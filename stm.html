@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KLAS - Sectional Titling Module</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      cursor: pointer;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+    }
+    .sidebar-item:hover {
+      background-color: #f3f4f6;
+    }
+    .sidebar-item.active {
+      background-color: #eff6ff;
+      color: #2563eb;
+    }
+    .sidebar-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-right: 0.75rem;
+      color: #6b7280;
+    }
+    .klas-logo {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      width: 24px;
+      height: 24px;
+    }
+    .klas-logo-red { background-color: #ef4444; }
+    .klas-logo-green { background-color: #10b981; }
+    .klas-logo-yellow { background-color: #f59e0b; }
+    .klas-logo-blue { background-color: #3b82f6; }
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      cursor: pointer;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+    }
+    .submenu-item:hover {
+      background-color: #f3f4f6;
+    }
+    .submenu-item.active {
+      background-color: #eff6ff;
+      color: #2563eb;
+    }
+    .stat-card {
+      background-color: white;
+      border-radius: 0.375rem;
+      padding: 1.25rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+    }
+    .tab {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover {
+      color: #4b5563;
+    }
+    .tab.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+    .service-card {
+      background-color: white;
+      border-radius: 0.375rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-primary {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+    .badge-progress {
+      background-color: #dbeafe;
+      color: #2563eb;
+    }
+    .badge-approved {
+      background-color: #d1fae5;
+      color: #059669;
+    }
+    .badge-pending {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      background-color: #e5e7eb;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .progress-bar-blue {
+      background-color: #3b82f6;
+    }
+    .progress-bar-orange {
+      background-color: #f59e0b;
+    }
+    .progress-bar-red {
+      background-color: #ef4444;
+    }
+    .table-header {
+      background-color: #f9fafb;
+      font-weight: 500;
+      color: #4b5563;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .table-cell {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex h-screen">
+  <!-- Sidebar -->
+  <div class="w-64 h-full bg-white border-r border-gray-200 flex flex-col">
+    <!-- Logo Header -->
+    <div class="p-4 border-b border-gray-200 bg-purple-50">
+      <div class="flex items-center">
+        <div class="mr-2 flex-shrink-0">
+          <div class="klas-logo">
+            <div class="klas-logo-red"></div>
+            <div class="klas-logo-green"></div>
+            <div class="klas-logo-yellow"></div>
+            <div class="klas-logo-blue"></div>
+          </div>
+        </div>
+        <span class="text-xl font-bold">KLAS</span>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="flex-1 overflow-y-auto p-2 space-y-1">
+      <div class="sidebar-item">
+        <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">1. DASHBOARD</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="users" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">2. CUSTOMER MANAGEMENT</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item active">
+        <i data-lucide="book-open" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">3. PROGRAMMES</span>
+        </div>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <!-- Programmes submenu -->
+      <div class="space-y-1">
+        <div class="submenu-item">
+          <i data-lucide="grid" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>Allocation</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 ml-auto text-gray-400"></i>
+        </div>
+        
+        <div class="submenu-item">
+          <i data-lucide="home" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>Resettlement</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 ml-auto text-gray-400"></i>
+        </div>
+        
+        <div class="submenu-item">
+          <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>Recertification</span>
+        </div>
+        
+        <div class="submenu-item">
+          <i data-lucide="file-text" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>SLTR / First Registration</span>
+        </div>
+        
+        <div class="submenu-item">
+          <i data-lucide="repeat" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>Regularization / Conversion</span>
+        </div>
+        
+        <div class="submenu-item active">
+          <i data-lucide="layout-grid" class="w-4 h-4 mr-2 text-blue-500"></i>
+          <span>Sectional Titling</span>
+          <span class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">Active</span>
+        </div>
+        
+        <div class="submenu-item">
+          <i data-lucide="map" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>GIS Mapping</span>
+        </div>
+        
+        <div class="submenu-item">
+          <i data-lucide="clipboard-list" class="w-4 h-4 mr-2 text-gray-500"></i>
+          <span>Land Property Enumeration</span>
+        </div>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="file-text" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">4. INFORMATION PRODUCTS</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="clipboard-list" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">5. INSTRUMENT REGISTRATION</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="folder-archive" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">6. FILE DIGITAL REGISTRY</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+    </div>
+
+    <!-- User Profile -->
+    <div class="border-t border-gray-200 p-4">
+      <div class="flex items-center">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+          <i data-lucide="user" class="w-5 h-5 text-gray-500"></i>
+        </div>
+        <div class="flex-1">
+          <div class="font-medium">Admin User</div>
+          <div class="text-xs text-gray-500">admin@kangis.gov</div>
+        </div>
+        <div class="text-gray-400">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto">
+    <!-- Header -->
+    <div class="p-6 bg-white border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold">Sectional Titling Module (STM)</h1>
+          <p class="text-gray-500">Process CofO for individually owned sections of multi-unit developments</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+            <input
+              type="text"
+              placeholder="Search applications..."
+              class="pl-10 pr-4 py-2 border border-gray-200 rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="relative">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              2
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="p-6">
+      <!-- Stats Cards - Screenshot 122 -->
+      <div class="grid grid-cols-5 gap-4 mb-8">
+        <div class="stat-card">
+          <div class="flex items-start mb-2">
+            <div>
+              <h3 class="text-gray-700 font-medium">Primary Applications</h3>
+              <p class="text-xs text-gray-500 mt-1">Total primary applications</p>
+            </div>
+            <i data-lucide="file-text" class="ml-auto text-gray-500 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">68</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">+8% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-start mb-2">
+            <div>
+              <h3 class="text-gray-700 font-medium">Secondary Applications</h3>
+              <p class="text-xs text-gray-500 mt-1">Total secondary applications</p>
+            </div>
+            <i data-lucide="home" class="ml-auto text-gray-500 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">180</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">+12% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-start mb-2">
+            <div>
+              <h3 class="text-gray-700 font-medium">Certificates Issued</h3>
+              <p class="text-xs text-gray-500 mt-1">Total CofO issued</p>
+            </div>
+            <i data-lucide="file-check" class="ml-auto text-gray-500 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">156</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">+15% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-start mb-2">
+            <div>
+              <h3 class="text-gray-700 font-medium">Pending Applications</h3>
+              <p class="text-xs text-gray-500 mt-1">Applications awaiting action</p>
+            </div>
+            <i data-lucide="clock" class="ml-auto text-gray-500 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">37</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-down" class="text-red-500 w-4 h-4 mr-1"></i>
+            <span class="text-red-500">-5% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card bg-green-50 border-green-100">
+          <div class="flex flex-col items-center justify-center h-full">
+            <h3 class="text-green-700 font-medium text-center">Kano State</h3>
+            <h3 class="text-green-700 font-medium text-center">GIS Mapping</h3>
+            <i data-lucide="map" class="text-green-500 w-10 h-10 my-2"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex space-x-6 border-b border-gray-200 mb-8">
+        <div class="tab active">Overview</div>
+        <div class="tab">Customer Care</div>
+        <div class="tab">Primary Applications</div>
+        <div class="tab">Secondary Applications</div>
+        <div class="tab">Planning</div>
+        <div class="tab">Survey</div>
+        <div class="tab">Operations</div>
+        <div class="tab">Body Corporate</div>
+      </div>
+
+      <!-- Sectional Titling Mandate - Screenshot 122 -->
+      <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-8">
+        <h2 class="text-xl font-bold mb-2">Sectional Titling Mandate</h2>
+        <p class="text-gray-500 text-sm mb-4">Department overview and responsibilities</p>
+        
+        <p class="text-gray-700 mb-4">
+          The Sectional Titling Department is responsible for processing Certificates of Occupancy (CofO) for individually owned sections of multi-unit developments (e.g., plazas, story buildings, offices, apartments) in both 2D/3D formats, ensuring the capture of ownership rights over individual units and common property governed by a Body Corporate.
+        </p>
+      </div>
+
+      <!-- Service Areas - Screenshot 123 -->
+      <div class="grid grid-cols-4 gap-4 mb-8">
+        <div class="service-card">
+          <div class="flex flex-col items-center mb-4">
+            <i data-lucide="users" class="w-10 h-10 text-gray-700 mb-2"></i>
+            <h3 class="text-lg font-medium">Customer Care</h3>
+          </div>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Receive applications</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Process payments</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Collect documents</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Digital archiving</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="flex flex-col items-center mb-4">
+            <i data-lucide="layout-grid" class="w-10 h-10 text-gray-700 mb-2"></i>
+            <h3 class="text-lg font-medium">Planning</h3>
+          </div>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Field validations</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Compliance checks</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Architectural reviews</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Plan approvals</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="flex flex-col items-center mb-4">
+            <i data-lucide="map-pin" class="w-10 h-10 text-gray-700 mb-2"></i>
+            <h3 class="text-lg font-medium">Survey</h3>
+          </div>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Field mapping</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Plan digitization</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Reference numbers</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>3D coordinates</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="flex flex-col items-center mb-4">
+            <i data-lucide="settings" class="w-10 h-10 text-gray-700 mb-2"></i>
+            <h3 class="text-lg font-medium">Operations</h3>
+          </div>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Process applications</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Generate CofO</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>3D modeling</span>
+            </li>
+            <li class="flex items-start">
+              <i data-lucide="check" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+              <span>Deed registration</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Application Flow - Screenshot 124 -->
+      <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-8">
+        <h2 class="text-xl font-bold mb-2">Application Flow</h2>
+        <p class="text-gray-500 text-sm mb-6">Sectional titling application process</p>
+        
+        <div class="grid grid-cols-2 gap-6">
+          <!-- Primary Application -->
+          <div class="bg-white rounded-md border border-gray-200 p-6">
+            <div class="flex items-center mb-4">
+              <i data-lucide="file-text" class="w-6 h-6 text-gray-700 mr-2"></i>
+              <h3 class="text-lg font-medium">Primary Application</h3>
+            </div>
+            
+            <p class="text-gray-600 mb-4">
+              Submitted by the original property owner or developer to initiate sectional titling for the entire property.
+            </p>
+            
+            <ul class="space-y-3 mb-6">
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Property details and documentation</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Proposed unit layout and floor plans</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Define unit details and common property</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Generate participation quota</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Submit for departmental review</span>
+              </li>
+            </ul>
+            
+            <button class="w-full bg-gray-900 text-white py-3 rounded-md flex items-center justify-center">
+              <i data-lucide="file-text" class="w-5 h-5 mr-2"></i>
+              Create Primary Application
+            </button>
+          </div>
+          
+          <!-- Secondary Application -->
+          <div class="bg-white rounded-md border border-gray-200 p-6">
+            <div class="flex items-center mb-4">
+              <i data-lucide="home" class="w-6 h-6 text-gray-700 mr-2"></i>
+              <h3 class="text-lg font-medium">Secondary Application</h3>
+            </div>
+            
+            <p class="text-gray-600 mb-4">
+              Submitted by individual unit buyers to claim ownership of specific sections within the property.
+            </p>
+            
+            <ul class="space-y-3 mb-6">
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Applicant information</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Select/confirm specific unit</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Upload proof of purchase</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Submit identity and supporting documents</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                <span>Generate individual CofO upon approval</span>
+              </li>
+            </ul>
+            
+            <button class="w-full bg-gray-900 text-white py-3 rounded-md flex items-center justify-center">
+              <i data-lucide="home" class="w-5 h-5 mr-2"></i>
+              Create Secondary Application
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Applications and Workflow Status - Screenshot 125 -->
+      <div class="grid grid-cols-3 gap-6 mb-8">
+        <!-- Recent Applications -->
+        <div class="col-span-2 bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-bold">Recent Applications</h2>
+              <p class="text-gray-500 text-sm">Latest sectional title applications</p>
+            </div>
+            <button class="flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-md text-sm">
+              <i data-lucide="filter" class="w-4 h-4"></i>
+              <span>Filter</span>
+            </button>
+          </div>
+
+          <div class="overflow-hidden rounded-md border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="table-header">Application ID</th>
+                  <th class="table-header">Type</th>
+                  <th class="table-header">Property/Unit</th>
+                  <th class="table-header">Applicant</th>
+                  <th class="table-header">Status</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="table-cell text-green-700">ST-2025-001</td>
+                  <td class="table-cell">
+                    <span class="badge badge-primary">Primary</span>
+                  </td>
+                  <td class="table-cell">Kano City Plaza</td>
+                  <td class="table-cell">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
+                      </div>
+                      <div>Alhaji Ibrahim Dantata</div>
+                    </div>
+                  </td>
+                  <td class="table-cell">
+                    <span class="badge badge-progress">In Progress</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="table-cell text-green-700">ST-2025-001-U3</td>
+                  <td class="table-cell">
+                    <span class="badge badge-primary">Secondary</span>
+                  </td>
+                  <td class="table-cell">Sabon Gari Mall, Unit 3</td>
+                  <td class="table-cell">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
+                      </div>
+                      <div>Hajiya Amina Yusuf</div>
+                    </div>
+                  </td>
+                  <td class="table-cell">
+                    <span class="badge badge-approved">Approved</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="table-cell text-green-700">ST-2025-002</td>
+                  <td class="table-cell">
+                    <span class="badge badge-primary">Primary</span>
+                  </td>
+                  <td class="table-cell">Bompai Business Center</td>
+                  <td class="table-cell">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
+                      </div>
+                      <div>Mallam Sani Abubakar</div>
+                    </div>
+                  </td>
+                  <td class="table-cell">
+                    <span class="badge badge-pending">Pending</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="table-cell text-green-700">ST-2025-004-U7</td>
+                  <td class="table-cell">
+                    <span class="badge badge-primary">Secondary</span>
+                  </td>
+                  <td class="table-cell">Kwari Market Complex, Unit 7</td>
+                  <td class="table-cell">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
+                      </div>
+                      <div>Musa Usman Bayero</div>
+                    </div>
+                  </td>
+                  <td class="table-cell">
+                    <span class="badge badge-approved">Approved</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="mt-4 text-center">
+            <button class="text-blue-600 flex items-center mx-auto">
+              <span>View All Applications</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Workflow Status -->
+        <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <h2 class="text-xl font-bold mb-2">Workflow Status</h2>
+          <p class="text-gray-500 text-sm mb-6">Current status of applications by unit</p>
+          
+          <!-- Customer Care -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="users" class="w-4 h-4 mr-2 text-gray-500"></i>
+                <span>Customer Care</span>
+              </div>
+              <span class="font-medium">42 applications</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill progress-bar-blue" style="width: 42%"></div>
+            </div>
+          </div>
+          
+          <!-- Planning -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="layout-grid" class="w-4 h-4 mr-2 text-gray-500"></i>
+                <span>Planning</span>
+              </div>
+              <span class="font-medium">28 applications</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill progress-bar-blue" style="width: 28%"></div>
+            </div>
+          </div>
+          
+          <!-- Survey -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i>
+                <span>Survey</span>
+              </div>
+              <span class="font-medium">15 applications</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill progress-bar-blue" style="width: 15%"></div>
+            </div>
+          </div>
+          
+          <!-- Operations -->
+          <div class="mb-6">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="settings" class="w-4 h-4 mr-2 text-gray-500"></i>
+                <span>Operations</span>
+              </div>
+              <span class="font-medium">15 applications</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill progress-bar-blue" style="width: 15%"></div>
+            </div>
+          </div>
+          
+          <!-- Processing Time -->
+          <h3 class="font-medium mb-2">Processing Time</h3>
+          
+          <div class="mb-2">
+            <div class="flex justify-between mb-1">
+              <span class="text-gray-600">Average</span>
+              <span class="font-medium">14 days</span>
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <div class="flex justify-between mb-1">
+              <span class="text-gray-600">Fastest</span>
+              <span class="font-medium">3 days</span>
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <div class="flex justify-between mb-1">
+              <span class="text-gray-600">Slowest</span>
+              <span class="font-medium">45 days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-6 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500 mt-auto">
+      <div>© 2025 Land Admin System. All rights reserved.</div>
+      <div class="flex items-center">
+        <span class="mr-2">LAAD-Sys</span>
+        <div class="bg-green-500 text-white px-2 py-1 rounded text-xs flex items-center">
+          <span class="mr-1">Land Admin System</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Add click event listeners to tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+    
+    // Add click event listeners to sidebar items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        // Toggle the active state
+        if (!item.classList.contains('active')) {
+          document.querySelectorAll('.sidebar-item').forEach(i => {
+            i.classList.remove('active');
+            const chevDown = i.querySelector('[data-lucide="chevron-down"]');
+            if (chevDown) {
+              chevDown.setAttribute('data-lucide', 'chevron-right');
+            }
+          });
+          
+          item.classList.add('active');
+          const chevRight = item.querySelector('[data-lucide="chevron-right"]');
+          if (chevRight) {
+            chevRight.setAttribute('data-lucide', 'chevron-down');
+          }
+          lucide.createIcons();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
