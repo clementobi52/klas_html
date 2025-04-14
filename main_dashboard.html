@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KLAS - Kano State Land Admin System</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      cursor: pointer;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+    }
+    .sidebar-item:hover {
+      background-color: #f3f4f6;
+    }
+    .sidebar-item.active {
+      background-color: #eff6ff;
+      color: #2563eb;
+    }
+    .sidebar-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-right: 0.75rem;
+      color: #6b7280;
+    }
+    .klas-logo {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      width: 24px;
+      height: 24px;
+    }
+    .klas-logo-red { background-color: #ef4444; }
+    .klas-logo-green { background-color: #10b981; }
+    .klas-logo-yellow { background-color: #f59e0b; }
+    .klas-logo-blue { background-color: #3b82f6; }
+    .stat-card {
+      background-color: white;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    .tab {
+      padding: 0.75rem 0.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+      border-bottom-color: #3b82f6;
+      color: #3b82f6;
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      background-color: #e5e7eb;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background-color: #3b82f6;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex h-screen">
+  <!-- Sidebar -->
+  <div class="w-64 h-full bg-white border-r border-gray-200 flex flex-col">
+    <!-- Logo Header -->
+    <div class="p-4 border-b border-gray-200 bg-purple-50">
+      <div class="flex items-center">
+        <div class="mr-2 flex-shrink-0">
+          <div class="klas-logo">
+            <div class="klas-logo-red"></div>
+            <div class="klas-logo-green"></div>
+            <div class="klas-logo-yellow"></div>
+            <div class="klas-logo-blue"></div>
+          </div>
+        </div>
+        <span class="text-xl font-bold">KLAS</span>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="flex-1 overflow-y-auto p-2 space-y-1">
+      <div class="sidebar-item active">
+        <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">1. DASHBOARD</span>
+        </div>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <!-- Dashboard submenu -->
+      <div class="ml-8 bg-blue-50 rounded-md">
+        <div class="sidebar-item active">
+          <i data-lucide="home" class="sidebar-icon"></i>
+          <div class="flex-1">
+            <span class="font-medium">Dashboard</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="users" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">2. CUSTOMER MANAGEMENT</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="book-open" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">3. PROGRAMMES</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="file-text" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">4. INFORMATION PRODUCTS</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="clipboard-list" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">5. INSTRUMENT REGISTRATION</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+      
+      <div class="sidebar-item">
+        <i data-lucide="folder-archive" class="sidebar-icon"></i>
+        <div class="flex-1">
+          <span class="font-medium">6. FILE DIGITAL REGISTRY</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+      </div>
+    </div>
+
+    <!-- User Profile -->
+    <div class="border-t border-gray-200 p-4">
+      <div class="flex items-center">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+          <i data-lucide="user" class="w-5 h-5 text-gray-500"></i>
+        </div>
+        <div class="flex-1">
+          <div class="font-medium">Admin User</div>
+          <div class="text-xs text-gray-500">admin@kangis.gov</div>
+        </div>
+        <div class="text-gray-400">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-200 bg-white">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold">Dashboard</h1>
+          <p class="text-gray-500">Welcome to KLAS - Kano State Land Admin System</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+            <input
+              type="text"
+              placeholder="Search..."
+              class="pl-10 pr-4 py-2 border border-gray-200 rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="relative">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              3
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="p-6">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-5 gap-4 mb-6">
+        <div class="stat-card">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-gray-600 font-medium">Total Applications</h3>
+            <i data-lucide="file-text" class="text-gray-400 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">1,284</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">12% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-gray-600 font-medium">Pending Approvals</h3>
+            <i data-lucide="clock" class="text-gray-400 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">145</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-down" class="text-red-500 w-4 h-4 mr-1"></i>
+            <span class="text-red-500">8% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-gray-600 font-medium">Registered Properties</h3>
+            <i data-lucide="home" class="text-gray-400 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">8,549</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">4% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-gray-600 font-medium">Registered Users</h3>
+            <i data-lucide="users" class="text-gray-400 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">3,672</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">9% from last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-gray-600 font-medium">Active Modules</h3>
+            <i data-lucide="layers" class="text-gray-400 w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-bold">9</div>
+          <div class="flex items-center mt-2 text-sm">
+            <i data-lucide="arrow-up" class="text-green-500 w-4 h-4 mr-1"></i>
+            <span class="text-green-500">2 new this month</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex space-x-6 border-b border-gray-200 mb-6">
+        <div class="tab active">Overview</div>
+        <div class="tab">Applications</div>
+        <div class="tab">Information Products</div>
+        <div class="tab">Analytics</div>
+        <div class="tab">Modules</div>
+      </div>
+
+      <!-- Main Content Sections -->
+      <div class="grid grid-cols-3 gap-6">
+        <!-- Applications Overview -->
+        <div class="col-span-2 bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-bold">Applications Overview</h2>
+              <p class="text-gray-500 text-sm">Application submissions over the past 30 days</p>
+            </div>
+            <button class="flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-md text-sm">
+              <i data-lucide="filter" class="w-4 h-4"></i>
+              <span>Filter</span>
+            </button>
+          </div>
+
+          <!-- Chart Placeholder -->
+          <div class="h-64 bg-gray-50 rounded-md flex items-center justify-center">
+            <div class="text-center">
+              <i data-lucide="bar-chart-2" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+              <p class="text-gray-400">Chart visualization would appear here</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Upcoming Appointments</h2>
+            <a href="#" class="text-blue-500 text-sm">View All</a>
+          </div>
+          <p class="text-gray-500 text-sm mb-4">Your schedule for today</p>
+
+          <!-- Appointment 1 -->
+          <div class="border border-gray-100 rounded-md p-4 mb-3">
+            <div class="flex items-start">
+              <div class="bg-gray-100 p-2 rounded-md mr-3">
+                <i data-lucide="calendar" class="w-5 h-5 text-gray-500"></i>
+              </div>
+              <div>
+                <div class="font-medium">Property Inspection</div>
+                <div class="text-sm text-gray-500 flex items-center mt-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i>
+                  10:00 AM with John Smith
+                </div>
+                <div class="text-sm text-gray-500 flex items-center mt-1">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1"></i>
+                  Riverside Apartments
+                </div>
+                <span class="inline-block mt-2 px-2 py-0.5 bg-gray-800 text-white text-xs rounded-full">
+                  Upcoming
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appointment 2 -->
+          <div class="border border-gray-100 rounded-md p-4 mb-3">
+            <div class="flex items-start">
+              <div class="bg-gray-100 p-2 rounded-md mr-3">
+                <i data-lucide="file-check" class="w-5 h-5 text-gray-500"></i>
+              </div>
+              <div>
+                <div class="font-medium">Document Verification</div>
+                <div class="text-sm text-gray-500 flex items-center mt-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i>
+                  11:30 AM with Sarah Johnson
+                </div>
+                <div class="text-sm text-gray-500 flex items-center mt-1">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1"></i>
+                  KLAS Office
+                </div>
+                <span class="inline-block mt-2 px-2 py-0.5 bg-gray-800 text-white text-xs rounded-full">
+                  Upcoming
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appointment 3 -->
+          <div class="border border-gray-100 rounded-md p-4">
+            <div class="flex items-start">
+              <div class="bg-gray-100 p-2 rounded-md mr-3">
+                <i data-lucide="file-signature" class="w-5 h-5 text-gray-500"></i>
+              </div>
+              <div>
+                <div class="font-medium">Title Deed Handover</div>
+                <div class="text-sm text-gray-500 flex items-center mt-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i>
+                  1:00 PM with Michael Brown
+                </div>
+                <div class="text-sm text-gray-500 flex items-center mt-1">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1"></i>
+                  Central Plaza
+                </div>
+                <span class="inline-block mt-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                  Confirmed
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Row -->
+      <div class="grid grid-cols-3 gap-6 mt-6">
+        <!-- Recent Activities -->
+        <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <div class="mb-4">
+            <h2 class="text-xl font-bold">Recent Activities</h2>
+            <p class="text-gray-500 text-sm">Latest system activities</p>
+          </div>
+
+          <!-- Activity 1 -->
+          <div class="mb-4">
+            <div class="flex items-start">
+              <div class="mr-3 text-gray-400">
+                <i data-lucide="file-plus" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium">New application submitted</div>
+                <div class="text-sm text-gray-500">John Smith • 10 minutes ago</div>
+              </div>
+              <div class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                Sectional Titling
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity 2 -->
+          <div class="mb-4">
+            <div class="flex items-start">
+              <div class="mr-3 text-gray-400">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium">Document approved</div>
+                <div class="text-sm text-gray-500">Admin User • 30 minutes ago</div>
+              </div>
+              <div class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                Certificate of Occupancy
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity 3 -->
+          <div class="mb-4">
+            <div class="flex items-start">
+              <div class="mr-3 text-gray-400">
+                <i data-lucide="user-plus" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium">User account created</div>
+                <div class="text-sm text-gray-500">System • 1 hour ago</div>
+              </div>
+              <div class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                System Admin
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity 4 -->
+          <div>
+            <div class="flex items-start">
+              <div class="mr-3 text-gray-400">
+                <i data-lucide="upload" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium">File uploaded</div>
+                <div class="text-sm text-gray-500">Sarah Johnson • 2 hours ago</div>
+              </div>
+              <div class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                File Digital Registry
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module Usage -->
+        <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold">Module Usage</h2>
+            <p class="text-gray-500 text-sm">Most active modules</p>
+          </div>
+
+          <!-- Module 1 -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="layout-grid" class="w-4 h-4 mr-2 text-blue-500"></i>
+                <span>Sectional Titling</span>
+              </div>
+              <span class="font-medium">42%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: 42%"></div>
+            </div>
+          </div>
+
+          <!-- Module 2 -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="repeat" class="w-4 h-4 mr-2 text-blue-500"></i>
+                <span>Recertification</span>
+              </div>
+              <span class="font-medium">28%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: 28%"></div>
+            </div>
+          </div>
+
+          <!-- Module 3 -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="folder" class="w-4 h-4 mr-2 text-blue-500"></i>
+                <span>File Digital Registry</span>
+              </div>
+              <span class="font-medium">15%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: 15%"></div>
+            </div>
+          </div>
+
+          <!-- Module 4 -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <div class="flex items-center">
+                <i data-lucide="users" class="w-4 h-4 mr-2 text-blue-500"></i>
+                <span>Customer Management</span>
+              </div>
+              <span class="font-medium">15%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: 15%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="bg-white rounded-md shadow-sm border border-gray-200 p-6">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold">Quick Stats</h2>
+            <p class="text-gray-500 text-sm">System performance</p>
+          </div>
+
+          <!-- Stat 1 -->
+          <div class="mb-4">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                  <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                </div>
+                <div>
+                  <div class="font-medium">Approved Applications</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-xl">432</div>
+                <div class="text-green-500 text-sm">+12%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 2 -->
+          <div class="mb-4">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                  <i data-lucide="x" class="w-4 h-4 text-red-500"></i>
+                </div>
+                <div>
+                  <div class="font-medium">Rejected Applications</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-xl">67</div>
+                <div class="text-red-500 text-sm">-5%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 3 -->
+          <div class="mb-4">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                  <i data-lucide="clock" class="w-4 h-4 text-yellow-500"></i>
+                </div>
+                <div>
+                  <div class="font-medium">Average Processing Time</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-xl">3.2</div>
+                <div class="text-red-500 text-sm">-0.5 days</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 4 -->
+          <div>
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i data-lucide="thumbs-up" class="w-4 h-4 text-blue-500"></i>
+                </div>
+                <div>
+                  <div class="font-medium">User Satisfaction</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-xl">92%</div>
+                <div class="text-green-500 text-sm">+4%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-6 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
+      <div>© 2025 Land Admin System. All rights reserved.</div>
+      <div class="flex items-center">
+        <span class="mr-2">LAAD-Sys</span>
+        <div class="bg-green-500 text-white px-2 py-1 rounded text-xs flex items-center">
+          <span class="mr-1">Land Admin System</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Add click event listeners to tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+    
+    // Add click event listeners to sidebar items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (!item.closest('.ml-8')) { // Don't apply to submenu items
+          document.querySelectorAll('.sidebar-item:not(.ml-8 .sidebar-item)').forEach(i => {
+            i.classList.remove('active');
+            const chevDown = i.querySelector('[data-lucide="chevron-down"]');
+            if (chevDown) {
+              chevDown.setAttribute('data-lucide', 'chevron-right');
+            }
+          });
+          
+          item.classList.add('active');
+          const chevRight = item.querySelector('[data-lucide="chevron-right"]');
+          if (chevRight) {
+            chevRight.setAttribute('data-lucide', 'chevron-down');
+          }
+          lucide.createIcons();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
