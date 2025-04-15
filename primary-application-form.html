@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KLAS - Primary Application Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    body {
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .modal-content {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .step-circle {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+    }
+    .step-circle.active {
+      background-color: #10b981;
+      color: white;
+    }
+    .step-circle.inactive {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+    .form-section {
+      display: none;
+    }
+    .form-section.active {
+      display: block;
+    }
+    .upload-box {
+      border: 2px dashed #e5e7eb;
+      border-radius: 0.375rem;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .upload-box:hover {
+      border-color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Application Form Modal -->
+  <div class="modal-content">
+    <!-- Step 1: Basic Information -->
+    <div class="form-section active" id="step1">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-800">MINISTRY OF LAND AND PHYSICAL PLANNING</h2>
+          <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+              <h3 class="text-lg font-bold">Application for Sectional Titling - Main Application</h3>
+            </div>
+            <div class="flex items-center">
+              <span class="text-gray-600 mr-2">Land Use:</span>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Residential</span>
+            </div>
+          </div>
+          <p class="text-gray-600 mt-1">Complete the form below to submit a new primary application for sectional titling</p>
+        </div>
+
+        <div class="flex items-center mb-6">
+          <div class="flex items-center mr-4">
+            <div class="step-circle active flex items-center justify-center">1</div>
+          </div>
+          <div class="flex items-center mr-4">
+            <div class="step-circle inactive flex items-center justify-center">2</div>
+          </div>
+          <div class="flex items-center">
+            <div class="step-circle inactive flex items-center justify-center">3</div>
+          </div>
+          <div class="ml-4">Step 1</div>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-right text-sm text-gray-500">CODE: ST FORM - 1</div>
+          <hr class="my-4">
+          
+          <div class="grid grid-cols-3 gap-6 mb-6">
+            <!-- Left column (2/3 width) -->
+            <div class="col-span-2">
+              <div class="mb-6">
+                <label class="block mb-2 font-medium">Applicant Type</label>
+                <div class="flex space-x-6">
+                  <label class="flex items-center">
+                    <input type="radio" name="applicantType" class="mr-2">
+                    <span>Individual</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="radio" name="applicantType" class="mr-2">
+                    <span>Corporate Body</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="radio" name="applicantType" class="mr-2" checked>
+                    <span>Multiple Owners</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="bg-green-50 border border-green-100 rounded-md p-4 mb-6">
+                <div class="flex items-center mb-2">
+                  <i data-lucide="file" class="w-5 h-5 mr-2 text-green-600"></i>
+                  <span class="font-medium">File Number Information</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">Select file number type and enter the details</p>
+                
+                <div class="bg-white p-2 rounded-md mb-4 flex space-x-2">
+                  <button class="px-4 py-2 rounded-md hover:bg-gray-100">MLS</button>
+                  <button class="px-4 py-2 rounded-md hover:bg-gray-100">KANGIS</button>
+                  <button class="px-4 py-2 rounded-md hover:bg-gray-100">New KANGIS</button>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-2">New KANGIS File Number</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-2">
+                  <div>
+                    <label class="block text-sm mb-1">File Prefix</label>
+                    <div class="relative">
+                      <select class="w-full p-2 border border-gray-300 rounded-md appearance-none pr-8">
+                        <option>Select prefix</option>
+                      </select>
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm mb-1">Serial Number</label>
+                    <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g. 0001 or 2500">
+                  </div>
+                </div>
+                
+                <p class="text-xs text-gray-500">Format example: KN0001, KN2500, KN0131</p>
+              </div>
+            </div>
+            
+            <!-- Right column (1/3 width) - Passport Photo Upload -->
+            <div class="col-span-1">
+              <div class="mb-2">
+                <div class="flex justify-between items-center mb-2">
+                  <label class="font-medium">Passport Photo</label>
+                  <button class="flex items-center px-3 py-1 bg-white border border-gray-300 rounded-md">
+                    <i data-lucide="upload" class="w-4 h-4 mr-1"></i>
+                    <span>Upload</span>
+                  </button>
+                </div>
+                <div class="border-2 border-dashed border-gray-300 rounded-md p-4 text-center h-40 flex flex-col items-center justify-center">
+                  <div class="flex justify-center mb-2">
+                    <i data-lucide="user" class="w-20 h-20 text-gray-300"></i>
+                  </div>
+                  <p class="text-sm text-gray-500">No passport photo uploaded</p>
+                  <p class="text-xs text-gray-400 mt-1">JPG or PNG (max. 2MB)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6 mb-6">
+            <!-- Left column -->
+            <div>
+              <label class="block mb-2 font-medium">Means of identification</label>
+              <div class="grid grid-cols-1 gap-2">
+                <label class="flex items-center">
+                  <input type="radio" name="idType" class="mr-2" checked>
+                  <span>National ID</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="idType" class="mr-2">
+                  <span>Driver's License</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="idType" class="mr-2">
+                  <span>Others</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- Right column -->
+            <div>
+              <div class="h-6"></div> <!-- Spacer to align with left column label -->
+              <div class="grid grid-cols-1 gap-2">
+                <label class="flex items-center">
+                  <input type="radio" name="idType" class="mr-2">
+                  <span>Voter's Card</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="idType" class="mr-2">
+                  <span>International Passport</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+              <label class="font-medium">Upload ID Document</label>
+              <button class="flex items-center px-3 py-1 bg-white border border-gray-300 rounded-md">
+                <i data-lucide="upload" class="w-4 h-4 mr-1"></i>
+                <span>Upload</span>
+              </button>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">No ID document uploaded</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-medium mb-4">Property Details</h3>
+            
+            <div class="mb-4">
+              <label class="block mb-2 font-medium">Type of Residence</label>
+              <div class="grid grid-cols-2 gap-4">
+                <label class="flex items-center">
+                  <input type="radio" name="residenceType" class="mr-2" checked>
+                  <span>Detached House</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="residenceType" class="mr-2">
+                  <span>Housing Estate</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="residenceType" class="mr-2">
+                  <span>Fragmented Layout</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="residenceType" class="mr-2">
+                  <span>Others</span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="block text-sm mb-1">No. of Units</label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter number of units">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">No. of Blocks</label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter number of blocks">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">No. of Sections (Floors)</label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter number of floors">
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-sm mb-1">Write any comments that will assist in processing the application</label>
+              <textarea class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="Enter any additional comments or information"></textarea>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="font-medium">Property Owners</h3>
+              <button class="flex items-center px-3 py-1 bg-white border border-gray-300 rounded-md">
+                <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                <span>Add Owner</span>
+              </button>
+            </div>
+            
+            <div class="mb-4">
+              <h4 class="font-medium mb-4">Owner 1</h4>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm mb-1">Title</label>
+                  <div class="relative">
+                    <select class="w-full p-2 border border-gray-300 rounded-md appearance-none pr-8">
+                      <option>Mr.</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">Full Name</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g. Abubakar Ibrahim">
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm mb-1">House No.</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="House No.">
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">Street Name</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Street Name">
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm mb-1">District</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="District">
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">LGA</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="LGA">
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">State</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Kano" value="Kano">
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm mb-1">Contact Address:</label>
+                <div class="p-2 bg-gray-50 border border-gray-200 rounded-md">
+                  <span>Kano</span>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm mb-1">Phone No. 1</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter phone number">
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">Phone No. 2</label>
+                  <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter alternate phone">
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm mb-1">Email Address</label>
+                <input type="email" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter email address">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 p-4 rounded-md mb-6">
+            <h3 class="font-medium text-center mb-4">INITIAL BILL</h3>
+            
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="flex items-center text-sm mb-1">
+                  <i data-lucide="file-text" class="w-4 h-4 mr-1 text-green-600"></i>
+                  Application fee (₦)
+                </label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter application fee">
+              </div>
+              <div>
+                <label class="flex items-center text-sm mb-1">
+                  <i data-lucide="file-check" class="w-4 h-4 mr-1 text-green-600"></i>
+                  Processing fee (₦)
+                </label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter processing fee">
+              </div>
+              <div>
+                <label class="flex items-center text-sm mb-1">
+                  <i data-lucide="map" class="w-4 h-4 mr-1 text-green-600"></i>
+                  Site Plan (₦)
+                </label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter site plan fee">
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center">
+                <i data-lucide="file-text" class="w-4 h-4 mr-1 text-green-600"></i>
+                <span>Total:</span>
+              </div>
+              <span class="font-bold">₦0.00</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="flex items-center text-sm mb-1">
+                  <i data-lucide="calendar" class="w-4 h-4 mr-1 text-green-600"></i>
+                  has been paid on
+                </label>
+                <input type="date" class="w-full p-2 border border-gray-300 rounded-md" value="2025-04-15">
+              </div>
+              <div>
+                <label class="flex items-center text-sm mb-1">
+                  <i data-lucide="receipt" class="w-4 h-4 mr-1 text-green-600"></i>
+                  with receipt No.
+                </label>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter receipt number">
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between mt-8">
+            <button class="px-4 py-2 bg-white border border-gray-300 rounded-md">Cancel</button>
+            <div class="flex items-center">
+              <span class="text-sm text-gray-500 mr-4">Step 1 of 3</span>
+              <button class="px-4 py-2 bg-black text-white rounded-md" id="nextStep1">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Required Documents -->
+    <div class="form-section" id="step2">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-center text-gray-800">MINISTRY OF LAND AND PHYSICAL PLANNING</h2>
+          <button id="closeModal2" class="text-gray-500 hover:text-gray-700">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="flex items-center mb-2">
+            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+            <h3 class="text-lg font-bold">Application for Sectional Titling - Main Application</h3>
+            <div class="ml-auto flex items-center">
+              <span class="text-gray-600 mr-2">Land Use:</span>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Residential</span>
+            </div>
+          </div>
+          <p class="text-gray-600">Complete the form below to submit a new primary application for sectional titling</p>
+        </div>
+
+        <div class="flex items-center mb-8">
+          <div class="flex items-center mr-4">
+            <div class="step-circle inactive">1</div>
+          </div>
+          <div class="flex items-center mr-4">
+            <div class="step-circle active">2</div>
+          </div>
+          <div class="flex items-center">
+            <div class="step-circle inactive">3</div>
+          </div>
+          <div class="ml-4">Step 2</div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex items-start mb-4">
+            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+            <span class="font-medium">Required Documents</span>
+          </div>
+          
+          <div class="bg-blue-50 border border-blue-100 rounded-md p-4 mb-6">
+            <div class="flex items-start">
+              <i data-lucide="info" class="w-5 h-5 mr-2 text-blue-500 mt-0.5"></i>
+              <div>
+                <h4 class="font-medium text-blue-800">Document Requirements</h4>
+                <p class="text-sm text-blue-600">Please upload all required documents. Acceptable formats are PDF, JPG, and PNG. Maximum file size is 5MB per document.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-6 mb-6">
+            <div class="border border-gray-200 rounded-md p-4">
+              <h4 class="font-medium mb-2">Application Letter</h4>
+              <p class="text-sm text-gray-600 mb-4">Formal letter requesting sectional titling</p>
+              
+              <div class="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <div class="flex justify-center mb-2">
+                  <i data-lucide="upload" class="w-6 h-6 text-gray-400"></i>
+                </div>
+                <div class="flex justify-center">
+                  <button class="flex items-center text-blue-600">
+                    <span>Upload Document</span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">PDF, JPG or PNG (max. 5MB)</p>
+              </div>
+            </div>
+            
+            <div class="border border-gray-200 rounded-md p-4">
+              <h4 class="font-medium mb-2">Building Plan</h4>
+              <p class="text-sm text-gray-600 mb-4">Approved building plan with architectural details</p>
+              
+              <div class="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <div class="flex justify-center mb-2">
+                  <i data-lucide="upload" class="w-6 h-6 text-gray-400"></i>
+                </div>
+                <div class="flex justify-center">
+                  <button class="flex items-center text-blue-600">
+                    <span>Upload Document</span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">PDF, JPG or PNG (max. 5MB)</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-6 mb-6">
+            <div class="border border-gray-200 rounded-md p-4">
+              <h4 class="font-medium mb-2">Architectural Design</h4>
+              <p class="text-sm text-gray-600 mb-4">Detailed architectural design of the property</p>
+              
+              <div class="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <div class="flex justify-center mb-2">
+                  <i data-lucide="upload" class="w-6 h-6 text-gray-400"></i>
+                </div>
+                <div class="flex justify-center">
+                  <button class="flex items-center text-blue-600">
+                    <span>Upload Document</span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">PDF, JPG or PNG (max. 5MB)</p>
+              </div>
+            </div>
+            
+            <div class="border border-gray-200 rounded-md p-4">
+              <h4 class="font-medium mb-2">Ownership Document</h4>
+              <p class="text-sm text-gray-600 mb-4">Proof of ownership (CofO, deed, etc.)</p>
+              
+              <div class="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <div class="flex justify-center mb-2">
+                  <i data-lucide="upload" class="w-6 h-6 text-gray-400"></i>
+                </div>
+                <div class="flex justify-center">
+                  <button class="flex items-center text-blue-600">
+                    <span>Upload Document</span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">PDF, JPG or PNG (max. 5MB)</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between mt-8">
+            <button class="px-4 py-2 bg-white border border-gray-300 rounded-md" id="backStep2">Back</button>
+            <div class="flex items-center">
+              <span class="text-sm text-gray-500 mr-4">Step 2 of 3</span>
+              <button class="px-4 py-2 bg-black text-white rounded-md" id="nextStep2">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Application Summary -->
+    <div class="form-section" id="step3">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-center text-gray-800">MINISTRY OF LAND AND PHYSICAL PLANNING</h2>
+          <button id="closeModal3" class="text-gray-500 hover:text-gray-700">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="flex items-center mb-2">
+            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+            <h3 class="text-lg font-bold">Application for Sectional Titling - Main Application</h3>
+            <div class="ml-auto flex items-center">
+              <span class="text-gray-600 mr-2">Land Use:</span>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Residential</span>
+            </div>
+          </div>
+          <p class="text-gray-600">Complete the form below to submit a new primary application for sectional titling</p>
+        </div>
+
+        <div class="flex items-center mb-8">
+          <div class="flex items-center mr-4">
+            <div class="step-circle inactive">1</div>
+          </div>
+          <div class="flex items-center mr-4">
+            <div class="step-circle inactive">2</div>
+          </div>
+          <div class="flex items-center">
+            <div class="step-circle active">3</div>
+          </div>
+          <div class="ml-4">Step 3</div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex items-start mb-4">
+            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+            <span class="font-medium">Application Summary</span>
+          </div>
+          
+          <div class="border border-gray-200 rounded-md p-6 mb-6">
+            <div class="grid grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium mb-4">Applicant Information</h4>
+                <table class="w-full text-sm">
+                  <tr>
+                    <td class="py-1 text-gray-600">Applicant Type:</td>
+                    <td class="py-1 font-medium">Individual</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Name:</td>
+                    <td class="py-1 font-medium">Mr. Clement Joseph</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Email:</td>
+                    <td class="py-1 font-medium">clemzy689@gmail.com</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Phone:</td>
+                    <td class="py-1 font-medium">07032228984</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div>
+                <h4 class="font-medium mb-4">Unit Information</h4>
+                <table class="w-full text-sm">
+                  <tr>
+                    <td class="py-1 text-gray-600">Type of Residence:</td>
+                    <td class="py-1 font-medium">Detached House</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Block No:</td>
+                    <td class="py-1 font-medium">7</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Section (Floor) No:</td>
+                    <td class="py-1 font-medium">Not provided</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Unit No:</td>
+                    <td class="py-1 font-medium">5</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Unit Type:</td>
+                    <td class="py-1 font-medium">Not provided</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">File Number:</td>
+                    <td class="py-1 font-medium">CON-COM-2019-296</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Land Use:</td>
+                    <td class="py-1 font-medium">Residential</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Primary Application ID:</td>
+                    <td class="py-1 font-medium">Not provided</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="font-medium mb-4">Address Information</h4>
+            <table class="w-full text-sm">
+              <tr>
+                <td class="py-1 text-gray-600 w-1/4">House No:</td>
+                <td class="py-1 font-medium">79</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">Street Name:</td>
+                <td class="py-1 font-medium">Umudagu road</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">District:</td>
+                <td class="py-1 font-medium">Not provided</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">LGA:</td>
+                <td class="py-1 font-medium">Not provided</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">State:</td>
+                <td class="py-1 font-medium">Kano</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">Complete Address:</td>
+                <td class="py-1 font-medium">79 Umudagu road, , , Kano</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="mb-6">
+            <div class="flex items-start mb-4">
+              <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+              <span class="font-medium">Payment Information</span>
+            </div>
+            <table class="w-full text-sm">
+              <tr>
+                <td class="py-1 text-gray-600 w-1/4">Application Fee:</td>
+                <td class="py-1 font-medium">₦2,000</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">Processing Fee:</td>
+                <td class="py-1 font-medium">₦20,000</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">Site Plan Fee:</td>
+                <td class="py-1 font-medium">₦24,000</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600 font-medium">Total:</td>
+                <td class="py-1 font-bold">₦46,000.00</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">Receipt Number:</td>
+                <td class="py-1 font-medium">RC-20478</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-gray-600">Payment Date:</td>
+                <td class="py-1 font-medium">4/15/2025</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="font-medium mb-4">Uploaded Documents</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex items-center">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <span>Application Letter</span>
+              </div>
+              <div class="flex items-center">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <span>Building Plan</span>
+              </div>
+              <div class="flex items-center">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <span>Architectural Design</span>
+              </div>
+              <div class="flex items-center">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <span>Ownership Document</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between mt-8">
+            <div class="flex space-x-4">
+              <button class="px-4 py-2 bg-white border border-gray-300 rounded-md" id="backStep3">Back</button>
+              <button class="px-4 py-2 bg-white border border-gray-300 rounded-md flex items-center">
+                <i data-lucide="printer" class="w-4 h-4 mr-2"></i>
+                Print Application Slip
+              </button>
+            </div>
+            <div class="flex items-center">
+              <span class="text-sm text-gray-500 mr-4">Step 3 of 3</span>
+              <button class="px-4 py-2 bg-black text-white rounded-md">Submit Application</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Form navigation
+    document.addEventListener('DOMContentLoaded', function() {
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const step3 = document.getElementById('step3');
+      
+      const nextStep1 = document.getElementById('nextStep1');
+      const nextStep2 = document.getElementById('nextStep2');
+      const backStep2 = document.getElementById('backStep2');
+      const backStep3 = document.getElementById('backStep3');
+      
+      // Next from Step 1 to Step 2
+      nextStep1.addEventListener('click', function() {
+        step1.classList.remove('active');
+        step2.classList.add('active');
+      });
+      
+      // Next from Step 2 to Step 3
+      nextStep2.addEventListener('click', function() {
+        step2.classList.remove('active');
+        step3.classList.add('active');
+      });
+      
+      // Back from Step 2 to Step 1
+      backStep2.addEventListener('click', function() {
+        step2.classList.remove('active');
+        step1.classList.add('active');
+      });
+      
+      // Back from Step 3 to Step 2
+      backStep3.addEventListener('click', function() {
+        step3.classList.remove('active');
+        step2.classList.add('active');
+      });
+      
+      // Close modal buttons
+      document.getElementById('closeModal').addEventListener('click', function() {
+        // In a real application, this would close the modal
+        alert('Application process canceled');
+      });
+      
+      document.getElementById('closeModal2').addEventListener('click', function() {
+        // In a real application, this would close the modal
+        alert('Application process canceled');
+      });
+      
+      document.getElementById('closeModal3').addEventListener('click', function() {
+        // In a real application, this would close the modal
+        alert('Application process canceled');
+      });
+    });
+  </script>
+</body>
+</html>
