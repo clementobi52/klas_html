@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KLAS - Payment Modal</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    body {
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .modal-content {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .tab-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .tab-button.active {
+      background-color: #f3f4f6;
+      font-weight: 500;
+    }
+    .tab-button:hover:not(.active) {
+      background-color: #f9fafb;
+    }
+    .bill-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .bill-table th, .bill-table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      font-size: 0.75rem;
+    }
+    .bill-table th {
+      background-color: #f9fafb;
+      text-align: left;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <!-- Payment Modal -->
+  <div class="modal-content p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-medium">Payment Management</h2>
+      <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <div class="py-2">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-medium">Residential Property</h3>
+          <p class="text-xs text-gray-500">
+            Application ID: APP-2023-001 | File No: KN0001
+          </p>
+        </div>
+        <div class="text-right">
+          <h3 class="text-sm font-medium">Mr. Clement Joseph</h3>
+          <p class="text-xs text-gray-500">Residential</p>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <button class="tab-button active" data-tab="initial">
+          <i data-lucide="banknote" class="w-3.5 h-3.5 mr-1.5"></i>
+          INITIAL BILL
+        </button>
+        <button class="tab-button" data-tab="detterment">
+          <i data-lucide="calculator" class="w-3.5 h-3.5 mr-1.5"></i>
+          GENERATE DETTERMENT BILL
+        </button>
+        <button class="tab-button" data-tab="final">
+          <i data-lucide="file-check" class="w-3.5 h-3.5 mr-1.5"></i>
+          GENERATE FINAL BILL
+        </button>
+      </div>
+
+      <!-- Initial Bill Tab -->
+      <div id="initial-tab" class="tab-content active">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-medium">Initial Application Fee</h3>
+            <p class="text-xs text-gray-500">Generate and manage initial application payment</p>
+          </div>
+          <div class="p-4 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label for="application-fee" class="text-xs font-medium block">
+                  Application Fee (₦)
+                </label>
+                <input id="application-fee" type="text" value="25,000.00" class="w-full p-2 border border-gray-300 rounded-md text-sm" readonly>
+              </div>
+              <div class="space-y-2">
+                <label for="processing-fee" class="text-xs font-medium block">
+                  Processing Fee (₦)
+                </label>
+                <input id="processing-fee" type="text" value="15,000.00" class="w-full p-2 border border-gray-300 rounded-md text-sm" readonly>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label for="admin-fee" class="text-xs font-medium block">
+                  Administrative Fee (₦)
+                </label>
+                <input id="admin-fee" type="text" value="10,000.00" class="w-full p-2 border border-gray-300 rounded-md text-sm" readonly>
+              </div>
+              <div class="space-y-2">
+                <label for="survey-fee" class="text-xs font-medium block">
+                  Survey Fee (₦)
+                </label>
+                <input id="survey-fee" type="text" value="50,000.00" class="w-full p-2 border border-gray-300 rounded-md text-sm" readonly>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-xs text-gray-500">Total Amount</p>
+                <p class="text-lg font-bold">₦100,000.00</p>
+              </div>
+              <div class="flex gap-2">
+                <button class="flex items-center px-3 py-1 text-xs border border-gray-300 rounded-md bg-white hover:bg-gray-50">
+                  <i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5"></i>
+                  Print
+                </button>
+                <button class="flex items-center px-3 py-1 text-xs border border-gray-300 rounded-md bg-white hover:bg-gray-50">
+                  <i data-lucide="download" class="w-3.5 h-3.5 mr-1.5"></i>
+                  Download
+                </button>
+                <button class="flex items-center px-3 py-1 text-xs bg-black text-white rounded-md hover:bg-gray-800">
+                  <i data-lucide="credit-card" class="w-3.5 h-3.5 mr-1.5"></i>
+                  Pay Now
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-gray-100 p-3 rounded-md">
+              <h4 class="text-xs font-medium mb-1">Payment Status</h4>
+              <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-amber-500"></div>
+                <p class="text-xs">Pending Payment</p>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                Initial payment must be completed before application processing can begin.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detterment Bill Tab -->
+      <div id="detterment-tab" class="tab-content">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-medium">Detterment Bill</h3>
+            <p class="text-xs text-gray-500">Generate detterment charges based on property assessment</p>
+          </div>
+          <div class="p-4 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label for="property-value" class="text-xs font-medium block">
+                  Property Value (₦)
+                </label>
+                <input id="property-value" type="text" placeholder="Enter property value" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+              </div>
+              <div class="space-y-2">
+                <label for="land-size" class="text-xs font-medium block">
+                  Land Size (sqm)
+                </label>
+                <input id="land-size" type="text" value="1,200" class="w-full p-2 border border-gray-300 rounded-md text-sm" readonly>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label for="detterment-rate" class="text-xs font-medium block">
+                  Detterment Rate (%)
+                </label>
+                <input id="detterment-rate" type="text" value="2.5" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+              </div>
+              <div class="space-y-2">
+                <label for="units-count" class="text-xs font-medium block">
+                  Number of Units
+                </label>
+                <input id="units-count" type="text" value="12" class="w-full p-2 border border-gray-300 rounded-md text-sm" readonly>
+              </div>
+            </div>
+
+            <div class="bg-gray-100 p-3 rounded-md">
+              <h4 class="text-xs font-medium mb-1">Calculation Preview</h4>
+              <p class="text-xs text-gray-500">
+                Detterment Fee = Property Value × Detterment Rate × Land Size Factor
+              </p>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-xs text-gray-500">Estimated Amount</p>
+                <p class="text-lg font-bold">₦0.00</p>
+              </div>
+              <div class="flex gap-2">
+                <button class="flex items-center px-3 py-1 text-xs border border-gray-300 rounded-md bg-white hover:bg-gray-50">
+                  <i data-lucide="calculator" class="w-3.5 h-3.5 mr-1.5"></i>
+                  Calculate
+                </button>
+                <button class="flex items-center px-3 py-1 text-xs bg-black text-white rounded-md hover:bg-gray-800">
+                  <i data-lucide="receipt" class="w-3.5 h-3.5 mr-1.5"></i>
+                  Generate Bill
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Bill Tab - Updated with two logos -->
+      <div id="final-tab" class="tab-content">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div class="p-4">
+            <!-- Header with two logos and title -->
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-12 h-12">
+                <img src="/placeholder.svg?height=48&width=48" alt="Kano State Logo" class="w-full h-full object-contain">
+              </div>
+              <div class="text-center">
+                <h3 class="text-sm font-bold text-green-800">KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING</h3>
+                <p class="text-xs font-medium text-red-600">SECTIONAL TITLE FINAL BILL</p>
+              </div>
+              <div class="w-12 h-12">
+                <img src="/placeholder.svg?height=48&width=48" alt="Ministry Logo" class="w-full h-full object-contain">
+              </div>
+            </div>
+            
+            <!-- Date -->
+            <div class="text-right text-xs mb-4">
+              <p>Wednesday, April 16, 2025</p>
+            </div>
+            
+            <!-- Introduction -->
+            <div class="mb-4">
+              <p class="text-xs mb-2">Dear Sir/Madam,</p>
+              <p class="text-xs">
+                I am directed to inform you that the total cost of processing of your application for sectional 
+                title located at <span class="font-medium">Street plot/property address</span> with the following particulars.
+              </p>
+            </div>
+            
+            <!-- Property Details -->
+            <div class="mb-4">
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p><span class="font-medium">Owner/Lessee:</span> Mr. Clement Joseph</p>
+                  <p><span class="font-medium">Block/Application No:</span> APP-2023-001</p>
+                  <p><span class="font-medium">Plot No./Section/Outline:</span> KN0001</p>
+                  <p><span class="font-medium">Plan No:</span> PL-2023-001</p>
+                </div>
+                <div>
+                  <p><span class="font-medium">Location:</span> Kano</p>
+                  <p><span class="font-medium">Approval Date:</span> 15/04/2025</p>
+                  <p><span class="font-medium">Land Use:</span> Residential</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fee Table -->
+            <div class="mb-4">
+              <table class="bill-table">
+                <thead>
+                  <tr>
+                    <th>S/N</th>
+                    <th>Survey / Processing Fees</th>
+                    <th>Dev. Charges ₦</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>Administrative Fees</td>
+                    <td>₦ 20,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>Survey Fees</td>
+                    <td>₦ 50,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td>Dev. Charges</td>
+                    <td>₦ 100,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td>Appraisal</td>
+                    <td>₦ 30,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>5</td>
+                    <td>GIS Retrieval Fees</td>
+                    <td>₦ 15,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>6</td>
+                    <td>Certificate Fees</td>
+                    <td>₦ 25,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>7</td>
+                    <td>Processing Fees</td>
+                    <td>₦ 100,000.00</td>
+                  </tr>
+                  <tr>
+                    <td>8</td>
+                    <td>Penalty Fees</td>
+                    <td>₦ 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>9</td>
+                    <td>Registration Fees</td>
+                    <td>₦ 15,000.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Ground Rent -->
+            <div class="mb-4">
+              <table class="bill-table">
+                <tr>
+                  <td>One year Ground Rent</td>
+                  <td>₦ _____________</td>
+                  <td>₦ _____________</td>
+                </tr>
+              </table>
+            </div>
+            
+            <!-- Total -->
+            <div class="mb-4">
+              <div class="flex justify-between items-center">
+                <p class="text-sm font-bold">TOTAL:</p>
+                <p class="text-sm font-bold">₦ 355,000.00</p>
+              </div>
+              <hr class="my-2 border-t border-gray-300">
+            </div>
+            
+            <!-- Footer Text -->
+            <div class="text-xs space-y-2 mb-4">
+              <p>
+                You are hereby directed to settle this bill promptly in order to accelerate the processing of your 
+                application.
+              </p>
+              <p>
+                <span class="font-medium">Note:</span> Documentary Payments can be made at the Checkout-Point and KANGIS 
+                Cashier's Office.
+              </p>
+              <p>
+                <span class="font-medium">Note:</span> Ensure that you obtain a duly acknowledged Revenue Receipt issued at the KANGIS 
+                Office.
+              </p>
+              <p>Thank you.</p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center mt-6">
+              <button class="flex items-center px-3 py-1 text-xs border border-gray-300 rounded-md bg-white hover:bg-gray-50">
+                <i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5"></i>
+                Print Bill
+              </button>
+              <button class="flex items-center px-3 py-1 text-xs bg-black text-white rounded-md hover:bg-gray-800">
+                <i data-lucide="credit-card" class="w-3.5 h-3.5 mr-1.5"></i>
+                Pay Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Tab switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          
+          // Deactivate all tabs
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Activate selected tab
+          this.classList.add('active');
+          document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+      });
+      
+      // Close modal button
+      document.getElementById('closeModal').addEventListener('click', function() {
+        // In a real application, this would close the modal
+        alert('Modal closed');
+      });
+    });
+  </script>
+</body>
+</html>
