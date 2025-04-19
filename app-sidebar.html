@@ -95,6 +95,38 @@
     .module-icon-admin {
       opacity: 0.8;
     }
+    
+    /* Nested submenu styles */
+    .submenu-l1 {
+      padding-left: 1.5rem;
+    }
+    
+    .submenu-l2 {
+      padding-left: 2.5rem;
+    }
+    
+    .submenu-l3 {
+      padding-left: 3.5rem;
+    }
+    
+    .submenu-item {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      align-items: center;
+      border-radius: 0.375rem;
+      transition: all 0.2s;
+    }
+    
+    .submenu-item:hover {
+      background-color: #F9FAFB;
+    }
+    
+    .submenu-item.active {
+      font-weight: 500;
+      background-color: #EBF5FF;
+      border-left: 4px solid #3B82F6;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -244,20 +276,106 @@
             <i data-lucide="file-up" class="h-4 w-4 module-icon-programmes"></i>
             <span>Regularization / Conversion</span>
           </a>
-          <a href="/sectional-titling" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
-            <i data-lucide="building-2" class="h-4 w-4 module-icon-programmes"></i>
-            <span>Sectional Titling</span>
-            <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full sidebar-badge module-badge-programmes">
-              Active
-            </span>
-          </a>
-          <a href="/sectional-titling/gis-mapping" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
-            <i data-lucide="map" class="h-4 w-4 module-icon-programmes"></i>
-            <span>GIS Mapping</span>
-            <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full sidebar-badge module-badge-programmes">
-              New
-            </span>
-          </a>
+          
+          <!-- Modified Sectional Titling Section -->
+          <div class="sidebar-submodule-header flex items-center justify-between py-1.5 px-3 cursor-pointer rounded-md" data-section="sectionalTitling">
+            <div class="flex items-center gap-2">
+              <i data-lucide="building-2" class="h-4 w-4 module-icon-programmes"></i>
+              <span>Sectional Titling</span>
+              
+            </div>
+            <i data-lucide="chevron-right" class="h-4 w-4 transition-transform duration-200" data-chevron="sectionalTitling"></i>
+          </div>
+
+          <div class="pl-4 mt-1 mb-1 space-y-0.5 hidden" data-content="sectionalTitling">
+            <a href="/sectional-titling/primary-application" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+              <i data-lucide="file-plus" class="h-3.5 w-3.5"></i>
+              <span> Primary Application</span>
+            </a>
+            <a href="/sectional-titling/unit-application" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+              <i data-lucide="file-plus-2" class="h-3.5 w-3.5"></i>
+              <span>Unit Application</span>
+            </a>
+            <a href="/sectional-titling/field-data" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+              <i data-lucide="clipboard-list" class="h-3.5 w-3.5"></i>
+              <span> Field Data</span>
+            </a>
+            <a href="/sectional-titling/payments" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+              <i data-lucide="credit-card" class="h-3.5 w-3.5"></i>
+              <span> Payments</span>
+            </a>
+            
+            <!-- Approvals at same level -->
+            <div class="sidebar-submodule-header flex items-center justify-between py-1.5 px-3 cursor-pointer rounded-md" data-section="approvals">
+              <div class="flex items-center gap-2">
+                <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+                <span> Approvals</span>
+              </div>
+              <i data-lucide="chevron-right" class="h-4 w-4 transition-transform duration-200" data-chevron="approvals"></i>
+            </div>
+            
+            <div class="pl-4 mt-1 mb-1 space-y-0.5 hidden" data-content="approvals">
+              <a href="/sectional-titling/approvals/other-departments" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="building-2" class="h-3.5 w-3.5"></i>
+                <span> Other Departments</span>
+              </a>
+              <a href="/sectional-titling/approvals/planning-recommendation" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="clipboard-check" class="h-3.5 w-3.5"></i>
+                <span>Planning Recommendation</span>
+              </a>
+              <a href="/sectional-titling/approvals/directors-approval" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="stamp" class="h-3.5 w-3.5"></i>
+                <span> Director's Approval</span>
+              </a>
+            </div>
+            
+            <!-- e-Registry at same level -->
+            <div class="sidebar-submodule-header flex items-center justify-between py-1.5 px-3 cursor-pointer rounded-md" data-section="eRegistry">
+              <div class="flex items-center gap-2">
+                <i data-lucide="database" class="h-3.5 w-3.5"></i>
+                <span> e-Registry</span>
+              </div>
+              <i data-lucide="chevron-right" class="h-4 w-4 transition-transform duration-200" data-chevron="eRegistry"></i>
+            </div>
+            
+            <div class="pl-4 mt-1 mb-1 space-y-0.5 hidden" data-content="eRegistry">
+              <a href="/sectional-titling/e-registry/files" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="folder" class="h-3.5 w-3.5"></i>
+                <span>Files</span>
+              </a>
+              <a href="/sectional-titling/e-registry/certificate" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="file-cog" class="h-4 w-4 module-icon-programmes"></i>
+                <span> Certificate</span>
+              </a>
+            </div>
+            
+            <!-- Reports at same level -->
+            <a href="/sectional-titling/reports" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+              <i data-lucide="file-bar-chart" class="h-3.5 w-3.5"></i>
+              <span> Reports</span>
+            </a>
+            
+            <!-- GIS at same level -->
+            <div class="sidebar-submodule-header flex items-center justify-between py-1.5 px-3 cursor-pointer rounded-md" data-section="gis">
+              <div class="flex items-center gap-2">
+                <i data-lucide="map" class="h-3.5 w-3.5"></i>
+                <span> GIS</span>
+              </div>
+              <i data-lucide="chevron-right" class="h-4 w-4 transition-transform duration-200" data-chevron="gis"></i>
+            </div>
+            
+            <div class="pl-4 mt-1 mb-1 space-y-0.5 hidden" data-content="gis">
+              <a href="/sectional-titling/gis/system" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="server" class="h-3.5 w-3.5"></i>
+                <span> System</span>
+              </a>
+              <a href="/sectional-titling/gis/map" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
+                <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                <span> Map</span>
+              </a>
+            </div>
+          </div>
+          
           <a href="/programmes/enumeration" class="sidebar-item flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200">
             <i data-lucide="file-down" class="h-4 w-4 module-icon-programmes"></i>
             <span>Land Property Enumeration</span>
@@ -517,6 +635,12 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Set dashboard as open by default
       toggleModule('dashboard');
+      
+      // Open Programmes and Sectional Titling by default
+      toggleModule('programmes');
+      setTimeout(() => {
+        toggleSection('sectionalTitling');
+      }, 100);
       
       // Module toggle handlers
       const moduleHeaders = document.querySelectorAll('[data-module]');
