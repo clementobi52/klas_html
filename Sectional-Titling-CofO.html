@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sectional Titling CofO Registration</title>
+  <!-- Include Tailwind CSS via CDN for styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Include Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Custom styles to match the React components */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.125rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .badge-pending {
+      background-color: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fef08a;
+    }
+    .badge-registered {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .badge-rejected {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .tab-active {
+      border-bottom: 2px solid #2563eb;
+      color: #2563eb;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      border-radius: 0.5rem;
+      width: 80%;
+      max-width: 700px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: #f9f9f9;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+      border-radius: 0.375rem;
+    }
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+      border-radius: 0.375rem;
+    }
+    .show {
+      display: block;
+    }
+    .calendar-popup {
+      display: none;
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+    }
+    .calendar-header {
+      grid-column: span 7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .calendar-day {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 9999px;
+    }
+    .calendar-day:hover {
+      background-color: #e5e7eb;
+    }
+    .calendar-day.selected {
+      background-color: #2563eb;
+      color: white;
+    }
+    .calendar-day.today {
+      border: 1px solid #2563eb;
+    }
+    .calendar-weekday {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+      padding: 0.25rem 0;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="container mx-auto py-6 space-y-6 px-4">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold">Sectional CofO Registration</h1>
+        <p class="text-gray-500">Register Certificates of Occupancy for sectional properties</p>
+      </div>
+      <div class="dropdown">
+        <button onclick="toggleDropdown()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2">
+          Register CofO <i class="fas fa-chevron-down text-xs"></i>
+        </button>
+        <div id="registerDropdown" class="dropdown-content">
+          <a href="#" onclick="openSingleRegisterModal()"><i class="fas fa-file-alt mr-2"></i> Register Single CofO</a>
+          <a href="#" onclick="openBatchRegisterModal()"><i class="fas fa-upload mr-2"></i> Batch Register CofOs</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="text-sm font-medium text-gray-500 mb-1">Pending Registration</div>
+        <div class="text-2xl font-bold">42</div>
+        <p class="text-xs text-gray-500 mt-1">CofOs awaiting registration</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="text-sm font-medium text-gray-500 mb-1">Registered CofOs</div>
+        <div class="text-2xl font-bold">187</div>
+        <p class="text-xs text-gray-500 mt-1">Successfully registered</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="text-sm font-medium text-gray-500 mb-1">Rejected</div>
+        <div class="text-2xl font-bold">8</div>
+        <p class="text-xs text-gray-500 mt-1">Rejected applications</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="text-sm font-medium text-gray-500 mb-1">Total CofOs</div>
+        <div class="text-2xl font-bold">237</div>
+        <p class="text-xs text-gray-500 mt-1">All sectional CofOs</p>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-4 border-b">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 class="text-lg font-semibold">Sectional Certificates of Occupancy</h2>
+          <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div class="flex gap-2">
+              <div class="relative w-full sm:w-64">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+                <input type="search" placeholder="Search CofOs..." class="w-full pl-8 pr-3 py-2 border rounded-md" id="searchInput">
+              </div>
+              <select class="border rounded-md px-3 py-2" id="filterSelect">
+                <option value="all">All Fields</option>
+                <option value="fileNo">File Number</option>
+                <option value="regNo">Registration No.</option>
+                <option value="owner">Owner Name</option>
+                <option value="unitNo">Unit Number</option>
+              </select>
+            </div>
+            <button class="flex items-center gap-1 whitespace-nowrap border rounded-md px-3 py-2 hover:bg-gray-50">
+              <i class="fas fa-download text-sm"></i> Export
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="p-4">
+        <!-- Tabs -->
+        <div class="border-b mb-4">
+          <ul class="flex flex-wrap -mb-px">
+            <li class="mr-2">
+              <a href="#" class="inline-block p-4 tab-active" onclick="switchTab('pending', this)">
+                Pending <span class="ml-2 bg-gray-100 rounded-full px-2 py-0.5 text-xs">42</span>
+              </a>
+            </li>
+            <li class="mr-2">
+              <a href="#" class="inline-block p-4" onclick="switchTab('registered', this)">
+                Registered <span class="ml-2 bg-gray-100 rounded-full px-2 py-0.5 text-xs">187</span>
+              </a>
+            </li>
+            <li class="mr-2">
+              <a href="#" class="inline-block p-4" onclick="switchTab('rejected', this)">
+                Rejected <span class="ml-2 bg-gray-100 rounded-full px-2 py-0.5 text-xs">8</span>
+              </a>
+            </li>
+            <li class="mr-2">
+              <a href="#" class="inline-block p-4" onclick="switchTab('all', this)">
+                All CofOs
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input type="checkbox" class="rounded" onchange="toggleSelectAll(this)">
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  STM Ref
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Unit No.
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Block
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Owner
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Property Description
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Reg. Date
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="cofoTableBody">
+              <!-- Table rows will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Previous
+            </button>
+            <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">42</span> results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Previous</span>
+                  <i class="fas fa-chevron-left text-xs"></i>
+                </button>
+                <button class="bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                  1
+                </button>
+                <button class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                  2
+                </button>
+                <button class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden md:inline-flex relative items-center px-4 py-2 border text-sm font-medium">
+                  3
+                </button>
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  ...
+                </span>
+                <button class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                  5
+                </button>
+                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Next</span>
+                  <i class="fas fa-chevron-right text-xs"></i>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Register Modal -->
+  <div id="singleRegisterModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Register Sectional Title Certificate of Occupancy</h2>
+        <button onclick="closeSingleRegisterModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p class="text-gray-500 mb-6">Select a verified unit from the sectional title scheme to register its Certificate of Occupancy.</p>
+      
+      <div id="unitSearchSection">
+        <div class="flex gap-2 items-center mb-4">
+          <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+            <input type="search" placeholder="Search for a unit..." class="w-full pl-8 pr-3 py-2 border rounded-md" id="unitSearchInput">
+          </div>
+          <select class="border rounded-md px-3 py-2" id="unitSearchFilter">
+            <option value="unitNo">Unit Number</option>
+            <option value="owner">Owner Name</option>
+            <option value="stmRef">STM Reference</option>
+          </select>
+        </div>
+
+        <div class="border rounded-md overflow-hidden mb-6">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  STM Ref
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Unit
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Block
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Owner
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="unitSearchResults">
+              <!-- Will be populated by JavaScript -->
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">STM-2024-001</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">101</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">A</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">Fatima Ahmed</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <span class="badge badge-registered">Verified</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <button class="bg-blue-600 text-white px-3 py-1 rounded-md text-sm" onclick="selectUnit(0)">Select</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">STM-2024-001</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">102</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">A</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">Musa Ibrahim</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <span class="badge badge-registered">Verified</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <button class="bg-blue-600 text-white px-3 py-1 rounded-md text-sm" onclick="selectUnit(1)">Select</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="unitDetailsSection" class="hidden">
+        <div class="bg-gray-50 p-4 rounded-lg space-y-4 mb-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-medium">Selected Unit Details</h3>
+            <button class="text-gray-500 hover:text-gray-700 text-sm" onclick="backToUnitSearch()">
+              Change
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div>
+              <span class="text-gray-500">STM Reference:</span>
+              <span class="ml-2 font-medium" id="selectedStmRef">STM-2024-001</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Property:</span>
+              <span class="ml-2 font-medium" id="selectedProperty">Love Court Estate</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Unit Number:</span>
+              <span class="ml-2 font-medium" id="selectedUnitNo">101</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Block Number:</span>
+              <span class="ml-2 font-medium" id="selectedBlockNo">A</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Owner:</span>
+              <span class="ml-2 font-medium" id="selectedOwner">Fatima Ahmed</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Unit Type:</span>
+              <span class="ml-2 font-medium" id="selectedUnitType">Apartment</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Unit Size:</span>
+              <span class="ml-2 font-medium" id="selectedUnitSize">75 sq.m</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Status:</span>
+              <span class="ml-2">
+                <span class="badge badge-registered">Verified</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <label for="cofoNumber" class="block text-sm font-medium text-gray-700">Certificate of Occupancy Number</label>
+            <input type="text" id="cofoNumber" class="w-full px-3 py-2 border rounded-md" placeholder="Enter CofO number" value="COFO-ST-001-A101">
+          </div>
+
+          <div class="space-y-2">
+            <label for="registrationDate" class="block text-sm font-medium text-gray-700">Registration Date</label>
+            <div class="relative">
+              <button type="button" id="datePickerButton" class="w-full flex justify-between items-center px-3 py-2 border rounded-md" onclick="toggleCalendar()">
+                <span id="selectedDate">May 2, 2024</span>
+                <i class="fas fa-calendar-alt text-gray-400"></i>
+              </button>
+              <div id="calendarPopup" class="calendar-popup">
+                <div class="calendar">
+                  <div class="calendar-header">
+                    <button onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
+                    <span id="currentMonth">May 2024</span>
+                    <button onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                  <div class="calendar-weekday">Su</div>
+                  <div class="calendar-weekday">Mo</div>
+                  <div class="calendar-weekday">Tu</div>
+                  <div class="calendar-weekday">We</div>
+                  <div class="calendar-weekday">Th</div>
+                  <div class="calendar-weekday">Fr</div>
+                  <div class="calendar-weekday">Sa</div>
+                  <!-- Calendar days will be populated by JavaScript -->
+                  <div id="calendarDays"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label for="registrationFee" class="block text-sm font-medium text-gray-700">Registration Fee (₦)</label>
+            <input type="text" id="registrationFee" class="w-full px-3 py-2 border rounded-md" placeholder="Enter registration fee" value="25000">
+          </div>
+
+          <div class="space-y-2">
+            <label for="remarks" class="block text-sm font-medium text-gray-700">Remarks</label>
+            <textarea id="remarks" class="w-full px-3 py-2 border rounded-md" placeholder="Enter any additional remarks" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 mt-6">
+        <button onclick="closeSingleRegisterModal()" class="px-4 py-2 border rounded-md">
+          Cancel
+        </button>
+        <button id="registerButton" class="bg-blue-600 text-white px-4 py-2 rounded-md" onclick="registerCofO()">
+          Register CofO
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Register Modal -->
+  <div id="batchRegisterModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Batch Register Sectional Certificates of Occupancy</h2>
+        <button onclick="closeBatchRegisterModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p class="text-gray-500 mb-6">Select multiple verified sectional properties to register their Certificates of Occupancy.</p>
+      
+      <div id="batchSearchSection">
+        <div class="flex justify-end mb-4">
+          <button onclick="showGlobalSearch()" class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
+            <i class="fas fa-search"></i> Search Properties
+          </button>
+        </div>
+
+        <div id="globalSearchSection" class="hidden space-y-4 mb-6">
+          <div class="flex gap-2">
+            <input type="text" placeholder="Search by file number, unit number, owner name..." class="flex-1 px-3 py-2 border rounded-md">
+            <button onclick="hideGlobalSearch()" class="px-4 py-2 border rounded-md">
+              Cancel
+            </button>
+          </div>
+
+          <div class="border rounded-md overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <input type="checkbox" class="rounded" onchange="toggleSelectAllSearch(this)">
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    File Number
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Scheme
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Unit Type
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Unit Number
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Owner
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <input type="checkbox" class="rounded search-checkbox">
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">KN/SEC/2024/001</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">Kano Heights</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">Apartment</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">A-101</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">Abdullahi Mohammed</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="badge badge-registered">Verified</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <input type="checkbox" class="rounded search-checkbox">
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">KN/SEC/2024/002</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">Kano Heights</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">Apartment</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">A-102</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">Hauwa Ibrahim</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="badge badge-registered">Verified</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex justify-end">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md" onclick="addSelectedProperties()">
+              Add Selected Properties (0)
+            </button>
+          </div>
+        </div>
+
+        <div id="selectedPropertiesSection" class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h3 class="text-sm font-medium">Selected Properties</h3>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <div class="flex items-center gap-2">
+                <input type="text" placeholder="Search properties..." class="w-full sm:w-64 px-3 py-2 border rounded-md">
+              </div>
+              <div class="flex items-center gap-2">
+                <select class="border rounded-md px-3 py-2">
+                  <option value="all">All Schemes</option>
+                  <option value="Kano Heights">Kano Heights</option>
+                  <option value="Kano Business Park">Kano Business Park</option>
+                  <option value="Kano Residences">Kano Residences</option>
+                </select>
+
+                <select class="border rounded-md px-3 py-2">
+                  <option value="all">All Unit Types</option>
+                  <option value="Apartment">Apartment</option>
+                  <option value="Office">Office</option>
+                  <option value="Townhouse">Townhouse</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-sm text-gray-500">
+            0 of 0 selected
+          </div>
+
+          <div class="border rounded-md overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <input type="checkbox" class="rounded" onchange="toggleSelectAllBatch(this)">
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    File Number
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Scheme
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Unit Type
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Unit Number
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Owner
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200" id="selectedPropertiesTable">
+                <tr>
+                  <td colspan="7" class="px-6 py-10 text-center text-gray-500">
+                    No properties added yet. Click 'Search Properties' to add properties.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div class="space-y-2">
+              <label for="batchRegistrationDate" class="block text-sm font-medium text-gray-700">Registration Date</label>
+              <div class="relative">
+                <button type="button" id="batchDatePickerButton" class="w-full flex justify-between items-center px-3 py-2 border rounded-md" onclick="toggleBatchCalendar()">
+                  <span id="batchSelectedDate">May 2, 2024</span>
+                  <i class="fas fa-calendar-alt text-gray-400"></i>
+                </button>
+                <div id="batchCalendarPopup" class="calendar-popup">
+                  <div class="calendar">
+                    <div class="calendar-header">
+                      <button onclick="prevBatchMonth()"><i class="fas fa-chevron-left"></i></button>
+                      <span id="batchCurrentMonth">May 2024</span>
+                      <button onclick="nextBatchMonth()"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-weekday">Su</div>
+                    <div class="calendar-weekday">Mo</div>
+                    <div class="calendar-weekday">Tu</div>
+                    <div class="calendar-weekday">We</div>
+                    <div class="calendar-weekday">Th</div>
+                    <div class="calendar-weekday">Fr</div>
+                    <div class="calendar-weekday">Sa</div>
+                    <!-- Calendar days will be populated by JavaScript -->
+                    <div id="batchCalendarDays"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="batchRegistrationFee" class="block text-sm font-medium text-gray-700">Registration Fee per Property (₦)</label>
+              <input type="text" id="batchRegistrationFee" class="w-full px-3 py-2 border rounded-md" placeholder="Enter registration fee" value="75000">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 mt-6">
+        <button onclick="closeBatchRegisterModal()" class="px-4 py-2 border rounded-md">
+          Cancel
+        </button>
+        <button id="batchRegisterButton" class="bg-blue-600 text-white px-4 py-2 rounded-md" onclick="batchRegisterCofO()" disabled>
+          Register 0 CofOs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-xs">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <i class="fas fa-check-circle text-green-500"></i>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-900" id="toastTitle">Success</p>
+        <p class="text-sm text-gray-500" id="toastMessage">Operation completed successfully.</p>
+      </div>
+      <div class="ml-auto pl-3">
+        <button type="button" class="inline-flex text-gray-400 hover:text-gray-500" onclick="hideToast()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data for the table
+    const cofoData = [
+      {
+        id: "ST-COFO-2024-001",
+        stmRef: "STM-2024-001",
+        unitNo: "Unit 101",
+        blockNo: "Block A",
+        owner: "Fatima Ahmed",
+        propertyDescription: "2 Bedroom Apartment, Love Court Estate",
+        registrationDate: "2024-04-15",
+        status: "pending"
+      },
+      {
+        id: "ST-COFO-2024-002",
+        stmRef: "STM-2024-001",
+        unitNo: "Unit 102",
+        blockNo: "Block A",
+        owner: "Musa Ibrahim",
+        propertyDescription: "2 Bedroom Apartment, Love Court Estate",
+        registrationDate: "2024-04-15",
+        status: "registered"
+      },
+      {
+        id: "ST-COFO-2024-003",
+        stmRef: "STM-2024-002",
+        unitNo: "Unit 201",
+        blockNo: "Block B",
+        owner: "Ahmed Hassan",
+        propertyDescription: "3 Bedroom Apartment, Royal Heights",
+        registrationDate: "2024-04-12",
+        status: "pending"
+      },
+      {
+        id: "ST-COFO-2024-004",
+        stmRef: "STM-2024-002",
+        unitNo: "Unit 202",
+        blockNo: "Block B",
+        owner: "Zainab Umar",
+        propertyDescription: "3 Bedroom Apartment, Royal Heights",
+        registrationDate: "2024-04-12",
+        status: "rejected"
+      },
+      {
+        id: "ST-COFO-2024-005",
+        stmRef: "STM-2024-003",
+        unitNo: "Unit 301",
+        blockNo: "Block A",
+        owner: "Mohammed Kabir",
+        propertyDescription: "1 Bedroom Studio, Green Towers",
+        registrationDate: "2024-04-10",
+        status: "registered"
+      }
+    ];
+
+    // Sample unit data
+    const unitData = [
+      {
+        id: "1",
+        stmRef: "STM-2024-001",
+        propertyName: "Love Court Estate",
+        unitNo: "101",
+        blockNo: "A",
+        owner: "Fatima Ahmed",
+        unitType: "Apartment",
+        unitSize: "75 sq.m",
+        status: "verified"
+      },
+      {
+        id: "2",
+        stmRef: "STM-2024-001",
+        propertyName: "Love Court Estate",
+        unitNo: "102",
+        blockNo: "A",
+        owner: "Musa Ibrahim",
+        unitType: "Apartment",
+        unitSize: "75 sq.m",
+        status: "verified"
+      }
+    ];
+
+    // Current active tab
+    let activeTab = 'pending';
+    let selectedUnitIndex = -1;
+    let selectedProperties = [];
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      populateTable();
+      initializeCalendars();
+    });
+
+    // Populate the table based on the active tab
+    function populateTable() {
+      const tableBody = document.getElementById('cofoTableBody');
+      tableBody.innerHTML = '';
+      
+      const filteredData = activeTab === 'all' 
+        ? cofoData 
+        : cofoData.filter(item => item.status === activeTab);
+      
+      if (filteredData.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td colspan="9" class="px-6 py-10 text-center text-gray-500">
+            No results found.
+          </td>
+        `;
+        tableBody.appendChild(row);
+        return;
+      }
+      
+      filteredData.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="checkbox" class="rounded">
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${item.stmRef}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">${item.unitNo}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">${item.blockNo}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">${item.owner}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">${item.propertyDescription}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">${item.registrationDate}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <span class="badge badge-${item.status}">${capitalizeFirstLetter(item.status)}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+            <button class="text-gray-500 hover:text-gray-700" onclick="showActionsMenu(this)">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View Details</a>
+              ${item.status === 'pending' ? `<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Register CofO</a>` : ''}
+              ${item.status === 'pending' ? `<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Details</a>` : ''}
+              ${item.status === 'registered' ? `<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Print CofO</a>` : ''}
+              ${item.status === 'registered' ? `<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download PDF</a>` : ''}
+              ${item.status === 'pending' ? `<a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Reject</a>` : ''}
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Switch between tabs
+    function switchTab(tab, element) {
+      activeTab = tab;
+      
+      // Update active tab styling
+      document.querySelectorAll('.tab-active').forEach(el => {
+        el.classList.remove('tab-active');
+      });
+      element.classList.add('tab-active');
+      
+      // Repopulate the table
+      populateTable();
+    }
+
+    // Toggle dropdown menu
+    function toggleDropdown() {
+      document.getElementById("registerDropdown").classList.toggle("show");
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropdown button')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+
+    // Open single register modal
+    function openSingleRegisterModal() {
+      document.getElementById('singleRegisterModal').style.display = 'block';
+      document.getElementById('unitSearchSection').style.display = 'block';
+      document.getElementById('unitDetailsSection').style.display = 'none';
+    }
+
+    // Close single register modal
+    function closeSingleRegisterModal() {
+      document.getElementById('singleRegisterModal').style.display = 'none';
+    }
+
+    // Open batch register modal
+    function openBatchRegisterModal() {
+      document.getElementById('batchRegisterModal').style.display = 'block';
+      document.getElementById('globalSearchSection').style.display = 'none';
+    }
+
+    // Close batch register modal
+    function closeBatchRegisterModal() {
+      document.getElementById('batchRegisterModal').style.display = 'none';
+    }
+
+    // Show global search in batch register modal
+    function showGlobalSearch() {
+      document.getElementById('globalSearchSection').style.display = 'block';
+    }
+
+    // Hide global search in batch register modal
+    function hideGlobalSearch() {
+      document.getElementById('globalSearchSection').style.display = 'none';
+    }
+
+    // Select a unit in single register modal
+    function selectUnit(index) {
+      selectedUnitIndex = index;
+      const unit = unitData[index];
+      
+      document.getElementById('unitSearchSection').style.display = 'none';
+      document.getElementById('unitDetailsSection').style.display = 'block';
+      
+      document.getElementById('selectedStmRef').textContent = unit.stmRef;
+      document.getElementById('selectedProperty').textContent = unit.propertyName;
+      document.getElementById('selectedUnitNo').textContent = unit.unitNo;
+      document.getElementById('selectedBlockNo').textContent = unit.blockNo;
+      document.getElementById('selectedOwner').textContent = unit.owner;
+      document.getElementById('selectedUnitType').textContent = unit.unitType;
+      document.getElementById('selectedUnitSize').textContent = unit.unitSize;
+      
+      document.getElementById('cofoNumber').value = `COFO-ST-${unit.stmRef.split('-')[2]}-${unit.blockNo}${unit.unitNo}`;
+    }
+
+    // Go back to unit search
+    function backToUnitSearch() {
+      document.getElementById('unitSearchSection').style.display = 'block';
+      document.getElementById('unitDetailsSection').style.display = 'none';
+      selectedUnitIndex = -1;
+    }
+
+    // Register CofO
+    function registerCofO() {
+      if (selectedUnitIndex === -1) return;
+      
+      const registerButton = document.getElementById('registerButton');
+      registerButton.textContent = 'Processing...';
+      registerButton.disabled = true;
+      
+      // Simulate API call
+      setTimeout(() => {
+        showToast('CofO Registered', 'Certificate of Occupancy has been registered successfully.');
+        closeSingleRegisterModal();
+        registerButton.textContent = 'Register CofO';
+        registerButton.disabled = false;
+        
+        // Update the table
+        const unit = unitData[selectedUnitIndex];
+        const existingIndex = cofoData.findIndex(item => 
+          item.stmRef === unit.stmRef && 
+          item.unitNo === `Unit ${unit.unitNo}` && 
+          item.blockNo === `Block ${unit.blockNo}`
+        );
+        
+        if (existingIndex !== -1) {
+          cofoData[existingIndex].status = 'registered';
+        } else {
+          cofoData.push({
+            id: `ST-COFO-2024-${cofoData.length + 1}`,
+            stmRef: unit.stmRef,
+            unitNo: `Unit ${unit.unitNo}`,
+            blockNo: `Block ${unit.blockNo}`,
+            owner: unit.owner,
+            propertyDescription: `${unit.unitType}, ${unit.propertyName}`,
+            registrationDate: new Date().toISOString().split('T')[0],
+            status: 'registered'
+          });
+        }
+        
+        populateTable();
+      }, 1500);
+    }
+
+    // Batch register CofOs
+    function batchRegisterCofO() {
+      if (selectedProperties.length === 0) return;
+      
+      const batchRegisterButton = document.getElementById('batchRegisterButton');
+      batchRegisterButton.textContent = 'Processing...';
+      batchRegisterButton.disabled = true;
+      
+      // Simulate API call
+      setTimeout(() => {
+        showToast('CofOs Registered', `${selectedProperties.length} Certificates of Occupancy have been registered successfully.`);
+        closeBatchRegisterModal();
+        batchRegisterButton.textContent = 'Register 0 CofOs';
+        batchRegisterButton.disabled = true;
+        selectedProperties = [];
+        
+        // Update the table (in a real app, this would update with actual data)
+        populateTable();
+      }, 2000);
+    }
+
+    // Add selected properties from search
+    function addSelectedProperties() {
+      const checkboxes = document.querySelectorAll('.search-checkbox:checked');
+      if (checkboxes.length === 0) return;
+      
+      // In a real app, this would add the selected properties to the selectedProperties array
+      selectedProperties = Array.from({length: checkboxes.length}, (_, i) => i.toString());
+      
+      document.getElementById('batchRegisterButton').textContent = `Register ${selectedProperties.length} CofO${selectedProperties.length !== 1 ? 's' : ''}`;
+      document.getElementById('batchRegisterButton').disabled = false;
+      
+      hideGlobalSearch();
+      
+      // Update the selected properties table
+      const selectedPropertiesTable = document.getElementById('selectedPropertiesTable');
+      selectedPropertiesTable.innerHTML = '';
+      
+      // In a real app, this would show the actual selected properties
+      for (let i = 0; i < checkboxes.length; i++) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="checkbox" class="rounded" checked>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">KN/SEC/2024/${i + 1}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">Kano Heights</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">Apartment</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">A-${100 + i}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">Owner ${i + 1}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <span class="badge badge-registered">Verified</span>
+          </td>
+        `;
+        selectedPropertiesTable.appendChild(row);
+      }
+    }
+
+    // Toggle select all checkboxes
+    function toggleSelectAll(checkbox) {
+      const checkboxes = document.querySelectorAll('#cofoTableBody input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+      });
+    }
+
+    // Toggle select all search checkboxes
+    function toggleSelectAllSearch(checkbox) {
+      const checkboxes = document.querySelectorAll('.search-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+      });
+    }
+
+    // Toggle select all batch checkboxes
+    function toggleSelectAllBatch(checkbox) {
+      const checkboxes = document.querySelectorAll('#selectedPropertiesTable input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+      });
+    }
+
+    // Show actions menu
+    function showActionsMenu(button) {
+      const menu = button.nextElementSibling;
+      menu.classList.toggle('hidden');
+      
+      // Close other open menus
+      document.querySelectorAll('#cofoTableBody .absolute:not(.hidden)').forEach(el => {
+        if (el !== menu) {
+          el.classList.add('hidden');
+        }
+      });
+      
+      // Close menu when clicking outside
+      document.addEventListener('click', function closeMenu(e) {
+        if (!menu.contains(e.target) && e.target !== button) {
+          menu.classList.add('hidden');
+          document.removeEventListener('click', closeMenu);
+        }
+      });
+    }
+
+    // Initialize calendars
+    function initializeCalendars() {
+      const today = new Date();
+      document.getElementById('selectedDate').textContent = formatDate(today);
+      document.getElementById('batchSelectedDate').textContent = formatDate(today);
+      document.getElementById('currentMonth').textContent = formatMonth(today);
+      document.getElementById('batchCurrentMonth').textContent = formatMonth(today);
+      
+      renderCalendar(today, 'calendarDays');
+      renderCalendar(today, 'batchCalendarDays');
+    }
+
+    // Render calendar
+    function renderCalendar(date, containerId) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDay = firstDay.getDay();
+      
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      
+      // Add empty cells for days before the first day of the month
+      for (let i = 0; i < startingDay; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        container.appendChild(dayElement);
+      }
+      
+      // Add days of the month
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = i;
+        
+        const currentDate = new Date(year, month, i);
+        if (isToday(currentDate)) {
+          dayElement.classList.add('today');
+        }
+        
+        dayElement.addEventListener('click', () => {
+          selectDate(currentDate, containerId === 'calendarDays' ? 'selectedDate' : 'batchSelectedDate');
+          toggleCalendar(containerId === 'calendarDays' ? 'calendarPopup' : 'batchCalendarPopup');
+        });
+        
+        container.appendChild(dayElement);
+      }
+    }
+
+    // Toggle calendar popup
+    function toggleCalendar(calendarId = 'calendarPopup') {
+      document.getElementById(calendarId).style.display = 
+        document.getElementById(calendarId).style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Toggle batch calendar popup
+    function toggleBatchCalendar() {
+      toggleCalendar('batchCalendarPopup');
+    }
+
+    // Select a date
+    function selectDate(date, elementId) {
+      document.getElementById(elementId).textContent = formatDate(date);
+    }
+
+    // Format date for display
+    function formatDate(date) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    // Format month for display
+    function formatMonth(date) {
+      const options = { year: 'numeric', month: 'long' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    // Check if a date is today
+    function isToday(date) {
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
+    }
+
+    // Navigate to previous month
+    function prevMonth() {
+      const currentMonth = document.getElementById('currentMonth').textContent;
+      const date = new Date(currentMonth);
+      date.setMonth(date.getMonth() - 1);
+      document.getElementById('currentMonth').textContent = formatMonth(date);
+      renderCalendar(date, 'calendarDays');
+    }
+
+    // Navigate to next month
+    function nextMonth() {
+      const currentMonth = document.getElementById('currentMonth').textContent;
+      const date = new Date(currentMonth);
+      date.setMonth(date.getMonth() + 1);
+      document.getElementById('currentMonth').textContent = formatMonth(date);
+      renderCalendar(date, 'calendarDays');
+    }
+
+    // Navigate to previous month in batch calendar
+    function prevBatchMonth() {
+      const currentMonth = document.getElementById('batchCurrentMonth').textContent;
+      const date = new Date(currentMonth);
+      date.setMonth(date.getMonth() - 1);
+      document.getElementById('batchCurrentMonth').textContent = formatMonth(date);
+      renderCalendar(date, 'batchCalendarDays');
+    }
+
+    // Navigate to next month in batch calendar
+    function nextBatchMonth() {
+      const currentMonth = document.getElementById('batchCurrentMonth').textContent;
+      const date = new Date(currentMonth);
+      date.setMonth(date.getMonth() + 1);
+      document.getElementById('batchCurrentMonth').textContent = formatMonth(date);
+      renderCalendar(date, 'batchCalendarDays');
+    }
+
+    // Show toast notification
+    function showToast(title, message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = message;
+      toast.classList.remove('hidden');
+      
+      setTimeout(() => {
+        hideToast();
+      }, 5000);
+    }
+
+    // Hide toast notification
+    function hideToast() {
+      document.getElementById('toast').classList.add('hidden');
+    }
+
+    // Helper function to capitalize first letter
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+  </script>
+</body>
+</html>
