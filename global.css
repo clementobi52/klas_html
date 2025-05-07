@@ -1,0 +1,435 @@
+/* 
+* KLAS UI Global Styles
+* This file is organized into sections:
+* 1. Tailwind Directives
+* 2. Base Components
+* 3. Animations
+* 4. Card Styles
+* 5. Status & Module Badges
+* 6. Sidebar Styles
+* 7. Print Styles
+* 8. Utility Classes
+* 9. Dialog/Modal Styles
+* 10. Select Dropdown Styles
+*/
+
+/* 1. Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. Base Components */
+@layer components {
+ .btn {
+   @apply px-4 py-2 rounded font-medium focus:outline-none focus:ring-2 focus:ring-offset-2;
+ }
+ .btn-primary {
+   @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+ }
+ .btn-secondary {
+   @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500;
+ }
+ .form-input {
+   @apply mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500;
+ }
+ .card {
+   @apply bg-white rounded-lg shadow-md overflow-hidden;
+ }
+ .card-header {
+   @apply px-6 py-4 border-b border-gray-200;
+ }
+ .card-body {
+   @apply p-6;
+ }
+}
+
+/* 3. Animations */
+@keyframes fadeIn {
+ from {
+   opacity: 0;
+ }
+ to {
+   opacity: 1;
+ }
+}
+
+.animate-fade-in {
+ animation: fadeIn 0.5s ease-in-out;
+}
+
+.hover-scale {
+ transition: transform 0.2s ease-in-out;
+}
+
+.hover-scale:hover {
+ transform: scale(1.02);
+}
+
+/* 4. Card Styles */
+.gradient-card {
+ position: relative;
+ overflow: hidden;
+}
+
+.gradient-card::before {
+ content: "";
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background: linear-gradient(135deg, var(--gradient-start, transparent) 0%, var(--gradient-end, transparent) 100%);
+ opacity: 0.07;
+ z-index: 0;
+}
+
+.gradient-card > * {
+ position: relative;
+ z-index: 1;
+}
+
+.card-equal-height {
+ display: flex;
+ flex-direction: column;
+}
+
+.card-equal-height .card-content {
+ flex-grow: 1;
+ display: flex;
+ flex-direction: column;
+}
+
+.card-equal-height .card-actions {
+ margin-top: auto;
+}
+
+/* 5. Status & Module Badges */
+.status-badge-approved {
+ background-color: hsl(142.1, 76.2%, 36.3%, 0.1);
+ color: hsl(142.1, 76.2%, 36.3%);
+}
+
+.status-badge-pending {
+ background-color: hsl(38, 92%, 50%, 0.1);
+ color: hsl(38, 92%, 50%);
+}
+
+.status-badge-in-progress {
+ background-color: hsl(221.2, 83.2%, 53.3%, 0.1);
+ color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.status-badge-rejected {
+ background-color: hsl(339.6, 82.2%, 51.6%, 0.1);
+ color: hsl(339.6, 82.2%, 51.6%);
+}
+
+.module-badge-dashboard {
+ background-color: hsl(221.2, 83.2%, 53.3%, 0.1);
+ color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.module-badge-customer {
+ background-color: hsl(142.1, 76.2%, 36.3%, 0.1);
+ color: hsl(142.1, 76.2%, 36.3%);
+}
+
+.module-badge-programmes {
+ background-color: hsl(38, 92%, 50%, 0.1);
+ color: hsl(38, 92%, 50%);
+}
+
+.module-badge-info-products {
+ background-color: hsl(262, 83.3%, 57.8%, 0.1);
+ color: hsl(262, 83.3%, 57.8%);
+}
+
+.module-badge-instrument {
+ background-color: hsl(339.6, 82.2%, 51.6%, 0.1);
+ color: hsl(339.6, 82.2%, 51.6%);
+}
+
+.module-badge-file-registry {
+ background-color: hsl(198, 93%, 60%, 0.1);
+ color: hsl(198, 93%, 60%);
+}
+
+.module-badge-programmes {
+ background-color: #ddd6fe;
+ color: #7c3aed;
+}
+
+.module-badge-instrument {
+ background-color: #e0e7ff;
+ color: #4f46e5;
+}
+
+/* Module icon styles */
+.module-icon-dashboard {
+ color: #3b82f6;
+}
+.module-icon-customer {
+ color: #10b981;
+}
+.module-icon-programmes {
+ color: #8b5cf6;
+}
+.module-icon-info-products {
+ color: #f59e0b;
+}
+.module-icon-legal-search {
+ color: #ef4444;
+}
+.module-icon-instrument {
+ color: #6366f1;
+}
+.module-icon-file-registry {
+ color: #0ea5e9;
+}
+.module-icon-systems {
+ color: hsl(0, 84.2%, 60.2%);
+}
+.module-icon-legacy {
+ color: hsl(24, 100%, 62%);
+}
+.module-icon-admin {
+ color: hsl(262, 83.3%, 57.8%);
+}
+
+/* 6. Sidebar Styles */
+.sidebar-module-header {
+ font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+   "Helvetica Neue", sans-serif;
+ font-weight: 700;
+ letter-spacing: 0.05em;
+ color: #1e293b;
+ background: linear-gradient(to right, rgba(241, 245, 249, 0.9), rgba(226, 232, 240, 0.6));
+ border-radius: 6px;
+ box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+ transition: all 0.2s ease;
+ margin-bottom: 0.75rem;
+}
+
+.sidebar-module-header:hover {
+ background: linear-gradient(to right, rgba(241, 245, 249, 1), rgba(226, 232, 240, 0.8));
+}
+
+.sidebar-module-icon {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 32px;
+ height: 32px;
+ border-radius: 6px;
+ background: white;
+ box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+ margin-right: 12px;
+}
+
+.sidebar-item {
+ font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+   "Helvetica Neue", sans-serif;
+ transition: all 0.2s ease;
+ border-radius: 6px;
+ margin-bottom: 2px;
+ font-size: 0.9rem;
+ border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover {
+ background-color: rgba(241, 245, 249, 0.8);
+ transform: translateX(2px);
+}
+
+.sidebar-item.active {
+ background-color: rgba(59, 130, 246, 0.08);
+ font-weight: 500;
+ color: #2563eb;
+ border-left: 3px solid #3b82f6;
+ padding-left: calc(0.75rem - 3px);
+}
+
+.sidebar-submodule-header {
+ font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+   "Helvetica Neue", sans-serif;
+ font-weight: 500;
+ color: #475569;
+ transition: all 0.2s ease;
+ margin-bottom: 2px;
+ padding-left: 0.5rem;
+}
+
+.sidebar-submodule-header:hover {
+ color: #1e293b;
+ background-color: rgba(241, 245, 249, 0.5);
+}
+
+.sidebar-subitem {
+ font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+   "Helvetica Neue", sans-serif;
+ font-size: 0.875rem;
+ color: #64748b;
+ transition: all 0.2s ease;
+}
+
+.sidebar-subitem:hover {
+ color: #334155;
+ background-color: rgba(241, 245, 249, 0.8);
+}
+
+.sidebar-subitem.active {
+ background-color: rgba(59, 130, 246, 0.08);
+ color: #2563eb;
+ font-weight: 500;
+}
+
+.sidebar-badge {
+ font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+   "Helvetica Neue", sans-serif;
+ font-size: 0.65rem;
+ font-weight: 600;
+ padding: 0.15rem 0.4rem;
+ border-radius: 9999px;
+}
+
+/* 7. Print Styles */
+@media print {
+ /* Hide dialog footer with navigation buttons when printing */
+ .dialog-footer {
+   display: none !important;
+ }
+
+ /* Hide step indicators when printing */
+ .step-indicators {
+   display: none !important;
+ }
+
+ /* Remove max height constraints for printing */
+ .dialog-content {
+   max-height: none !important;
+   overflow: visible !important;
+ }
+
+ /* Hide any other UI elements not needed in print */
+ .print-hide {
+   display: none !important;
+ }
+
+ /* Ensure the content fills the page */
+ body {
+   width: 100%;
+   margin: 0;
+   padding: 0;
+ }
+
+ /* Add page breaks where needed */
+ .page-break {
+   page-break-after: always;
+ }
+}
+
+/* 8. Utility Classes */
+.scrollbar-hide {
+ -ms-overflow-style: none; /* IE and Edge */
+ scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+ display: none; /* Chrome, Safari and Opera */
+}
+
+/* FAAN-style sidebar module headers */
+
+/* Improved sidebar items */
+
+/* FAAN-style submodule headers */
+
+/* Module Badges */
+
+/* Card Heights */
+
+/* Button Styling */
+.btn-primary-black {
+ background-color: #000;
+ color: #fff;
+}
+
+.btn-primary-black:hover {
+ background-color: #333;
+}
+
+.btn-outline-custom {
+ border-color: #e2e8f0;
+}
+
+.btn-outline-custom:hover {
+ background-color: #f8fafc;
+}
+
+/* 9. Dialog/Modal Styles - Fix for transparency issues */
+.dialog-overlay {
+ background-color: rgba(0, 0, 0, 0.5) !important;
+ backdrop-filter: blur(2px) !important;
+}
+
+.dialog-content {
+ background-color: white !important;
+ border: 1px solid rgba(0, 0, 0, 0.1) !important;
+ box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Critical dialog styles */
+.dialog-overlay {
+ background-color: rgba(0, 0, 0, 0.5) !important;
+ position: fixed !important;
+ inset: 0 !important;
+ z-index: 50 !important;
+}
+
+.dialog-content {
+ background-color: white !important;
+ border-radius: 0.5rem !important;
+ box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+ position: fixed !important;
+ top: 50% !important;
+ left: 50% !important;
+ transform: translate(-50%, -50%) !important;
+ max-width: 90vw !important;
+ max-height: 85vh !important;
+ z-index: 51 !important;
+ overflow: auto !important;
+}
+
+[data-theme="dark"] .dialog-content {
+ background-color: #1f2937 !important;
+}
+
+/* 10. Select Dropdown Styles - Fix for z-index and transparency issues */
+[data-radix-popper-content-wrapper] {
+ z-index: 9999 !important;
+}
+
+.select-content,
+[role="listbox"] {
+ background-color: white !important;
+ border: 1px solid rgba(0, 0, 0, 0.1) !important;
+ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+ z-index: 9999 !important;
+}
+
+[role="option"] {
+ background-color: white !important;
+}
+
+[role="option"]:hover {
+ background-color: #f3f4f6 !important;
+}
+
+[role="option"][data-highlighted] {
+ background-color: #f3f4f6 !important;
+ color: #111827 !important;
+}
+
+[role="option"][data-state="checked"] {
+ background-color: #eff6ff !important;
+ color: #2563eb !important;
+}
