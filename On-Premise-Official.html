@@ -590,6 +590,150 @@
       </div>
     </div>
 
+    <!-- Legal Search Report View (initially hidden) -->
+    <div id="legal-search-report-view" class="hidden">
+      <div class="mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold">Legal Search Report</h2>
+            <p class="text-gray-500" id="report-subtitle">Official search report for file <span id="report-file-reference"></span></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="back-to-file-details-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to File Details
+            </button>
+            <button id="print-report-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Print Report
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6">
+              <!-- Report Header -->
+              <div class="flex items-center justify-between mb-6 border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.ibb.co/prw0q9jx/Whats-App-Image-2025-02-28-at-4-01-36-PM.jpg" alt="Kano State Logo" class="h-16 w-16">
+                  <div class="text-center">
+                    <h3 class="text-xl font-bold text-blue-700">KANO STATE GEOGRAPHIC INFORMATION SYSTEM</h3>
+                    <h4 class="text-lg font-semibold">MINISTRY OF LAND AND PHYSICAL PLANNING</h4>
+                    <h5 class="text-md font-medium mt-1">LEGAL SEARCH REPORT</h5>
+                  </div>
+                  <img src="https://i.ibb.co/60m0yNx7/Whats-App-Image-2025-02-28-at-4-01-36-PM-1.jpg" alt="GIS Logo" class="h-16 w-16">
+                </div>
+                <div class="text-right">
+                  <p class="text-sm" id="report-date"></p>
+                </div>
+              </div>
+
+              <!-- Property Details Section -->
+              <div class="mb-6">
+                <div class="inline-block border border-black px-2 py-1 bg-gray-100 text-sm font-bold mb-2">
+                  Property Details
+                </div>
+                <div class="border-t border-black pt-3 space-y-2 text-sm">
+                  <div class="flex">
+                    <div class="w-36 font-bold">File Number:</div>
+                    <div id="report-file-numbers"></div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Schedule:</div>
+                    <div>Kano</div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Plot Number:</div>
+                    <div id="report-plot-number"></div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Plan Number:</div>
+                    <div id="report-plan-number"></div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Plot Description:</div>
+                    <div id="report-plot-description"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transaction History Section -->
+              <div class="mb-6">
+                <div class="inline-block border border-black px-2 py-1 bg-gray-100 text-sm font-bold mb-2">
+                  Transaction History
+                </div>
+                <div class="border-t border-black pt-3">
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse">
+                      <thead>
+                        <tr>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">S/N</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Grantor</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Grantee</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Instrument Type</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Date</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Reg. No.</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Size</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Caveat</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Comments</th>
+                        </tr>
+                      </thead>
+                      <tbody id="report-transactions-table">
+                        <!-- Will be populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Report Footer -->
+              <div class="mt-8 text-sm">
+                <p class="font-bold" id="report-timestamp"></p>
+
+                <div class="mt-6 flex justify-between items-start">
+                  <div>
+                    <p class="font-medium">Yours Faithfully,</p>
+                    <div class="h-12 mt-2 border-2 border-blue-900 p-1 w-48 transform -rotate-12">
+                      <svg width="200" height="45" viewBox="0 0 200 45" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M10,35 C30,5 50,40 70,15 C90,30 110,10 130,25 C150,15 170,30 190,20"
+                          stroke="#000080"
+                          fill="none"
+                          stroke-width="2"
+                        />
+                      </svg>
+                    </div>
+                    <p>.......Director Deeds.........</p>
+                    <p class="mt-2">Printed by: jennifer.c</p>
+                  </div>
+
+                  <div class="text-right">
+                    <!-- QR Code -->
+                    <img id="report-qr-code" src="/placeholder.svg" alt="QR Code with File Details" width="150" height="150">
+                    <div class="text-center text-xs mt-1">Scan for file verification</div>
+                  </div>
+                </div>
+
+                <div class="mt-8 border-t pt-4 text-center">
+                  <p class="text-xs text-muted-foreground">
+                    Disclaimer: This Search Report does not represent consent to any transaction and is without prejudice to subsequent disclosures.
+                  </p>
+                  <p class="text-xs text-muted-foreground mt-2">For enquiries, please call +234 (0) 8023456789</p>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    KANO STATE GEOGRAPHIC INFORMATION SYSTEM, Plot P/123, Secretariat Kano, Kano State
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <!-- Reports View (initially hidden) -->
     <div id="reports-view" class="hidden space-y-6">
       <!-- Will be populated dynamically -->
@@ -668,7 +812,7 @@
             <!-- Reset Button -->
             <button id="reset-search-btn" class="ml-auto inline-flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-md">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Reset
             </button>
@@ -681,7 +825,7 @@
             </div>
             <button id="reset-search-collapsed-btn" class="ml-auto inline-flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-md">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Reset
             </button>
@@ -918,6 +1062,9 @@
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const newSearchFromDetailsBtn = document.getElementById('new-search-from-details-btn');
+    const legalSearchReportView = document.getElementById('legal-search-report-view');
+    const backToFileDetailsBtn = document.getElementById('back-to-file-details-btn');
+    const printReportBtn = document.getElementById('print-report-btn');
 
     // State variables
     let currentView = 'table';
@@ -1851,9 +1998,87 @@
       }
       
       if (e.target.closest('#view-detailed-records-btn')) {
-        alert('View detailed records functionality would be implemented here.');
+        // Show legal search report view
+        fileHistoryView.classList.add('hidden');
+        legalSearchReportView.classList.remove('hidden');
+        
+        // Render the legal search report
+        renderLegalSearchReport();
       }
     });
+
+    // Back to file details from legal search report view
+    backToFileDetailsBtn.addEventListener('click', () => {
+      legalSearchReportView.classList.add('hidden');
+      fileHistoryView.classList.remove('hidden');
+    });
+
+    // Print report
+    printReportBtn.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Render legal search report
+    const renderLegalSearchReport = () => {
+      if (!selectedFile) return;
+      
+      // Set current date and time
+      const currentDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      // Update report header
+      document.getElementById('report-file-reference').textContent = selectedFile.fileNumber;
+      document.getElementById('report-date').textContent = `Date: ${currentDate}`;
+      document.getElementById('report-timestamp').textContent = `These details are as at ${currentDate} ${currentTime}`;
+      
+      // Update property details
+      document.getElementById('report-file-numbers').textContent = `mlsfNo: ${selectedFile.fileNumber} | kangisFileNo: ${selectedFile.kangisFileNo} | NewKANGISFileNo: ${selectedFile.newKangisFileNo}`;
+      document.getElementById('report-plot-number').textContent = selectedFile.plotNumber || "GP No. 1067/1 & 1067/2";
+      document.getElementById('report-plan-number').textContent = selectedFile.planNumber || "LKN/RES/2021/3006";
+      document.getElementById('report-plot-description').textContent = `${selectedFile.district || "Niger Street Nassarawa District"}, ${selectedFile.lga || "Nassarawa"} LGA`;
+      
+      // Generate QR code URL
+      const qrCodeData = `File Number: MLSF: ${selectedFile.fileNumber} | KANGIS: ${selectedFile.kangisFileNo} | New KANGIS: ${selectedFile.newKangisFileNo}`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCodeData)}`;
+      document.getElementById('report-qr-code').src = qrCodeUrl;
+      
+      // Render transaction history table
+      const transactionsTable = document.getElementById('report-transactions-table');
+      transactionsTable.innerHTML = '';
+      
+      if (selectedFile.history && selectedFile.history.length > 0) {
+        selectedFile.history.forEach((transaction, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="border border-gray-300 px-3 py-2">${index + 1}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.guarantor}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.guarantee}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.transactionType}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.date}</td>
+            <td class="border border-gray-300 px-3 py-2">${index + 1}/${index + 1}/1</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.size || "0.0192ha"}</td>
+            <td class="border border-gray-300 px-3 py-2 ${transaction.caveat === 'Yes' ? 'text-red-600' : ''}">${transaction.caveat}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.comments || "Transfer registered"}</td>
+          `;
+          transactionsTable.appendChild(row);
+        });
+      } else {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td colspan="9" class="border border-gray-300 px-3 py-2 text-center">No transaction history found</td>
+        `;
+        transactionsTable.appendChild(row);
+      }
+    };
 
     // Add input event listeners for search fields
     document.getElementById('fileNumber').addEventListener('input', performSearch);
