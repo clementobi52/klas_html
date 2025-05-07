@@ -1,1515 +1,2096 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Record Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/lucide-icons@latest/dist/umd/lucide.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/lucide-icons@latest/dist/umd/lucide.min.js"></script>
-    <style>
-        /* Custom styles */
-        .dialog-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-        
-        .dialog-content {
-            background-color: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 9999px;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .badge-green {
-            background-color: #10b981;
-            color: white;
-        }
-        
-        .badge-outline {
-            background-color: transparent;
-            border: 1px solid #e5e7eb;
-        }
-
-        /* Project-specific styles */
-        .tabs-container {
-            display: flex;
-            justify-content: center;
-            border-bottom: 1px solid #e5e7eb;
-            margin-bottom: 1rem;
-        }
-
-        .tab-button {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .tab-button.active {
-            border-bottom-color: #2563eb;
-            color: #2563eb;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #374151;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            background-color: white;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-
-        .btn-secondary {
-            background-color: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-secondary:hover {
-            background-color: #f9fafb;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-body {
-            padding: 1rem;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th {
-            background-color: #f9fafb;
-            padding: 0.75rem 1rem;
-            text-align: left;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .table td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.875rem;
-            color: #374151;
-        }
-
-        .form-section {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-section-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.75rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Search - On-Premise Official | KLAS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* Base styles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #111827;
+      background-color: #f9fafb;
+    }
+    
+    /* Custom components */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+    
+    .badge-outline {
+      background-color: transparent;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .badge-destructive {
+      background-color: #ef4444;
+      color: white;
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 95%;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .search-section {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .results-section {
+      flex-grow: 1;
+      overflow: auto;
+      padding: 1.5rem;
+    }
+    
+    /* Loading spinner */
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #000;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Tab styles */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .tab {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: #6b7280;
+    }
+    
+    .tab.active {
+      border-bottom-color: #000;
+      color: #000;
+      font-weight: 600;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background-color: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    td {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    tr:hover {
+      background-color: #f9fafb;
+    }
+    
+    /* Select dropdown fix */
+    .select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    
+    .select {
+      appearance: none;
+      width: 100%;
+      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.375rem;
+      background-color: white;
+    }
+    
+    .select-icon {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    
+    /* Form field styles */
+    .form-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    
+    .form-label {
+      font-size: 0.875rem;
+      color: #6b7280;
+      width: 40%;
+      padding-top: 0.25rem;
+    }
+    
+    .form-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      width: 60%;
+      text-align: right;
+    }
+    
+    /* Status indicator */
+    .status-indicator {
+      display: inline-block;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+    
+    /* Hide elements */
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
-    <div class="container mx-auto py-6 space-y-6">
-        <!-- Page Header -->
-        <div class="flex flex-col space-y-2">
-            <h1 class="text-3xl font-bold tracking-tight">Property Record Assistant</h1>
-            <p class="text-gray-500">Capture and manage property records and transactions</p>
-        </div>
+<body class="min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">Legal Search</h1>
+        <p class="text-gray-500">On-Premise Official Legal Search</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="#" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Full Reports
+        </a>
+        <button id="new-search-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black/90 md:w-40">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          New Search
+        </button>
+      </div>
+    </div>
+  </header>
 
-        <!-- Tabs - Centered with project colors -->
-        <div class="tabs-container">
-            <button id="tab-property-details" class="tab-button active">Property Record</button>
-            <button id="tab-property-transactions" class="tab-button">Property Transactions</button>
-            <button id="tab-property-files" class="tab-button">CofO Records</button>
-        </div>
-
-        <!-- Property Details Tab Content -->
-        <div id="property-details-content" class="tab-content active">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-lg font-medium">Property Records</h2>
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="property-search" class="form-input w-64" placeholder="Search properties...">
-                        <button id="add-property-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <path d="M12 5v14M5 12h14"></path>
-                            </svg>
-                            Add New Property
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Property Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                        <!-- Add New Property Card -->
-                        <div class="border rounded-lg shadow-sm cursor-pointer hover:bg-blue-50 transition-colors" id="add-property-card">
-                            <div class="flex flex-col items-center justify-center p-6">
-                                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                                    <span class="text-blue-600 text-xl">+</span>
-                                </div>
-                                <h3 class="text-lg font-medium text-center">Add New Property</h3>
-                                <p class="text-sm text-gray-500 text-center mt-1">Create a new property record</p>
-                            </div>
-                        </div>
-
-                        <!-- Sample Property Card -->
-                        <div class="border rounded-lg shadow-sm overflow-hidden">
-                            <div class="bg-gray-50 p-4 border-b">
-                                <div class="flex justify-between items-center">
-                                    <span class="bg-blue-100 text-blue-700 border-blue-200 px-2 py-1 rounded-full text-xs">Residential</span>
-                                    <button class="text-gray-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                            <circle cx="12" cy="12" r="1"></circle>
-                                            <circle cx="12" cy="5" r="1"></circle>
-                                            <circle cx="12" cy="19" r="1"></circle>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <h3 class="mt-2 font-bold">KNML 09846</h3>
-                            </div>
-                            <div class="p-4">
-                                <div class="space-y-3">
-                                    <div class="text-sm truncate">3 Bedroom Apartment in Kano City</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-500">Location:</span>
-                                            <span>KANO</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-500">Plot No:</span>
-                                            <span>A123</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-500">Reg No:</span>
-                                            <span>1/1/2</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-4 pt-0 flex justify-between border-t">
-                                <div class="text-xs text-gray-500">
-                                    <div>From: John Doe</div>
-                                    <div>To: Jane Smith</div>
-                                </div>
-                                <button class="px-2 py-1 border rounded-md text-sm flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-1">
-                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                    Details
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Sample Property Card 2 -->
-                        <div class="border rounded-lg shadow-sm overflow-hidden">
-                            <div class="bg-gray-50 p-4 border-b">
-                                <div class="flex justify-between items-center">
-                                    <span class="bg-blue-100 text-blue-700 border-blue-200 px-2 py-1 rounded-full text-xs">Commercial</span>
-                                    <button class="text-gray-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                            <circle cx="12" cy="12" r="1"></circle>
-                                            <circle cx="12" cy="5" r="1"></circle>
-                                            <circle cx="12" cy="19" r="1"></circle>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <h3 class="mt-2 font-bold">KNGP 00338</h3>
-                            </div>
-                            <div class="p-4">
-                                <div class="space-y-3">
-                                    <div class="text-sm truncate">Commercial Building in Fagge</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-500">Location:</span>
-                                            <span>FAGGE</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-500">Plot No:</span>
-                                            <span>B456</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-500">Reg No:</span>
-                                            <span>1/1/5</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-4 pt-0 flex justify-between border-t">
-                                <div class="text-xs text-gray-500">
-                                    <div>From: ABC Corporation</div>
-                                    <div>To: XYZ Limited</div>
-                                </div>
-                                <button class="px-2 py-1 border rounded-md text-sm flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-1">
-                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                    Details
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Property Table -->
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>File Number</th>
-                                    <th>Description</th>
-                                    <th>Location</th>
-                                    <th>Reg No</th>
-                                    <th>Assignor</th>
-                                    <th>Assignee</th>
-                                    <th>Instrument</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="font-medium">KNML 09846</td>
-                                    <td>3 Bedroom Apartment in Kano City</td>
-                                    <td>KANO</td>
-                                    <td>1/1/2</td>
-                                    <td>John Doe</td>
-                                    <td>Jane Smith</td>
-                                    <td>Certificate of Occupancy</td>
-                                    <td>
-                                        <div class="flex items-center gap-2">
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                                    <path d="m15 5 4 4"></path>
-                                                </svg>
-                                            </button>
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M3 6h18"></path>
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                                    <line x1="10" x2="10" y1="11" y2="17"></line>
-                                                    <line x1="14" x2="14" y1="11" y2="17"></line>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-medium">KNGP 00338</td>
-                                    <td>Commercial Building in Fagge</td>
-                                    <td>FAGGE</td>
-                                    <td>1/1/5</td>
-                                    <td>ABC Corporation</td>
-                                    <td>XYZ Limited</td>
-                                    <td>Deed of Assignment</td>
-                                    <td>
-                                        <div class="flex items-center gap-2">
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                                    <path d="m15 5 4 4"></path>
-                                                </svg>
-                                            </button>
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M3 6h18"></path>
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                                    <line x1="10" x2="10" y1="11" y2="17"></line>
-                                                    <line x1="14" x2="14" y1="11" y2="17"></line>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+  <!-- Main Content -->
+  <main class="flex-1 p-6">
+    <div id="dashboard-view" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1: Official Search -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 class="text-lg font-semibold">Official Search</h3>
             </div>
+            <p class="text-sm text-gray-500 mb-4">Find legal records for Official purposes</p>
+            <p class="text-sm text-gray-500 mb-4">
+              Conduct legal searches for Official purposes with extended access to records.
+            </p>
+            <button id="search-records-btn" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black/90">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
+              </svg>
+              Search Records
+            </button>
+          </div>
         </div>
 
-        <!-- Property Transactions Tab Content -->
-        <div id="property-transactions-content" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-lg font-medium">Property Transactions</h2>
-                    <div class="flex space-x-2">
-                        <button class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" x2="12" y1="15" y2="3"></line>
-                            </svg>
-                            Export
-                        </button>
-                        <button class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                <rect width="12" height="8" x="6" y="14"></rect>
-                            </svg>
-                            Print
-                        </button>
-                        <button id="add-transaction-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <path d="M5 12h14"></path>
-                                <path d="M12 5v14"></path>
-                            </svg>
-                            Add Transaction
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="flex items-center space-x-4 mb-6">
-                        <div class="flex-1">
-                            <input type="text" id="transaction-search" class="form-input" placeholder="Search by file number, parties, or instrument type...">
-                        </div>
-                        <div class="w-[200px]">
-                            <select id="transaction-filter" class="form-select">
-                                <option value="all">All Transaction Types</option>
-                                <option value="assignment">Assignment</option>
-                                <option value="mortgage">Mortgage</option>
-                                <option value="surrender">Surrender</option>
-                                <option value="sub-lease">Sub-Lease</option>
-                                <option value="release">Release</option>
-                                <option value="devolution order">Devolution Order</option>
-                                <option value="court order">Court Order</option>
-                                <option value="revocation">Revocation</option>
-                                <option value="certificate of occupancy">Certificate of Occupancy</option>
-                                <option value="power of attorney">Power of Attorney</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Transaction Type</th>
-                                    <th>File Number</th>
-                                    <th>From Party</th>
-                                    <th>To Party</th>
-                                    <th>Instrument Type</th>
-                                    <th>Registration No</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>2023-05-15</td>
-                                    <td>Assignment</td>
-                                    <td>KNML 39762</td>
-                                    <td>John Doe</td>
-                                    <td>Jane Smith</td>
-                                    <td>Deed of Assignment</td>
-                                    <td>1/1/2</td>
-                                    <td>
-                                        <span class="badge badge-green">Completed</span>
-                                    </td>
-                                    <td>
-                                        <button class="text-gray-500 view-transaction-details" data-id="1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                                <polyline points="10 9 9 9 8 9"></polyline>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2023-06-22</td>
-                                    <td>Mortgage</td>
-                                    <td>KNML 39762</td>
-                                    <td>Jane Smith</td>
-                                    <td>First Bank Nigeria</td>
-                                    <td>Deed of Mortgage</td>
-                                    <td>1/1/5</td>
-                                    <td>
-                                        <span class="badge badge-green">Completed</span>
-                                    </td>
-                                    <td>
-                                        <button class="text-gray-500 view-transaction-details" data-id="2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                                <polyline points="10 9 9 9 8 9"></polyline>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2023-08-10</td>
-                                    <td>Surrender</td>
-                                    <td>KNML 39762</td>
-                                    <td>First Bank Nigeria</td>
-                                    <td>Jane Smith</td>
-                                    <td>Deed of Surrender</td>
-                                    <td>1/1/8</td>
-                                    <td>
-                                        <span class="badge badge-outline">Pending</span>
-                                    </td>
-                                    <td>
-                                        <button class="text-gray-500 view-transaction-details" data-id="3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                                <polyline points="10 9 9 9 8 9"></polyline>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <!-- Card 2: Recent Searches -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 class="text-lg font-semibold">Recent Searches</h3>
             </div>
+            <p class="text-sm text-gray-500 mb-4">View your recent legal searches</p>
+            <p class="text-sm text-gray-500 mb-4">
+              Access your recent legal searches to quickly return to previously viewed records.
+            </p>
+            <button id="view-reports-btn" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              View Reports
+            </button>
+          </div>
         </div>
 
-        <!-- CofO Records Tab Content -->
-        <div id="property-files-content" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-lg font-medium">CofO Records Table</h2>
-                    <div class="flex space-x-2">
-                        <button class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" x2="12" y1="15" y2="3"></line>
-                            </svg>
-                            Export
-                        </button>
-                        <button class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                <rect width="12" height="8" x="6" y="14"></rect>
-                            </svg>
-                            Print
-                        </button>
-                        <button id="capture-cofo-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
-                            Capture CofO
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="flex items-center space-x-4 mb-6">
-                        <div class="flex-1">
-                            <input type="text" id="cofo-search" class="form-input" placeholder="Search files...">
-                        </div>
-                        <div class="w-[200px]">
-                            <select id="cofo-filter" class="form-select">
-                                <option value="all">All File Types</option>
-                                <option value="Certificate">Certificate</option>
-                                <option value="Legal Document">Legal Document</option>
-                                <option value="Plan">Plan</option>
-                            </select>
-                        </div>
-                        <div class="w-[300px] border rounded-md overflow-hidden">
-                            <div class="flex">
-                                <button class="flex-1 py-2 bg-blue-600 text-white">All</button>
-                                <button class="flex-1 py-2 bg-gray-100">Active</button>
-                                <button class="flex-1 py-2 bg-gray-100">Archived</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>File No.</th>
-                                    <th>Reg Number</th>
-                                    <th>Land Use</th>
-                                    <th>Plot Description</th>
-                                    <th>Ground Rent</th>
-                                    <th>Lease Period</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="font-medium">KNML 39762</td>
-                                    <td>1/1/2</td>
-                                    <td>Residential</td>
-                                    <td>Plot 45, Block B, Kaduna North</td>
-                                    <td>₦50,000</td>
-                                    <td>99 years</td>
-                                    <td>
-                                        <div class="flex space-x-2">
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-medium">KNML 42851</td>
-                                    <td>1/1/3</td>
-                                    <td>Commercial</td>
-                                    <td>Plot 12, Block C, Kaduna South</td>
-                                    <td>₦75,000</td>
-                                    <td>99 years</td>
-                                    <td>
-                                        <div class="flex space-x-2">
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                            <button class="text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <!-- Card 3: Online Portal -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              <h3 class="text-lg font-semibold">Online Portal</h3>
             </div>
+            <p class="text-sm text-gray-500 mb-4">Access the online legal search portal</p>
+            <p class="text-sm text-gray-500 mb-4">
+              Switch to the online portal for remote access to legal search services.
+            </p>
+            <a href="#" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Go to Online Portal
+            </a>
+          </div>
         </div>
+      </div>
+
+      <!-- Monthly Trends Chart -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <h3 class="text-lg font-semibold">Search Trends</h3>
+          </div>
+          <p class="text-sm text-gray-500 mb-4">Official search volume over the past 12 months</p>
+          <div class="h-[350px]">
+            <canvas id="searchTrendsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional statistics for Official Search -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Search Statistics -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6">
+            <h3 class="text-lg font-semibold mb-1">Search Statistics</h3>
+            <p class="text-sm text-gray-500 mb-4">Key metrics for official searches</p>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium">Total Searches (This Month)</span>
+                <span class="font-bold">24</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium">Average Search Time</span>
+                <span class="font-bold">3.2 minutes</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium">Success Rate</span>
+                <span class="font-bold">92%</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium">Most Common Search Type</span>
+                <span class="font-bold">File Number</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6">
+            <h3 class="text-lg font-semibold mb-1">Recent Activity</h3>
+            <p class="text-sm text-gray-500 mb-4">Latest official search activities</p>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center border-b pb-2">
+                <div>
+                  <p class="font-medium">File Search #2024</p>
+                  <p class="text-sm text-gray-500">Just now</p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100">Completed</span>
+              </div>
+              <div class="flex justify-between items-center border-b pb-2">
+                <div>
+                  <p class="font-medium">File Search #2025</p>
+                  <p class="text-sm text-gray-500">2 hours ago</p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100">Completed</span>
+              </div>
+              <div class="flex justify-between items-center border-b pb-2">
+                <div>
+                  <p class="font-medium">File Search #2026</p>
+                  <p class="text-sm text-gray-500">Yesterday</p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100">Completed</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="font-medium">File Search #2027</p>
+                  <p class="text-sm text-gray-500">3 days ago</p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Property Form Dialog -->
-    <div id="property-form-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Add New Property</h2>
-                <button id="close-property-form" class="text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+    <!-- File History View (initially hidden) -->
+    <div id="file-history-view" class="hidden">
+      <div class="mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold">File Details</h2>
+            <p class="text-gray-500" id="file-details-subtitle">Viewing legal search results for file <span id="file-reference"></span></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="back-to-dashboard-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Dashboard
+            </button>
+            <button id="new-search-from-details-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black/90">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              New Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - File Information -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6">
+          <h3 class="text-lg font-semibold mb-4">File Information</h3>
+          <p class="text-sm text-gray-500 mb-4">Details about the selected file</p>
+          
+          <div class="space-y-4">
+            <div class="form-row">
+              <span class="form-label">File Number (MLSF):</span>
+              <span class="form-value" id="file-number-value"></span>
+            </div>
+            <div class="form-row">
+              <span class="form-label">KANGIS File Number:</span>
+              <span class="form-value" id="kangis-file-number-value"></span>
+            </div>
+            <div class="form-row">
+              <span class="form-label">New KANGIS File Number:</span>
+              <span class="form-value" id="new-kangis-file-number-value"></span>
+            </div>
+            
+            <div class="form-row">
+              <span class="form-label">Current Guarantor:</span>
+              <span class="form-value" id="current-guarantor-value"></span>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Current Guarantee:</span>
+              <span class="form-value" id="current-guarantee-value"></span>
+            </div>
+            
+            <div class="form-row">
+              <span class="form-label">LGA:</span>
+              <span class="form-value" id="lga-value"></span>
+            </div>
+            <div class="form-row">
+              <span class="form-label">District:</span>
+              <span class="form-value" id="district-value"></span>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Property Type:</span>
+              <span class="form-value" id="property-type-value"></span>
+            </div>
+            
+            <div class="form-row">
+              <span class="form-label">Last Transaction:</span>
+              <span class="form-value" id="last-transaction-value"></span>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Status:</span>
+              <span class="form-value flex justify-end items-center" id="status-value">
+                <span class="status-indicator bg-green-500"></span>
+                Active
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Transaction History -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden lg:col-span-2">
+          <div class="p-6">
+            <h3 class="text-lg font-semibold mb-2">Transaction History</h3>
+            <p class="text-sm text-gray-500 mb-4">Historical transactions associated with this file</p>
+            
+            <div class="tabs border-b mb-6">
+              <button class="tab active" data-tab="property-transactions">Property Transactions</button>
+              <button class="tab" data-tab="property-history">Property History</button>
+              <button class="tab" data-tab="instrument-registration">Instrument Registration</button>
+              <button class="tab" data-tab="cofo">CofO</button>
+            </div>
+
+            <div id="property-transactions-tab" class="tab-content active">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Transaction Type</th>
+                      <th>Guarantor</th>
+                      <th>Guarantee</th>
+                      <th>Caveat</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="property-transactions-table">
+                    <!-- Will be populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="mt-6 flex justify-center">
+                <button id="view-detailed-records-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  View Detailed Records
                 </button>
+              </div>
             </div>
-            <form id="property-form" class="space-y-6">
-                <!-- File Information - Full Width -->
-                <div class="form-section w-full">
-                    <h4 class="form-section-title">File Information</h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-xs text-gray-600">File Number Type</label>
-                            <div class="border-b">
-                                <div class="flex">
-                                    <button type="button" class="file-type-btn px-4 py-2 border-b-2 border-blue-500 font-medium text-blue-600" data-type="mlsFileNo">MLS</button>
-                                    <button type="button" class="file-type-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500" data-type="kangisFileNo">KANGIS</button>
-                                    <button type="button" class="file-type-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500" data-type="newKangisFileNo">New KANGIS</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1.5">
-                                <label for="filePrefix" class="text-xs">File Prefix</label>
-                                <select id="filePrefix" class="form-select text-sm">
-                                    <option value="">Select prefix</option>
-                                    <option value="RES">RES</option>
-                                    <option value="COM">COM</option>
-                                    <option value="CON-COM">CON-COM</option>
-                                    <option value="IND">IND</option>
-                                </select>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label for="fileSerialNo" class="text-xs">Serial Number</label>
-                                <input id="fileSerialNo" type="text" class="form-input text-sm" placeholder="e.g. 2019-296 or 91-249">
-                            </div>
-                        </div>
-                        <div id="fileNoPreview" class="mt-2 p-2 bg-green-50 border border-green-100 rounded-md hidden">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-green-800">Complete File Number:</span>
-                                <span id="completeFileNo" class="text-sm font-medium text-green-800"></span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label for="serialNo" class="text-xs text-gray-600">Serial No.</label>
-                                <input id="serialNo" type="text" class="form-input text-sm" placeholder="e.g. 1">
-                            </div>
-                            <div>
-                                <label for="page" class="text-xs text-gray-600">Page</label>
-                                <input id="page" type="text" class="form-input text-sm" placeholder="e.g. 1">
-                            </div>
-                            <div>
-                                <label for="vol" class="text-xs text-gray-600">Volume</label>
-                                <input id="vol" type="text" class="form-input text-sm" placeholder="e.g. 2">
-                            </div>
-                        </div>
-                        <div id="regNoPreview" class="mt-2 p-2 bg-green-50 border border-green-100 rounded-md hidden">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-green-700">REG NO:</span>
-                                <span id="completeRegNo" class="text-sm font-medium text-green-800"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Ownership Information - Full Width -->
-                <div class="form-section w-full">
-                    <h4 class="form-section-title">Ownership Information</h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label for="assignor" class="text-xs text-gray-600">Assignor</label>
-                            <input id="assignor" type="text" class="form-input text-sm">
-                        </div>
-                        <div>
-                            <label for="assignee" class="text-xs text-gray-600">Assignee</label>
-                            <input id="assignee" type="text" class="form-input text-sm">
-                        </div>
-                    </div>
-                </div>
+            <div id="property-history-tab" class="tab-content">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Event</th>
+                      <th>Authority</th>
+                      <th>Recipient</th>
+                      <th>Document No.</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="property-history-table">
+                    <!-- Will be populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-                <!-- Two Column Layout for Property Details and Classification -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="form-section">
-                        <h4 class="form-section-title">Property Details</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label for="description" class="text-xs text-gray-600">Description</label>
-                                <textarea id="description" class="form-input text-sm" rows="2"></textarea>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label for="lgsaOrCity" class="text-xs text-gray-600">LGA/City</label>
-                                    <input id="lgsaOrCity" type="text" class="form-input text-sm">
-                                </div>
-                                <div>
-                                    <label for="plotNo" class="text-xs text-gray-600">Plot No.</label>
-                                    <input id="plotNo" type="text" class="form-input text-sm">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4 class="form-section-title">Classification</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label for="instrument" class="text-xs text-gray-600">Instrument</label>
-                                <select id="instrument" class="form-select text-sm">
-                                    <option value="">Select Instrument</option>
-                                    <option value="Certificate of Occupancy">Certificate of Occupancy</option>
-                                    <option value="Right of Occupancy">Right of Occupancy</option>
-                                    <option value="Deed of Assignment">Deed of Assignment</option>
-                                    <option value="Deed of Mortgage">Deed of Mortgage</option>
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label for="layout" class="text-xs text-gray-600">Layout</label>
-                                    <select id="layout" class="form-select text-sm">
-                                        <option value="">Select Layout</option>
-                                        <option value="Residential">Residential</option>
-                                        <option value="Commercial">Commercial</option>
-                                        <option value="Industrial">Industrial</option>
-                                        <option value="Agricultural">Agricultural</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="schedule" class="text-xs text-gray-600">Schedule</label>
-                                    <select id="schedule" class="form-select text-sm">
-                                        <option value="">Select Schedule</option>
-                                        <option value="Regular">Regular</option>
-                                        <option value="Sectional">Sectional</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div id="instrument-registration-tab" class="tab-content">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th>Registration Date</th>
+                      <th>Instrument Type</th>
+                      <th>Registration No.</th>
+                      <th>Parties</th>
+                      <th>Registered By</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="instrument-registration-table">
+                    <!-- Will be populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-                <!-- System References - Full Width -->
-                <div class="form-section w-full">
-                    <h4 class="form-section-title">System References</h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label for="mlsFileNo" class="text-xs text-gray-600">Legacy File Number (MLS)</label>
-                            <input id="mlsFileNo" type="text" class="form-input text-sm" placeholder="e.g. CON-COM-2019-296, RES-2015-4859">
-                        </div>
-                        <div>
-                            <label for="kangisFileNo" class="text-xs text-gray-600">KANGIS File Number</label>
-                            <input id="kangisFileNo" type="text" class="form-input text-sm" placeholder="e.g. KNML 09846, KNGP 00338">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" id="cancel-property-form" class="btn btn-secondary">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Record</button>
-                </div>
-            </form>
+            <div id="cofo-tab" class="tab-content">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th>CofO Number</th>
+                      <th>Issue Date</th>
+                      <th>Holder Name</th>
+                      <th>Land Use</th>
+                      <th>Term</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cofo-table">
+                    <!-- Will be populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Transaction Details Dialog -->
-    <div id="transaction-details-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Transaction Details</h2>
-                <button id="close-transaction-details" class="text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div class="grid grid-cols-2 gap-4 py-4">
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">Transaction Type</p>
-                    <p id="transaction-type" class="font-medium">Assignment</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">Date</p>
-                    <p id="transaction-date" class="font-medium">2023-05-15</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">File Number</p>
-                    <p id="transaction-file-number" class="font-medium">KNML 39762</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">Registration Number</p>
-                    <p id="transaction-reg-number" class="font-medium">1/1/2</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">From Party</p>
-                    <p id="transaction-from-party" class="font-medium">John Doe</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">To Party</p>
-                    <p id="transaction-to-party" class="font-medium">Jane Smith</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">Instrument Type</p>
-                    <p id="transaction-instrument-type" class="font-medium">Deed of Assignment</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-gray-500">Status</p>
-                    <span id="transaction-status" class="badge badge-green">Completed</span>
-                </div>
-                <div class="col-span-2 space-y-1">
-                    <p class="text-sm font-medium text-gray-500">Additional Notes</p>
-                    <p id="transaction-notes" class="text-sm">No additional notes available for this transaction.</p>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 pt-4 border-t">
-                <button id="close-transaction-details-btn" class="btn btn-secondary">Close</button>
-                <button class="btn btn-primary">Edit Transaction</button>
-            </div>
+    <!-- Legal Search Report View (initially hidden) -->
+    <div id="legal-search-report-view" class="hidden">
+      <div class="mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold">Legal Search Report</h2>
+            <p class="text-gray-500" id="report-subtitle">Official search report for file <span id="report-file-reference"></span></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="back-to-file-details-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to File Details
+            </button>
+            <button id="print-report-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Print Report
+            </button>
+          </div>
         </div>
-    </div>
 
-    <!-- Add Transaction Dialog -->
-    <div id="add-transaction-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Add Property Transaction</h2>
-                <button id="close-add-transaction" class="text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div class="space-y-4 py-2 max-h-[70vh] overflow-y-auto pr-1">
-                <!-- Title Type Selection -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Transaction Type</h4>
-                    <div class="space-y-3">
-                        <div class="space-y-1">
-                            <label class="text-sm">Title Type</label>
-                            <div class="flex space-x-4">
-                                <div class="flex items-center space-x-1">
-                                    <input type="radio" id="customary" name="titleType" value="customary" checked>
-                                    <label for="customary" class="text-sm">Customary</label>
-                                </div>
-                                <div class="flex items-center space-x-1">
-                                    <input type="radio" id="statutory" name="titleType" value="statutory">
-                                    <label for="statutory" class="text-sm">Statutory</label>
-                                </div>
-                            </div>
-                        </div>
+        <div class="space-y-6">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6">
+              <!-- Report Header -->
+              <div class="flex items-center justify-between mb-6 border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <img src="https://placehold.co/80x80/blue/white?text=KGIS" alt="Kano State Logo" class="h-16 w-16 object-contain">
+                  <div class="text-center">
+                    <h3 class="text-xl font-bold text-blue-700">KANO STATE GEOGRAPHIC INFORMATION SYSTEM</h3>
+                    <h4 class="text-lg font-semibold">MINISTRY OF LAND AND PHYSICAL PLANNING</h4>
+                    <h5 class="text-md font-medium mt-1">LEGAL SEARCH REPORT</h5>
+                  </div>
+                  <img src="https://placehold.co/80x80/darkblue/white?text=GIS" alt="GIS Logo" class="h-16 w-16 object-contain">
+                </div>
+                <div class="text-right">
+                  <p class="text-sm" id="report-date"></p>
+                </div>
+              </div>
 
-                        <!-- File Number -->
-                        <div class="space-y-1">
-                            <label class="text-sm">File Number</label>
-                            <div class="border-b">
-                                <div class="flex">
-                                    <button type="button" class="file-type-btn px-4 py-2 border-b-2 border-blue-500 font-medium text-blue-600" data-type="mlsFileNo">MLS</button>
-                                    <button type="button" class="file-type-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500" data-type="kangisFileNo">KANGIS</button>
-                                    <button type="button" class="file-type-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500" data-type="newKangisFileNo">New KANGIS</button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 mt-2">
-                                <div class="space-y-1.5">
-                                    <label for="transFilePrefix" class="text-xs">File Prefix</label>
-                                    <select id="transFilePrefix" class="form-select text-sm">
-                                        <option value="">Select prefix</option>
-                                        <option value="KNML">KNML</option>
-                                        <option value="KNGP">KNGP</option>
-                                        <option value="MLKN">MLKN</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label for="transFileSerialNo" class="text-xs">Serial Number</label>
-                                    <input id="transFileSerialNo" class="form-input text-sm" placeholder="e.g. 39762">
-                                </div>
-                            </div>
-                            <div id="transFileNoPreview" class="mt-1 p-1.5 bg-green-50 border border-green-100 rounded-md hidden">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-green-800">Complete File Number:</span>
-                                    <span id="transCompleteFileNo" class="text-sm font-medium text-green-800"></span>
-                                </div>
-                            </div>
-                        </div>
+              <!-- Property Details Section -->
+              <div class="mb-6">
+                <div class="inline-block border border-black px-2 py-1 bg-gray-100 text-sm font-bold mb-2">
+                  Property Details
+                </div>
+                <div class="border-t border-black pt-3 space-y-2 text-sm">
+                  <div class="flex">
+                    <div class="w-36 font-bold">File Number:</div>
+                    <div id="report-file-numbers"></div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Schedule:</div>
+                    <div>Kano</div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Plot Number:</div>
+                    <div id="report-plot-number"></div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Plan Number:</div>
+                    <div id="report-plan-number"></div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-36 font-bold">Plot Description:</div>
+                    <div id="report-plot-description"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transaction History Section -->
+              <div class="mb-6">
+                <div class="inline-block border border-black px-2 py-1 bg-gray-100 text-sm font-bold mb-2">
+                  Transaction History
+                </div>
+                <div class="border-t border-black pt-3">
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse">
+                      <thead>
+                        <tr>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">S/N</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Grantor</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Grantee</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Instrument Type</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Date</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Reg. No.</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Size</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Caveat</th>
+                          <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Comments</th>
+                        </tr>
+                      </thead>
+                      <tbody id="report-transactions-table">
+                        <!-- Will be populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Report Footer -->
+              <div class="mt-8 text-sm">
+                <p class="font-bold" id="report-timestamp"></p>
+
+                <div class="mt-6 flex justify-between items-start">
+                  <div>
+                    <p class="font-medium">Yours Faithfully,</p>
+                    <div class="h-12 mt-2 border-2 border-blue-900 p-1 w-48 transform -rotate-12">
+                      <svg width="200" height="45" viewBox="0 0 200 45" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M10,35 C30,5 50,40 70,15 C90,30 110,10 130,25 C150,15 170,30 190,20"
+                          stroke="#000080"
+                          fill="none"
+                          stroke-width="2"
+                        />
+                      </svg>
                     </div>
+                    <p>.......Director Deeds.........</p>
+                    <p class="mt-2">Printed by: jennifer.c</p>
+                  </div>
+
+                  <div class="text-right">
+                    <!-- QR Code -->
+                    <img id="report-qr-code" src="/placeholder.svg" alt="QR Code with File Details" width="150" height="150">
+                    <div class="text-center text-xs mt-1">Scan for file verification</div>
+                  </div>
                 </div>
 
-                <div class="form-section">
-                    <h4 class="form-section-title">Transaction Details</h4>
-                    <div class="space-y-3">
-                        <!-- Transaction Type and Date -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label for="transactionType" class="text-sm">Transaction Type</label>
-                                <select id="transactionType" class="form-select text-sm">
-                                    <option value="">Select type</option>
-                                    <option value="assignment">Assignment</option>
-                                    <option value="mortgage">Mortgage</option>
-                                    <option value="surrender">Surrender</option>
-                                    <option value="sublease">Sub-Lease</option>
-                                    <option value="release">Release</option>
-                                    <option value="devolution-order">Devolution Order</option>
-                                    <option value="court-order">Court Order</option>
-                                    <option value="revocation">Revocation</option>
-                                    <option value="certificate-of-occupancy">Certificate of Occupancy</option>
-                                    <option value="power-of-attorney">Power of Attorney</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div class="space-y-1">
-                                <label for="transactionDate" class="text-sm">Transaction Date</label>
-                                <input type="date" id="transactionDate" class="form-input text-sm">
-                            </div>
-                        </div>
-
-                        <!-- Registration Number Components -->
-                        <div class="space-y-1">
-                            <label class="text-sm">Registration Number Components</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div>
-                                    <label for="transSerialNo" class="text-xs">Serial No.</label>
-                                    <input id="transSerialNo" class="form-input text-sm" placeholder="e.g. 1">
-                                </div>
-                                <div>
-                                    <label for="transPage" class="text-xs">Page</label>
-                                    <input id="transPage" class="form-input text-sm" placeholder="e.g. 1">
-                                </div>
-                                <div>
-                                    <label for="transVol" class="text-xs">Volume</label>
-                                    <input id="transVol" class="form-input text-sm" placeholder="e.g. 2">
-                                </div>
-                            </div>
-                            <div id="transRegNoPreview" class="mt-1 p-1.5 bg-green-50 border border-green-100 rounded-md hidden">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-green-700">REG NO:</span>
-                                    <span id="transCompleteRegNo" class="text-sm font-medium text-green-800"></span>
-                                </div>
-                                <div class="text-xs text-green-600 text-right">Format: 1/1/2</div>
-                            </div>
-                        </div>
-
-                        <!-- Instrument Type and Period -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label for="instrumentType" class="text-sm">Instrument Type</label>
-                                <select id="instrumentType" class="form-select text-sm" disabled>
-                                    <option value="">Select transaction first</option>
-                                </select>
-                            </div>
-                            <div class="space-y-1">
-                                <label for="period" class="text-sm">Period</label>
-                                <div class="flex space-x-1">
-                                    <input id="period" type="number" class="form-input text-sm" placeholder="Period">
-                                    <select id="periodUnit" class="form-select text-sm w-[90px]">
-                                        <option value="days">Days</option>
-                                        <option value="months">Months</option>
-                                        <option value="years" selected>Years</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="mt-8 border-t pt-4 text-center">
+                  <p class="text-xs text-muted-foreground">
+                    Disclaimer: This Search Report does not represent consent to any transaction and is without prejudice to subsequent disclosures.
+                  </p>
+                  <p class="text-xs text-muted-foreground mt-2">For enquiries, please call +234 (0) 8023456789</p>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    KANO STATE GEOGRAPHIC INFORMATION SYSTEM, Plot P/123, Secretariat Kano, Kano State
+                  </p>
                 </div>
-
-                <!-- Transaction-specific fields (will be shown/hidden based on transaction type) -->
-                <div id="transaction-specific-fields" class="form-section hidden">
-                    <h3 class="form-section-title">Transaction Details</h3>
-                    <!-- Assignment fields -->
-                    <div id="assignment-fields" class="transaction-fields hidden">
-                        <div class="grid grid-cols-1 gap-3">
-                            <div class="space-y-1">
-                                <label for="trans-assignor" class="text-sm">Assignor</label>
-                                <input id="trans-assignor" class="form-input text-sm" placeholder="Enter assignor name">
-                            </div>
-                            <div class="space-y-1">
-                                <label for="trans-assignee" class="text-sm">Assignee</label>
-                                <input id="trans-assignee" class="form-input text-sm" placeholder="Enter assignee name">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Mortgage fields -->
-                    <div id="mortgage-fields" class="transaction-fields hidden">
-                        <div class="grid grid-cols-1 gap-3">
-                            <div class="space-y-1">
-                                <label for="mortgagor" class="text-sm">Mortgagor</label>
-                                <input id="mortgagor" class="form-input text-sm" placeholder="Enter mortgagor name">
-                            </div>
-                            <div class="space-y-1">
-                                <label for="mortgagee" class="text-sm">Mortgagee</label>
-                                <input id="mortgagee" class="form-input text-sm" placeholder="Enter mortgagee name">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Other transaction type fields would be added here -->
-                </div>
+              </div>
             </div>
-            <div class="flex justify-end space-x-3 pt-2 border-t mt-4">
-                <button id="cancel-add-transaction" class="btn btn-secondary">Cancel</button>
-                <button id="submit-transaction" class="btn btn-primary">Submit</button>
-            </div>
+          </div>
         </div>
+      </div>
+
+    <!-- Reports View (initially hidden) -->
+    <div id="reports-view" class="hidden space-y-6">
+      <!-- Will be populated dynamically -->
     </div>
+  </main>
 
-    <!-- Capture CofO Dialog -->
-    <div id="capture-cofo-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Certificate of Occupancy</h2>
-                <button id="close-capture-cofo" class="text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+  <!-- Search Modal (initially hidden) -->
+  <div id="search-modal" class="hidden modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Search Land Records</h2>
+      </div>
+
+      <div class="flex flex-col h-full overflow-hidden">
+        <!-- Search Section -->
+        <div class="search-section">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-medium">Search Filters</h3>
+            <button id="toggle-filters-btn" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md">
+              Collapse Filters
+            </button>
+          </div>
+
+          <div id="filters-container" class="flex flex-wrap items-center gap-2 mb-4">
+            <!-- File Number Filter -->
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-outline">File Number</span>
+              <input type="text" id="fileNumber" placeholder="Enter file number" class="flex-grow px-3 py-2 border border-gray-300 rounded-md">
+              <button class="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <div class="grid gap-4 py-4">
-                <div class="form-section">
-                    <div class="flex items-center gap-2 mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-green-600">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <h3 class="text-sm font-medium">File Number Information</h3>
-                    </div>
-                    <p class="text-xs mb-3">Select file number type and enter the details</p>
-                    <div class="border-b">
-                        <div class="flex">
-                            <button type="button" class="cofo-file-type-btn px-4 py-2 border-b-2 border-blue-500 font-medium text-blue-600 text-xs" data-type="mlsFileNo">MLS</button>
-                            <button type="button" class="cofo-file-type-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 text-xs" data-type="kangisFileNo">KANGIS</button>
-                            <button type="button" class="cofo-file-type-btn px-4 py-2 border-b-2 border-transparent font-medium text-gray-500 text-xs" data-type="newKangisFileNo">New KANGIS</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 mt-3">
-                        <div class="space-y-1.5">
-                            <label for="cofoFilePrefix" class="text-xs">File Prefix</label>
-                            <select id="cofoFilePrefix" class="form-select text-xs">
-                                <option value="">Select prefix</option>
-                                <option value="KNML">KNML</option>
-                                <option value="KNGP">KNGP</option>
-                                <option value="MLKN">MLKN</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1.5">
-                            <label for="cofoFileSerialNo" class="text-xs">Serial Number</label>
-                            <input id="cofoFileSerialNo" class="form-input text-xs" placeholder="e.g. 39762">
-                        </div>
-                    </div>
+
+            <!-- KANGIS File No. Filter -->
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-outline">KANGIS File No.</span>
+              <input type="text" id="kangisFileNo" placeholder="Enter KANGIS file number" class="flex-grow px-3 py-2 border border-gray-300 rounded-md">
+              <button class="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Add Filter Button -->
+            <div class="relative" id="filter-dropdown-container">
+              <button id="add-filter-btn" class="inline-flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Filter
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Filter Dropdown (initially hidden) -->
+              <div id="filter-dropdown" class="hidden absolute top-full left-0 mt-1 z-50 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                <div class="p-2 max-h-[200px] overflow-y-auto">
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="newKangisFileNo">New KANGIS File No.</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="guarantorName">Guarantor Name</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="guaranteeName">Guarantee Name</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="lga">LGA</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="district">District</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="location">Location</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="plotNumber">Plot Number</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="planNumber">Plan Number</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="size">Size</button>
+                  <button class="w-full text-left px-3 py-1 text-sm hover:bg-gray-100 rounded-md" data-filter="caveat">Caveat</button>
                 </div>
-
-                <div class="form-section">
-                    <h4 class="form-section-title">Certificate Details</h4>
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label for="regNumber" class="form-label">Reg Number:</label>
-                                <input id="regNumber" type="text" class="form-input">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="form-label">Title:</label>
-                                <div class="flex space-x-4">
-                                    <div class="flex items-center space-x-2">
-                                        <input type="radio" id="old" name="titleType" value="old" checked>
-                                        <label for="old">Old</label>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <input type="radio" id="new" name="titleType" value="new">
-                                        <label for="new">New</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label for="regPage" class="form-label">Reg Page:</label>
-                                <input id="regPage" type="text" class="form-input">
-                            </div>
-                            <div class="space-y-2">
-                                <label for="landUseType" class="form-label">Land Use Type:</label>
-                                <select id="landUseType" class="form-select">
-                                    <option value="">Select land use type</option>
-                                    <option value="residential">Residential</option>
-                                    <option value="commercial">Commercial</option>
-                                    <option value="industrial">Industrial</option>
-                                    <option value="agricultural">Agricultural</option>
-                                    <option value="mixed-use">Mixed Use</option>
-                                    <option value="institutional">Institutional</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label for="regVolume" class="form-label">Reg Volume:</label>
-                                <input id="regVolume" type="text" class="form-input">
-                            </div>
-                            <div class="space-y-2">
-                                <label for="plotDescription" class="form-label">Plot Description:</label>
-                                <input id="plotDescription" type="text" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label for="groundRent" class="form-label">Ground Rent:</label>
-                                <input id="groundRent" type="text" class="form-input">
-                            </div>
-                            <div class="space-y-2">
-                                <label for="regDate" class="form-label">Reg Date:</label>
-                                <select id="regDate" class="form-select">
-                                    <option value="">Select year</option>
-                                    <!-- Years would be dynamically populated -->
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label for="leasePeriod" class="form-label">Lease Period:</label>
-                                <div class="flex items-center space-x-2">
-                                    <input id="leasePeriod" type="number" class="form-input" value="99">
-                                    <span>year(s)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
-            <div class="flex justify-end space-x-3 pt-4 border-t">
-                <button id="cancel-capture-cofo" class="btn btn-secondary">Cancel</button>
-                <button id="save-cofo" class="btn btn-primary">Save Certificate of Occupancy</button>
+
+            <!-- Reset Button -->
+            <button id="reset-search-btn" class="ml-auto inline-flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset
+            </button>
+          </div>
+
+          <!-- Collapsed Filters (initially hidden) -->
+          <div id="collapsed-filters" class="hidden flex items-center gap-2 mb-2">
+            <div class="text-sm text-gray-500">
+              Filtered by: <span id="active-filters-summary">File Number, KANGIS File No.</span>
             </div>
+            <button id="reset-search-collapsed-btn" class="ml-auto inline-flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset
+            </button>
+          </div>
+
+          <!-- View mode toggle -->
+          <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-500"><span id="results-count">0</span> results found</div>
+            <div class="tabs">
+              <button class="tab active" data-view="table">Table View</button>
+              <button class="tab" data-view="cards">Card View</button>
+            </div>
+          </div>
         </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+          <!-- Loading Spinner (initially hidden) -->
+          <div id="search-loading" class="hidden flex justify-center items-center py-8">
+            <div class="spinner"></div>
+          </div>
+
+          <!-- No Results Message (initially hidden) -->
+          <div id="no-results-message" class="hidden text-center py-8">
+            <p class="text-gray-500">No results found. Please try a different search.</p>
+          </div>
+
+          <!-- Table View Results (initially hidden) -->
+          <div id="table-results" class="hidden border rounded-md overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[1000px]">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th>File Number</th>
+                    <th>KANGIS File No.</th>
+                    <th>New KANGIS</th>
+                    <th>Guarantor</th>
+                    <th>Guarantee</th>
+                    <th>LGA</th>
+                    <th>Location</th>
+                    <th>Plot No</th>
+                    <th>Registration Particulars</th>
+                    <th>Size</th>
+                    <th>Caveat</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-results-body">
+                  <!-- Will be populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Card View Results (initially hidden) -->
+          <div id="card-results" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Will be populated dynamically -->
+          </div>
+
+          <!-- File Details View (initially hidden) -->
+          <div id="file-details-view" class="hidden space-y-6">
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Tab switching functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab switching
-            const tabButtons = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
+  <!-- Delete Confirmation Dialog (initially hidden) -->
+  <div id="delete-confirm-dialog" class="hidden modal-overlay">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+      <h3 class="text-lg font-semibold mb-2">Confirm Deletion</h3>
+      <p class="text-gray-500 mb-4">Are you sure you want to delete this record? This action cannot be undone.</p>
+      <div class="flex justify-end gap-2">
+        <button id="cancel-delete-btn" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium">Cancel</button>
+        <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">Delete</button>
+      </div>
+    </div>
+  </div>
 
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Remove active class from all buttons and contents
-                    tabButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                    });
+  <!-- JavaScript -->
+  <script>
+    // Mock data for the application
+    const monthlyData = [
+      { month: "Jan", searches: 18, revenue: 270000 },
+      { month: "Feb", searches: 22, revenue: 330000 },
+      { month: "Mar", searches: 25, revenue: 375000 },
+      { month: "Apr", searches: 20, revenue: 300000 },
+      { month: "May", searches: 28, revenue: 420000 },
+      { month: "Jun", searches: 32, revenue: 480000 },
+      { month: "Jul", searches: 35, revenue: 525000 },
+      { month: "Aug", searches: 30, revenue: 450000 },
+      { month: "Sep", searches: 26, revenue: 390000 },
+      { month: "Oct", searches: 22, revenue: 330000 },
+      { month: "Nov", searches: 20, revenue: 300000 },
+      { month: "Dec", searches: 24, revenue: 360000 }
+    ];
 
-                    // Add active class to clicked button and corresponding content
-                    button.classList.add('active');
-                    const tabId = button.id.replace('tab-', '');
-                    document.getElementById(`${tabId}-content`).classList.add('active');
-                });
-            });
+    // Sample land records data
+    const landRecords = [
+      {
+        id: 1,
+        fileNumber: "COM-RES-2021-078",
+        kangisFileNo: "KNML 12453",
+        newKangisFileNo: "KN0004",
+        guarantor: "Kano Market Development Authority",
+        guarantee: "Suleiman Abubakar Trading Co.",
+        lga: "Kano Municipal",
+        district: "Sabon Gari Market",
+        location: "Sabon Gari",
+        propertyType: "Commercial",
+        registrationParticulars: "Lease Agreement dated 05/04/2021",
+        lastTransaction: "Lease Agreement",
+        caveat: "No",
+        size: "1000 sqm",
+        plotNumber: "Plot 123",
+        planNumber: "KN/PL/2021/123",
+        history: [
+          {
+            id: 1,
+            date: "2021-04-05",
+            time: "10:30 AM",
+            transactionType: "Lease Agreement",
+            guarantor: "Kano Market Development Authority",
+            guarantee: "Suleiman Abubakar Trading Co.",
+            amount: "₦5,000,000",
+            caveat: "No",
+            size: "1000 sqm",
+            comments: "Initial market stall lease"
+          }
+        ],
+        propertyHistory: [
+          {
+            id: 1,
+            date: "2021-04-05",
+            time: "10:30 AM",
+            event: "Initial Registration",
+            authority: "Kano Land Registry",
+            recipient: "Suleiman Abubakar Trading Co.",
+            documentNo: "DOC/2021/001",
+            size: "1000 sqm",
+            comments: "First registration of property"
+          }
+        ],
+        instrumentRegistrations: [
+          {
+            id: 1,
+            registrationDate: "2021-04-10",
+            registrationTime: "11:45 AM",
+            instrumentType: "Lease Agreement",
+            registrationNumber: "REG/2021/001",
+            parties: "Kano Market Development Authority and Suleiman Abubakar Trading Co.",
+            propertyDescription: "Commercial stall at Sabon Gari Market",
+            registeredBy: "Land Registry Officer",
+            caveat: "No"
+          }
+        ],
+        cofoRecords: [
+          {
+            id: 1,
+            cofoNumber: "C of O/KN/2021/001",
+            issueDate: "2021-05-01",
+            holderName: "Suleiman Abubakar Trading Co.",
+            propertyDescription: "Commercial stall at Sabon Gari Market",
+            landUse: "Commercial",
+            term: "25 years",
+            commencementDate: "2021-04-05",
+            annualRent: "₦200,000",
+            caveat: "No"
+          }
+        ]
+      },
+      {
+        id: 2,
+        fileNumber: "MLSF/KN/2023/002",
+        kangisFileNo: "KG-002-2023",
+        newKangisFileNo: "KNG-2023-002",
+        guarantor: "Michael Johnson",
+        guarantee: "Sarah Williams",
+        lga: "Fagge",
+        district: "North",
+        location: "Fagge",
+        propertyType: "Residential",
+        registrationParticulars: "Deed of Assignment dated 20/06/2023",
+        lastTransaction: "Lease",
+        caveat: "Yes",
+        size: "750 sqm",
+        plotNumber: "Plot 456",
+        planNumber: "KN/PL/2023/456",
+        history: [
+          {
+            id: 2,
+            date: "2023-06-20",
+            time: "02:15 PM",
+            transactionType: "Lease",
+            guarantor: "Michael Johnson",
+            guarantee: "Sarah Williams",
+            amount: "₦3,500,000",
+            caveat: "Yes",
+            size: "750 sqm",
+            comments: "Property leased for 25 years"
+          }
+        ],
+        propertyHistory: [],
+        instrumentRegistrations: [],
+        cofoRecords: []
+      }
+    ];
 
-            // Property Form Dialog
-            const propertyFormDialog = document.getElementById('property-form-dialog');
-            const addPropertyBtn = document.getElementById('add-property-btn');
-            const addPropertyCard = document.getElementById('add-property-card');
-            const closePropertyForm = document.getElementById('close-property-form');
-            const cancelPropertyForm = document.getElementById('cancel-property-form');
-            const propertyForm = document.getElementById('property-form');
+    // DOM Elements
+    const searchModal = document.getElementById('search-modal');
+    const newSearchBtn = document.getElementById('new-search-btn');
+    const searchRecordsBtn = document.getElementById('search-records-btn');
+    const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
+    const filtersContainer = document.getElementById('filters-container');
+    const collapsedFilters = document.getElementById('collapsed-filters');
+    const resetSearchBtn = document.getElementById('reset-search-btn');
+    const resetSearchCollapsedBtn = document.getElementById('reset-search-collapsed-btn');
+    const addFilterBtn = document.getElementById('add-filter-btn');
+    const filterDropdown = document.getElementById('filter-dropdown');
+    const searchLoading = document.getElementById('search-loading');
+    const noResultsMessage = document.getElementById('no-results-message');
+    const tableResults = document.getElementById('table-results');
+    const tableResultsBody = document.getElementById('table-results-body');
+    const cardResults = document.getElementById('card-results');
+    const fileDetailsView = document.getElementById('file-details-view');
+    const resultsCount = document.getElementById('results-count');
+    const viewTabs = document.querySelectorAll('.tab');
+    const dashboardView = document.getElementById('dashboard-view');
+    const fileHistoryView = document.getElementById('file-history-view');
+    const reportsView = document.getElementById('reports-view');
+    const viewReportsBtn = document.getElementById('view-reports-btn');
+    const deleteConfirmDialog = document.getElementById('delete-confirm-btn');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const newSearchFromDetailsBtn = document.getElementById('new-search-from-details-btn');
+    const legalSearchReportView = document.getElementById('legal-search-report-view');
+    const backToFileDetailsBtn = document.getElementById('back-to-file-details-btn');
+    const printReportBtn = document.getElementById('print-report-btn');
 
-            function showPropertyForm() {
-                propertyFormDialog.classList.remove('hidden');
+    // State variables
+    let currentView = 'table';
+    let selectedFile = null;
+    let transactionToDelete = null;
+    let searchResults = [];
+    let filtersCollapsed = false;
+
+    // Initialize the search trends chart
+    const initializeChart = () => {
+      const ctx = document.getElementById('searchTrendsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: monthlyData.map(d => d.month),
+          datasets: [{
+            label: 'Searches',
+            data: monthlyData.map(d => d.searches),
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Monthly Search Volume'
             }
-
-            function hidePropertyForm() {
-                propertyFormDialog.classList.add('hidden');
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Searches'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
             }
+          }
+        }
+      });
+    };
 
-            addPropertyBtn.addEventListener('click', showPropertyForm);
-            addPropertyCard.addEventListener('click', showPropertyForm);
-            closePropertyForm.addEventListener('click', hidePropertyForm);
-            cancelPropertyForm.addEventListener('click', hidePropertyForm);
+    // Initialize the chart when the page loads
+    document.addEventListener('DOMContentLoaded', initializeChart);
 
-            propertyForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Handle form submission
-                hidePropertyForm();
-            });
+    // Event Listeners
+    newSearchBtn.addEventListener('click', () => {
+      searchModal.classList.remove('hidden');
+    });
 
-            // File Number Preview
-            const filePrefix = document.getElementById('filePrefix');
-            const fileSerialNo = document.getElementById('fileSerialNo');
-            const fileNoPreview = document.getElementById('fileNoPreview');
-            const completeFileNo = document.getElementById('completeFileNo');
+    newSearchFromDetailsBtn.addEventListener('click', () => {
+      searchModal.classList.remove('hidden');
+    });
 
-            function updateFileNoPreview() {
-                if (filePrefix.value && fileSerialNo.value) {
-                    const prefix = filePrefix.value;
-                    const serialNo = fileSerialNo.value;
-                    completeFileNo.textContent = `${prefix}-${serialNo}`;
-                    fileNoPreview.classList.remove('hidden');
-                } else {
-                    fileNoPreview.classList.add('hidden');
-                }
+    searchRecordsBtn.addEventListener('click', () => {
+      searchModal.classList.remove('hidden');
+    });
+
+    // Close modal when clicking outside
+    searchModal.addEventListener('click', (e) => {
+      if (e.target === searchModal) {
+        searchModal.classList.add('hidden');
+      }
+    });
+
+    // Toggle filters
+    toggleFiltersBtn.addEventListener('click', () => {
+      filtersCollapsed = !filtersCollapsed;
+      if (filtersCollapsed) {
+        filtersContainer.classList.add('hidden');
+        collapsedFilters.classList.remove('hidden');
+        toggleFiltersBtn.textContent = 'Expand Filters';
+      } else {
+        filtersContainer.classList.remove('hidden');
+        collapsedFilters.classList.add('hidden');
+        toggleFiltersBtn.textContent = 'Collapse Filters';
+      }
+    });
+
+    // Reset search
+    const resetSearch = () => {
+      document.getElementById('fileNumber').value = '';
+      document.getElementById('kangisFileNo').value = '';
+      
+      // Reset any other filters that might be added
+      const additionalFilters = document.querySelectorAll('.additional-filter');
+      additionalFilters.forEach(filter => {
+        filter.remove();
+      });
+      
+      // Reset results
+      searchResults = [];
+      resultsCount.textContent = '0';
+      tableResultsBody.innerHTML = '';
+      cardResults.innerHTML = '';
+      
+      // Hide results views
+      tableResults.classList.add('hidden');
+      cardResults.classList.add('hidden');
+      fileDetailsView.classList.add('hidden');
+      noResultsMessage.classList.add('hidden');
+      
+      // Reset selected file
+      selectedFile = null;
+    };
+
+    resetSearchBtn.addEventListener('click', resetSearch);
+    resetSearchCollapsedBtn.addEventListener('click', resetSearch);
+
+    // Toggle filter dropdown
+    addFilterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      filterDropdown.classList.toggle('hidden');
+    });
+
+    // Close filter dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!addFilterBtn.contains(e.target) && !filterDropdown.contains(e.target)) {
+        filterDropdown.classList.add('hidden');
+      }
+    });
+
+    // Add filter when clicking on dropdown item
+    filterDropdown.addEventListener('click', (e) => {
+      if (e.target.hasAttribute('data-filter')) {
+        const filterId = e.target.getAttribute('data-filter');
+        addFilter(filterId);
+        filterDropdown.classList.add('hidden');
+      }
+    });
+
+    // Add a new filter to the filters container
+    const addFilter = (filterId) => {
+      // Check if filter already exists
+      if (document.getElementById(filterId)) {
+        return;
+      }
+
+      const filterLabels = {
+        newKangisFileNo: 'New KANGIS File No.',
+        guarantorName: 'Guarantor Name',
+        guaranteeName: 'Guarantee Name',
+        lga: 'LGA',
+        district: 'District',
+        location: 'Location',
+        plotNumber: 'Plot Number',
+        planNumber: 'Plan Number',
+        size: 'Size',
+        caveat: 'Caveat'
+      };
+
+      const filterDiv = document.createElement('div');
+      filterDiv.className = 'flex items-center gap-2 mb-2 additional-filter';
+      filterDiv.id = filterId + '-filter';
+
+      if (filterId === 'lga' || filterId === 'caveat') {
+        // Create select for LGA or Caveat
+        const options = filterId === 'lga' 
+          ? ['Dala', 'Fagge', 'Gwale', 'Kano Municipal', 'Nassarawa', 'Tarauni', 'Ungogo']
+          : ['Yes', 'No'];
+        
+        filterDiv.innerHTML = `
+          <span class="badge badge-outline">${filterLabels[filterId]}</span>
+          <div class="select-wrapper flex-grow">
+            <select id="${filterId}" class="select">
+              <option value="">Select ${filterLabels[filterId]}</option>
+              ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+            </select>
+            <div class="select-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        `;
+      } else {
+        // Create input for other filters
+        filterDiv.innerHTML = `
+          <span class="badge badge-outline">${filterLabels[filterId]}</span>
+          <input type="text" id="${filterId}" placeholder="Enter ${filterLabels[filterId].toLowerCase()}" class="flex-grow px-3 py-2 border border-gray-300 rounded-md">
+        `;
+      }
+
+      // Add remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100';
+      removeBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      `;
+      removeBtn.addEventListener('click', () => {
+        filterDiv.remove();
+        performSearch();
+      });
+
+      filterDiv.appendChild(removeBtn);
+      filtersContainer.insertBefore(filterDiv, addFilterBtn.parentNode);
+
+      // Add event listener to the new input/select
+      const input = document.getElementById(filterId);
+      if (input.tagName === 'SELECT') {
+        input.addEventListener('change', performSearch);
+      } else {
+        input.addEventListener('input', performSearch);
+      }
+    };
+
+    // Perform search based on filter values
+    const performSearch = () => {
+      // Get all filter values
+      const filters = {
+        fileNumber: document.getElementById('fileNumber').value,
+        kangisFileNo: document.getElementById('kangisFileNo').value
+      };
+
+      // Add any additional filters
+      const additionalFilters = document.querySelectorAll('.additional-filter');
+      additionalFilters.forEach(filter => {
+        const input = filter.querySelector('input, select');
+        if (input && input.value) {
+          filters[input.id] = input.value;
+        }
+      });
+
+      // Check if any filter has a value
+      const hasFilters = Object.values(filters).some(value => value);
+      if (!hasFilters) {
+        searchResults = [];
+        resultsCount.textContent = '0';
+        tableResults.classList.add('hidden');
+        cardResults.classList.add('hidden');
+        noResultsMessage.classList.add('hidden');
+        return;
+      }
+
+      // Show loading
+      searchLoading.classList.remove('hidden');
+      tableResults.classList.add('hidden');
+      cardResults.classList.add('hidden');
+      noResultsMessage.classList.add('hidden');
+      fileDetailsView.classList.add('hidden');
+
+      // Simulate API call with timeout
+      setTimeout(() => {
+        // Filter land records based on filters
+        searchResults = landRecords.filter(record => {
+          return Object.entries(filters).every(([key, value]) => {
+            if (!value) return true; // Skip empty filters
+            
+            const searchValue = value.toLowerCase();
+            
+            switch(key) {
+              case 'fileNumber':
+                return record.fileNumber.toLowerCase().includes(searchValue);
+              case 'kangisFileNo':
+                return record.kangisFileNo.toLowerCase().includes(searchValue);
+              case 'newKangisFileNo':
+                return record.newKangisFileNo.toLowerCase().includes(searchValue);
+              case 'guarantorName':
+                return record.guarantor.toLowerCase().includes(searchValue);
+              case 'guaranteeName':
+                return record.guarantee.toLowerCase().includes(searchValue);
+              case 'lga':
+                return record.lga === value;
+              case 'district':
+                return record.district.toLowerCase().includes(searchValue);
+              case 'location':
+                return record.location.toLowerCase().includes(searchValue);
+              case 'plotNumber':
+                return record.plotNumber.toLowerCase().includes(searchValue);
+              case 'planNumber':
+                return record.planNumber.toLowerCase().includes(searchValue);
+              case 'size':
+                return record.size.toLowerCase().includes(searchValue);
+              case 'caveat':
+                return record.caveat === value;
+              default:
+                return true;
             }
-
-            filePrefix.addEventListener('change', updateFileNoPreview);
-            fileSerialNo.addEventListener('input', updateFileNoPreview);
-
-            // Registration Number Preview
-            const serialNo = document.getElementById('serialNo');
-            const page = document.getElementById('page');
-            const vol = document.getElementById('vol');
-            const regNoPreview = document.getElementById('regNoPreview');
-            const completeRegNo = document.getElementById('completeRegNo');
-
-            function updateRegNoPreview() {
-                if (serialNo.value || page.value || vol.value) {
-                    const serial = serialNo.value || '-';
-                    const pg = page.value || '-';
-                    const volume = vol.value || '-';
-                    completeRegNo.textContent = `${serial}/${pg}/${volume}`;
-                    regNoPreview.classList.remove('hidden');
-                } else {
-                    regNoPreview.classList.add('hidden');
-                }
-            }
-
-            serialNo.addEventListener('input', updateRegNoPreview);
-            page.addEventListener('input', updateRegNoPreview);
-            vol.addEventListener('input', updateRegNoPreview);
-
-            // Transaction Details Dialog
-            const transactionDetailsDialog = document.getElementById('transaction-details-dialog');
-            const viewTransactionButtons = document.querySelectorAll('.view-transaction-details');
-            const closeTransactionDetails = document.getElementById('close-transaction-details');
-            const closeTransactionDetailsBtn = document.getElementById('close-transaction-details-btn');
-
-            function showTransactionDetails(transactionId) {
-                // In a real app, you would fetch transaction details by ID
-                // For now, we'll just show the dialog with sample data
-                transactionDetailsDialog.classList.remove('hidden');
-            }
-
-            function hideTransactionDetails() {
-                transactionDetailsDialog.classList.add('hidden');
-            }
-
-            viewTransactionButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const transactionId = button.getAttribute('data-id');
-                    showTransactionDetails(transactionId);
-                });
-            });
-
-            closeTransactionDetails.addEventListener('click', hideTransactionDetails);
-            closeTransactionDetailsBtn.addEventListener('click', hideTransactionDetails);
-
-            // Add Transaction Dialog
-            const addTransactionDialog = document.getElementById('add-transaction-dialog');
-            const addTransactionBtn = document.getElementById('add-transaction-btn');
-            const closeAddTransaction = document.getElementById('close-add-transaction');
-            const cancelAddTransaction = document.getElementById('cancel-add-transaction');
-            const submitTransaction = document.getElementById('submit-transaction');
-            const transactionType = document.getElementById('transactionType');
-            const instrumentType = document.getElementById('instrumentType');
-            const transactionSpecificFields = document.getElementById('transaction-specific-fields');
-            const allTransactionFields = document.querySelectorAll('.transaction-fields');
-
-            function showAddTransaction() {
-                addTransactionDialog.classList.remove('hidden');
-            }
-
-            function hideAddTransaction() {
-                addTransactionDialog.classList.add('hidden');
-            }
-
-            addTransactionBtn.addEventListener('click', showAddTransaction);
-            closeAddTransaction.addEventListener('click', hideAddTransaction);
-            cancelAddTransaction.addEventListener('click', hideAddTransaction);
-
-            submitTransaction.addEventListener('click', function() {
-                // Handle transaction submission
-                hideAddTransaction();
-            });
-
-            transactionType.addEventListener('change', function() {
-                const selectedType = this.value;
-                
-                // Enable instrument type dropdown
-                instrumentType.disabled = !selectedType;
-                
-                // Clear instrument type options
-                instrumentType.innerHTML = '';
-                
-                // Show transaction-specific fields
-                if (selectedType) {
-                    transactionSpecificFields.classList.remove('hidden');
-                    
-                    // Hide all transaction fields first
-                    allTransactionFields.forEach(field => {
-                        field.classList.add('hidden');
-                    });
-                    
-                    // Show fields specific to the selected transaction type
-                    const specificField = document.getElementById(`${selectedType}-fields`);
-                    if (specificField) {
-                        specificField.classList.remove('hidden');
-                    }
-                    
-                    // Populate instrument type options based on transaction type
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'Select instrument type';
-                    instrumentType.appendChild(option);
-                    
-                    // In a real app, you would populate this with actual options
-                    if (selectedType === 'assignment') {
-                        addInstrumentOption('deed-of-assignment', 'Deed of Assignment');
-                        addInstrumentOption('deed-of-assent', 'Deed of Assent');
-                    } else if (selectedType === 'mortgage') {
-                        addInstrumentOption('deed-of-mortgage', 'Deed of Mortgage');
-                        addInstrumentOption('tripartite-mortgage', 'Tripartite Mortgage');
-                    }
-                    // Add more conditions for other transaction types
-                } else {
-                    transactionSpecificFields.classList.add('hidden');
-                    
-                    // Add default option
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'Select transaction first';
-                    instrumentType.appendChild(option);
-                }
-            });
-
-            function addInstrumentOption(value, text) {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = text;
-                instrumentType.appendChild(option);
-            }
-
-            // Capture CofO Dialog
-            const captureCofoDialog = document.getElementById('capture-cofo-dialog');
-            const captureCofoBtn = document.getElementById('capture-cofo-btn');
-            const closeCaptureCofo = document.getElementById('close-capture-cofo');
-            const cancelCaptureCofo = document.getElementById('cancel-capture-cofo');
-            const saveCofo = document.getElementById('save-cofo');
-
-            function showCaptureCofo() {
-                captureCofoDialog.classList.remove('hidden');
-            }
-
-            function hideCaptureCofo() {
-                captureCofoDialog.classList.add('hidden');
-            }
-
-            captureCofoBtn.addEventListener('click', showCaptureCofo);
-            closeCaptureCofo.addEventListener('click', hideCaptureCofo);
-            cancelCaptureCofo.addEventListener('click', hideCaptureCofo);
-
-            saveCofo.addEventListener('click', function() {
-                // Handle CofO submission
-                hideCaptureCofo();
-            });
-
-            // File type buttons for all dialogs
-            const fileTypeButtons = document.querySelectorAll('.file-type-btn, .cofo-file-type-btn');
-            fileTypeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const parent = this.closest('.border-b');
-                    const buttons = parent.querySelectorAll('.file-type-btn, .cofo-file-type-btn');
-                    
-                    buttons.forEach(btn => {
-                        btn.classList.remove('border-blue-500', 'text-blue-600');
-                        btn.classList.add('border-transparent', 'text-gray-500');
-                    });
-                    
-                    this.classList.add('border-blue-500', 'text-blue-600');
-                    this.classList.remove('border-transparent', 'text-gray-500');
-                });
-            });
-
-            // Initialize the page with default values
-            updateFileNoPreview();
-            updateRegNoPreview();
+          });
         });
-    </script>
+
+        // Update results count
+        resultsCount.textContent = searchResults.length;
+
+        // Hide loading
+        searchLoading.classList.add('hidden');
+
+        // Show appropriate view
+        if (searchResults.length === 0) {
+          noResultsMessage.classList.remove('hidden');
+        } else {
+          // Automatically collapse filters when results are found
+          if (searchResults.length > 0 && !filtersCollapsed) {
+            filtersCollapsed = true;
+            filtersContainer.classList.add('hidden');
+            collapsedFilters.classList.remove('hidden');
+            toggleFiltersBtn.textContent = 'Expand Filters';
+            
+            // Update active filters summary
+            const activeFilters = Object.entries(filters)
+              .filter(([_, value]) => value)
+              .map(([key, value]) => {
+                const filterLabels = {
+                  fileNumber: 'File Number',
+                  kangisFileNo: 'KANGIS File No.',
+                  newKangisFileNo: 'New KANGIS File No.',
+                  guarantorName: 'Guarantor Name',
+                  guaranteeName: 'Guarantee Name',
+                  lga: 'LGA',
+                  district: 'District',
+                  location: 'Location',
+                  plotNumber: 'Plot Number',
+                  planNumber: 'Plan Number',
+                  size: 'Size',
+                  caveat: 'Caveat'
+                };
+                return `${filterLabels[key]}: ${value}`;
+              })
+              .join(', ');
+            
+            document.getElementById('active-filters-summary').textContent = activeFilters;
+          }
+          
+          renderSearchResults();
+        }
+      }, 500);
+    };
+
+    // Render search results based on current view
+    const renderSearchResults = () => {
+      if (currentView === 'table') {
+        renderTableResults();
+        tableResults.classList.remove('hidden');
+        cardResults.classList.add('hidden');
+      } else {
+        renderCardResults();
+        cardResults.classList.remove('hidden');
+        tableResults.classList.add('hidden');
+      }
+    };
+
+    // Render table results
+    const renderTableResults = () => {
+      tableResultsBody.innerHTML = '';
+      
+      searchResults.forEach(file => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+        row.innerHTML = `
+          <td class="p-2 text-sm">${file.fileNumber}</td>
+          <td class="p-2 text-sm">${file.kangisFileNo}</td>
+          <td class="p-2 text-sm">${file.newKangisFileNo}</td>
+          <td class="p-2 text-sm">${file.guarantor}</td>
+          <td class="p-2 text-sm">${file.guarantee}</td>
+          <td class="p-2 text-sm">${file.lga}</td>
+          <td class="p-2 text-sm">${file.location}</td>
+          <td class="p-2 text-sm">${file.plotNumber}</td>
+          <td class="p-2 text-sm">${file.registrationParticulars}</td>
+          <td class="p-2 text-sm">${file.size}</td>
+          <td class="p-2 text-sm font-medium ${file.caveat === 'Yes' ? 'text-red-600' : ''}">${file.caveat}</td>
+          <td class="p-2 text-sm">
+            <button class="view-file-btn inline-flex items-center px-2 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50" data-id="${file.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
+              </svg>
+              View Records
+            </button>
+          </td>
+        `;
+        
+        tableResultsBody.appendChild(row);
+      });
+      
+      // Add event listeners to view buttons
+      document.querySelectorAll('.view-file-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const fileId = parseInt(btn.getAttribute('data-id'));
+          selectedFile = searchResults.find(file => file.id === fileId);
+          
+          // Close search modal
+          searchModal.classList.add('hidden');
+          
+          // Show file history view directly instead of file details
+          dashboardView.classList.add('hidden');
+          fileHistoryView.classList.remove('hidden');
+          
+          // Populate file details
+          renderFileHistory();
+        });
+      });
+    };
+
+    // Render card results
+    const renderCardResults = () => {
+      cardResults.innerHTML = '';
+      
+      searchResults.forEach(file => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer';
+        card.innerHTML = `
+          <div class="p-4">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <div class="font-medium flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
+                  </svg>
+                  ${file.fileNumber}
+                </div>
+                <div class="text-sm text-gray-500 mt-1">
+                  KANGIS: ${file.kangisFileNo} | New KANGIS: ${file.newKangisFileNo}
+                </div>
+              </div>
+              <span class="badge ${file.caveat === 'Yes' ? 'badge-destructive' : 'badge-outline'}">
+                Caveat: ${file.caveat}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div>
+                <span class="text-gray-500">Guarantor:</span> ${file.guarantor}
+              </div>
+              <div>
+                <span class="text-gray-500">Guarantee:</span> ${file.guarantee}
+              </div>
+              <div>
+                <span class="text-gray-500">LGA:</span> ${file.lga}
+              </div>
+              <div>
+                <span class="text-gray-500">Location:</span> ${file.location}
+              </div>
+              <div>
+                <span class="text-gray-500">Plot No:</span> ${file.plotNumber}
+              </div>
+              <div>
+                <span class="text-gray-500">Size:</span> ${file.size}
+              </div>
+              <div class="col-span-2">
+                <span class="text-gray-500">Registration Particulars:</span> ${file.registrationParticulars}
+              </div>
+            </div>
+          </div>
+        `;
+        
+        card.addEventListener('click', () => {
+          selectedFile = file;
+          
+          // Close search modal
+          searchModal.classList.add('hidden');
+          
+          // Show file history view directly
+          dashboardView.classList.add('hidden');
+          fileHistoryView.classList.remove('hidden');
+          
+          // Populate file details
+          renderFileHistory();
+        });
+        
+        cardResults.appendChild(card);
+      });
+    };
+    
+    // Render file history (the side-by-side layout shown in the screenshot)
+    const renderFileHistory = () => {
+      if (!selectedFile) return;
+      
+      // Update file reference in subtitle
+      document.getElementById('file-reference').textContent = selectedFile.fileNumber;
+      
+      // Update file information fields
+      document.getElementById('file-number-value').textContent = selectedFile.fileNumber;
+      document.getElementById('kangis-file-number-value').textContent = selectedFile.kangisFileNo;
+      document.getElementById('new-kangis-file-number-value').textContent = selectedFile.newKangisFileNo;
+      document.getElementById('current-guarantor-value').textContent = selectedFile.guarantor;
+      document.getElementById('current-guarantee-value').textContent = selectedFile.guarantee;
+      document.getElementById('lga-value').textContent = selectedFile.lga;
+      document.getElementById('district-value').textContent = selectedFile.district;
+      document.getElementById('property-type-value').textContent = selectedFile.propertyType || 'N/A';
+      document.getElementById('last-transaction-value').textContent = selectedFile.lastTransaction;
+      
+      // Render the transactions tables
+      renderTransactionTables();
+      
+      // Set up tab switching
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+          switchTab(tabName);
+        });
+      });
+      
+      // Default to property transactions tab
+      switchTab('property-transactions');
+    };
+    
+    // Render all transaction tables
+    const renderTransactionTables = () => {
+      // Property Transactions
+      const propertyTransactionsTable = document.getElementById('property-transactions-table');
+      propertyTransactionsTable.innerHTML = '';
+      
+      if (selectedFile.history && selectedFile.history.length > 0) {
+        selectedFile.history.forEach(transaction => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${transaction.date}</td>
+            <td>${transaction.transactionType}</td>
+            <td>${transaction.guarantor}</td>
+            <td>${transaction.guarantee}</td>
+            <td class="${transaction.caveat === 'Yes' ? 'text-red-600 font-medium' : ''}">${transaction.caveat}</td>
+            <td>
+              <div class="flex space-x-2">
+                <button class="edit-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="delete-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          `;
+          propertyTransactionsTable.appendChild(row);
+        });
+      } else {
+        propertyTransactionsTable.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">No property transactions found.</td>
+          </tr>
+        `;
+      }
+      
+      // Property History
+      const propertyHistoryTable = document.getElementById('property-history-table');
+      propertyHistoryTable.innerHTML = '';
+      
+      if (selectedFile.propertyHistory && selectedFile.propertyHistory.length > 0) {
+        selectedFile.propertyHistory.forEach(history => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${history.date}</td>
+            <td>${history.event}</td>
+            <td>${history.authority}</td>
+            <td>${history.recipient}</td>
+            <td>${history.documentNo}</td>
+            <td>
+              <div class="flex space-x-2">
+                <button class="edit-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="delete-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          `;
+          propertyHistoryTable.appendChild(row);
+        });
+      } else {
+        propertyHistoryTable.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">No property history records found.</td>
+          </tr>
+        `;
+      }
+      
+      // Instrument Registration
+      const instrumentRegistrationTable = document.getElementById('instrument-registration-table');
+      instrumentRegistrationTable.innerHTML = '';
+      
+      if (selectedFile.instrumentRegistrations && selectedFile.instrumentRegistrations.length > 0) {
+        selectedFile.instrumentRegistrations.forEach(registration => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${registration.registrationDate}</td>
+            <td>${registration.instrumentType}</td>
+            <td>${registration.registrationNumber}</td>
+            <td>${registration.parties}</td>
+            <td>${registration.registeredBy}</td>
+            <td>
+              <div class="flex space-x-2">
+                <button class="edit-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="delete-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          `;
+          instrumentRegistrationTable.appendChild(row);
+        });
+      } else {
+        instrumentRegistrationTable.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">No instrument registration records found.</td>
+          </tr>
+        `;
+      }
+      
+      // Certificate of Occupancy
+      const cofoTable = document.getElementById('cofo-table');
+      cofoTable.innerHTML = '';
+      
+      if (selectedFile.cofoRecords && selectedFile.cofoRecords.length > 0) {
+        selectedFile.cofoRecords.forEach(cofo => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${cofo.cofoNumber}</td>
+            <td>${cofo.issueDate}</td>
+            <td>${cofo.holderName}</td>
+            <td>${cofo.landUse}</td>
+            <td>${cofo.term}</td>
+            <td>
+              <div class="flex space-x-2">
+                <button class="edit-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="delete-action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          `;
+          cofoTable.appendChild(row);
+        });
+      } else {
+        cofoTable.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">No Certificate of Occupancy records found.</td>
+          </tr>
+        `;
+      }
+    };
+    
+    // Switch between tabs in the file details view
+    const switchTab = (tabName) => {
+      // Update active tab
+      document.querySelectorAll('.tab').forEach(t => {
+        if (t.getAttribute('data-tab') === tabName) {
+          t.classList.add('active');
+        } else {
+          t.classList.remove('active');
+        }
+      });
+      
+      // Update visible content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    };
+
+    // Back to dashboard from file history view
+    document.getElementById('back-to-dashboard-btn').addEventListener('click', () => {
+      fileHistoryView.classList.add('hidden');
+      dashboardView.classList.remove('hidden');
+    });
+    
+    // Switch between table and card view
+    document.querySelectorAll('[data-view]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs
+        document.querySelectorAll('[data-view]').forEach(t => t.classList.remove('active'));
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Update current view
+        currentView = tab.getAttribute('data-view');
+        
+        // Render search results
+        renderSearchResults();
+      });
+    });
+
+    // Show reports view
+    viewReportsBtn.addEventListener('click', () => {
+      dashboardView.classList.add('hidden');
+      fileHistoryView.classList.add('hidden');
+      reportsView.classList.remove('hidden');
+      
+      // Render reports view
+      reportsView.innerHTML = `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-bold">Official Search Reports</h2>
+                <p class="text-sm text-gray-500">Overview of official legal search activities</p>
+              </div>
+              <button id="back-to-dashboard-from-reports-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                Back to Dashboard
+              </button>
+            </div>
+
+            <div class="tabs mb-6">
+              <button class="tab active" data-report-tab="summary">Summary</button>
+              <button class="tab" data-report-tab="detailed">Detailed Reports</button>
+            </div>
+
+            <div class="tab-content active" id="summary-tab">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div class="p-4">
+                    <h3 class="text-lg font-semibold">Total Searches</h3>
+                    <p class="text-3xl font-bold mt-2">267</p>
+                    <p class="text-sm text-gray-500 mt-1">Last 30 days</p>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div class="p-4">
+                    <h3 class="text-lg font-semibold">Success Rate</h3>
+                    <p class="text-3xl font-bold mt-2">92%</p>
+                    <p class="text-sm text-gray-500 mt-1">Records found</p>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div class="p-4">
+                    <h3 class="text-lg font-semibold">Average Time</h3>
+                    <p class="text-3xl font-bold mt-2">3.2 min</p>
+                    <p class="text-sm text-gray-500 mt-1">Per search</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-4">Monthly Search Volume</h3>
+                  <div class="h-[350px]">
+                    <canvas id="reportsChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-content" id="detailed-tab">
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-4">Recent Search Reports</h3>
+                  <div class="overflow-x-auto">
+                    <table class="w-full">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Search Type</th>
+                          <th>Parameter</th>
+                          <th>Value</th>
+                          <th>Result</th>
+                          <th>Staff</th>
+                          <th>LGA</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>2023-07-15</td>
+                          <td>File Number</td>
+                          <td>MLSF/KN/2023/001</td>
+                          <td>MLSF/KN/2023/001</td>
+                          <td>Found</td>
+                          <td>John Doe</td>
+                          <td>Kano Municipal</td>
+                        </tr>
+                        <tr>
+                          <td>2023-07-14</td>
+                          <td>KANGIS File No.</td>
+                          <td>KG-002-2023</td>
+                          <td>KG-002-2023</td>
+                          <td>Found</td>
+                          <td>Jane Smith</td>
+                          <td>Fagge</td>
+                        </tr>
+                        <tr>
+                          <td>2023-07-14</td>
+                          <td>Plot Number</td>
+                          <td>Plot 789</td>
+                          <td>Plot 789</td>
+                          <td>Not Found</td>
+                          <td>Michael Johnson</td>
+                          <td>Gwale</td>
+                        </tr>
+                        <tr>
+                          <td>2023-07-13</td>
+                          <td>Guarantor Name</td>
+                          <td>Sarah Williams</td>
+                          <td>Sarah Williams</td>
+                          <td>Found</td>
+                          <td>Robert Brown</td>
+                          <td>Nassarawa</td>
+                        </tr>
+                        <tr>
+                          <td>2023-07-12</td>
+                          <td>File Number</td>
+                          <td>MLSF/KN/2023/003</td>
+                          <td>MLSF/KN/2023/003</td>
+                          <td>Found</td>
+                          <td>Emily Davis</td>
+                          <td>Tarauni</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Initialize reports chart
+      const reportsCtx = document.getElementById('reportsChart').getContext('2d');
+      new Chart(reportsCtx, {
+        type: 'line',
+        data: {
+          labels: monthlyData.map(d => d.month),
+          datasets: [{
+            label: 'Searches',
+            data: monthlyData.map(d => d.searches),
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Monthly Search Volume'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Searches'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            }
+          }
+        }
+      });
+
+      // Add event listeners to report tabs
+      document.querySelectorAll('[data-report-tab]').forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Remove active class from all tabs
+          document.querySelectorAll('[data-report-tab]').forEach(t => t.classList.remove('active'));
+          // Add active class to clicked tab
+          tab.classList.add('active');
+          
+          // Hide all tab content
+          document.querySelectorAll('#summary-tab, #detailed-tab').forEach(content => content.classList.remove('active'));
+          // Show content for clicked tab
+          const tabId = tab.getAttribute('data-report-tab');
+          document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+      });
+
+      // Add event listener to back button
+      document.getElementById('back-to-dashboard-from-reports-btn').addEventListener('click', () => {
+        reportsView.classList.add('hidden');
+        dashboardView.classList.remove('hidden');
+      });
+    });
+
+    // Add event delegation for delete action buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-action')) {
+        // In a real app, you would show a confirmation dialog
+        alert('Delete functionality would be implemented here.');
+      }
+      
+      if (e.target.closest('.edit-action')) {
+        // In a real app, you would open an edit form
+        alert('Edit functionality would be implemented here.');
+      }
+      
+      if (e.target.closest('#view-detailed-records-btn')) {
+        // Show legal search report view
+        fileHistoryView.classList.add('hidden');
+        legalSearchReportView.classList.remove('hidden');
+        
+        // Render the legal search report
+        renderLegalSearchReport();
+      }
+    });
+
+    // Back to file details from legal search report view
+    backToFileDetailsBtn.addEventListener('click', () => {
+      legalSearchReportView.classList.add('hidden');
+      fileHistoryView.classList.remove('hidden');
+    });
+
+    // Print report
+    printReportBtn.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Render legal search report
+    const renderLegalSearchReport = () => {
+      if (!selectedFile) return;
+      
+      // Set current date and time
+      const currentDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      // Update report header
+      document.getElementById('report-file-reference').textContent = selectedFile.fileNumber;
+      document.getElementById('report-date').textContent = `Date: ${currentDate}`;
+      document.getElementById('report-timestamp').textContent = `These details are as at ${currentDate} ${currentTime}`;
+      
+      // Update property details
+      document.getElementById('report-file-numbers').textContent = `mlsfNo: ${selectedFile.fileNumber} | kangisFileNo: ${selectedFile.kangisFileNo} | NewKANGISFileNo: ${selectedFile.newKangisFileNo}`;
+      document.getElementById('report-plot-number').textContent = selectedFile.plotNumber || "GP No. 1067/1 & 1067/2";
+      document.getElementById('report-plan-number').textContent = selectedFile.planNumber || "LKN/RES/2021/3006";
+      document.getElementById('report-plot-description').textContent = `${selectedFile.district || "Niger Street Nassarawa District"}, ${selectedFile.lga || "Nassarawa"} LGA`;
+      
+      // Generate QR code URL
+      const qrCodeData = `File Number: MLSF: ${selectedFile.fileNumber} | KANGIS: ${selectedFile.kangisFileNo} | New KANGIS: ${selectedFile.newKangisFileNo}`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCodeData)}`;
+      document.getElementById('report-qr-code').src = qrCodeUrl;
+      
+      // Render transaction history table
+      const transactionsTable = document.getElementById('report-transactions-table');
+      transactionsTable.innerHTML = '';
+      
+      if (selectedFile.history && selectedFile.history.length > 0) {
+        selectedFile.history.forEach((transaction, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="border border-gray-300 px-3 py-2">${index + 1}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.guarantor}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.guarantee}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.transactionType}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.date}</td>
+            <td class="border border-gray-300 px-3 py-2">${index + 1}/${index + 1}/1</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.size || "0.0192ha"}</td>
+            <td class="border border-gray-300 px-3 py-2 ${transaction.caveat === 'Yes' ? 'text-red-600' : ''}">${transaction.caveat}</td>
+            <td class="border border-gray-300 px-3 py-2">${transaction.comments || "Transfer registered"}</td>
+          `;
+          transactionsTable.appendChild(row);
+        });
+      } else {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td colspan="9" class="border border-gray-300 px-3 py-2 text-center">No transaction history found</td>
+        `;
+        transactionsTable.appendChild(row);
+      }
+    };
+
+    // Add input event listeners for search fields
+    document.getElementById('fileNumber').addEventListener('input', performSearch);
+    document.getElementById('kangisFileNo').addEventListener('input', performSearch);
+
+    // Close modal when pressing Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        searchModal.classList.add('hidden');
+        deleteConfirmDialog.classList.add('hidden');
+      }
+    });
+  </script>
 </body>
 </html>
