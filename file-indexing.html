@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Indexing Assistant | Digital Registry</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* Base styles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #111827;
+      background-color: #ffffff;
+    }
+    
+    /* Card styles */
+    .card {
+      background-color: white;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 1rem 1.25rem;
+    }
+    
+    .card-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #111827;
+    }
+    
+    .card-content {
+      padding: 0 1.25rem 1.25rem;
+    }
+    
+    /* Badge styles */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+    
+    .badge-blue {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .badge-yellow {
+      background-color: #f59e0b;
+      color: white;
+    }
+    
+    .badge-green {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .badge-outline {
+      background-color: transparent;
+      border: 1px solid #e5e7eb;
+      color: #6b7280;
+    }
+    
+    /* Tab styles */
+    .tabs {
+      display: flex;
+      border-radius: 0.375rem;
+      background-color: #f9fafb;
+      padding: 0.25rem;
+    }
+    
+    .tab {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 0.25rem;
+      color: #6b7280;
+    }
+    
+    .tab.active {
+      background-color: white;
+      color: #111827;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Input styles */
+    .input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.375rem;
+      background-color: white;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    /* Button styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background-color: #111827;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #1f2937;
+    }
+    
+    .btn-blue {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .btn-blue:hover {
+      background-color: #2563eb;
+    }
+    
+    /* File item styles */
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    
+    .file-icon {
+      color: #3b82f6;
+      margin-right: 1rem;
+    }
+    
+    .file-details {
+      flex: 1;
+    }
+    
+    .file-number {
+      color: #3b82f6;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    
+    .file-name {
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+    }
+    
+    .file-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .file-tag {
+      background-color: #f3f4f6;
+      color: #4b5563;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+    }
+    
+    .file-date {
+      color: #6b7280;
+      font-size: 0.75rem;
+    }
+    
+    /* Progress bar styles */
+    .progress {
+      width: 100%;
+      height: 0.5rem;
+      background-color: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+      background-color: #3b82f6;
+    }
+    
+    /* AI Pipeline styles */
+    .pipeline {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 1.5rem 0;
+      padding-top: 0.5rem;
+    }
+    
+    .pipeline-line {
+      position: absolute;
+      top: 0.75rem;
+      left: 0;
+      right: 0;
+      height: 0.25rem;
+      background-color: #e5e7eb;
+      z-index: 0;
+    }
+    
+    .pipeline-progress {
+      position: absolute;
+      top: 0.75rem;
+      left: 0;
+      height: 0.25rem;
+      background-color: #3b82f6;
+      z-index: 1;
+      transition: width 0.3s ease;
+    }
+    
+    .pipeline-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
+    
+    .pipeline-dot {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .pipeline-dot.active {
+      background-color: #3b82f6;
+    }
+    
+    .pipeline-dot.completed {
+      background-color: #3b82f6;
+    }
+    
+    .pipeline-dot.pending {
+      background-color: #d1d5db;
+    }
+    
+    .pipeline-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .pipeline-label.active {
+      color: #3b82f6;
+    }
+    
+    .pipeline-label.completed {
+      color: #3b82f6;
+    }
+    
+    .pipeline-label.pending {
+      color: #6b7280;
+    }
+    
+    /* AI Insights styles */
+    .insight-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .insight-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .insight-confidence {
+      background-color: #ecfdf5;
+      color: #047857;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .insight-analysis {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    
+    .insight-field {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .insight-field-label {
+      color: #6b7280;
+    }
+    
+    .insight-field-value {
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+    
+    .insight-confidence-pill {
+      background-color: #f3f4f6;
+      color: #4b5563;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-size: 0.625rem;
+      margin-left: 0.375rem;
+    }
+    
+    .insight-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      margin-top: 0.5rem;
+    }
+    
+    .insight-keyword {
+      background-color: #f3f4f6;
+      color: #4b5563;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+    }
+    
+    .insight-issues {
+      background-color: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .insight-issues-title {
+      color: #92400e;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    
+    .insight-issues-list {
+      color: #b45309;
+      font-size: 0.875rem;
+      list-style-type: disc;
+      padding-left: 1.25rem;
+    }
+    
+    /* Dialog styles */
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    
+    .dialog {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 650px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .dialog-header {
+      background-color: #1f2937;
+      padding: 1.5rem;
+      color: white;
+    }
+    
+    .dialog-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .dialog-description {
+      color: #d1d5db;
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+    }
+    
+    .dialog-content {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+    
+    .dialog-footer {
+      background-color: #f9fafb;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    /* Utility classes */
+    .hidden {
+      display: none;
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .flex-col {
+      flex-direction: column;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .justify-end {
+      justify-content: flex-end;
+    }
+    
+    .gap-2 {
+      gap: 0.5rem;
+    }
+    
+    .gap-4 {
+      gap: 1rem;
+    }
+    
+    .mb-2 {
+      margin-bottom: 0.5rem;
+    }
+    
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    
+    .mt-2 {
+      margin-top: 0.5rem;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    .ml-2 {
+      margin-left: 0.5rem;
+    }
+    
+    .mr-2 {
+      margin-right: 0.5rem;
+    }
+    
+    .p-4 {
+      padding: 1rem;
+    }
+    
+    .p-6 {
+      padding: 1.5rem;
+    }
+    
+    .px-4 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+    
+    .py-4 {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+    
+    .text-xs {
+      font-size: 0.75rem;
+    }
+    
+    .text-sm {
+      font-size: 0.875rem;
+    }
+    
+    .text-lg {
+      font-size: 1.125rem;
+    }
+    
+    .text-xl {
+      font-size: 1.25rem;
+    }
+    
+    .text-2xl {
+      font-size: 1.5rem;
+    }
+    
+    .text-3xl {
+      font-size: 1.875rem;
+    }
+    
+    .font-medium {
+      font-weight: 500;
+    }
+    
+    .font-semibold {
+      font-weight: 600;
+    }
+    
+    .font-bold {
+      font-weight: 700;
+    }
+    
+    .text-gray-500 {
+      color: #6b7280;
+    }
+    
+    .text-gray-600 {
+      color: #4b5563;
+    }
+    
+    .text-gray-700 {
+      color: #374151;
+    }
+    
+    .text-blue-500 {
+      color: #3b82f6;
+    }
+    
+    .text-blue-600 {
+      color: #2563eb;
+    }
+    
+    .text-purple-600 {
+      color: #9333ea;
+    }
+    
+    .text-purple-700 {
+      color: #7e22ce;
+    }
+    
+    .bg-purple-50 {
+      background-color: #f5f3ff;
+    }
+    
+    .bg-purple-100 {
+      background-color: #ede9fe;
+    }
+    
+    .bg-yellow-50 {
+      background-color: #fffbeb;
+    }
+    
+    .border {
+      border-width: 1px;
+      border-style: solid;
+      border-color: #e5e7eb;
+    }
+    
+    .border-t {
+      border-top-width: 1px;
+      border-top-style: solid;
+      border-top-color: #e5e7eb;
+    }
+    
+    .rounded {
+      border-radius: 0.25rem;
+    }
+    
+    .rounded-md {
+      border-radius: 0.375rem;
+    }
+    
+    .rounded-lg {
+      border-radius: 0.5rem;
+    }
+    
+    .rounded-full {
+      border-radius: 9999px;
+    }
+    
+    .w-full {
+      width: 100%;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    .grid {
+      display: grid;
+    }
+    
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    
+    .grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    
+    .gap-6 {
+      gap: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-cols-3 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+      
+      .grid-cols-2 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+      
+      .insight-analysis {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-3 gap-6 mb-6">
+      <!-- File Index Card -->
+      <div class="card p-6">
+        <div class="card-title mb-2">File Index</div>
+        <div class="text-3xl font-bold mb-2" id="pending-files-count">3</div>
+        <div class="text-sm text-gray-500">Files waiting to be indexed</div>
+      </div>
+
+      <!-- Indexed Today Card -->
+      <div class="card p-6">
+        <div class="card-title mb-2">Indexed Today</div>
+        <div class="text-3xl font-bold mb-2" id="indexed-files-count">2</div>
+        <div class="text-sm text-gray-500">Files indexed today</div>
+      </div>
+
+      <!-- Next Steps Card -->
+      <div class="card p-6">
+        <div class="card-title mb-2">Next Steps</div>
+        <div class="text-3xl font-bold mb-2 flex items-center">
+          Scanning
+          <span class="badge badge-blue ml-2 text-xs">Stage 2</span>
+        </div>
+        <div class="text-sm text-gray-500">After indexing, proceed to scanning</div>
+      </div>
+    </div>
+
+    <!-- Tabs and New File Button -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="tabs" id="main-tabs">
+        <div class="tab active" data-tab="pending">File Index</div>
+        <div class="tab" data-tab="indexing">Digital Index (AI)</div>
+        <div class="tab" data-tab="indexed">Indexed Files</div>
+      </div>
+      <button class="btn btn-primary" id="new-file-index-btn">
+        <i data-lucide="folder-plus" class="h-4 w-4 mr-2"></i>
+        New File Index
+      </button>
+    </div>
+
+    <!-- Pending Files Tab Content -->
+    <div class="tab-content active" id="pending-tab">
+      <div class="card">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-bold">File Index</h2>
+              <p class="text-sm text-gray-500">Select files to begin the indexing process</p>
+            </div>
+            <div class="relative">
+              <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500"></i>
+              <input type="search" placeholder="Search files..." class="input pl-10" id="search-pending-files">
+            </div>
+          </div>
+
+          <div class="border rounded-md">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+              <div class="flex items-center">
+                <input type="checkbox" id="select-all-checkbox" class="mr-2" onclick="toggleSelectAll()">
+                <label for="select-all-checkbox" class="text-sm font-medium">Select All</label>
+              </div>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-500" id="selected-files-count">1 of 3 selected</span>
+                <button class="btn btn-primary ml-4" id="begin-indexing-btn">Begin Indexing</button>
+              </div>
+            </div>
+
+            <div id="pending-files-list">
+              <!-- File items will be populated here by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Digital Index (AI) Tab Content -->
+    <div class="tab-content hidden" id="indexing-tab">
+      <div class="card">
+        <div class="p-6">
+          <div class="flex items-center mb-2">
+            <i data-lucide="brain" class="h-5 w-5 text-purple-600 mr-2"></i>
+            <h2 class="text-xl font-bold">Digital Index (AI)</h2>
+          </div>
+          <p class="text-sm text-gray-500 mb-6">AI-powered document analysis and metadata extraction</p>
+          
+          <div class="card p-6 mb-4">
+            <div class="flex items-center mb-4">
+              <i data-lucide="brain" class="h-5 w-5 text-purple-600 mr-2"></i>
+              <h3 class="text-lg font-medium">AI Indexing: 2 Files</h3>
+            </div>
+            
+            <p class="mb-6">Ready to begin AI-powered indexing for 2 selected files.</p>
+            
+            <div class="flex justify-center">
+              <button class="btn btn-primary" id="start-ai-indexing-btn">
+                <i data-lucide="brain" class="h-4 w-4 mr-2"></i>
+                Start AI Indexing
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Processing View (initially hidden) -->
+    <div class="hidden" id="ai-processing-view">
+      <div class="card p-6 mb-4">
+        <div class="flex items-center mb-4">
+          <i data-lucide="layers" class="h-5 w-5 text-green-500 mr-2"></i>
+          <h3 class="text-lg font-medium">AI Indexing: 2 Files</h3>
+        </div>
+        
+        <div class="mb-4">
+          <div class="flex justify-between mb-2">
+            <div class="flex items-center">
+              <i data-lucide="layers" class="h-4 w-4 text-green-500 mr-2"></i>
+              <span class="text-sm">Extracting key information and metadata. Recognizing text, names, dates, and property details...</span>
+            </div>
+            <span class="text-sm" id="progress-percentage">0%</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+          </div>
+        </div>
+        
+        <div class="card p-4 mb-4">
+          <div class="mb-2">
+            <span class="text-sm font-medium">AI Processing Pipeline</span>
+            <span class="text-sm float-right" id="pipeline-percentage">0% Complete</span>
+          </div>
+          
+          <div class="progress mb-2">
+            <div class="progress-bar" id="pipeline-progress-bar" style="width: 0%"></div>
+          </div>
+          
+          <div class="pipeline">
+            <div class="pipeline-line"></div>
+            <div class="pipeline-progress" id="pipeline-progress-line" style="width: 0%"></div>
+            
+            <div class="pipeline-stage">
+              <div class="pipeline-dot active" id="stage-init"></div>
+              <span class="pipeline-label active">Init</span>
+            </div>
+            
+            <div class="pipeline-stage">
+              <div class="pipeline-dot pending" id="stage-analyze"></div>
+              <span class="pipeline-label pending">Analyze</span>
+            </div>
+            
+            <div class="pipeline-stage">
+              <div class="pipeline-dot pending" id="stage-extract"></div>
+              <span class="pipeline-label pending">Extract</span>
+            </div>
+            
+            <div class="pipeline-stage">
+              <div class="pipeline-dot pending" id="stage-categorize"></div>
+              <span class="pipeline-label pending">Categorize</span>
+            </div>
+            
+            <div class="pipeline-stage">
+              <div class="pipeline-dot pending" id="stage-validate"></div>
+              <span class="pipeline-label pending">Validate</span>
+            </div>
+            
+            <div class="pipeline-stage">
+              <div class="pipeline-dot pending" id="stage-complete"></div>
+              <span class="pipeline-label pending">Complete</span>
+            </div>
+          </div>
+          
+          <div class="flex items-start gap-3 mt-4" id="current-stage-info">
+            <div class="p-2 bg-green-100 rounded-full">
+              <i data-lucide="loader" class="h-5 w-5 text-green-500"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium mb-1">Current Stage: Initialization</p>
+              <p class="text-xs text-gray-600">Setting up AI processing environment and preparing documents for analysis...</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-purple-50 p-4 rounded-md border border-purple-100 mb-6">
+          <p class="text-purple-700">
+            Our AI is analyzing your documents, extracting metadata, and identifying key information. This process uses machine learning to understand document structure, recognize text, and categorize content.
+          </p>
+        </div>
+        
+        <div class="mb-4" id="ai-insights-container">
+          <!-- AI insights will be populated here -->
+        </div>
+        
+        <div class="flex justify-end">
+          <button class="btn btn-primary hidden" id="confirm-save-results-btn">
+            Confirm & Save Results
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indexed Files Tab Content -->
+    <div class="tab-content hidden" id="indexed-tab">
+  <div class="card">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-bold">Indexed Files</h2>
+          <p class="text-sm text-gray-500">Files that have been digitally indexed</p>
+        </div>
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500"></i>
+          <input type="search" placeholder="Search indexed files..." class="input pl-10" id="search-indexed-files">
+        </div>
+      </div>
+
+      <div class="border rounded-md">
+        <div id="indexed-files-list">
+          <!-- Indexed file items will be populated here by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <!-- New File Index Dialog -->
+  <div class="dialog-overlay hidden" id="new-file-dialog-overlay">
+    <!-- Dialog content -->
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Sample data for pending indexing files
+    let pendingFiles = [
+      {
+        id: "FILE-2023-001",
+        fileNumber: "KNML 09846",
+        name: "Alhaji Ibrahim Dantata",
+        type: "Certificate of Occupancy",
+        source: "Collated",
+        date: "2023-06-15",
+        landUseType: "Residential",
+        district: "Nasarawa",
+        hasCofo: true,
+      },
+      {
+        id: "FILE-2023-002",
+        fileNumber: "KNGP 00338",
+        name: "Hajiya Amina Yusuf",
+        type: "Site Plan",
+        source: "Collated",
+        date: "2023-06-14",
+        landUseType: "Commercial",
+        district: "Fagge",
+        hasCofo: false,
+      },
+      {
+        id: "FILE-2023-003",
+        fileNumber: "MLKN 03051",
+        name: "Kano Traders Association",
+        type: "Letter of Administration",
+        source: "Collated",
+        date: "2023-06-13",
+        landUseType: "Industrial",
+        district: "Bompai",
+        hasCofo: false,
+      },
+    ];
+    
+    // Sample data for indexed files
+    let indexedFiles = [
+      {
+        id: "FILE-2023-004",
+        fileNumber: "KNML 08146",
+        name: "Musa Usman Bayero",
+        type: "Right of Occupancy",
+        source: "Indexed",
+        date: "2023-06-12",
+        landUseType: "Residential",
+        district: "Nasarawa",
+        hasCofo: true,
+      },
+      {
+        id: "FILE-2023-005",
+        fileNumber: "MLKN 03888",
+        name: "Hajiya Fatima Mohammed",
+        type: "Deed of Assignment",
+        source: "Indexed & Scanned",
+        date: "2023-06-10",
+        landUseType: "Industrial",
+        district: "Bompai",
+        hasCofo: true,
+      },
+    ];
+    
+    // State variables
+    let selectedFiles = ["FILE-2023-001", "FILE-2023-002"]; // Pre-select two files for AI indexing
+    let indexingProgress = 50; // Set to 50% for the demo
+    let currentStage = "extract"; // Current stage in the AI pipeline
+    
+    // DOM Elements
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const pendingFilesList = document.getElementById('pending-files-list');
+    const selectedFilesCount = document.getElementById('selected-files-count');
+    const beginIndexingBtn = document.getElementById('begin-indexing-btn');
+    const newFileIndexBtn = document.getElementById('new-file-index-btn');
+    const newFileDialogOverlay = document.getElementById('new-file-dialog-overlay');
+    const confirmSaveResultsBtn = document.getElementById('confirm-save-results-btn');
+    
+    // DOM Elements for AI processing
+    const startAiIndexingBtn = document.getElementById('start-ai-indexing-btn');
+    const aiProcessingView = document.getElementById('ai-processing-view');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const pipelineProgressBar = document.getElementById('pipeline-progress-bar');
+    const pipelineProgressLine = document.getElementById('pipeline-progress-line');
+    const pipelinePercentage = document.getElementById('pipeline-percentage');
+    const currentStageInfo = document.getElementById('current-stage-info');
+    const aiInsightsContainer = document.getElementById('ai-insights-container');
+
+    // Function to toggle file selection
+    function toggleFileSelection(fileId) {
+      if (selectedFiles.includes(fileId)) {
+        selectedFiles = selectedFiles.filter(id => id !== fileId);
+      } else {
+        selectedFiles.push(fileId);
+      }
+      
+      renderPendingFiles();
+      updateSelectedFilesCount();
+    }
+    
+    // Function to toggle select all
+    function toggleSelectAll() {
+      const selectAllCheckbox = document.getElementById('select-all-checkbox');
+      
+      if (selectedFiles.length === pendingFiles.length) {
+        selectedFiles = [];
+        selectAllCheckbox.checked = false;
+      } else {
+        selectedFiles = pendingFiles.map(file => file.id);
+        selectAllCheckbox.checked = true;
+      }
+      
+      renderPendingFiles();
+      updateSelectedFilesCount();
+    }
+    
+    // Function to start AI indexing
+    function startAiIndexing() {
+      console.log("Starting AI indexing process...");
+      
+      // Hide the initial view and show the processing view
+      const initialView = document.querySelector('#indexing-tab .card .p-6 .card');
+      if (initialView) {
+        initialView.parentElement.classList.add('hidden');
+      }
+      aiProcessingView.classList.remove('hidden');
+      
+      // Start the indexing simulation
+      simulateIndexingProcess();
+    }
+    
+    // Function to simulate the indexing process
+    function simulateIndexingProcess() {
+      console.log("Starting AI indexing simulation");
+      
+      let progress = 0;
+      const stages = ['init', 'analyze', 'extract', 'categorize', 'validate', 'complete'];
+      let currentStageIndex = 0;
+      
+      // Stage descriptions
+      const stageDescriptions = {
+        init: "Setting up AI processing environment and preparing documents for analysis...",
+        analyze: "Analyzing document structure and identifying key sections...",
+        extract: "Extracting key information and metadata using form templates...",
+        categorize: "Categorizing extracted information and applying relevant tags...",
+        validate: "Validating extracted data against known patterns and rules...",
+        complete: "Finalizing results and preparing data for submission to KLAS..."
+      };
+      
+      // Stage icons
+      const stageIcons = {
+        init: "loader",
+        analyze: "search",
+        extract: "layers",
+        categorize: "tag",
+        validate: "check-circle",
+        complete: "check-square"
+      };
+      
+      // Update progress every 500ms
+      const interval = setInterval(() => {
+        progress += 2;
+        
+        // Update progress bar and percentage
+        progressBar.style.width = `${progress}%`;
+        progressPercentage.textContent = `${progress}%`;
+        pipelineProgressBar.style.width = `${progress}%`;
+        pipelineProgressLine.style.width = `${progress}%`;
+        pipelinePercentage.textContent = `${progress}% Complete`;
+        
+        // Update stage if needed
+        const stageThresholds = [0, 20, 40, 60, 80, 95];
+        if (progress >= stageThresholds[currentStageIndex + 1] && currentStageIndex < stages.length - 1) {
+          // Mark current stage as completed
+          document.getElementById(`stage-${stages[currentStageIndex]}`).classList.remove('active');
+          document.getElementById(`stage-${stages[currentStageIndex]}`).classList.add('completed');
+          
+          // Move to next stage
+          currentStageIndex++;
+          
+          // Mark new stage as active
+          document.getElementById(`stage-${stages[currentStageIndex]}`).classList.remove('pending');
+          document.getElementById(`stage-${stages[currentStageIndex]}`).classList.add('active');
+          
+          // Update current stage info
+          currentStageInfo.innerHTML = `
+            <div class="p-2 bg-green-100 rounded-full">
+              <i data-lucide="${stageIcons[stages[currentStageIndex]]}" class="h-5 w-5 text-green-500"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium mb-1">Current Stage: ${stages[currentStageIndex].charAt(0).toUpperCase() + stages[currentStageIndex].slice(1)}</p>
+              <p class="text-xs text-gray-600">${stageDescriptions[stages[currentStageIndex]]}</p>
+            </div>
+          `;
+          
+          // Initialize Lucide icons for the new content
+          lucide.createIcons();
+          
+          // Log progress
+          console.log(`AI Integration - Stage ${currentStageIndex + 1}/${stages.length}: ${stages[currentStageIndex]}`);
+        }
+        
+        // Show AI insights at 50% progress
+        if (progress === 50) {
+          showAiInsights();
+        }
+        
+        // Complete the process
+        if (progress >= 100) {
+          clearInterval(interval);
+          completeIndexingProcess();
+        }
+      }, 200);
+    }
+    
+    // Function to show AI insights
+    function showAiInsights() {
+      console.log("Generating AI insights");
+      
+      aiInsightsContainer.innerHTML = `
+        <div class="flex items-center mb-2">
+          <i data-lucide="zap" class="h-4 w-4 text-green-500 mr-2"></i>
+          <h4 class="font-medium">Real-time AI Insights</h4>
+        </div>
+        
+        <!-- First file insights -->
+        <div class="insight-card">
+          <div class="insight-header">
+            <div>
+              <h4 class="text-blue-600 font-medium">KNML 09846</h4>
+              <p class="text-gray-600">Alhaji Ibrahim Dantata</p>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="insight-confidence">92% Confidence</span>
+              <span class="text-xs text-gray-500">AI Analysis</span>
+            </div>
+          </div>
+          
+          <div class="insight-analysis">
+            <div>
+              <h5 class="font-medium mb-2">Document Analysis:</h5>
+              <div class="space-y-2">
+                <div class="insight-field">
+                  <span class="insight-field-label">Document Type:</span>
+                  <span class="insight-field-value">Certificate of Occupancy</span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Owner:</span>
+                  <span class="insight-field-value">
+                    Alhaji Ibrahim Dantata
+                    <span class="insight-confidence-pill">91%</span>
+                  </span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Plot Number:</span>
+                  <span class="insight-field-value">
+                    PL-4532
+                    <span class="insight-confidence-pill">88%</span>
+                  </span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Land Use:</span>
+                  <span class="insight-field-value">
+                    Residential
+                    <span class="insight-confidence-pill">87%</span>
+                  </span>
+                </div>
+              </div>
+              
+              <h5 class="font-medium mt-4 mb-2">AI Findings:</h5>
+              <div class="space-y-2">
+                <div class="insight-field">
+                  <span class="insight-field-label">Text Quality:</span>
+                  <span class="insight-field-value">
+                    <span class="insight-confidence-pill">93%</span>
+                  </span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Document Structure:</span>
+                  <span class="insight-field-value">Complete sections</span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Signature:</span>
+                  <span class="insight-field-value">Not detected</span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Stamp:</span>
+                  <span class="insight-field-value">Official stamp detected</span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">GIS Verification:</span>
+                  <span class="insight-field-value">Matched with parcel data</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h5 class="font-medium mb-2">Suggested Keywords:</h5>
+              <div class="insight-keywords">
+                <span class="insight-keyword">Residential</span>
+                <span class="insight-keyword">Nasarawa</span>
+                <span class="insight-keyword">Certificate of Occupancy</span>
+                <span class="insight-keyword">Land Document</span>
+                <span class="insight-keyword">Property</span>
+                <span class="insight-keyword">Kano State</span>
+                <span class="insight-keyword">Housing</span>
+              </div>
+              
+              <div class="insight-issues">
+                <h6 class="insight-issues-title">Potential Issues:</h6>
+                <ul class="insight-issues-list">
+                  <li>Plot boundaries not specified</li>
+                  <li>Ownership information unclear</li>
+                  <li>Parcel data needs updating</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Second file insights -->
+        <div class="insight-card">
+          <div class="insight-header">
+            <div>
+              <h4 class="text-blue-600 font-medium">KNGP 00338</h4>
+              <p class="text-gray-600">Hajiya Amina Yusuf</p>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="insight-confidence">93% Confidence</span>
+              <span class="text-xs text-gray-500">AI Analysis</span>
+            </div>
+          </div>
+          
+          <div class="insight-analysis">
+            <div>
+              <h5 class="font-medium mb-2">Document Analysis:</h5>
+              <div class="space-y-2">
+                <div class="insight-field">
+                  <span class="insight-field-label">Document Type:</span>
+                  <span class="insight-field-value">Site Plan</span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Owner:</span>
+                  <span class="insight-field-value">
+                    Hajiya Amina Yusuf
+                    <span class="insight-confidence-pill">93%</span>
+                  </span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Plot Number:</span>
+                  <span class="insight-field-value">
+                    PL-1278
+                    <span class="insight-confidence-pill">88%</span>
+                  </span>
+                </div>
+                
+                <div class="insight-field">
+                  <span class="insight-field-label">Form Status:</span>
+                  <span class="insight-field-value">
+                    Ready for submission
+                    <span class="insight-confidence-pill">95%</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h5 class="font-medium mb-2">Suggested Keywords:</h5>
+              <div class="insight-keywords">
+                <span class="insight-keyword">Commercial</span>
+                <span class="insight-keyword">Fagge</span>
+                <span class="insight-keyword">Site Plan</span>
+                <span class="insight-keyword">Land Document</span>
+                <span class="insight-keyword">Property</span>
+                <span class="insight-keyword">Kano State</span>
+                <span class="insight-keyword">Business</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Initialize Lucide icons for the new content
+      lucide.createIcons();
+    }
+    
+    // Function to complete the indexing process
+    function completeIndexingProcess() {
+      console.log("Completing indexing process and preparing for submission");
+      
+      // Show the confirm and save button
+      confirmSaveResultsBtn.classList.remove('hidden');
+    }
+    
+    // Confirm and save results
+    function confirmAndSaveResults() {
+      console.log("Submitting indexed data to KLAS");
+      
+      alert("Files have been successfully indexed and submitted to KLAS!");
+      
+      // Move selected files from pending to indexed
+      selectedFiles.forEach(fileId => {
+        const fileIndex = pendingFiles.findIndex(file => file.id === fileId);
+        if (fileIndex !== -1) {
+          const file = pendingFiles[fileIndex];
+          // Update the source to indicate it's been indexed
+          file.source = "Indexed";
+          // Add to indexed files
+          indexedFiles.push(file);
+          // Remove from pending files
+          pendingFiles.splice(fileIndex, 1);
+        }
+      });
+      
+      // Clear selected files
+      selectedFiles = [];
+      
+      // Update counters
+      updateCounters();
+      
+      // Reset the AI indexing view for next time
+      const initialView = document.querySelector('#indexing-tab .card .p-6 .card');
+      if (initialView) {
+        initialView.parentElement.classList.remove('hidden');
+      }
+      aiProcessingView.classList.add('hidden');
+      progressBar.style.width = '0%';
+      progressPercentage.textContent = '0%';
+      pipelineProgressBar.style.width = '0%';
+      pipelineProgressLine.style.width = '0%';
+      pipelinePercentage.textContent = '0% Complete';
+      
+      // Reset pipeline stages
+      const stages = ['init', 'analyze', 'extract', 'categorize', 'validate', 'complete'];
+      stages.forEach((stage, index) => {
+        const element = document.getElementById(`stage-${stage}`);
+        if (element) {
+          element.classList.remove('active', 'completed');
+          element.classList.add(index === 0 ? 'active' : 'pending');
+        }
+      });
+      
+      // Clear AI insights
+      aiInsightsContainer.innerHTML = '';
+      
+      // Hide confirm button
+      confirmSaveResultsBtn.classList.add('hidden');
+      
+      // Render pending files to update the list
+      renderPendingFiles();
+      
+      // Render indexed files
+      renderIndexedFiles();
+      
+      // Switch to indexed tab
+      switchTab('indexed');
+    }
+    
+    // Render indexed files
+function renderIndexedFiles() {
+  const indexedFilesList = document.getElementById('indexed-files-list');
+  indexedFilesList.innerHTML = '';
+  
+  if (indexedFiles.length === 0) {
+    indexedFilesList.innerHTML = `
+      <div class="p-8 text-center text-gray-500">
+        <i data-lucide="file-question" class="h-12 w-12 mx-auto mb-4 text-gray-400"></i>
+        <p>No indexed files yet. Start by indexing files from the File Index tab.</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+  
+  indexedFiles.forEach(file => {
+    const fileItem = document.createElement('div');
+    fileItem.className = 'p-4 border-b last:border-b-0';
+    
+    fileItem.innerHTML = `
+      <div class="flex items-center">
+        <div class="file-icon">
+          <i data-lucide="file-check" class="h-6 w-6 text-green-500"></i>
+        </div>
+        <div class="file-details ml-4">
+          <div class="file-number">${file.fileNumber}</div>
+          <div class="file-name">${file.name}</div>
+          <div class="file-tags">
+            <span class="file-tag">${file.source}</span>
+            <span class="file-tag">${file.landUseType}</span>
+            <span class="file-tag">${file.district}</span>
+            <span class="file-tag">${file.date}</span>
+          </div>
+        </div>
+        <div class="ml-auto">
+          <span class="badge badge-green">
+            <i data-lucide="check" class="h-3 w-3 mr-1"></i>
+            Indexed
+          </span>
+        </div>
+      </div>
+    `;
+    
+    indexedFilesList.appendChild(fileItem);
+  });
+  
+  // Initialize Lucide icons for the new rows
+  lucide.createIcons();
+}
+    
+    // Switch between tabs
+    function switchTab(tabName) {
+      // Update active tab
+      tabs.forEach(t => {
+        if (t.getAttribute('data-tab') === tabName) {
+          t.classList.add('active');
+        } else {
+          t.classList.remove('active');
+        }
+      });
+      
+      // Update visible content
+      tabContents.forEach(content => {
+        content.classList.add('hidden');
+        content.classList.remove('active');
+      });
+      
+      const activeContent = document.getElementById(`${tabName}-tab`);
+      if (activeContent) {
+        activeContent.classList.remove('hidden');
+        activeContent.classList.add('active');
+      }
+      
+      // If switching to indexed tab, render the indexed files
+  if (tabName === 'indexed') {
+    renderIndexedFiles();
+  }
+    }
+    
+    // Render pending files
+    function renderPendingFiles() {
+      pendingFilesList.innerHTML = '';
+      
+      pendingFiles.forEach(file => {
+        const isSelected = selectedFiles.includes(file.id);
+        const fileItem = document.createElement('div');
+        fileItem.className = 'p-4 border-b last:border-b-0';
+        
+        fileItem.innerHTML = `
+          <div class="flex items-center">
+            <input type="checkbox" ${isSelected ? 'checked' : ''} data-id="${file.id}" onclick="toggleFileSelection('${file.id}')" class="mr-4">
+            <div class="file-icon">
+              <i data-lucide="file-text" class="h-6 w-6"></i>
+            </div>
+            <div class="file-details ml-4">
+              <div class="file-number">${file.fileNumber}</div>
+              <div class="file-name">${file.name}</div>
+              <div class="file-tags">
+                <span class="file-tag">${file.source}</span>
+                <span class="file-tag">${file.landUseType}</span>
+                <span class="file-tag">${file.district}</span>
+                <span class="file-tag">${file.date}</span>
+              </div>
+            </div>
+            <div class="ml-auto">
+              <span class="badge badge-yellow">
+                <i data-lucide="clock" class="h-3 w-3 mr-1"></i>
+                Pending Digital Index
+              </span>
+            </div>
+          </div>
+        `;
+        
+        pendingFilesList.appendChild(fileItem);
+      });
+      
+      // Initialize Lucide icons for the new rows
+      lucide.createIcons();
+      
+      // Update selected files count
+      updateSelectedFilesCount();
+    }
+    
+    // Update selected files count
+    function updateSelectedFilesCount() {
+      selectedFilesCount.textContent = `${selectedFiles.length} of ${pendingFiles.length} selected`;
+    }
+    
+    // Update counters
+    function updateCounters() {
+      document.getElementById('pending-files-count').textContent = pendingFiles.length;
+      document.getElementById('indexed-files-count').textContent = indexedFiles.length;
+    }
+    
+    // Show new file dialog
+    function showNewFileDialog() {
+      newFileDialogOverlay.classList.remove('hidden');
+      // In a real implementation, this would show the dialog
+      alert("New File Index dialog would open here");
+      newFileDialogOverlay.classList.add('hidden');
+    }
+    
+    // Initialize the page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("Initializing File Indexing Assistant");
+      
+      // Make sure File Index tab is active by default
+      switchTab('pending');
+      
+      // Render the pending files list
+      renderPendingFiles();
+      
+      // Render the indexed files list
+  renderIndexedFiles();
+      
+      // Update counters
+      updateCounters();
+      
+      // Add event listeners
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+          switchTab(tabName);
+        });
+      });
+      
+      // Add event listener for select all checkbox
+      document.getElementById('select-all-checkbox').addEventListener('click', toggleSelectAll);
+      
+      beginIndexingBtn.addEventListener('click', () => {
+        // Only switch tabs if files are selected
+        if (selectedFiles.length > 0) {
+          // Update the AI Indexing title to show the number of selected files
+          const titleElement = document.querySelector('#indexing-tab .card h3');
+          if (titleElement) {
+            titleElement.textContent = `AI Indexing: ${selectedFiles.length} Files`;
+          }
+          
+          // Update the ready message
+          const messageElement = document.querySelector('#indexing-tab .card p.mb-6');
+          if (messageElement) {
+            messageElement.textContent = `Ready to begin AI-powered indexing for ${selectedFiles.length} selected files.`;
+          }
+          
+          // Switch to the indexing tab
+          switchTab('indexing');
+        } else {
+          alert("Please select at least one file to begin indexing.");
+        }
+      });
+      
+      newFileIndexBtn.addEventListener('click', showNewFileDialog);
+      startAiIndexingBtn.addEventListener('click', startAiIndexing);
+      confirmSaveResultsBtn.addEventListener('click', confirmAndSaveResults);
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
