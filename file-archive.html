@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Digital Archive - KLAS</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Alpine.js -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<style>
+  /* Base styles */
+  :root {
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+    --border: #e5e7eb;
+    --ring: #3b82f6;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    background-color: #f8fafc;
+  }
+
+  /* Card styles */
+  .card {
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Button styles */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--border);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--muted);
+  }
+
+  .btn-ghost {
+    background-color: transparent;
+  }
+
+  .btn-ghost:hover {
+    background-color: var(--muted);
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .btn-icon {
+    padding: 0.25rem;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Badge styles */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  .badge-outline {
+    background-color: transparent;
+    border: 1px solid var(--border);
+  }
+
+  .badge-secondary {
+    background-color: #f3f4f6;
+    color: #1f2937;
+  }
+
+  .badge-default {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .badge-destructive {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  /* Input styles */
+  .input {
+    display: block;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    background-color: white;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Select styles */
+  .select {
+    display: block;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    background-color: white;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+
+  .select:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Dialog styles */
+  .dialog-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .dialog-content {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Mark style for search highlighting */
+  mark {
+    background-color: #fef08a;
+    padding: 0.1em 0.2em;
+    border-radius: 0.2em;
+  }
+
+  /* Custom animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+</style>
+</head>
+<body class="bg-gray-50">
+<div class="flex flex-col min-h-screen">
+  <!-- Page Header -->
+  <header class="bg-white border-b">
+    <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">File Digital Archive</h1>
+          <p class="text-muted-foreground">Access and manage digitally archived files</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-outline gap-2">
+            <i data-lucide="download" class="h-4 w-4"></i>
+            Export
+          </button>
+          <button class="btn btn-primary gap-2">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Add File
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex-1 p-4 sm:p-6 container mx-auto space-y-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <!-- Total Archived Files -->
+      <div class="card">
+        <div class="p-4 pb-2">
+          <h3 class="text-sm font-medium">Total Archived Files</h3>
+        </div>
+        <div class="p-4 pt-0">
+          <div class="text-2xl font-bold">1,248</div>
+          <p class="text-xs text-muted-foreground mt-1">Digitally archived files</p>
+        </div>
+      </div>
+
+      <!-- Recently Added -->
+      <div class="card">
+        <div class="p-4 pb-2">
+          <h3 class="text-sm font-medium">Recently Added</h3>
+        </div>
+        <div class="p-4 pt-0">
+          <div class="text-2xl font-bold">78</div>
+          <p class="text-xs text-muted-foreground mt-1">Added in the last 30 days</p>
+        </div>
+      </div>
+
+      <!-- Storage Used -->
+      <div class="card">
+        <div class="p-4 pb-2">
+          <h3 class="text-sm font-medium">Storage Used</h3>
+        </div>
+        <div class="p-4 pt-0">
+          <div class="text-2xl font-bold">4.2 GB</div>
+          <p class="text-xs text-muted-foreground mt-1">Of 10 GB allocated</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Card -->
+    <div class="card mb-6">
+      <div class="p-6 border-b">
+        <h2 class="text-lg font-semibold">Search Archives</h2>
+        <p class="text-sm text-muted-foreground">Find archived files by file number, title, or content</p>
+      </div>
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <label for="search" class="block text-sm font-medium mb-1">Search Term</label>
+            <div class="relative mt-1">
+              <i data-lucide="search" class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"></i>
+              <input id="search" placeholder="Enter search term..." class="input pl-8">
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row gap-2">
+            <div>
+              <label for="searchField" class="block text-sm font-medium mb-1">Search In</label>
+              <select id="searchField" class="select w-full md:w-[180px]">
+                <option value="all">All Fields</option>
+                <option value="page">Page Title</option>
+                <option value="type">Document Type</option>
+                <option value="fileName">File Name</option>
+                <option value="fileNumber">File Number</option>
+              </select>
+            </div>
+            <div>
+              <label for="category" class="block text-sm font-medium mb-1">Category</label>
+              <select id="category" class="select w-full md:w-[180px]">
+                <option value="all">All Categories</option>
+                <option value="land">Land Records</option>
+                <option value="legal">Legal Documents</option>
+                <option value="admin">Administrative</option>
+              </select>
+            </div>
+            <div class="flex items-end gap-2">
+              <button id="search-button" class="btn btn-primary">Search</button>
+              <button id="reset-search" class="btn btn-outline hidden">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="search-type-indicator" class="mt-2 flex items-center hidden">
+          <span id="search-badge" class="badge badge-outline text-xs"></span>
+          <span id="search-description" class="text-xs text-muted-foreground ml-2"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Files Display Area -->
+    <div id="files-container" class="card">
+      <!-- This will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- File Details Dialog -->
+<div id="file-details-dialog" class="dialog-backdrop hidden" aria-hidden="true">
+  <div class="dialog-content animate-fade-in">
+    <div class="flex flex-col md:flex-row h-full">
+      <!-- Left side - Document preview -->
+      <div class="w-full md:w-2/5 bg-gray-50 p-6 flex flex-col border-r">
+        <div class="flex items-center justify-between mb-4">
+          <span id="file-status-badge" class="badge"></span>
+          <button id="toggle-star" class="btn btn-ghost h-8 w-8">
+            <i data-lucide="star" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <div id="file-preview" class="flex-1 flex flex-col items-center justify-center">
+          <!-- File preview will be inserted here -->
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">Format:</span>
+            <span id="file-format" class="badge badge-outline font-mono"></span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">Size:</span>
+            <span id="file-size" class="font-medium"></span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">Pages:</span>
+            <span id="file-pages" class="font-medium"></span>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-2">
+          <button id="close-details" class="btn btn-outline w-full">Close</button>
+          <button id="view-document" class="btn btn-primary w-full">View Document</button>
+        </div>
+      </div>
+
+      <!-- Right side - Document details -->
+      <div class="w-full md:w-3/5 p-6">
+        <div class="mb-6">
+          <h2 id="file-name" class="text-2xl font-bold"></h2>
+        </div>
+
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <h4 class="text-sm font-medium text-gray-500 mb-1">File Number</h4>
+              <div class="flex items-center">
+                <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                <p id="file-number" class="text-sm font-medium"></p>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-medium text-gray-500 mb-1">KANGIS File No</h4>
+              <div class="flex items-center">
+                <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                <p id="kangis-file-no" class="text-sm font-medium"></p>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-medium text-gray-500 mb-1">New KANGIS File No</h4>
+              <div class="flex items-center">
+                <div class="w-2 h-2 rounded-full bg-purple-500 mr-2"></div>
+                <p id="new-kangis-file-no" class="text-sm font-medium"></p>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-medium text-gray-500 mb-1">Upload Date</h4>
+              <p id="upload-date" class="text-sm"></p>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-medium text-gray-500 mb-1">Last Accessed</h4>
+              <p id="last-accessed" class="text-sm"></p>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-medium text-gray-500 mb-1">Uploaded By</h4>
+              <p id="uploaded-by" class="text-sm"></p>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-gray-500 mb-2">Tags</h4>
+            <div id="file-tags" class="flex flex-wrap gap-1.5">
+              <!-- Tags will be inserted here -->
+            </div>
+          </div>
+
+          <div id="document-pages-container">
+            <h4 class="text-sm font-medium text-gray-500 mb-2">Document Pages</h4>
+            <div class="border rounded-md overflow-hidden">
+              <div class="bg-gray-50 px-4 py-2 border-b grid grid-cols-12 text-xs font-medium text-gray-500">
+                <div class="col-span-1">#</div>
+                <div class="col-span-5">Title</div>
+                <div class="col-span-3">Type</div>
+                <div class="col-span-3">Page Code</div>
+              </div>
+              <div id="document-pages" class="max-h-[200px] overflow-y-auto">
+                <!-- Document pages will be inserted here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-2">
+          <button class="btn btn-outline btn-sm gap-1">
+            <i data-lucide="download" class="h-4 w-4"></i>
+            Download
+          </button>
+          <button class="btn btn-outline btn-sm gap-1">
+            <i data-lucide="printer" class="h-4 w-4"></i>
+            Print
+          </button>
+          <button class="btn btn-outline btn-sm gap-1">
+            <i data-lucide="share-2" class="h-4 w-4"></i>
+            Share
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Document Viewer Dialog - Converted to Alpine.js -->
+<div id="document-viewer-dialog" class="dialog-backdrop hidden" aria-hidden="true" 
+     x-data="documentViewer()" 
+     x-show="isOpen" 
+     x-transition 
+     @click="closeOnBackdrop($event)">
+  <div class="dialog-content animate-fade-in max-w-[1200px] h-[90vh] flex flex-col">
+    <div class="p-4 border-b flex items-center justify-between">
+      <h2 class="text-lg font-semibold" x-text="viewerTitle"></h2>
+      <button class="btn btn-ghost btn-sm" @click="close">
+        <i data-lucide="x" class="h-4 w-4"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <!-- Document pages sidebar -->
+      <div class="w-full md:w-64 border-r bg-gray-50 overflow-y-auto">
+        <div class="p-4">
+          <h3 class="text-sm font-medium mb-2">Pages</h3>
+          <div class="space-y-2">
+            <template x-for="(page, index) in pages" :key="index">
+              <div class="p-2 border rounded-md cursor-pointer hover:bg-gray-50"
+                   :class="currentPage === index + 1 ? 'bg-blue-50 border-blue-300' : 'bg-white'"
+                   @click="currentPage = index + 1">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-xs font-medium" x-text="index + 1"></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium truncate" x-text="page.title"></div>
+                    <div class="text-xs text-gray-500 truncate" x-text="page.type"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <div x-show="pages.length === 0" class="text-center p-4 text-sm text-gray-500">
+              No pages available for this document
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document content area -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="p-2 border-b flex items-center justify-between bg-gray-50">
+          <div class="flex items-center gap-2">
+            <button class="btn btn-ghost btn-sm" @click="prevPage" :disabled="currentPage <= 1">
+              <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <span class="text-sm" x-text="`Page ${currentPage} of ${totalPages}`"></span>
+            <button class="btn btn-ghost btn-sm" @click="nextPage" :disabled="currentPage >= totalPages">
+              <i data-lucide="chevron-right" class="h-4 w-4"></i>
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn btn-ghost btn-sm" @click="zoomOut">
+              <i data-lucide="zoom-out" class="h-4 w-4"></i>
+            </button>
+            <span class="text-sm" x-text="`${zoomLevel}%`"></span>
+            <button class="btn btn-ghost btn-sm" @click="zoomIn">
+              <i data-lucide="zoom-in" class="h-4 w-4"></i>
+            </button>
+            <button class="btn btn-ghost btn-sm" @click="rotate">
+              <i data-lucide="rotate-cw" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-auto flex items-center justify-center bg-gray-100 p-4">
+          <template x-if="currentPageContent">
+            <div class="bg-white shadow-md rounded-md max-w-[800px] w-full mx-auto transition-transform" 
+                 :style="`transform: scale(${zoomLevel / 100}) rotate(${rotation}deg);`">
+              <div class="p-6">
+                <h2 class="text-xl font-bold mb-4" x-text="currentPageContent.title"></h2>
+                <div class="space-y-4">
+                  <template x-for="(line, i) in currentPageContent.contentLines" :key="i">
+                    <p x-text="line"></p>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div x-show="!currentPageContent" class="text-center p-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p class="text-gray-500">No content available for this page</p>
+          </div>
+        </div>
+
+        <div class="p-2 border-t bg-gray-50">
+          <div class="text-sm text-gray-500" x-show="currentPageContent">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium" x-text="currentPageContent?.type || ''"></span>
+                <span x-show="currentPageContent?.subType" x-text="` - ${currentPageContent.subType}`"></span>
+              </div>
+              <div class="font-mono text-xs" x-text="currentPageContent?.pageCode || ''"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Dummy data for digital files with the three numbering systems
+  const fileData = [
+    {
+      id: "FILE-2023-001",
+      fileName: "Alhaji Ibrahim Dantata",
+      fileNumber: "RES-86-2244",
+      kangisFileNo: "KNGP 00338",
+      newKangisFileNo: "KNO001",
+      fileType: "Certificate of Occupancy",
+      fileSize: "2.4 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-01-15",
+      lastAccessed: "2023-06-10",
+      status: "Active",
+      tags: ["Residential", "Certificate", "Nasarawa"],
+      content:
+        "This Certificate of Occupancy is granted to Alhaji Ibrahim Dantata for the property located in Nasarawa District. The property is designated for residential use with a land area of 1000 square meters. The term of this certificate is 99 years commencing from January 15, 2023.",
+      pages: [
+        {
+          id: "page-001",
+          title: "Cover Page",
+          type: "File Cover",
+          subType: "New File Cover",
+          pageCode: "KNGP 00338-1-1-01",
+          content: "Certificate of Occupancy - Cover Page",
+        },
+        {
+          id: "page-002",
+          title: "Application Form",
+          type: "Application",
+          subType: "Certificate of Occupancy",
+          pageCode: "KNGP 00338-2-3-02",
+          content: "Application for Certificate of Occupancy",
+        },
+        {
+          id: "page-003",
+          title: "Personal Information",
+          type: "Application",
+          subType: "Certificate of Occupancy",
+          pageCode: "KNGP 00338-2-3-03",
+          content: "Applicant: Alhaji Ibrahim Dantata\nAddress: 15 Kano Road, Nasarawa\nPhone: 080-XXX-XXXX",
+        },
+        {
+          id: "page-004",
+          title: "Property Details",
+          type: "Land Title",
+          subType: "Certificate of Occupancy",
+          pageCode: "KNGP 00338-5-5-04",
+          content: "Plot Number: RES-86-2244\nLocation: Nasarawa District\nSize: 1000 sq meters\nLand Use: Residential",
+        },
+        {
+          id: "page-005",
+          title: "Survey Plan",
+          type: "Survey",
+          subType: "Survey Plan",
+          pageCode: "KNGP 00338-9-25-05",
+          content: "Survey Plan for Plot RES-86-2244",
+        },
+      ],
+    },
+    {
+      id: "FILE-2023-002",
+      fileName: "Hajiya Amina Yusuf",
+      fileNumber: "RES-85-1730",
+      kangisFileNo: "RES-86-2244",
+      newKangisFileNo: "KNO069",
+      fileType: "Site Plan",
+      fileSize: "5.8 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-02-20",
+      lastAccessed: "2023-06-08",
+      status: "Active",
+      tags: ["Residential", "Site Plan", "Bompai"],
+      content:
+        "Site Plan for the property owned by Hajiya Amina Yusuf located in Bompai area. The plan includes detailed measurements, boundaries, and topographical information. The property is zoned for residential use with approved building specifications.",
+      pages: [
+        {
+          id: "page-001",
+          title: "Cover Page",
+          type: "File Cover",
+          subType: "New File Cover",
+          pageCode: "RES-86-2244-1-1-01",
+          content: "Site Plan - Cover Page",
+        },
+        {
+          id: "page-002",
+          title: "Site Plan Drawing",
+          type: "Survey",
+          subType: "Site Plan",
+          pageCode: "RES-86-2244-9-25-02",
+          content: "Site Plan Drawing for Plot RES-85-1730",
+        },
+        {
+          id: "page-003",
+          title: "Property Measurements",
+          type: "Survey",
+          subType: "Survey Plan",
+          pageCode: "RES-86-2244-9-25-03",
+          content: "Property Measurements and Boundaries",
+        },
+      ],
+    },
+    // Other files remain the same
+    {
+      id: "FILE-2023-003",
+      fileName: "Kano Traders Association",
+      fileNumber: "COM-91-249",
+      kangisFileNo: "MLKN 03051",
+      newKangisFileNo: "KNO082",
+      fileType: "Letter of Administration",
+      fileSize: "1.2 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-03-05",
+      lastAccessed: "2023-05-22",
+      status: "Archived",
+      tags: ["Commercial", "Letter", "Sabon Gari"],
+      content:
+        "Letter of Administration granted to the Kano Traders Association for management of commercial properties in Sabon Gari market area. This document authorizes the association to collect fees, maintain facilities, and represent traders in official matters.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-004",
+      fileName: "Musa Usman Bayero",
+      fileNumber: "RES-2000-1904",
+      kangisFileNo: "KNML 08146",
+      newKangisFileNo: "KNO131",
+      fileType: "Right of Occupancy",
+      fileSize: "3.1 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-03-18",
+      lastAccessed: "2023-06-12",
+      status: "Active",
+      tags: ["Residential", "Right of Occupancy", "Nasarawa"],
+      content:
+        "Right of Occupancy granted to Musa Usman Bayero for the residential property in Nasarawa. This document confirms the legal right to occupy and develop the land according to approved plans and local regulations.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-005",
+      fileName: "Hajiya Fatima Mohammed",
+      fileNumber: "CON-IND-2021-37",
+      kangisFileNo: "MLKN 03888",
+      newKangisFileNo: "KNO132",
+      fileType: "Deed of Assignment",
+      fileSize: "4.5 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-04-10",
+      lastAccessed: "2023-05-30",
+      status: "Inactive",
+      tags: ["Condominium", "Industrial", "Deed"],
+      content:
+        "Deed of Assignment transferring ownership of industrial condominium unit to Hajiya Fatima Mohammed. The property was previously owned by Kano Industrial Development Corporation and is now fully transferred with all rights and responsibilities.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-006",
+      fileName: "Nasarawa",
+      fileNumber: "RES-2019-746",
+      kangisFileNo: "KNML 08722",
+      newKangisFileNo: "KNO134",
+      fileType: "Development Plan",
+      fileSize: "8.7 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-04-25",
+      lastAccessed: "2023-06-05",
+      status: "Active",
+      tags: ["Residential", "Development Plan", "Nasarawa"],
+      content:
+        "Community Development Plan for Nasarawa district outlining zoning regulations, infrastructure development, and public facilities. The plan covers residential areas, commercial zones, and public spaces with implementation timeline from 2019-2025.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-007",
+      fileName: "Sabon Gari Market",
+      fileNumber: "CON-COM-2023-001",
+      kangisFileNo: "MLKN 04221",
+      newKangisFileNo: "KNO136",
+      fileType: "Lease Agreement",
+      fileSize: "3.2 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-05-12",
+      lastAccessed: "2023-06-15",
+      status: "Active",
+      tags: ["Condominium", "Commercial", "Lease", "Sabon Gari"],
+      content:
+        "Commercial Property Lease Agreement for shops in Sabon Gari Market. This document outlines the terms and conditions for leasing commercial spaces, including rent schedules, maintenance responsibilities, and renewal options.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-008",
+      fileName: "Abdullahi Family",
+      fileNumber: "CON-RES-93-402",
+      kangisFileNo: "KNML 08923",
+      newKangisFileNo: "KNO149",
+      fileType: "Transfer Document",
+      fileSize: "2.8 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-05-18",
+      lastAccessed: "2023-06-14",
+      status: "Archived",
+      tags: ["Condominium", "Residential", "Transfer"],
+      content:
+        "Residential Property Transfer Document for the Abdullahi Family condominium. This document records the transfer of property ownership from the original developer to the Abdullahi Family with all associated rights and responsibilities.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-009",
+      fileName: "Bompai Business Center",
+      fileNumber: "COM-2014-015",
+      kangisFileNo: "MLKN 03420",
+      newKangisFileNo: "KN0152",
+      fileType: "Registration Document",
+      fileSize: "5.1 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-05-22",
+      lastAccessed: "2023-06-18",
+      status: "Active",
+      tags: ["Commercial", "Registration", "Bompai"],
+      content:
+        "Commercial Property Registration Document for Bompai Business Center. This document officially registers the property in the land registry system and establishes legal ownership and property boundaries.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-010",
+      fileName: "Ibrahim Residence",
+      fileNumber: "RES-2003-2343",
+      kangisFileNo: "KNML 08496",
+      newKangisFileNo: "KN0155",
+      fileType: "Building Plan",
+      fileSize: "12.3 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-05-30",
+      lastAccessed: "2023-06-20",
+      status: "Active",
+      tags: ["Residential", "Building Plan"],
+      content:
+        "Residential Building Plan for Ibrahim Residence detailing architectural designs, structural specifications, and utility layouts. The plan has been approved by the local building authority and meets all zoning requirements.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-011",
+      fileName: "Kurna District",
+      fileNumber: "RES-2021-1720",
+      kangisFileNo: "KNML 08179",
+      newKangisFileNo: "KNO156",
+      fileType: "Survey Report",
+      fileSize: "7.5 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-06-05",
+      lastAccessed: "2023-06-22",
+      status: "Active",
+      tags: ["Residential", "Survey", "Kurna"],
+      content:
+        "Land Survey Report for Kurna District providing comprehensive topographical data, property boundaries, and land features. The survey was conducted using modern GPS technology and meets national standards for accuracy.",
+      pages: [],
+    },
+    {
+      id: "FILE-2023-012",
+      fileName: "Commercial Properties",
+      fileNumber: "COM-2022-313",
+      kangisFileNo: "KNMI 09221",
+      newKangisFileNo: "KNO165",
+      fileType: "Tax Document",
+      fileSize: "4.2 MB",
+      fileFormat: "PDF",
+      uploadedBy: "Admin User",
+      uploadDate: "2023-06-10",
+      lastAccessed: "2023-06-25",
+      status: "Active",
+      tags: ["Tax", "Commercial", "Assessment"],
+      content:
+        "Property Tax Assessment for Commercial Properties in the central business district. This document outlines the tax valuation methodology, assessed values, and tax obligations for the current fiscal year.",
+      pages: [],
+    },
+  ];
+
+  // State management
+  const state = {
+    searchTerm: "",
+    searchCategory: "all",
+    searchType: "basic", // "basic" or "content"
+    searchField: "all", // "all", "page", "type", "fileName", "fileNumber"
+    selectedFile: null,
+    activeTab: "all",
+    fileNumberFormat: "all", // "all", "mlsf", "kangis", "newKangis"
+    selectedTags: [],
+    sortField: "uploadDate",
+    sortDirection: "desc", // "asc" or "desc"
+    documentViewerOpen: false,
+    viewMode: "grid", // "grid" or "content"
+    isStarred: false,
+    searchResults: [],
+    isSearching: false,
+    currentPage: 1,
+    zoomLevel: 100,
+    rotation: 0
+  };
+
+  // File number format validation functions
+  const isValidMLSFNo = (fileNo) => {
+    // Validate patterns like RES-2015-4859, COM-91-249, CON-IND-2021-37
+    const pattern1 = /^(RES|COM)-\d{2,4}-\d{1,4}$/;
+    const pattern2 = /^CON-(RES|COM|IND)-\d{2,4}-\d{1,3}$/;
+
+    return pattern1.test(fileNo) || pattern2.test(fileNo);
+  };
+
+  const isValidKangisFileNo = (fileNo) => {
+    // Validate patterns like KNGP 00338, KNML 08146, MLKN 03051
+    const pattern1 = /^(KNGP|KNML|MLKN|KNMI) \d{5}$/;
+    const pattern2 = /^RES-\d{2}-\d{4}$/;
+
+    return pattern1.test(fileNo) || pattern2.test(fileNo);
+  };
+
+  const isValidNewKangisFileNo = (fileNo) => {
+    // Validate patterns like KNO001, KN0152
+    return /^KN[O0]\d{3}$/.test(fileNo);
+  };
+
+  // Filter tags to remove those that match or are contained in the file type
+  const filterDuplicateTypeTags = (tags, fileType) => {
+    const fileTypeLower = fileType.toLowerCase();
+    return tags.filter((tag) => {
+      // Skip tags that are the same as the file type or contained within it
+      return !fileTypeLower.includes(tag.toLowerCase()) && !tag.toLowerCase().includes(fileTypeLower);
+    });
+  };
+
+  // Get unique tags from all files
+  const getAllTags = () => {
+    return Array.from(new Set(fileData.flatMap((file) => file.tags || [])));
+  };
+
+  // DOM Elements
+  const elements = {
+    searchInput: document.getElementById('search'),
+    searchButton: document.getElementById('search-button'),
+    resetSearchButton: document.getElementById('reset-search'),
+    searchField: document.getElementById('searchField'),
+    searchCategory: document.getElementById('category'),
+    searchTypeIndicator: document.getElementById('search-type-indicator'),
+    searchBadge: document.getElementById('search-badge'),
+    searchDescription: document.getElementById('search-description'),
+    filesContainer: document.getElementById('files-container'),
+    fileDetailsDialog: document.getElementById('file-details-dialog'),
+    documentViewerDialog: document.getElementById('document-viewer-dialog'),
+    closeDetailsButton: document.getElementById('close-details'),
+    viewDocumentButton: document.getElementById('view-document'),
+    closeViewerButton: document.getElementById('close-viewer'),
+    toggleStarButton: document.getElementById('toggle-star'),
+    prevPageButton: document.getElementById('prev-page'),
+    nextPageButton: document.getElementById('next-page'),
+    zoomInButton: document.getElementById('zoom-in'),
+    zoomOutButton: document.getElementById('zoom-out'),
+    rotateButton: document.getElementById('rotate'),
+    pageIndicator: document.getElementById('page-indicator'),
+    zoomLevel: document.getElementById('zoom-level'),
+    documentContent: document.getElementById('document-content'),
+    documentPagesList: document.getElementById('document-pages-list'),
+    pageInfo: document.getElementById('page-info')
+  };
+
+  // Helper functions
+  function highlightText(text, searchTerm) {
+    if (!searchTerm.trim()) return text;
+
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    return text.replace(regex, "<mark>$1</mark>");
+  }
+
+  function findMatchingPage(file, searchTerm) {
+    if (!searchTerm.trim()) return null;
+
+    const searchLower = searchTerm.toLowerCase();
+
+    if (state.searchField === "page") {
+      return file.pages.find((page) => page.title.toLowerCase().includes(searchLower));
+    } else if (state.searchField === "type") {
+      return file.pages.find(
+        (page) => page.type.toLowerCase().includes(searchLower) || page.subType?.toLowerCase().includes(searchLower)
+      );
+    } else {
+      return file.pages.find(
+        (page) =>
+          page.title.toLowerCase().includes(searchLower) ||
+          page.type.toLowerCase().includes(searchLower) ||
+          page.subType?.toLowerCase().includes(searchLower)
+      );
+    }
+  }
+
+  // Render functions
+  function renderFilesGrid(files) {
+    const header = `
+      <div class="p-6 border-b flex flex-row items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold">${state.isSearching ? 'Search Results' : 'Archived Files'}</h2>
+          <p class="text-sm text-muted-foreground">
+            ${state.isSearching 
+              ? `Found ${files.length} ${files.length === 1 ? 'file' : 'files'} matching "${state.searchTerm}"`
+              : 'Recently archived digital files'}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          ${state.isSearching ? `
+            <button id="toggle-view-grid" class="btn btn-outline btn-sm gap-1 ${state.viewMode === 'grid' ? 'bg-muted' : ''}">
+              <i data-lucide="grid" class="h-3.5 w-3.5"></i>
+              Grid
+            </button>
+            <button id="toggle-view-content" class="btn btn-outline btn-sm gap-1 ${state.viewMode === 'content' ? 'bg-muted' : ''}">
+              <i data-lucide="list" class="h-3.5 w-3.5"></i>
+              Content
+            </button>
+          ` : `
+            <button id="filter-button" class="btn btn-outline btn-sm gap-1">
+              <i data-lucide="filter" class="h-3.5 w-3.5"></i>
+              Filter
+            </button>
+            <button id="sort-button" class="btn btn-outline btn-sm gap-1">
+              <i data-lucide="sort-asc" class="h-3.5 w-3.5"></i>
+              Sort
+            </button>
+          `}
+        </div>
+      </div>
+    `;
+
+    let content = '';
+
+    if (files.length === 0) {
+      content = `
+        <div class="p-6">
+          <div class="text-center py-8">
+            <div class="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <i data-lucide="search" class="h-6 w-6 text-muted-foreground"></i>
+            </div>
+            <h3 class="text-lg font-medium mb-1">No results found</h3>
+            <p class="text-sm text-muted-foreground">Try adjusting your search terms or category</p>
+          </div>
+        </div>
+      `;
+    } else if (state.viewMode === 'grid') {
+      content = `
+        <div class="p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            ${files.map(file => `
+              <div class="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer file-card" data-id="${file.id}">
+                <div class="aspect-[3/4] bg-gray-100 relative">
+                  <!-- Document thumbnail -->
+                  <div class="absolute inset-0 flex items-center justify-center bg-gray-50">
+                    ${renderFileThumbnail(file)}
+                  </div>
+
+                  <!-- File type badge -->
+                  <div class="absolute top-2 right-2">
+                    <span class="badge badge-secondary text-xs font-medium">
+                      ${file.fileFormat}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="p-3">
+                  <h3 class="font-medium text-sm line-clamp-1" title="${file.fileName}">
+                    ${file.fileName}
+                  </h3>
+                  <div class="mt-1 flex items-center text-xs text-muted-foreground">
+                    <span class="line-clamp-1" title="${file.fileNumber}">
+                      ${file.fileNumber}
+                    </span>
+                  </div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <span class="text-xs text-muted-foreground">${file.fileSize}</span>
+                    <span class="badge ${
+                      file.status === "Active"
+                        ? "badge-outline"
+                        : file.status === "Archived"
+                          ? "badge-secondary"
+                          : "badge-destructive"
+                    } text-xs">
+                      ${file.status}
+                    </span>
+                  </div>
+                </div>
+                <div class="p-2 pt-0 flex flex-wrap gap-1">
+                  ${filterDuplicateTypeTags(file.tags, file.fileType).map(tag => `
+                    <span class="badge badge-secondary text-xs">${tag}</span>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      // Content view
+      content = `
+        <div class="p-6">
+          <div class="space-y-4">
+            ${files.map(file => {
+              const matchingPage = findMatchingPage(file, state.searchTerm);
+              
+              return `
+                <div class="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer file-card" data-id="${file.id}">
+                  <div class="p-4 flex gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                      ${file.fileFormat === "PDF" ? `
+                        <svg class="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12.819 14.427c.064.267.077.679-.021.948-.128.351-.381.528-.754.528H8.203c-.373 0-.624-.177-.752-.528-.098-.269-.086-.681.021-.948l1.436-2.387c.2-.33.509-.528.869-.528.358 0 .668.198.868.529l1.174 1.95zm2.091 2.585c.076.302.003.604-.248.906-.188.227-.401.343-.707.343H7.232c-.303 0-.518-.116-.705-.343-.25-.302-.324-.604-.25-.906.19-.804.78-1.236 1.75-1.236h4.132c.97 0 1.559.432 1.751 1.236M9.603 9.437c0-.577.49-1.063 1.073-1.063.582 0 1.073.486 1.073 1.063 0 .577-.49 1.064-1.073 1.064-.583 0-1.073-.487-1.073-1.064"></path>
+                          <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+                        </svg>
+                      ` : file.fileFormat === "DOCX" || file.fileFormat === "DOC" ? `
+                        <svg class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+                          <path d="M14.386 16.488h1.218V7.5h-1.218v3.64h-4.77V7.5H8.398v8.988h1.218v-4.158h4.77z"></path>
+                        </svg>
+                      ` : `
+                        <i data-lucide="file" class="h-6 w-6 text-gray-400"></i>
+                      `}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-medium text-base truncate">${file.fileName}</h3>
+                        <span class="badge ${
+                          file.status === "Active"
+                            ? "badge-outline"
+                            : file.status === "Archived"
+                              ? "badge-secondary"
+                              : "badge-destructive"
+                        } ml-2 flex-shrink-0">
+                          ${file.status}
+                        </span>
+                      </div>
+                      <div class="flex items-center text-sm text-muted-foreground mb-2">
+                        <span class="flex items-center gap-1 mr-3">
+                          <i data-lucide="tag" class="h-3.5 w-3.5"></i>
+                          ${file.fileNumber}
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                          ${file.uploadDate}
+                        </span>
+                      </div>
+
+                      ${matchingPage ? `
+                        <div class="mt-3 border-t pt-2">
+                          <div class="text-sm">
+                            <span class="font-medium text-gray-700">Page: </span>
+                            <span>${highlightText(matchingPage.title, state.searchTerm)}</span>
+                          </div>
+                          <div class="text-sm mt-1">
+                            <span class="font-medium text-gray-700">Type: </span>
+                            <span>${highlightText(matchingPage.type, state.searchTerm)}</span>
+                            ${matchingPage.subType ? `
+                              <span class="mx-1">-</span>
+                              <span>${highlightText(matchingPage.subType, state.searchTerm)}</span>
+                            ` : ''}
+                          </div>
+                          <div class="text-sm mt-1">
+                            <span class="font-medium text-gray-700">Page Code: </span>
+                            <span class="font-mono text-xs">${matchingPage.pageCode}</span>
+                          </div>
+                        </div>
+                      ` : `
+                        <div class="mt-2 flex flex-wrap gap-1">
+                          ${filterDuplicateTypeTags(file.tags, file.fileType).map(tag => `
+                            <span class="badge badge-secondary text-xs">${tag}</span>
+                          `).join('')}
+                        </div>
+                      `}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    const footer = `
+      <div class="flex justify-center border-t pt-4 p-6">
+        <button class="btn btn-outline">View All ${state.isSearching ? 'Results' : 'Archives'}</button>
+      </div>
+    `;
+
+    elements.filesContainer.innerHTML = header + content + footer;
+    
+    // Initialize Lucide icons for the new content
+    lucide.createIcons();
+    
+    // Add event listeners
+    document.querySelectorAll('.file-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const fileId = card.getAttribute('data-id');
+        openFileDetails(fileId);
+      });
+    });
+
+    if (state.isSearching) {
+      document.getElementById('toggle-view-grid')?.addEventListener('click', () => {
+        state.viewMode = 'grid';
+        renderFilesGrid(files);
+      });
+      
+      document.getElementById('toggle-view-content')?.addEventListener('click', () => {
+        state.viewMode = 'content';
+        renderFilesGrid(files);
+      });
+    }
+  }
+
+  function renderFileThumbnail(file) {
+    if (file.fileFormat === "PDF") {
+      return `
+        <div class="w-full h-full relative">
+          <!-- PDF thumbnail preview -->
+          <div class="absolute inset-0 bg-white border-b">
+            <div class="h-6 bg-red-600 flex items-center px-2">
+              <div class="w-3 h-3 rounded-full bg-white/50 mr-1"></div>
+              <div class="w-3 h-3 rounded-full bg-white/50 mr-1"></div>
+              <div class="w-3 h-3 rounded-full bg-white/50"></div>
+            </div>
+            <div class="p-2">
+              <div class="w-full h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-3/4 h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-full h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-5/6 h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-full h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          <div class="absolute bottom-1 right-1">
+            <svg class="w-8 h-8 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.819 14.427c.064.267.077.679-.021.948-.128.351-.381.528-.754.528H8.203c-.373 0-.624-.177-.752-.528-.098-.269-.086-.681.021-.948l1.436-2.387c.2-.33.509-.528.869-.528.358 0 .668.198.868.529l1.174 1.95zm2.091 2.585c.076.302.003.604-.248.906-.188.227-.401.343-.707.343H7.232c-.303 0-.518-.116-.705-.343-.25-.302-.324-.604-.25-.906.19-.804.78-1.236 1.75-1.236h4.132c.97 0 1.559.432 1.751 1.236M9.603 9.437c0-.577.49-1.063 1.073-1.063.582 0 1.073.486 1.073 1.063 0 .577-.49 1.064-1.073 1.064-.583 0-1.073-.487-1.073-1.064"></path>
+              <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+    } else if (file.fileFormat === "DOCX" || file.fileFormat === "DOC") {
+      return `
+        <div class="w-full h-full relative">
+          <!-- Word document thumbnail preview -->
+          <div class="absolute inset-0 bg-white border-b">
+            <div class="h-6 bg-blue-600 flex items-center px-2">
+              <div class="w-3 h-3 rounded-full bg-white/50 mr-1"></div>
+              <div class="w-3 h-3 rounded-full bg-white/50 mr-1"></div>
+              <div class="w-3 h-3 rounded-full bg-white/50"></div>
+            </div>
+            <div class="p-2">
+              <div class="w-full h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-3/4 h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-full h-4 bg-gray-200 rounded mb-2"></div>
+              <div class="w-5/6 h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          <div class="absolute bottom-1 right-1">
+            <svg class="w-8 h-8 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+              <path d="M14.386 16.488h1.218V7.5h-1.218v3.64h-4.77V7.5H8.398v8.988h1.218v-4.158h4.77z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+    } else if (file.fileFormat === "JPG" || file.fileFormat === "PNG" || file.fileFormat === "JPEG") {
+      return `
+        <div class="w-full h-full relative">
+          <!-- Image thumbnail preview -->
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-12 w-12 text-blue-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <div class="absolute bottom-1 right-1">
+            <svg class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="w-full h-full relative">
+          <!-- Generic file thumbnail preview -->
+          <div class="absolute inset-0 bg-gray-100 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-12 w-12 text-gray-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function renderFileDetails(fileId) {
+    const file = fileData.find(f => f.id === fileId);
+    if (!file) return;
+
+    // Update file details in the dialog
+    document.getElementById('file-status-badge').className = `badge ${
+      file.status === "Active" ? "badge-default" : file.status === "Archived" ? "badge-secondary" : "badge-destructive"
+    } px-2 py-1`;
+    document.getElementById('file-status-badge').textContent = file.status;
+
+    // Update star icon
+    const starIcon = elements.toggleStarButton.querySelector('i');
+    if (state.isStarred) {
+      starIcon.classList.add('fill-yellow-400', 'text-yellow-400');
+    } else {
+      starIcon.classList.remove('fill-yellow-400', 'text-yellow-400');
+    }
+
+    // File preview
+    let previewHTML = '';
+    if (file.fileFormat === "PDF") {
+      previewHTML = `
+        <div class="relative w-full max-w-[250px] aspect-[3/4] bg-white rounded-lg shadow-md border overflow-hidden mx-auto">
+          <div class="h-8 bg-red-600 flex items-center px-3">
+            <div class="w-3 h-3 rounded-full bg-white/50 mr-1.5"></div>
+            <div class="w-3 h-3 rounded-full bg-white/50 mr-1.5"></div>
+            <div class="w-3 h-3 rounded-full bg-white/50"></div>
+          </div>
+          <div class="p-4">
+            <div class="w-full h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-3/4 h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-full h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-5/6 h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-full h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-2/3 h-5 bg-gray-200 rounded"></div>
+          </div>
+          <div class="absolute bottom-3 right-3">
+            <svg class="w-12 h-12 text-red-600 opacity-50" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.819 14.427c.064.267.077.679-.021.948-.128.351-.381.528-.754.528H8.203c-.373 0-.624-.177-.752-.528-.098-.269-.086-.681.021-.948l1.436-2.387c.2-.33.509-.528.869-.528.358 0 .668.198.868.529l1.174 1.95zm2.091 2.585c.076.302.003.604-.248.906-.188.227-.401.343-.707.343H7.232c-.303 0-.518-.116-.705-.343-.25-.302-.324-.604-.25-.906.19-.804.78-1.236 1.75-1.236h4.132c.97 0 1.559.432 1.751 1.236M9.603 9.437c0-.577.49-1.063 1.073-1.063.582 0 1.073.486 1.073 1.063 0 .577-.49 1.064-1.073 1.064-.583 0-1.073-.487-1.073-1.064"></path>
+              <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+    } else if (file.fileFormat === "DOCX" || file.fileFormat === "DOC") {
+      previewHTML = `
+        <div class="relative w-full max-w-[250px] aspect-[3/4] bg-white rounded-lg shadow-md border overflow-hidden mx-auto">
+          <div class="h-8 bg-blue-600 flex items-center px-3">
+            <div class="w-3 h-3 rounded-full bg-white/50 mr-1.5"></div>
+            <div class="w-3 h-3 rounded-full bg-white/50 mr-1.5"></div>
+            <div class="w-3 h-3 rounded-full bg-white/50"></div>
+          </div>
+          <div class="p-4">
+            <div class="w-full h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-3/4 h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-full h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-5/6 h-5 bg-gray-200 rounded mb-3"></div>
+            <div class="w-full h-5 bg-gray-200 rounded"></div>
+          </div>
+          <div class="absolute bottom-3 right-3">
+            <svg class="w-12 h-12 text-blue-600 opacity-50" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+              <path d="M14.386 16.488h1.218V7.5h-1.218v3.64h-4.77V7.5H8.398v8.988h1.218v-4.158h4.77z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+    } else if (file.fileFormat === "JPG" || file.fileFormat === "PNG" || file.fileFormat === "JPEG") {
+      previewHTML = `
+        <div class="relative w-full max-w-[250px] aspect-[3/4] bg-white rounded-lg shadow-md border overflow-hidden mx-auto">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-20 w-20 text-blue-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <div class="absolute bottom-3 right-3">
+            <svg class="w-10 h-10 text-blue-500 drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.826 21.214H4.174A2.174 2.174 0 0 1 2 19.04V4.96c0-1.2.974-2.174 2.174-2.174h15.652A2.174 2.174 0 0 1 22 4.96v14.08a2.174 2.174 0 0 1-2.174 2.174M4.174 4.13a.83.83 0 0 0-.83.83v14.08c0 .458.372.83.83.83h15.652a.83.83 0 0 0 .83-.83V4.96a.83.83 0 0 0-.83-.83H4.174z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+    } else {
+      previewHTML = `
+        <div class="relative w-full max-w-[250px] aspect-[3/4] bg-white rounded-lg shadow-md border overflow-hidden mx-auto flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-20 w-20 text-gray-300"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+      `;
+    }
+    document.getElementById('file-preview').innerHTML = previewHTML;
+
+    // File metadata
+    document.getElementById('file-format').textContent = file.fileFormat;
+    document.getElementById('file-size').textContent = file.fileSize;
+    document.getElementById('file-pages').textContent = file.pages.length || 'N/A';
+
+    // File details
+    document.getElementById('file-name').textContent = file.fileName;
+    document.getElementById('file-number').textContent = file.fileNumber;
+    document.getElementById('kangis-file-no').textContent = file.kangisFileNo;
+    document.getElementById('new-kangis-file-no').textContent = file.newKangisFileNo;
+    document.getElementById('upload-date').textContent = file.uploadDate;
+    document.getElementById('last-accessed').textContent = file.lastAccessed;
+    document.getElementById('uploaded-by').textContent = file.uploadedBy;
+
+    // Tags
+    const tagsContainer = document.getElementById('file-tags');
+    tagsContainer.innerHTML = '';
+    filterDuplicateTypeTags(file.tags, file.fileType).forEach(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.className = 'badge badge-secondary px-2 py-1';
+      tagElement.textContent = tag;
+      tagsContainer.appendChild(tagElement);
+    });
+
+    // Document pages
+    const documentPagesContainer = document.getElementById('document-pages-container');
+    const documentPages = document.getElementById('document-pages');
+    
+    if (file.pages.length > 0) {
+      documentPagesContainer.classList.remove('hidden');
+      documentPages.innerHTML = '';
+      
+      file.pages.slice(0, 5).forEach((page, index) => {
+        const pageElement = document.createElement('div');
+        pageElement.className = 'px-4 py-2 border-b last:border-b-0 grid grid-cols-12 text-sm hover:bg-gray-50 cursor-pointer';
+        pageElement.setAttribute('data-page-index', index);
+        pageElement.innerHTML = `
+          <div class="col-span-1 font-medium text-gray-500">${index + 1}</div>
+          <div class="col-span-5 truncate">${page.title}</div>
+          <div class="col-span-3 truncate text-gray-600">${page.type}</div>
+          <div class="col-span-3 truncate font-mono text-xs text-gray-500">${page.pageCode}</div>
+        `;
+        documentPages.appendChild(pageElement);
+        
+        // Add click event to open document viewer
+        pageElement.addEventListener('click', () => {
+          state.currentPage = index + 1;
+          openDocumentViewer(fileId);
+        });
+      });
+      
+      if (file.pages.length > 5) {
+        const morePages = document.createElement('div');
+        morePages.className = 'px-4 py-2 text-center text-sm text-gray-500 bg-gray-50';
+        morePages.textContent = `+ ${file.pages.length - 5} more pages`;
+        documentPages.appendChild(morePages);
+      }
+    } else {
+      documentPagesContainer.classList.add('hidden');
+    }
+  }
+
+  // Alpine.js component for document viewer
+  function documentViewer() {
+    return {
+      isOpen: false,
+      fileId: null,
+      currentPage: 1,
+      zoomLevel: 100,
+      rotation: 0,
+      pages: [],
+      viewerTitle: "Document Viewer",
+      
+      get totalPages() {
+        return this.pages.length || 1;
+      },
+      
+      get currentPageContent() {
+        if (this.pages.length === 0 || this.currentPage > this.pages.length) {
+          return null;
+        }
+        
+        const page = this.pages[this.currentPage - 1];
+        return {
+          ...page,
+          contentLines: page.content.split('\n')
+        };
+      },
+      
+      open(fileId) {
+        this.fileId = fileId;
+        this.loadFile();
+        this.isOpen = true;
+        document.getElementById('document-viewer-dialog').classList.remove('hidden');
+        document.getElementById('document-viewer-dialog').setAttribute('aria-hidden', 'false');
+        
+        // Re-initialize Lucide icons after Alpine renders content
+        this.$nextTick(() => {
+          lucide.createIcons();
+        });
+      },
+      
+      close() {
+        this.isOpen = false;
+        document.getElementById('document-viewer-dialog').classList.add('hidden');
+        document.getElementById('document-viewer-dialog').setAttribute('aria-hidden', 'true');
+      },
+      
+      closeOnBackdrop(event) {
+        if (event.target === document.getElementById('document-viewer-dialog')) {
+          this.close();
+        }
+      },
+      
+      loadFile() {
+        const file = fileData.find(f => f.id === this.fileId);
+        if (!file) return;
+        
+        this.viewerTitle = `${file.fileName} - ${file.fileType}`;
+        this.pages = file.pages;
+        this.currentPage = 1;
+        this.zoomLevel = 100;
+        this.rotation = 0;
+      },
+      
+      prevPage() {
+        if (this.currentPage > 1) {
+          this.currentPage--;
+        }
+      },
+      
+      nextPage() {
+        if (this.currentPage < this.totalPages) {
+          this.currentPage++;
+        }
+      },
+      
+      zoomIn() {
+        this.zoomLevel = Math.min(this.zoomLevel + 25, 200);
+      },
+      
+      zoomOut() {
+        this.zoomLevel = Math.max(this.zoomLevel - 25, 50);
+      },
+      
+      rotate() {
+        this.rotation = (this.rotation + 90) % 360;
+      }
+    };
+  }
+
+  // Event handlers
+  function performSearch() {
+    const searchTerm = elements.searchInput.value.trim();
+    if (!searchTerm) return;
+    
+    state.searchTerm = searchTerm;
+    state.searchCategory = elements.searchCategory.value;
+    state.searchField = elements.searchField.value;
+    
+    // Detect if search is for content
+    const isLikelyContentSearch =
+      searchTerm.toLowerCase().includes("page") ||
+      searchTerm.toLowerCase().includes("type") ||
+      searchTerm.toLowerCase().includes("title") ||
+      searchTerm.trim().split(/\s+/).length >= 3;
+
+    if (isLikelyContentSearch) {
+      state.searchType = "content";
+      state.viewMode = "content";
+    } else {
+      state.searchType = "basic";
+    }
+    
+    // Show search type indicator
+    elements.searchTypeIndicator.classList.remove('hidden');
+    
+    // Update search badge and description
+    if (state.searchField === "all") {
+      elements.searchBadge.textContent = "Content Search";
+      elements.searchDescription.textContent = "Searching in all document fields";
+    } else if (state.searchField === "page") {
+      elements.searchBadge.textContent = "Page Title Search";
+      elements.searchDescription.textContent = "Searching in document page titles";
+    } else if (state.searchField === "type") {
+      elements.searchBadge.textContent = "Document Type Search";
+      elements.searchDescription.textContent = "Searching in document types";
+    } else if (state.searchField === "fileName") {
+      elements.searchBadge.textContent = "File Name Search";
+      elements.searchDescription.textContent = "Searching in file names";
+    } else if (state.searchField === "fileNumber") {
+      elements.searchBadge.textContent = "File Number Search";
+      elements.searchDescription.textContent = "Searching in file numbers";
+    }
+    
+    // Filter files based on search criteria
+    const results = fileData.filter((file) => {
+      // Skip if search term is empty
+      if (!searchTerm.trim()) return false;
+
+      const searchLower = searchTerm.toLowerCase();
+
+      // Basic search based on selected field
+      let basicMatch = false;
+
+      if (state.searchField === "all" || state.searchField === "fileName") {
+        basicMatch = basicMatch || file.fileName.toLowerCase().includes(searchLower);
+      }
+
+      if (state.searchField === "all" || state.searchField === "fileNumber") {
+        basicMatch =
+          basicMatch ||
+          file.fileNumber.toLowerCase().includes(searchLower) ||
+          file.kangisFileNo.toLowerCase().includes(searchLower) ||
+          file.newKangisFileNo.toLowerCase().includes(searchLower);
+      }
+
+      if (state.searchField === "all") {
+        basicMatch = basicMatch || file.fileType.toLowerCase().includes(searchLower);
+      }
+
+      // Content search - specifically in Title or Type from Document Pages
+      let contentMatch = false;
+
+      if (state.searchField === "all" || state.searchField === "page") {
+        contentMatch = contentMatch || file.pages.some((page) => page.title.toLowerCase().includes(searchLower));
+      }
+
+      if (state.searchField === "all" || state.searchField === "type") {
+        contentMatch =
+          contentMatch ||
+          file.pages.some(
+            (page) =>
+              page.type.toLowerCase().includes(searchLower) || page.subType?.toLowerCase().includes(searchLower)
+          );
+      }
+
+      // Category filter
+      const categoryMatch =
+        state.searchCategory === "all" ||
+        (state.searchCategory === "land" && (file.tags.includes("Residential") || file.fileType.includes("Occupancy"))) ||
+        (state.searchCategory === "legal" &&
+          (file.fileType.includes("Letter") || file.fileType.includes("Deed") || file.fileType.includes("Transfer"))) ||
+        (state.searchCategory === "admin" && (file.fileType.includes("Tax") || file.fileType.includes("Registration")));
+
+      // Return based on search type and field
+      return categoryMatch && (basicMatch || contentMatch);
+    });
+    
+    state.searchResults = results;
+    state.isSearching = true;
+    
+    // Show reset button
+    elements.resetSearchButton.classList.remove('hidden');
+    
+    // Auto-switch to content view for page and type searches
+    if (state.searchField === "page" || state.searchField === "type") {
+      state.viewMode = "content";
+    }
+    
+    // Render search results
+    renderFilesGrid(results);
+  }
+
+  function resetSearch() {
+    state.searchTerm = "";
+    state.searchCategory = "all";
+    state.searchType = "basic";
+    state.searchField = "all";
+    state.searchResults = [];
+    state.isSearching = false;
+    state.viewMode = "grid";
+    
+    // Reset form
+    elements.searchInput.value = "";
+    elements.searchField.value = "all";
+    elements.searchCategory.value = "all";
+    
+    // Hide search type indicator
+    elements.searchTypeIndicator.classList.add('hidden');
+    
+    // Hide reset button
+    elements.resetSearchButton.classList.add('hidden');
+    
+    // Render default files
+    renderFilesGrid(fileData.slice(0, 12));
+  }
+
+  function openFileDetails(fileId) {
+    state.selectedFile = fileId;
+    renderFileDetails(fileId);
+    elements.fileDetailsDialog.classList.remove('hidden');
+    elements.fileDetailsDialog.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeFileDetails() {
+    elements.fileDetailsDialog.classList.add('hidden');
+    elements.fileDetailsDialog.setAttribute('aria-hidden', 'true');
+    state.selectedFile = null;
+  }
+
+  function openDocumentViewer(fileId) {
+    // Use Alpine.js component to open document viewer
+    const viewer = Alpine.data('documentViewer');
+    if (viewer) {
+      viewer.open(fileId);
+    }
+  }
+
+  function toggleStar() {
+    state.isStarred = !state.isStarred;
+    const starIcon = elements.toggleStarButton.querySelector('i');
+    if (state.isStarred) {
+      starIcon.classList.add('fill-yellow-400', 'text-yellow-400');
+    } else {
+      starIcon.classList.remove('fill-yellow-400', 'text-yellow-400');
+    }
+  }
+
+  // Initialize the page
+  function init() {
+    // Render initial files
+    renderFilesGrid(fileData.slice(0, 12));
+    
+    // Add event listeners
+    elements.searchButton.addEventListener('click', performSearch);
+    elements.resetSearchButton.addEventListener('click', resetSearch);
+    elements.searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+    
+    // File details dialog
+    elements.closeDetailsButton.addEventListener('click', closeFileDetails);
+    elements.viewDocumentButton.addEventListener('click', () => {
+      if (state.selectedFile) {
+        openDocumentViewer(state.selectedFile);
+      }
+    });
+    elements.toggleStarButton.addEventListener('click', toggleStar);
+    
+    // Close dialogs when clicking outside
+    elements.fileDetailsDialog.addEventListener('click', (e) => {
+      if (e.target === elements.fileDetailsDialog) {
+        closeFileDetails();
+      }
+    });
+  }
+  
+  // Initialize the page when DOM is loaded
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
