@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .transform-center {
+            transform-origin: center center;
+        }
+        .document-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .floating-controls {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Document Viewer Dialog -->
+    <div id="document-viewer" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-[90vw] max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Header with controls -->
+            <div class="bg-white border-b flex items-center justify-between px-4 py-3">
+                <div class="flex items-center">
+                    <button id="close-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 mr-2 h-8 w-8 flex items-center justify-center">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                    <h2 id="document-title" class="text-base font-medium truncate max-w-[300px]">Document Title</h2>
+                    <span id="document-status" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded ml-3">Active</span>
+                </div>
+
+                <div class="flex items-center gap-1">
+                    <!-- Star Button -->
+                    <button id="star-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                        <i data-lucide="star" class="h-4 w-4"></i>
+                    </button>
+                    
+                    <!-- Download Button -->
+                    <button class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                        <i data-lucide="download" class="h-4 w-4"></i>
+                    </button>
+                    
+                    <!-- Print Button -->
+                    <button class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                        <i data-lucide="printer" class="h-4 w-4"></i>
+                    </button>
+                    
+                    <!-- Share Button -->
+                    <button class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                        <i data-lucide="share-2" class="h-4 w-4"></i>
+                    </button>
+
+                    <div class="h-5 w-px bg-gray-200 mx-1"></div>
+
+                    <!-- Fullscreen Button -->
+                    <button id="fullscreen-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                        <i data-lucide="maximize-2" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main content area with sidebar and document view -->
+            <div class="flex-1 flex overflow-hidden" style="height: calc(90vh - 56px);">
+                <!-- Sidebar with tabs -->
+                <div class="w-[280px] bg-gray-50 border-r flex flex-col">
+                    <div class="flex border-b">
+                        <button id="pages-tab" class="px-3 py-1.5 bg-white border border-b-0 rounded-t-md font-medium text-sm">Pages</button>
+                        <button id="info-tab" class="px-3 py-1.5 bg-transparent rounded-t-md font-medium text-sm">Info</button>
+                    </div>
+
+                    <!-- Pages Tab Content -->
+                    <div id="pages-content" class="flex-1 overflow-auto bg-white p-3 space-y-2">
+                        <!-- Pages will be dynamically inserted here -->
+                    </div>
+
+                    <!-- Info Tab Content -->
+                    <div id="info-content" class="flex-1 overflow-auto bg-white p-4 hidden space-y-4">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-3">Document Information</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Format:</span>
+                                    <span id="info-format" class="font-medium">PDF</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Size:</span>
+                                    <span id="info-size" class="font-medium">2.4 MB</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Pages:</span>
+                                    <span id="info-pages" class="font-medium">5</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Uploaded:</span>
+                                    <span id="info-uploaded" class="font-medium">2023-01-15</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Last accessed:</span>
+                                    <span id="info-last-accessed" class="font-medium">2023-06-10</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <h3 class="text-sm font-semibold mb-3">File Numbers</h3>
+                            <div class="space-y-2">
+                                <div class="text-sm">
+                                    <div class="text-gray-500 mb-1">File Number:</div>
+                                    <div id="info-file-number" class="font-medium bg-gray-50 p-2 rounded border">RES-86-2244</div>
+                                </div>
+                                <div class="text-sm">
+                                    <div class="text-gray-500 mb-1">KANGIS File No:</div>
+                                    <div id="info-kangis" class="font-medium bg-gray-50 p-2 rounded border">KNGP 00338</div>
+                                </div>
+                                <div class="text-sm">
+                                    <div class="text-gray-500 mb-1">New KANGIS File No:</div>
+                                    <div id="info-new-kangis" class="font-medium bg-gray-50 p-2 rounded border">KNO001</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <h3 class="text-sm font-semibold mb-2">Tags</h3>
+                            <div id="info-tags" class="flex flex-wrap gap-1.5">
+                                <!-- Tags will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main document view area -->
+                <div class="flex-1 flex flex-col relative">
+                    <!-- Document content with scanned document preview -->
+                    <div class="flex-1 overflow-auto bg-neutral-100 p-6">
+                        <div id="document-container" class="bg-white document-shadow mx-auto my-4 transition-transform rounded-lg border overflow-hidden transform-center" style="width: 100%; max-width: 800px;">
+                            <!-- Document content will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Floating controls -->
+                    <div id="floating-controls" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center bg-white rounded-full floating-controls border px-2 py-1.5 z-10">
+                        <button id="prev-page-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                            <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                        </button>
+
+                        <div id="page-indicator" class="px-3 text-sm font-medium">1 / 5</div>
+
+                        <button id="next-page-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                            <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                        </button>
+
+                        <div class="h-5 w-px bg-gray-200 mx-1"></div>
+
+                        <button id="zoom-out-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                            <i data-lucide="zoom-out" class="h-4 w-4"></i>
+                        </button>
+
+                        <div id="zoom-level" class="px-2 text-xs font-medium">100%</div>
+
+                        <button id="zoom-in-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                            <i data-lucide="zoom-in" class="h-4 w-4"></i>
+                        </button>
+
+                        <div class="h-5 w-px bg-gray-200 mx-1"></div>
+
+                        <button id="rotate-btn" class="bg-transparent hover:bg-gray-100 rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                            <i data-lucide="rotate-cw" class="h-4 w-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Sample document data
+        const documentData = {
+            id: "FILE-2023-001",
+            fileName: "Alhaji Ibrahim Dantata",
+            fileNumber: "RES-86-2244",
+            kangisFileNo: "KNGP 00338",
+            newKangisFileNo: "KNO001",
+            fileType: "Certificate of Occupancy",
+            fileSize: "2.4 MB",
+            fileFormat: "PDF",
+            uploadedBy: "Admin User",
+            uploadDate: "2023-01-15",
+            lastAccessed: "2023-06-10",
+            status: "Active",
+            tags: ["Residential", "Certificate", "Nasarawa"],
+            pages: [
+                {
+                    id: "page-001",
+                    title: "Cover Page",
+                    type: "File Cover",
+                    subType: "New File Cover",
+                    pageCode: "KNGP 00338-1-1-01",
+                    content: "Certificate of Occupancy - Cover Page",
+                    image: "https://via.placeholder.com/800x1000?text=Cover+Page"
+                },
+                {
+                    id: "page-002",
+                    title: "Application Form",
+                    type: "Application",
+                    subType: "Certificate of Occupancy",
+                    pageCode: "KNGP 00338-2-3-02",
+                    content: "Application for Certificate of Occupancy",
+                    image: "https://via.placeholder.com/800x1000?text=Application+Form"
+                },
+                {
+                    id: "page-003",
+                    title: "Personal Information",
+                    type: "Application",
+                    subType: "Certificate of Occupancy",
+                    pageCode: "KNGP 00338-2-3-03",
+                    content: "Applicant: Alhaji Ibrahim Dantata\nAddress: 15 Kano Road, Nasarawa\nPhone: 080-XXX-XXXX",
+                    image: "https://via.placeholder.com/800x1000?text=Personal+Information"
+                },
+                {
+                    id: "page-004",
+                    title: "Property Details",
+                    type: "Land Title",
+                    subType: "Certificate of Occupancy",
+                    pageCode: "KNGP 00338-5-5-04",
+                    content: "Plot Number: RES-86-2244\nLocation: Nasarawa District\nSize: 1000 sq meters\nLand Use: Residential",
+                    image: "https://via.placeholder.com/800x1000?text=Property+Details"
+                },
+                {
+                    id: "page-005",
+                    title: "Survey Plan",
+                    type: "Survey",
+                    subType: "Survey Plan",
+                    pageCode: "KNGP 00338-9-25-05",
+                    content: "Survey Plan for Plot RES-86-2244",
+                    image: "https://via.placeholder.com/800x1000?text=Survey+Plan"
+                }
+            ]
+        };
+
+        // State management
+        let currentPage = 0;
+        let zoomLevel = 100;
+        let rotation = 0;
+        let isStarred = false;
+        let isFullscreen = false;
+
+        // DOM elements
+        const documentViewer = document.getElementById('document-viewer');
+        const closeBtn = document.getElementById('close-btn');
+        const starBtn = document.getElementById('star-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const pagesTab = document.getElementById('pages-tab');
+        const infoTab = document.getElementById('info-tab');
+        const pagesContent = document.getElementById('pages-content');
+        const infoContent = document.getElementById('info-content');
+        const prevPageBtn = document.getElementById('prev-page-btn');
+        const nextPageBtn = document.getElementById('next-page-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomLevelDisplay = document.getElementById('zoom-level');
+        const rotateBtn = document.getElementById('rotate-btn');
+        const documentContainer = document.getElementById('document-container');
+        const documentTitle = document.getElementById('document-title');
+        const documentStatus = document.getElementById('document-status');
+
+        // Initialize the document viewer
+        function initDocumentViewer() {
+            // Set document info
+            documentTitle.textContent = documentData.fileName;
+            documentStatus.textContent = documentData.status;
+            
+            // Set info tab content
+            document.getElementById('info-format').textContent = documentData.fileFormat;
+            document.getElementById('info-size').textContent = documentData.fileSize;
+            document.getElementById('info-pages').textContent = documentData.pages.length;
+            document.getElementById('info-uploaded').textContent = documentData.uploadDate;
+            document.getElementById('info-last-accessed').textContent = documentData.lastAccessed;
+            document.getElementById('info-file-number').textContent = documentData.fileNumber;
+            document.getElementById('info-kangis').textContent = documentData.kangisFileNo;
+            document.getElementById('info-new-kangis').textContent = documentData.newKangisFileNo;
+            
+            // Add tags
+            const tagsContainer = document.getElementById('info-tags');
+            tagsContainer.innerHTML = '';
+            documentData.tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded';
+                tagElement.textContent = tag;
+                tagsContainer.appendChild(tagElement);
+            });
+            
+            // Add pages
+            pagesContent.innerHTML = '';
+            documentData.pages.forEach((page, index) => {
+                const pageElement = document.createElement('div');
+                pageElement.className = `flex items-start p-2 rounded-md cursor-pointer transition-colors ${
+                    index === currentPage ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'
+                }`;
+                pageElement.innerHTML = `
+                    <div class="w-10 h-14 bg-white border flex items-center justify-center mr-3 flex-shrink-0 rounded shadow-sm">
+                        <div class="text-xs font-medium text-gray-500">${index + 1}</div>
+                    </div>
+                    <div class="flex-1 min-w-0 pt-1">
+                        <div class="text-sm font-medium truncate">${page.title}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">${page.type}</div>
+                        <div class="text-xs text-gray-400 mt-1 font-mono">${page.pageCode}</div>
+                    </div>
+                `;
+                pageElement.addEventListener('click', () => goToPage(index));
+                pagesContent.appendChild(pageElement);
+            });
+            
+            // Load first page
+            loadPage(currentPage);
+        }
+
+        // Load a specific page
+        function loadPage(pageIndex) {
+            const page = documentData.pages[pageIndex];
+            if (!page) return;
+            
+            documentContainer.innerHTML = `
+                <div>
+                    <!-- Document metadata header -->
+                    <div class="flex justify-between items-start p-4 border-b bg-gray-50">
+                        <div>
+                            <h2 class="text-lg font-bold">${page.title}</h2>
+                            <div class="flex items-center mt-1">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded mr-2">${page.type}</span>
+                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded border">${page.subType}</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 bg-white px-3 py-1 rounded border">
+                            Page ${pageIndex + 1} of ${documentData.pages.length}
+                        </div>
+                    </div>
+
+                    <!-- Actual document image -->
+                    <div class="p-4">
+                        <img src="${page.image}" alt="${page.title}" class="w-full h-auto object-contain border shadow-sm rounded">
+                    </div>
+
+                    <!-- Document page code footer -->
+                    <div class="px-4 py-2 text-xs text-gray-500 border-t bg-gray-50">
+                        Page Code: <span class="font-mono">${page.pageCode}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update page indicator
+            pageIndicator.textContent = `${pageIndex + 1} / ${documentData.pages.length}`;
+            
+            // Update buttons state
+            prevPageBtn.disabled = pageIndex === 0;
+            nextPageBtn.disabled = pageIndex === documentData.pages.length - 1;
+            
+            // Apply current zoom and rotation
+            updateDocumentTransform();
+        }
+
+        // Update document transform based on zoom and rotation
+        function updateDocumentTransform() {
+            documentContainer.style.transform = `scale(${zoomLevel / 100}) rotate(${rotation}deg)`;
+            zoomLevelDisplay.textContent = `${zoomLevel}%`;
+        }
+
+        // Go to specific page
+        function goToPage(pageIndex) {
+            if (pageIndex >= 0 && pageIndex < documentData.pages.length) {
+                currentPage = pageIndex;
+                loadPage(currentPage);
+                
+                // Update active page in sidebar
+                const pageElements = pagesContent.querySelectorAll('div');
+                pageElements.forEach((el, idx) => {
+                    if (idx === pageIndex) {
+                        el.className = 'flex items-start p-2 rounded-md cursor-pointer transition-colors bg-blue-50 border border-blue-200';
+                    } else {
+                        el.className = 'flex items-start p-2 rounded-md cursor-pointer transition-colors hover:bg-gray-50 border border-transparent';
+                    }
+                });
+            }
+        }
+
+        // Next page
+        function nextPage() {
+            if (currentPage < documentData.pages.length - 1) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        // Previous page
+        function prevPage() {
+            if (currentPage > 0) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        // Zoom in
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 25, 200);
+            updateDocumentTransform();
+        }
+
+        // Zoom out
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 25, 50);
+            updateDocumentTransform();
+        }
+
+        // Rotate
+        function rotateDoc() {
+            rotation = (rotation + 90) % 360;
+            updateDocumentTransform();
+        }
+
+        // Toggle star
+        function toggleStar() {
+            isStarred = !isStarred;
+            const starIcon = starBtn.querySelector('i');
+            if (isStarred) {
+                starIcon.classList.add('fill-yellow-400', 'text-yellow-400');
+            } else {
+                starIcon.classList.remove('fill-yellow-400', 'text-yellow-400');
+            }
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+            const viewerDialog = documentViewer.querySelector('div');
+            
+            if (isFullscreen) {
+                viewerDialog.classList.remove('max-w-[90vw]', 'max-h-[90vh]');
+                viewerDialog.classList.add('w-screen', 'h-screen', 'rounded-none');
+                fullscreenBtn.innerHTML = '<i data-lucide="minimize-2" class="h-4 w-4"></i>';
+            } else {
+                viewerDialog.classList.add('max-w-[90vw]', 'max-h-[90vh]');
+                viewerDialog.classList.remove('w-screen', 'h-screen', 'rounded-none');
+                fullscreenBtn.innerHTML = '<i data-lucide="maximize-2" class="h-4 w-4"></i>';
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Toggle tabs
+        function toggleTab(tab) {
+            if (tab === 'pages') {
+                pagesTab.classList.add('bg-white', 'border');
+                infoTab.classList.remove('bg-white', 'border');
+                pagesContent.classList.remove('hidden');
+                infoContent.classList.add('hidden');
+            } else {
+                infoTab.classList.add('bg-white', 'border');
+                pagesTab.classList.remove('bg-white', 'border');
+                infoContent.classList.remove('hidden');
+                pagesContent.classList.add('hidden');
+            }
+        }
+
+        // Event listeners
+        closeBtn.addEventListener('click', () => {
+            documentViewer.classList.add('hidden');
+        });
+
+        starBtn.addEventListener('click', toggleStar);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        pagesTab.addEventListener('click', () => toggleTab('pages'));
+        infoTab.addEventListener('click', () => toggleTab('info'));
+        prevPageBtn.addEventListener('click', prevPage);
+        nextPageBtn.addEventListener('click', nextPage);
+        zoomOutBtn.addEventListener('click', zoomOut);
+        zoomInBtn.addEventListener('click', zoomIn);
+        rotateBtn.addEventListener('click', rotateDoc);
+
+        // Function to open the viewer (can be called from outside)
+        window.openDocumentViewer = function() {
+            documentViewer.classList.remove('hidden');
+            initDocumentViewer();
+        };
+    </script>
+
+    <!-- Demo button to open the viewer -->
+    <div class="p-8">
+        <button onclick="openDocumentViewer()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            Open Document Viewer
+        </button>
+    </div>
+</body>
+</html>
