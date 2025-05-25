@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrument Registration Form - KLAS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles */
+        :root {
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+            --muted: #f3f4f6;
+            --muted-foreground: #6b7280;
+            --border: #e5e7eb;
+            --ring: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --destructive: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #0f172a;
+            background-color: #f8fafc;
+        }
+
+        /* Card styles */
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: #374151;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--muted);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: #374151;
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--muted);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Input styles */
+        .input {
+            display: block;
+            width: 100%;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            background-color: white;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .input:read-only {
+            background-color: var(--muted);
+        }
+
+        /* Select styles */
+        .select {
+            display: block;
+            width: 100%;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .select:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Textarea styles */
+        .textarea {
+            display: block;
+            width: 100%;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            background-color: white;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Dialog styles */
+        .dialog-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .dialog-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 1rem;
+        }
+
+        /* Checkbox styles */
+        .checkbox {
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .checkbox:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Label styles */
+        .label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        /* Animation classes */
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Utility classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .ml-2 { margin-left: 0.5rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .pb-3 { padding-bottom: 0.75rem; }
+        .pt-2 { padding-top: 0.5rem; }
+        .pt-4 { padding-top: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .space-x-6 > * + * { margin-left: 1.5rem; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .w-full { width: 100%; }
+        .h-4 { height: 1rem; }
+        .h-5 { height: 1.25rem; }
+        .h-8 { height: 2rem; }
+        .h-10 { height: 2.5rem; }
+        .h-16 { height: 4rem; }
+        .h-24 { height: 6rem; }
+        .w-4 { width: 1rem; }
+        .w-5 { width: 1.25rem; }
+        .w-8 { width: 2rem; }
+        .w-10 { width: 2.5rem; }
+        .w-12 { width: 3rem; }
+        .w-16 { width: 4rem; }
+        .min-h-screen { min-height: 100vh; }
+        .max-w-xs { max-width: 20rem; }
+        .max-h-48 { max-height: 12rem; }
+        .overflow-y-auto { overflow-y: auto; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .top-0 { top: 0; }
+        .left-0 { left: 0; }
+        .right-0 { right: 0; }
+        .bottom-0 { bottom: 0; }
+        .border { border-width: 1px; }
+        .border-b { border-bottom-width: 1px; }
+        .border-t { border-top-width: 1px; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-gray-300 { border-color: #d1d5db; }
+        .rounded { border-radius: 0.25rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .bg-white { background-color: white; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .bg-muted { background-color: var(--muted); }
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-500 { color: #6b7280; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-900 { color: #111827; }
+        .text-blue-600 { color: #2563eb; }
+        .text-muted-foreground { color: var(--muted-foreground); }
+        .cursor-pointer { cursor: pointer; }
+        .cursor-help { cursor: help; }
+        .select-none { user-select: none; }
+
+        /* Date picker styles */
+        .date-picker {
+            position: relative;
+        }
+
+        .date-picker-input {
+            cursor: pointer;
+        }
+
+        .date-picker-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            padding: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive design */
+        @media (min-width: 768px) {
+            .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Main Page Content -->
+    <div class="min-h-screen p-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="card p-6">
+                <h1 class="text-2xl font-bold mb-4">Instrument Registration System</h1>
+                <p class="text-gray-600 mb-6">Select an instrument type to register</p>
+                
+                <!-- Instrument Type Selection - All 12 Types -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="power-of-attorney">
+                        <h3 class="font-medium">Power of Attorney</h3>
+                        <p class="text-sm text-gray-600">General power of attorney document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="irrevocable-power-of-attorney">
+                        <h3 class="font-medium">Irrevocable Power of Attorney</h3>
+                        <p class="text-sm text-gray-600">Irrevocable power of attorney document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-mortgage">
+                        <h3 class="font-medium">Deed of Mortgage</h3>
+                        <p class="text-sm text-gray-600">Mortgage agreement document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="tripartite-mortgage">
+                        <h3 class="font-medium">Tripartite Mortgage</h3>
+                        <p class="text-sm text-gray-600">Three-party mortgage agreement</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-assignment">
+                        <h3 class="font-medium">Deed of Assignment</h3>
+                        <p class="text-sm text-gray-600">Property assignment document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-lease">
+                        <h3 class="font-medium">Deed of Lease</h3>
+                        <p class="text-sm text-gray-600">Property lease agreement</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-sub-lease">
+                        <h3 class="font-medium">Deed of Sub-Lease</h3>
+                        <p class="text-sm text-gray-600">Sub-lease agreement document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-sub-under-lease">
+                        <h3 class="font-medium">Deed of Sub-Under-Lease</h3>
+                        <p class="text-sm text-gray-600">Sub-under-lease agreement</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-sub-division">
+                        <h3 class="font-medium">Deed of Sub-Division</h3>
+                        <p class="text-sm text-gray-600">Property subdivision document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-merger">
+                        <h3 class="font-medium">Deed of Merger</h3>
+                        <p class="text-sm text-gray-600">Property merger document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-surrender">
+                        <h3 class="font-medium">Deed of Surrender</h3>
+                        <p class="text-sm text-gray-600">Property surrender document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-assent">
+                        <h3 class="font-medium">Deed of Assent</h3>
+                        <p class="text-sm text-gray-600">Estate assent document</p>
+                    </button>
+                    <button class="instrument-type-btn p-4 border rounded-lg hover:bg-gray-50 text-left" data-type="deed-of-release">
+                        <h3 class="font-medium">Deed of Release</h3>
+                        <p class="text-sm text-gray-600">Property release document</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrument Registration Form Dialog -->
+    <div id="registration-dialog" class="dialog-backdrop hidden">
+        <div class="dialog-content animate-fade-in">
+            <div class="p-6 border-b">
+                <h2 id="dialog-title" class="text-lg font-semibold">Register Instrument</h2>
+                <p class="text-sm text-gray-600">Enter the details for the new instrument</p>
+            </div>
+            
+            <form id="registration-form" class="p-6 space-y-6">
+                <!-- File Number Section -->
+                <div class="space-y-4 border rounded-md p-4 bg-gray-50">
+                    <h3 class="text-lg font-medium">File Number</h3>
+                    
+                    <div class="flex items-center space-x-2 mb-4">
+                        <input type="checkbox" id="isTemporaryFileNo" class="checkbox">
+                        <label for="isTemporaryFileNo" class="label">
+                            This application has no Extant File Number (Use Temporary File Number)
+                        </label>
+                        <i data-lucide="info" class="h-4 w-4 text-gray-400 cursor-help" title="For applications without an existing file number, a temporary file number will be generated."></i>
+                    </div>
+
+                    <div id="temporary-file-section" class="space-y-2 hidden">
+                        <label for="temporaryFileNo" class="label">Temporary File Number</label>
+                        <div class="flex gap-2">
+                            <input id="temporaryFileNo" name="temporaryFileNo" class="input bg-muted" readonly>
+                            <button type="button" id="regenerate-temp-btn" class="btn btn-outline">Regenerate</button>
+                        </div>
+                        <p class="text-xs text-gray-500">This temporary file number will be used until a permanent file number is assigned.</p>
+                    </div>
+
+                    <div id="regular-file-section" class="space-y-4">
+                        <div class="space-y-2">
+                            <label for="fileNumberType" class="label">File Number Type</label>
+                            <select id="fileNumberType" class="select">
+                                <option value="mlsFileNo">MLSF Number</option>
+                                <option value="kangisFileNo">KANGIS File Number</option>
+                                <option value="newKangisFileNo">New KANGIS File Number</option>
+                            </select>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="filePrefix" class="label">File Prefix</label>
+                                <input id="filePrefix" name="filePrefix" class="input" placeholder="e.g., RES">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="fileSerialNo" class="label">Serial Number</label>
+                                <input id="fileSerialNo" name="fileSerialNo" class="input" placeholder="e.g., 2023-001">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="fileNo" class="label">Generated File Number</label>
+                            <input id="fileNo" name="fileNo" class="input bg-muted" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Details Section -->
+                <div class="space-y-4 border rounded-md p-4 bg-gray-50">
+                    <h3 class="text-lg font-medium">Registration Details</h3>
+                    
+                    <div id="reg-no-section" class="space-y-2 hidden">
+                        <label for="regNo" class="label">Registration Number (ROOT TITLE)</label>
+                        <input id="regNo" name="regNo" value="0/0/0" readonly class="input bg-muted">
+                        <p class="text-xs text-gray-500">Customary Titles are registered as ROOT TITLES with Registration Number 0/0/0 by default.</p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="rootRegNo" class="label">Root Registration Number</label>
+                        <input id="rootRegNo" name="rootRegNo" class="input" placeholder="Enter root registration number">
+                    </div>
+                </div>
+
+                <!-- First Party Section -->
+                <div class="border rounded-md p-4 bg-gray-50">
+                    <h3 id="first-party-title" class="text-lg font-medium mb-3">Grantor Information</h3>
+                    
+                    <div class="space-y-2 mb-4">
+                        <label for="firstPartyName" id="first-party-label" class="label">Grantor Name</label>
+                        <input id="firstPartyName" name="firstPartyName" class="input" placeholder="Enter grantor's full name">
+                    </div>
+
+                    <div class="space-y-3 border rounded-md p-3 bg-white">
+                        <h4 class="font-medium">Grantor Address</h4>
+                        <div class="space-y-2">
+                            <label for="firstPartyStreet" class="label">Street Address</label>
+                            <input id="firstPartyStreet" name="firstPartyStreet" class="input" placeholder="Enter street address">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-2">
+                                <label for="firstPartyCity" class="label">City</label>
+                                <input id="firstPartyCity" name="firstPartyCity" class="input" placeholder="Enter city">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="firstPartyState" class="label">State</label>
+                                <input id="firstPartyState" name="firstPartyState" class="input" placeholder="Enter state">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-2">
+                                <label for="firstPartyPostalCode" class="label">Postal Code</label>
+                                <input id="firstPartyPostalCode" name="firstPartyPostalCode" class="input" placeholder="Enter postal code">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="firstPartyCountry" class="label">Country</label>
+                                <input id="firstPartyCountry" name="firstPartyCountry" class="input" placeholder="Enter country">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Party Section -->
+                <div class="border rounded-md p-4 bg-gray-50">
+                    <h3 id="second-party-title" class="text-lg font-medium mb-3">Grantee Information</h3>
+                    
+                    <div class="space-y-2 mb-4">
+                        <label for="secondPartyName" id="second-party-label" class="label">Grantee Name</label>
+                        <input id="secondPartyName" name="secondPartyName" class="input" placeholder="Enter grantee's full name">
+                    </div>
+
+                    <div class="space-y-3 border rounded-md p-3 bg-white">
+                        <h4 class="font-medium">Grantee Address</h4>
+                        <div class="space-y-2">
+                            <label for="secondPartyStreet" class="label">Street Address</label>
+                            <input id="secondPartyStreet" name="secondPartyStreet" class="input" placeholder="Enter street address">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-2">
+                                <label for="secondPartyCity" class="label">City</label>
+                                <input id="secondPartyCity" name="secondPartyCity" class="input" placeholder="Enter city">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="secondPartyState" class="label">State</label>
+                                <input id="secondPartyState" name="secondPartyState" class="input" placeholder="Enter state">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-2">
+                                <label for="secondPartyPostalCode" class="label">Postal Code</label>
+                                <input id="secondPartyPostalCode" name="secondPartyPostalCode" class="input" placeholder="Enter postal code">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="secondPartyCountry" class="label">Country</label>
+                                <input id="secondPartyCountry" name="secondPartyCountry" class="input" placeholder="Enter country">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solicitor Information Section -->
+                <div class="border rounded-md p-4 bg-gray-50">
+                    <h3 class="text-lg font-medium mb-3">Solicitor Information</h3>
+                    
+                    <div class="space-y-2 mb-4">
+                        <label for="solicitorName" class="label">Solicitor Name</label>
+                        <input id="solicitorName" name="solicitorName" class="input" placeholder="Enter solicitor's full name">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="solicitorAddress" class="label">Solicitor Address</label>
+                        <textarea id="solicitorAddress" name="solicitorAddress" class="textarea" placeholder="Enter solicitor's complete address"></textarea>
+                    </div>
+                </div>
+
+                <!-- Property Details Section -->
+                <div class="border rounded-md p-4 bg-gray-50">
+                    <h3 class="text-lg font-medium mb-3">Property Details</h3>
+                    
+                    <div class="space-y-2">
+                        <label for="plotDescription" class="label">Plot Description</label>
+                        <textarea id="plotDescription" name="plotDescription" class="textarea" placeholder="Enter plot description"></textarea>
+                    </div>
+
+                    <div class="space-y-2 mt-4">
+                        <label for="plotSize" class="label">Plot Size</label>
+                        <input id="plotSize" name="plotSize" class="input" placeholder="Enter plot size (e.g., 100 x 50 meters)">
+                    </div>
+
+                    <div class="flex items-center space-x-2 mt-4">
+                        <input type="checkbox" id="surveyInfo" class="checkbox">
+                        <label for="surveyInfo" class="label">Include Survey Information</label>
+                    </div>
+
+                    <div id="survey-info-section" class="space-y-4 mt-4 border-t pt-4 hidden">
+                        <h4 class="font-medium">Survey Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="lga" class="label">LGA (Local Government Area)</label>
+                                <select id="lga" name="lga" class="select">
+                                    <option value="">Select LGA</option>
+                                    <option value="Ajingi">Ajingi</option>
+                                    <option value="Albasu">Albasu</option>
+                                    <option value="Bagwai">Bagwai</option>
+                                    <option value="Bebeji">Bebeji</option>
+                                    <option value="Bichi">Bichi</option>
+                                    <option value="Bunkure">Bunkure</option>
+                                    <option value="Dala">Dala</option>
+                                    <option value="Dambatta">Dambatta</option>
+                                    <option value="Dawaki Kudu">Dawaki Kudu</option>
+                                    <option value="Dawaki Tofa">Dawaki Tofa</option>
+                                    <option value="Doguwa">Doguwa</option>
+                                    <option value="Fagge">Fagge</option>
+                                    <option value="Gabasawa">Gabasawa</option>
+                                    <option value="Garko">Garko</option>
+                                    <option value="Garun Mallam">Garun Mallam</option>
+                                    <option value="Gaya">Gaya</option>
+                                    <option value="Gezawa">Gezawa</option>
+                                    <option value="Gwale">Gwale</option>
+                                    <option value="Gwarzo">Gwarzo</option>
+                                    <option value="Kabo">Kabo</option>
+                                    <option value="Kano Municipal">Kano Municipal</option>
+                                    <option value="Karaye">Karaye</option>
+                                    <option value="Kibiya">Kibiya</option>
+                                    <option value="Kiru">Kiru</option>
+                                    <option value="Kumbotso">Kumbotso</option>
+                                    <option value="Kunchi">Kunchi</option>
+                                    <option value="Kura">Kura</option>
+                                    <option value="Madobi">Madobi</option>
+                                    <option value="Makoda">Makoda</option>
+                                    <option value="Minjibir">Minjibir</option>
+                                    <option value="Nasarawa">Nasarawa</option>
+                                    <option value="Rano">Rano</option>
+                                    <option value="Rimin Gado">Rimin Gado</option>
+                                    <option value="Rogo">Rogo</option>
+                                    <option value="Shanono">Shanono</option>
+                                    <option value="Sumaila">Sumaila</option>
+                                    <option value="Takai">Takai</option>
+                                    <option value="Tarauni">Tarauni</option>
+                                    <option value="Tofa">Tofa</option>
+                                    <option value="Tsanyawa">Tsanyawa</option>
+                                    <option value="Tudun Wada">Tudun Wada</option>
+                                    <option value="Ungogo">Ungogo</option>
+                                    <option value="Warawa">Warawa</option>
+                                    <option value="Wudil">Wudil</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="district" class="label">District</label>
+                                <input id="district" name="district" class="input" placeholder="Enter district">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="plotNumber" class="label">Plot Number</label>
+                                <input id="plotNumber" name="plotNumber" class="input" placeholder="Enter plot number">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instrument-Specific Fields Section -->
+                <div id="instrument-specific-section" class="border rounded-md p-4 bg-gray-50">
+                    <h3 class="text-lg font-medium mb-3">Additional Details</h3>
+                    
+                    <div id="instrument-fields" class="space-y-4">
+                        <!-- Dynamic fields will be inserted here -->
+                    </div>
+
+                    <!-- Registration Dates -->
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="font-medium mb-3">Registration Dates</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="registrationDate" class="label">Registration Date</label>
+                                <div class="date-picker">
+                                    <input id="registrationDate" name="registrationDate" type="date" class="input date-picker-input">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="entryDate" class="label">Entry Date</label>
+                                <div class="date-picker">
+                                    <input id="entryDate" name="entryDate" type="date" class="input date-picker-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="p-6 border-t flex justify-end gap-2">
+                <button type="button" id="cancel-btn" class="btn btn-outline">Cancel</button>
+                <button type="button" id="submit-btn" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // State management
+        let currentInstrumentType = null;
+        let tempFileCounter = 1;
+
+        // Complete instrument type definitions for all 12 types
+        const instrumentTypes = {
+            'power-of-attorney': {
+                id: 'power-of-attorney',
+                name: 'Power of Attorney',
+                firstParty: 'Grantor',
+                secondParty: 'Grantee'
+            },
+            'irrevocable-power-of-attorney': {
+                id: 'irrevocable-power-of-attorney',
+                name: 'Irrevocable Power of Attorney',
+                firstParty: 'Grantor',
+                secondParty: 'Grantee'
+            },
+            'deed-of-mortgage': {
+                id: 'deed-of-mortgage',
+                name: 'Deed of Mortgage',
+                firstParty: 'Mortgagor',
+                secondParty: 'Mortgagee'
+            },
+            'tripartite-mortgage': {
+                id: 'tripartite-mortgage',
+                name: 'Tripartite Mortgage',
+                firstParty: 'Mortgagor',
+                secondParty: 'Mortgagee'
+            },
+            'deed-of-assignment': {
+                id: 'deed-of-assignment',
+                name: 'Deed of Assignment',
+                firstParty: 'Assignor',
+                secondParty: 'Assignee'
+            },
+            'deed-of-lease': {
+                id: 'deed-of-lease',
+                name: 'Deed of Lease',
+                firstParty: 'Lessor',
+                secondParty: 'Lessee'
+            },
+            'deed-of-sub-lease': {
+                id: 'deed-of-sub-lease',
+                name: 'Deed of Sub-Lease',
+                firstParty: 'Sub-Lessor',
+                secondParty: 'Sub-Lessee'
+            },
+            'deed-of-sub-under-lease': {
+                id: 'deed-of-sub-under-lease',
+                name: 'Deed of Sub-Under-Lease',
+                firstParty: 'Sub-Under-Lessor',
+                secondParty: 'Sub-Under-Lessee'
+            },
+            'deed-of-sub-division': {
+                id: 'deed-of-sub-division',
+                name: 'Deed of Sub-Division',
+                firstParty: 'Subdivider',
+                secondParty: 'Beneficiary'
+            },
+            'deed-of-merger': {
+                id: 'deed-of-merger',
+                name: 'Deed of Merger',
+                firstParty: 'Merging Party',
+                secondParty: 'Receiving Party'
+            },
+            'deed-of-surrender': {
+                id: 'deed-of-surrender',
+                name: 'Deed of Surrender',
+                firstParty: 'Surrenderer',
+                secondParty: 'Recipient'
+            },
+            'deed-of-assent': {
+                id: 'deed-of-assent',
+                name: 'Deed of Assent',
+                firstParty: 'Executor/Administrator',
+                secondParty: 'Beneficiary'
+            },
+            'deed-of-release': {
+                id: 'deed-of-release',
+                name: 'Deed of Release',
+                firstParty: 'Releasor',
+                secondParty: 'Releasee'
+            }
+        };
+
+        // DOM elements
+        const elements = {
+            registrationDialog: document.getElementById('registration-dialog'),
+            dialogTitle: document.getElementById('dialog-title'),
+            registrationForm: document.getElementById('registration-form'),
+            cancelBtn: document.getElementById('cancel-btn'),
+            submitBtn: document.getElementById('submit-btn'),
+            isTemporaryFileNo: document.getElementById('isTemporaryFileNo'),
+            temporaryFileSection: document.getElementById('temporary-file-section'),
+            regularFileSection: document.getElementById('regular-file-section'),
+            temporaryFileNo: document.getElementById('temporaryFileNo'),
+            regenerateTempBtn: document.getElementById('regenerate-temp-btn'),
+            fileNumberType: document.getElementById('fileNumberType'),
+            filePrefix: document.getElementById('filePrefix'),
+            fileSerialNo: document.getElementById('fileSerialNo'),
+            fileNo: document.getElementById('fileNo'),
+            regNoSection: document.getElementById('reg-no-section'),
+            firstPartyTitle: document.getElementById('first-party-title'),
+            firstPartyLabel: document.getElementById('first-party-label'),
+            secondPartyTitle: document.getElementById('second-party-title'),
+            secondPartyLabel: document.getElementById('second-party-label'),
+            surveyInfo: document.getElementById('surveyInfo'),
+            surveyInfoSection: document.getElementById('survey-info-section'),
+            instrumentFields: document.getElementById('instrument-fields')
+        };
+
+        // Helper functions
+        function generateTemporaryFileNo() {
+            const paddedCounter = String(tempFileCounter).padStart(4, '0');
+            tempFileCounter++;
+            return `TEMP-${paddedCounter}`;
+        }
+
+        function formatFileNumber(type, prefix, serialNo) {
+            if (!prefix || !serialNo) return '';
+            
+            switch (type) {
+                case 'mlsFileNo':
+                    return `${prefix}-${serialNo}`;
+                case 'kangisFileNo':
+                    return `${prefix} ${serialNo}`;
+                case 'newKangisFileNo':
+                    return `${prefix}${serialNo}`;
+                default:
+                    return `${prefix}-${serialNo}`;
+            }
+        }
+
+        function updatePartyLabels(instrumentType) {
+            const type = instrumentTypes[instrumentType];
+            if (!type) return;
+
+            elements.firstPartyTitle.textContent = `${type.firstParty} Information`;
+            elements.firstPartyLabel.textContent = `${type.firstParty} Name`;
+            elements.secondPartyTitle.textContent = `${type.secondParty} Information`;
+            elements.secondPartyLabel.textContent = `${type.secondParty} Name`;
+
+            // Update placeholders
+            document.getElementById('firstPartyName').placeholder = `Enter ${type.firstParty.toLowerCase()}'s full name`;
+            document.getElementById('secondPartyName').placeholder = `Enter ${type.secondParty.toLowerCase()}'s full name`;
+        }
+
+        function renderInstrumentSpecificFields(instrumentType) {
+            const fieldsContainer = elements.instrumentFields;
+            fieldsContainer.innerHTML = '';
+
+            switch (instrumentType) {
+                case 'power-of-attorney':
+                case 'irrevocable-power-of-attorney':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="duration" class="label">Duration</label>
+                            <input id="duration" name="duration" class="input" placeholder="Enter duration (e.g., 5 years)">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-mortgage':
+                case 'tripartite-mortgage':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="bankName" class="label">Bank Name</label>
+                            <input id="bankName" name="bankName" class="input" placeholder="Enter bank name">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="mortgageDate" class="label">Mortgage Date</label>
+                            <input id="mortgageDate" name="mortgageDate" type="date" class="input">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="governorSignDate" class="label">Governor Sign Date</label>
+                            <input id="governorSignDate" name="governorSignDate" type="date" class="input">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-assignment':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="assignmentTerm" class="label">Assignment Term</label>
+                            <input id="assignmentTerm" name="assignmentTerm" class="input" placeholder="Enter assignment term">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoDate" class="label">CofO Date</label>
+                            <input id="cofoDate" name="cofoDate" type="date" class="input">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoRegParticulars" class="label">CofO Reg Particulars</label>
+                            <input id="cofoRegParticulars" name="cofoRegParticulars" class="input" placeholder="Enter CofO registration particulars">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoTerm" class="label">CofO Term</label>
+                            <input id="cofoTerm" name="cofoTerm" class="input" placeholder="Enter CofO term">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoTermStartDate" class="label">CofO Term Start Date</label>
+                            <input id="cofoTermStartDate" name="cofoTermStartDate" type="date" class="input">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-lease':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="leaseTerm" class="label">Lease Term</label>
+                            <input id="leaseTerm" name="leaseTerm" class="input" placeholder="Enter lease term (e.g., 99 years)">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="annualRent" class="label">Annual Rent</label>
+                            <input id="annualRent" name="annualRent" class="input" placeholder="Enter annual rent">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="chiefMagistrateSignDate" class="label">Chief Magistrate Sign Date</label>
+                            <input id="chiefMagistrateSignDate" name="chiefMagistrateSignDate" type="date" class="input">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-sub-lease':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="leaseTerm" class="label">Lease Term</label>
+                            <input id="leaseTerm" name="leaseTerm" class="input" placeholder="Enter lease term (e.g., 99 years)">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="subLeaseAmount" class="label">Sub-Lease Amount</label>
+                            <input id="subLeaseAmount" name="subLeaseAmount" class="input" placeholder="Enter sub-lease amount">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="assignmentTerm" class="label">Assignment Term</label>
+                            <input id="assignmentTerm" name="assignmentTerm" class="input" placeholder="Enter assignment term">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoDate" class="label">CofO Date</label>
+                            <input id="cofoDate" name="cofoDate" type="date" class="input">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoRegParticulars" class="label">CofO Reg Particulars</label>
+                            <input id="cofoRegParticulars" name="cofoRegParticulars" class="input" placeholder="Enter CofO registration particulars">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoTerm" class="label">CofO Term</label>
+                            <input id="cofoTerm" name="cofoTerm" class="input" placeholder="Enter CofO term">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="cofoTermStartDate" class="label">CofO Term Start Date</label>
+                            <input id="cofoTermStartDate" name="cofoTermStartDate" type="date" class="input">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-sub-under-lease':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="leaseTerm" class="label">Lease Term</label>
+                            <input id="leaseTerm" name="leaseTerm" class="input" placeholder="Enter lease term (e.g., 99 years)">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="leaseAmount" class="label">Lease Amount</label>
+                            <input id="leaseAmount" name="leaseAmount" class="input" placeholder="Enter lease amount">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-sub-division':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="numberOfPlots" class="label">Number of Plots</label>
+                            <input id="numberOfPlots" name="numberOfPlots" type="number" class="input" placeholder="Enter number of plots">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="originalPlotSize" class="label">Original Plot Size</label>
+                            <input id="originalPlotSize" name="originalPlotSize" class="input" placeholder="Enter original plot size">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-merger':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="mergingProperties" class="label">Merging Properties</label>
+                            <input id="mergingProperties" name="mergingProperties" class="input" placeholder="Enter merging properties">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="resultingProperty" class="label">Resulting Property</label>
+                            <input id="resultingProperty" name="resultingProperty" class="input" placeholder="Enter resulting property">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-surrender':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="surrenderReason" class="label">Reason for Surrender</label>
+                            <input id="surrenderReason" name="surrenderReason" class="input" placeholder="Enter reason for surrender">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="compensationAmount" class="label">Compensation Amount</label>
+                            <input id="compensationAmount" name="compensationAmount" class="input" placeholder="Enter compensation amount (if any)">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-assent':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="deceasedName" class="label">Deceased Name</label>
+                            <input id="deceasedName" name="deceasedName" class="input" placeholder="Enter deceased's full name">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="dateOfDeath" class="label">Date of Death</label>
+                            <input id="dateOfDeath" name="dateOfDeath" type="date" class="input">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="willReference" class="label">Will Reference</label>
+                            <input id="willReference" name="willReference" class="input" placeholder="Enter will reference number">
+                        </div>
+                    `;
+                    break;
+                case 'deed-of-release':
+                    fieldsContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <label for="bankName" class="label">Bank Name</label>
+                            <input id="bankName" name="bankName" class="input" placeholder="Enter bank name">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="releaseRegParticulars" class="label">Release Reg Particulars</label>
+                            <input id="releaseRegParticulars" name="releaseRegParticulars" class="input" placeholder="Enter release registration particulars">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="originalInstrumentRegParticulars" class="label">Original Instrument Reg Particulars</label>
+                            <input id="originalInstrumentRegParticulars" name="originalInstrumentRegParticulars" class="input" placeholder="Enter original instrument registration particulars">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="releaseAmount" class="label">Release Amount</label>
+                            <input id="releaseAmount" name="releaseAmount" class="input" placeholder="Enter release amount (if applicable)">
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        function openRegistrationDialog(instrumentType) {
+            currentInstrumentType = instrumentType;
+            const type = instrumentTypes[instrumentType];
+            
+            elements.dialogTitle.textContent = `Register ${type.name}`;
+            updatePartyLabels(instrumentType);
+            renderInstrumentSpecificFields(instrumentType);
+            
+            // Show/hide registration number section for power of attorney types
+            if (instrumentType === 'power-of-attorney' || instrumentType === 'irrevocable-power-of-attorney') {
+                elements.regNoSection.classList.remove('hidden');
+            } else {
+                elements.regNoSection.classList.add('hidden');
+            }
+            
+            elements.registrationDialog.classList.remove('hidden');
+        }
+
+        function closeRegistrationDialog() {
+            elements.registrationDialog.classList.add('hidden');
+            currentInstrumentType = null;
+            elements.registrationForm.reset();
+        }
+
+        function handleTemporaryFileNoChange() {
+            const isChecked = elements.isTemporaryFileNo.checked;
+            
+            if (isChecked) {
+                elements.temporaryFileSection.classList.remove('hidden');
+                elements.regularFileSection.classList.add('hidden');
+                elements.temporaryFileNo.value = generateTemporaryFileNo();
+            } else {
+                elements.temporaryFileSection.classList.add('hidden');
+                elements.regularFileSection.classList.remove('hidden');
+                elements.temporaryFileNo.value = '';
+            }
+        }
+
+        function updateFileNumber() {
+            const type = elements.fileNumberType.value;
+            const prefix = elements.filePrefix.value;
+            const serialNo = elements.fileSerialNo.value;
+            
+            elements.fileNo.value = formatFileNumber(type, prefix, serialNo);
+        }
+
+        function handleSurveyInfoChange() {
+            const isChecked = elements.surveyInfo.checked;
+            
+            if (isChecked) {
+                elements.surveyInfoSection.classList.remove('hidden');
+            } else {
+                elements.surveyInfoSection.classList.add('hidden');
+                // Clear survey fields
+                document.getElementById('lga').value = '';
+                document.getElementById('district').value = '';
+                document.getElementById('plotNumber').value = '';
+            }
+        }
+
+        function collectFormData() {
+            const formData = new FormData(elements.registrationForm);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Add instrument type
+            data.instrumentType = currentInstrumentType;
+            
+            // Add final file number
+            data.finalFileNo = elements.isTemporaryFileNo.checked ? 
+                elements.temporaryFileNo.value : 
+                elements.fileNo.value;
+            
+            return data;
+        }
+
+        function handleSubmit() {
+            const formData = collectFormData();
+            console.log('Form submitted:', formData);
+            
+            // Here you would typically send the data to a server
+            alert('Instrument registration submitted successfully!');
+            closeRegistrationDialog();
+        }
+
+        // Event listeners
+        document.querySelectorAll('.instrument-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-type');
+                openRegistrationDialog(type);
+            });
+        });
+
+        elements.cancelBtn.addEventListener('click', closeRegistrationDialog);
+        elements.submitBtn.addEventListener('click', handleSubmit);
+
+        elements.isTemporaryFileNo.addEventListener('change', handleTemporaryFileNoChange);
+        elements.regenerateTempBtn.addEventListener('click', () => {
+            elements.temporaryFileNo.value = generateTemporaryFileNo();
+        });
+
+        elements.fileNumberType.addEventListener('change', updateFileNumber);
+        elements.filePrefix.addEventListener('input', updateFileNumber);
+        elements.fileSerialNo.addEventListener('input', updateFileNumber);
+
+        elements.surveyInfo.addEventListener('change', handleSurveyInfoChange);
+
+        // Close dialog when clicking outside
+        elements.registrationDialog.addEventListener('click', (e) => {
+            if (e.target === elements.registrationDialog) {
+                closeRegistrationDialog();
+            }
+        });
+
+        // Set default dates to today
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('registrationDate').value = today;
+            document.getElementById('entryDate').value = today;
+        }
+
+        // Initialize the page
+        function init() {
+            setDefaultDates();
+            lucide.createIcons();
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
