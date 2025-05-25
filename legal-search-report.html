@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legal Search Report - KLAS</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- QR Code Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+    /* Custom styles */
+    :root {
+        --primary: #3b82f6;
+        --primary-foreground: #ffffff;
+        --muted: #f3f4f6;
+        --muted-foreground: #6b7280;
+        --border: #e5e7eb;
+        --ring: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --destructive: #ef4444;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #0f172a;
+        background-color: #f8fafc;
+    }
+
+    /* Card styles */
+    .card {
+        background-color: white;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--border);
+        color: #374151;
+    }
+
+    .btn-outline:hover {
+        background-color: var(--muted);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Badge styles */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    /* Table styles */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: left;
+        border: 1px solid var(--border);
+        vertical-align: top;
+    }
+
+    .table th {
+        font-weight: 500;
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        background-color: #f3f4f6;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--muted);
+    }
+
+    /* Animation classes */
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Utility classes */
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .ml-2 { margin-left: 0.5rem; }
+    .p-2 { padding: 0.5rem; }
+    .p-4 { padding: 1rem; }
+    .p-6 { padding: 1.5rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    .pt-3 { padding-top: 0.75rem; }
+    .pt-4 { padding-top: 1rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    .space-x-3 > * + * { margin-left: 0.75rem; }
+    .w-full { width: 100%; }
+    .w-10 { width: 2.5rem; }
+    .w-36 { width: 9rem; }
+    .w-48 { width: 12rem; }
+    .h-4 { height: 1rem; }
+    .h-10 { height: 2.5rem; }
+    .h-12 { height: 3rem; }
+    .max-h-80vh { max-height: 80vh; }
+    .overflow-y-auto { overflow-y: auto; }
+    .overflow-x-auto { overflow-x: auto; }
+    .flex-1 { flex: 1 1 0%; }
+    .inline-block { display: inline-block; }
+    .border { border-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    .border-2 { border-width: 2px; }
+    .border-black { border-color: #000000; }
+    .border-gray-300 { border-color: #d1d5db; }
+    .border-blue-900 { border-color: #1e3a8a; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-full { border-radius: 9999px; }
+    .bg-white { background-color: white; }
+    .bg-gray-100 { background-color: #f3f4f6; }
+    .bg-gray-200 { background-color: #e5e7eb; }
+    .bg-amber-100 { background-color: #fef3c7; }
+    .bg-muted\/30 { background-color: rgba(243, 244, 246, 0.3); }
+    .text-black { color: #000000; }
+    .text-gray-600 { color: #4b5563; }
+    .text-blue-700 { color: #1d4ed8; }
+    .text-red-600 { color: #dc2626; }
+    .text-amber-800 { color: #92400e; }
+    .text-muted-foreground { color: var(--muted-foreground); }
+    .transform { transform: translateX(0) translateY(0) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1); }
+    .-rotate-12 { transform: rotate(-12deg); }
+    .cursor-pointer { cursor: pointer; }
+
+    /* Responsive design */
+    @media (min-width: 768px) {
+        .md\\:p-6 { padding: 1.5rem; }
+    }
+
+    /* Print styles for the report content */
+    .print-content {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: white;
+        color: black;
+    }
+
+    .print-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .print-header-text {
+        text-align: center;
+        flex-grow: 1;
+        margin: 0 20px;
+    }
+
+    .print-logo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .print-title {
+        color: #0066cc;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .print-subtitle {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+
+    .print-purpose {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .print-date {
+        text-align: right;
+        margin: 10px 0 20px 0;
+        font-size: 12px;
+    }
+
+    .print-section-title {
+        border: 1px solid black;
+        padding: 2px 5px;
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #f5f5f5;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .print-property-details {
+        border-top: 1px solid black;
+        margin-top: 0;
+        padding-top: 10px;
+    }
+
+    .print-property-row {
+        display: flex;
+        margin-bottom: 5px;
+        font-size: 12px;
+    }
+
+    .print-property-label {
+        width: 150px;
+        font-weight: bold;
+    }
+
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        margin-top: 10px;
+    }
+
+    .print-table th,
+    .print-table td {
+        padding: 3px;
+        text-align: left;
+        vertical-align: top;
+        border: 1px solid #ddd;
+    }
+
+    .print-table th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+    }
+
+    .print-footer {
+        margin-top: 30px;
+        padding: 10px 0;
+        border-top: 1px solid #eee;
+    }
+
+    .print-timestamp {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .print-footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .print-signature-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .print-signature-text {
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .print-signature-image {
+        border: 2px solid #0047AB;
+        padding: 5px;
+        transform: rotate(-20deg);
+        width: 200px;
+        height: 45px;
+    }
+
+    .print-info {
+        font-size: 12px;
+        text-align: right;
+    }
+
+    .print-qr-container {
+        text-align: center;
+        margin: 15px 0;
+    }
+
+    .print-disclaimer {
+        font-size: 11px;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .print-contact-info {
+        font-size: 11px;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .print-geo-info {
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 80px;
+        color: #cccccc;
+        opacity: 0.2;
+        z-index: 0;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+</style>
+</head>
+<body class="bg-gray-50">
+<div class="min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        <!-- Report Container -->
+        <div class="border rounded-lg overflow-hidden bg-white w-full flex flex-col max-h-80vh">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-4 border-b bg-muted/30">
+                <div class="flex items-center space-x-3">
+                    <img
+                        src="https://i.ibb.co/prw0q9jx/Whats-App-Image-2025-02-28-at-4-01-36-PM.jpg"
+                        alt="Kano State Logo"
+                        class="h-10 w-10"
+                    />
+                    <div>
+                        <h3 class="font-semibold text-lg">Legal Search Report</h3>
+                        <p class="text-sm text-muted-foreground" id="header-datetime">
+                            <!-- Date and time will be inserted here -->
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div id="official-use-badge" class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium hidden">
+                        Official Use Only
+                    </div>
+                    <button
+                        id="print-btn"
+                        class="btn btn-outline btn-sm flex items-center gap-1"
+                    >
+                        <i data-lucide="printer" class="h-4 w-4"></i>
+                        <span id="print-text">Print Report</span>
+                    </button>
+                    <button
+                        id="toggle-official-btn"
+                        class="btn btn-outline btn-sm"
+                    >
+                        Toggle Official Use
+                    </button>
+                </div>
+            </div>
+
+            <!-- Report Content -->
+            <div class="p-4 md:p-6 overflow-y-auto flex-1" id="report-content">
+                <!-- Report Header -->
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold text-blue-700">KANO STATE GEOGRAPHIC INFORMATION SYSTEM</h2>
+                    <h3 class="text-lg font-semibold">MINISTRY OF LAND AND PHYSICAL PLANNING</h3>
+                    <h4 class="text-md font-medium mt-2">LEGAL SEARCH REPORT</h4>
+                    <p class="text-sm mt-2" id="report-date">Date: <!-- Date will be inserted here --></p>
+                </div>
+
+                <!-- Property Details Section -->
+                <div class="mb-6">
+                    <div class="inline-block border border-black px-2 py-1 bg-gray-100 text-sm font-bold mb-2">
+                        Property Details
+                    </div>
+                    <div class="border-t border-black pt-3 space-y-2 text-sm">
+                        <div class="flex">
+                            <div class="w-36 font-bold">File Number:</div>
+                            <div id="file-numbers">
+                                <!-- File numbers will be inserted here -->
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="w-36 font-bold">Schedule:</div>
+                            <div>Kano</div>
+                        </div>
+                        <div class="flex">
+                            <div class="w-36 font-bold">Plot Number:</div>
+                            <div id="plot-number">GP No. 1067/1 & 1067/2</div>
+                        </div>
+                        <div class="flex">
+                            <div class="w-36 font-bold">Plan Number:</div>
+                            <div id="plan-number">LKN/RES/2021/3006</div>
+                        </div>
+                        <div class="flex">
+                            <div class="w-36 font-bold">Plot Description:</div>
+                            <div id="plot-description">Niger Street Nassarawa District, Nassarawa LGA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction History Section -->
+                <div class="mb-6">
+                    <div class="inline-block border border-black px-2 py-1 bg-gray-100 text-sm font-bold mb-2">
+                        Transaction History
+                    </div>
+                    <div class="border-t border-black pt-3">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">S/N</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Grantor</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Grantee</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Instrument Type</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Date</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Reg. No.</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Size</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Caveat</th>
+                                        <th class="border border-gray-300 px-3 py-2 text-left font-bold bg-gray-200">Comments</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-table-body">
+                                    <!-- Transaction data will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Section -->
+                <div class="mt-8 text-sm">
+                    <p class="font-bold" id="footer-timestamp">
+                        <!-- Timestamp will be inserted here -->
+                    </p>
+
+                    <div class="mt-6 flex justify-between items-start">
+                        <div>
+                            <p class="font-medium">Yours Faithfully,</p>
+                            <div class="h-12 mt-2 border-2 border-blue-900 p-1 w-48 transform -rotate-12">
+                                <svg width="200" height="45" viewBox="0 0 200 45" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M10,35 C30,5 50,40 70,15 C90,30 110,10 130,25 C150,15 170,30 190,20"
+                                        stroke="#000080"
+                                        fill="none"
+                                        stroke-width="2"
+                                    />
+                                </svg>
+                            </div>
+                            <p>.......Director Deeds.........</p>
+                            <p class="mt-2" id="printed-by">Printed by: jennifer.c</p>
+                        </div>
+
+                        <div class="text-right">
+                            <div id="qr-code-container" class="text-center">
+                                <!-- QR code will be inserted here -->
+                                <div class="text-xs mt-1">Scan for file verification</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t pt-4 text-center">
+                        <p class="text-xs text-muted-foreground">
+                            Disclaimer: This Search Report does not represent consent to any transaction and is without prejudice to subsequent disclosures.
+                        </p>
+                        <p class="text-xs text-muted-foreground mt-2">For enquiries, please call +234 (0) 8023456789</p>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            KANO STATE GEOGRAPHIC INFORMATION SYSTEM, Plot P/123, Secretariat Kano, Kano State
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Sample file data
+    const sampleFileData = {
+        fileNumber: "CON-RES-2018-242",
+        kangisFileNo: "KNML 08146",
+        newKangisFileNo: "KNO131",
+        plotNumber: "GP No. 1067/1 & 1067/2",
+        planNumber: "LKN/RES/2021/3006",
+        district: "Niger Street Nassarawa District",
+        lga: "Nassarawa",
+        size: "0.0192ha",
+        caveat: "No",
+        printedBy: "jennifer.c",
+        history: [
+            {
+                guarantor: "Kano State Government",
+                guarantee: "Alhaji Musa Ibrahim",
+                transactionType: "Certificate of Occupancy",
+                date: "15/06/2018",
+                size: "0.0192ha",
+                caveat: "No",
+                comments: "Original grant registered"
+            },
+            {
+                guarantor: "Alhaji Musa Ibrahim",
+                guarantee: "Hajiya Fatima Yusuf",
+                transactionType: "Deed of Assignment",
+                date: "22/03/2020",
+                size: "0.0192ha",
+                caveat: "No",
+                comments: "Transfer registered"
+            },
+            {
+                guarantor: "Hajiya Fatima Yusuf",
+                guarantee: "Ibrahim Mohammed Ltd",
+                transactionType: "Deed of Mortgage",
+                date: "10/11/2021",
+                size: "0.0192ha",
+                caveat: "Yes",
+                comments: "Mortgage registered - First Bank Nigeria"
+            }
+        ]
+    };
+
+    // State management
+    let isOfficialUse = false;
+    let isPrinting = false;
+
+    // DOM elements
+    const elements = {
+        printBtn: document.getElementById('print-btn'),
+        printText: document.getElementById('print-text'),
+        toggleOfficialBtn: document.getElementById('toggle-official-btn'),
+        officialUseBadge: document.getElementById('official-use-badge'),
+        headerDatetime: document.getElementById('header-datetime'),
+        reportDate: document.getElementById('report-date'),
+        fileNumbers: document.getElementById('file-numbers'),
+        plotNumber: document.getElementById('plot-number'),
+        planNumber: document.getElementById('plan-number'),
+        plotDescription: document.getElementById('plot-description'),
+        transactionTableBody: document.getElementById('transaction-table-body'),
+        footerTimestamp: document.getElementById('footer-timestamp'),
+        printedBy: document.getElementById('printed-by'),
+        qrCodeContainer: document.getElementById('qr-code-container')
+    };
+
+    // Helper functions
+    function formatMlsfNumber(fileNumber) {
+        if (!fileNumber) return "CON-RES-2018-242";
+        if (/^(CON-RES|RES|COM|IND)-\d{4}-\d{3}$/.test(fileNumber)) {
+            return fileNumber;
+        }
+        return fileNumber;
+    }
+
+    function formatKangisNumber(fileNumber) {
+        if (!fileNumber) return "KNML 08146";
+        if (/^(KNML|KNGP|KNCOM) \d{5}$/.test(fileNumber)) {
+            return fileNumber;
+        }
+        return fileNumber;
+    }
+
+    function formatNewKangisNumber(fileNumber) {
+        if (!fileNumber) return "KNO131";
+        if (/^KN[A-Z]?\d{3,4}$/.test(fileNumber)) {
+            return fileNumber;
+        }
+        return fileNumber;
+    }
+
+    function generateTransactionHistory(history) {
+        return history.map((transaction, index) => ({
+            "S/N": index + 1,
+            "Grantor": transaction.guarantor,
+            "Grantee": transaction.guarantee,
+            "Instrument Type": transaction.transactionType,
+            "Date": transaction.date,
+            "Reg. No.": `${index + 1}/${index + 1}/1`,
+            "Size": transaction.size || "0.0192ha",
+            "Caveat": transaction.caveat || "No",
+            "Comments": transaction.comments || "Transfer registered"
+        }));
+    }
+
+    function getCurrentDateTime() {
+        const now = new Date();
+        const date = now.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+        const time = now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        });
+        return { date, time };
+    }
+
+    function generateQRCode(fileData) {
+        const qrData = `File Number:
+MLSF: ${formatMlsfNumber(fileData.fileNumber)}
+KANGIS: ${formatKangisNumber(fileData.kangisFileNo)}
+New KANGIS: ${formatNewKangisNumber(fileData.newKangisFileNo)}
+Schedule: Kano
+Plot Number: ${fileData.plotNumber || "GP No. 1067/1 & 1067/2"}
+Plan Number: ${fileData.planNumber || "LKN/RES/2021/3006"}
+Plot Description: ${fileData.district || "Niger Street Nassarawa District"}, ${fileData.lga || "Nassarawa"} LGA
+Size: ${fileData.size || "0.0192ha"}
+Caveat: ${fileData.caveat || "No"}
+Report Generated: ${new Date().toLocaleString()}`;
+
+        // Clear previous QR code
+        elements.qrCodeContainer.innerHTML = '';
+
+        // Generate new QR code
+        QRCode.toCanvas(
+            document.createElement('canvas'),
+            qrData,
+            {
+                width: 150,
+                height: 150,
+                margin: 1,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            },
+            function (error, canvas) {
+                if (error) {
+                    console.error('QR Code generation error:', error);
+                    return;
+                }
+                
+                // Append the canvas to the container
+                elements.qrCodeContainer.appendChild(canvas);
+                
+                // Add description
+                const description = document.createElement('div');
+                description.className = 'text-xs mt-1';
+                description.textContent = 'Scan for file verification';
+                elements.qrCodeContainer.appendChild(description);
+            }
+        );
+    }
+
+    function renderReport(fileData) {
+        const { date, time } = getCurrentDateTime();
+        
+        // Update header
+        elements.headerDatetime.textContent = `${date} | ${time}`;
+        elements.reportDate.textContent = `Date: ${date}`;
+        
+        // Update file numbers
+        const mlsfNumber = formatMlsfNumber(fileData.fileNumber);
+        const kangisNumber = formatKangisNumber(fileData.kangisFileNo);
+        const newKangisNumber = formatNewKangisNumber(fileData.newKangisFileNo);
+        
+        elements.fileNumbers.textContent = `mlsfNo: ${mlsfNumber} | kangisFileNo: ${kangisNumber} | NewKANGISFileNo: ${newKangisNumber}`;
+        
+        // Update property details
+        elements.plotNumber.textContent = fileData.plotNumber || "GP No. 1067/1 & 1067/2";
+        elements.planNumber.textContent = fileData.planNumber || "LKN/RES/2021/3006";
+        elements.plotDescription.textContent = `${fileData.district || "Niger Street Nassarawa District"}, ${fileData.lga || "Nassarawa"} LGA`;
+        
+        // Update transaction history
+        const transactionData = generateTransactionHistory(fileData.history || []);
+        elements.transactionTableBody.innerHTML = '';
+        
+        transactionData.forEach(transaction => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="border border-gray-300 px-3 py-2">${transaction["S/N"]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Grantor"]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Grantee"]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Instrument Type"]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Date"]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Reg. No."]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Size"]}</td>
+                <td class="border border-gray-300 px-3 py-2 ${transaction["Caveat"].toLowerCase() === "yes" ? "text-red-600" : "text-black"}">${transaction["Caveat"]}</td>
+                <td class="border border-gray-300 px-3 py-2">${transaction["Comments"]}</td>
+            `;
+            elements.transactionTableBody.appendChild(row);
+        });
+        
+        // Update footer
+        elements.footerTimestamp.textContent = `These details are as at ${date} ${time}`;
+        elements.printedBy.textContent = `Printed by: ${fileData.printedBy || "jennifer.c"}`;
+        
+        // Generate QR code
+        generateQRCode(fileData);
+    }
+
+    function toggleOfficialUse() {
+        isOfficialUse = !isOfficialUse;
+        
+        if (isOfficialUse) {
+            elements.officialUseBadge.classList.remove('hidden');
+        } else {
+            elements.officialUseBadge.classList.add('hidden');
+        }
+    }
+
+    function handlePrint() {
+    if (isPrinting) return;
+    
+    isPrinting = true;
+    elements.printText.textContent = 'Printing...';
+    elements.printBtn.disabled = true;
+
+    // Create print window
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        alert('Please allow popups for this website');
+        isPrinting = false;
+        elements.printText.textContent = 'Print Report';
+        elements.printBtn.disabled = false;
+        return;
+    }
+
+    const { date, time } = getCurrentDateTime();
+    const fileData = sampleFileData;
+    const mlsfNumber = formatMlsfNumber(fileData.fileNumber);
+    const kangisNumber = formatKangisNumber(fileData.kangisFileNo);
+    const newKangisNumber = formatNewKangisNumber(fileData.newKangisFileNo);
+    const transactionData = generateTransactionHistory(fileData.history || []);
+
+    // Generate QR code data URL for printing
+    const qrData = `File Number: MLSF: ${mlsfNumber} | KANGIS: ${kangisNumber} | New KANGIS: ${newKangisNumber}`;
+    
+    // Function to generate print content with or without QR code
+    function generatePrintContent(qrCodeUrl = null) {
+        const qrCodeHtml = qrCodeUrl ? 
+            `<img src="${qrCodeUrl}" alt="QR Code" width="100" height="100">` :
+            `<div style="width: 100px; height: 100px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px;">QR Code</div>`;
+
+        return `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>KANO STATE GEOGRAPHIC INFORMATION SYSTEM - LEGAL SEARCH REPORT</title>
+                <style type="text/css">
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                        background-color: white;
+                        display: flex;
+                        justify-content: center;
+                    }
+                    
+                    .report-container {
+                        width: 1000px;
+                        background-color: white;
+                        padding: 20px;
+                        position: relative;
+                    }
+                    
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    
+                    .logo {
+                        width: 80px;
+                        height: 80px;
+                    }
+                    
+                    .header-text {
+                        text-align: center;
+                        flex-grow: 1;
+                        margin: 0 20px;
+                    }
+                    
+                    .header-title {
+                        color: #0066cc;
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .header-subtitle {
+                        font-size: 14px;
+                        font-weight: bold;
+                        margin: 5px 0;
+                    }
+                    
+                    .header-purpose {
+                        font-size: 14px;
+                        font-weight: bold;
+                    }
+                    
+                    .date-section {
+                        text-align: right;
+                        margin: 10px 0 20px 0;
+                        font-size: 12px;
+                    }
+                    
+                    .section-title {
+                        border: 1px solid black;
+                        padding: 2px 5px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        background-color: #f5f5f5;
+                        display: inline-block;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .property-details {
+                        border-top: 1px solid black;
+                        margin-top: 0;
+                        padding-top: 10px;
+                    }
+                    
+                    .property-row {
+                        display: flex;
+                        margin-bottom: 5px;
+                        font-size: 12px;
+                    }
+                    
+                    .property-label {
+                        width: 150px;
+                        font-weight: bold;
+                    }
+                    
+                    .transaction-history {
+                        margin-top: 20px;
+                        border-top: 1px solid black;
+                        padding-top: 10px;
+                    }
+                    
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 11px;
+                    }
+                    
+                    th, td {
+                        padding: 3px;
+                        text-align: left;
+                        vertical-align: top;
+                        border: 1px solid #ddd;
+                    }
+                    
+                    th {
+                        background-color: #f0f0f0;
+                        font-weight: bold;
+                    }
+                    
+                    .watermark {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) rotate(-45deg);
+                        font-size: 80px;
+                        color: #cccccc;
+                        opacity: 0.2;
+                        z-index: 0;
+                        white-space: nowrap;
+                        pointer-events: none;
+                    }
+                    
+                    .footer {
+                        font-family: Arial, sans-serif;
+                        margin-top: 30px;
+                        padding: 10px 0;
+                        border-top: 1px solid #eee;
+                        width: 100%;
+                    }
+                    
+                    .timestamp {
+                        font-size: 12px;
+                        font-weight: bold;
+                        text-align: left;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .footer-content {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 15px;
+                    }
+                    
+                    .signature-block {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+                    
+                    .signature-text {
+                        font-size: 12px;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .signature-image {
+                        border: 2px solid #0047AB;
+                        padding: 5px;
+                        transform: rotate(-20deg);
+                        width: 200px;
+                        height: 45px;
+                    }
+                    
+                    .print-info {
+                        font-size: 12px;
+                        text-align: right;
+                    }
+                    
+                    .barcode {
+                        text-align: center;
+                        margin: 15px 0;
+                    }
+                    
+                    .disclaimer {
+                        font-size: 11px;
+                        text-align: center;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .contact-info {
+                        font-size: 11px;
+                        text-align: center;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .geo-info {
+                        font-size: 11px;
+                        text-align: center;
+                    }
+
+                    @media print {
+                        body {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-container">
+                    ${isOfficialUse ? '<div class="watermark">FOR OFFICE USE ONLY</div>' : ""}
+                    
+                    <div class="header">
+                        <img src="https://i.ibb.co/prw0q9jx/Whats-App-Image-2025-02-28-at-4-01-36-PM.jpg" alt="Kano State Logo" width="80" height="80">
+                        <div class="header-text">
+                            <div class="header-title">KANO STATE GEOGRAPHIC INFORMATION SYSTEM</div>
+                            <div class="header-subtitle">MINISTRY OF LAND AND PHYSICAL PLANNING</div>
+                            <div class="header-purpose">LEGAL SEARCH REPORT</div>  
+                            ${isOfficialUse ? '<div class="header-purpose">OFFICIAL SEARCH REPORT FOR FILING PURPOSES</div>' : ""}
+                        </div>
+                        <img src="https://i.ibb.co/60m0yNx7/Whats-App-Image-2025-02-28-at-4-01-36-PM-1.jpg" alt="GIS Logo" width="80" height="80">
+                    </div>
+                    
+                    <div class="date-section">
+                        Date: ${date}
+                    </div>
+                
+                    <div class="section-title">Property Details</div>
+                    
+                    <div class="property-details">
+                        <div class="property-row">
+                            <div class="property-label">File Number:</div>
+                            <div>mlsfNo: ${mlsfNumber} | kangisFileNo: ${kangisNumber} | NewKANGISFileNo: ${newKangisNumber}</div>
+                        </div>
+                        
+                        <div class="property-row">       
+                            <div class="property-label">Schedule:</div>
+                            <div>Kano</div>
+                        </div>
+                        
+                        <div class="property-row">
+                            <div class="property-label">Plot Number:</div>
+                            <div>${fileData.plotNumber || "GP No. 1067/1 & 1067/2"}</div>
+                        </div>
+                        
+                        <div class="property-row">
+                            <div class="property-label">Plan Number:</div>
+                            <div>${fileData.planNumber || "LKN/RES/2021/3006"}</div>
+                        </div>
+                        
+                        <div class="property-row">
+                            <div class="property-label">Plot Description:</div>
+                            <div>${fileData.district || "Niger Street Nassarawa District"}, ${fileData.lga || "Nassarawa"} LGA</div>
+                        </div>
+                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <div class="section-title">Transaction History</div> 
+                    
+                    <div class="transaction-history">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>S/N</th>
+                                    <th>Grantor</th>
+                                    <th>Grantee</th>
+                                    <th>Instrument Type</th>
+                                    <th>Date</th>
+                                    <th>Reg. No.</th>
+                                    <th>Size</th>
+                                    <th>Caveat</th>
+                                    <th>Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${transactionData
+                                    .map(
+                                        (row, index) => `
+                                    <tr>
+                                        <td>${row["S/N"]}</td>
+                                        <td>${row["Grantor"]}</td>
+                                        <td>${row["Grantee"]}</td>
+                                        <td>${row["Instrument Type"]}</td>
+                                        <td>${row["Date"]}</td>
+                                        <td>${row["Reg. No."]}</td>
+                                        <td>${row["Size"]}</td>
+                                        <td style="${row["Caveat"].toLowerCase() === "yes" ? "color: red;" : "color: black;"}">${row["Caveat"]}</td>
+                                        <td>${row["Comments"]}</td>
+                                    </tr>
+                                `,
+                                    )
+                                    .join("")}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="footer">
+                        <div class="timestamp">
+                            These details are as at ${date} ${time}
+                        </div>
+                        
+                        <div class="footer-content">
+                            <div class="signature-block">
+                                <div class="signature-text">Yours Faithfully,</div>
+                                <div class="signature-image">
+                                    <svg width="200" height="45" viewBox="0 0 200 45" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10,35 C30,5 50,40 70,15 C90,30 110,10 130,25 C150,15 170,30 190,20" 
+                                              stroke="#000080" fill="none" stroke-width="2"/>
+                                    </svg>
+                                </div>
+                                .......Director Deeds.........
+                            </div>
+                            <div class="print-info">
+                                Printed by: ${fileData.printedBy || "jennifer.c"}
+                            </div>
+                        </div>
+                        
+                        <div class="barcode">
+                            ${qrCodeHtml}
+                        </div>
+                        
+                        <div class="disclaimer">
+                            Disclaimer: This Search Report does not represent consent to any transaction and is without prejudice to subsequent disclosures.
+                        </div>
+                        
+                        <div class="contact-info">
+                            For enquiries, please call +234 (0) 8023456789
+                        </div>
+                        
+                        <div class="geo-info">
+                            KANO STATE GEOGRAPHIC INFORMATION SYSTEM, Plot P/123, Secretariat Kano, Kano State
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+    }
+
+    // Function to complete the print process
+    function completePrint(printContent) {
+        try {
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.focus();
+
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.onafterprint = () => {
+                    printWindow.close();
+                    isPrinting = false;
+                    elements.printText.textContent = 'Print Report';
+                    elements.printBtn.disabled = false;
+                };
+                
+                // Fallback in case onafterprint doesn't fire
+                setTimeout(() => {
+                    if (isPrinting) {
+                        isPrinting = false;
+                        elements.printText.textContent = 'Print Report';
+                        elements.printBtn.disabled = false;
+                    }
+                }, 5000);
+            }, 1000);
+        } catch (error) {
+            console.error('Print error:', error);
+            isPrinting = false;
+            elements.printText.textContent = 'Print Report';
+            elements.printBtn.disabled = false;
+            alert('An error occurred while printing. Please try again.');
+        }
+    }
+
+    // Try to generate QR code, but proceed with print even if it fails
+    if (typeof QRCode !== 'undefined') {
+        try {
+            QRCode.toDataURL(qrData, {
+                width: 150,
+                height: 150,
+                margin: 1,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function (error, url) {
+                if (error) {
+                    console.warn('QR Code generation failed:', error);
+                    completePrint(generatePrintContent());
+                } else {
+                    completePrint(generatePrintContent(url));
+                }
+            });
+        } catch (error) {
+            console.warn('QR Code library error:', error);
+            completePrint(generatePrintContent());
+        }
+    } else {
+        console.warn('QR Code library not available');
+        completePrint(generatePrintContent());
+    }
+}
+
+    // Event listeners
+    elements.printBtn.addEventListener('click', handlePrint);
+    elements.toggleOfficialBtn.addEventListener('click', toggleOfficialUse);
+
+    // Initialize the page
+    function init() {
+        renderReport(sampleFileData);
+        lucide.createIcons();
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
