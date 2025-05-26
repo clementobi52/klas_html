@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLTR Applications Table - KLAS</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    /* Custom styles */
+    :root {
+        --primary: #3b82f6;
+        --primary-foreground: #ffffff;
+        --muted: #f3f4f6;
+        --muted-foreground: #6b7280;
+        --border: #e5e7eb;
+        --ring: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --destructive: #ef4444;
+        --secondary: #f1f5f9;
+        --secondary-foreground: #0f172a;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #0f172a;
+        background-color: #f8fafc;
+    }
+
+    /* Card styles */
+    .card {
+        background-color: white;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--border);
+        color: #374151;
+    }
+
+    .btn-outline:hover {
+        background-color: var(--muted);
+    }
+
+    .btn-ghost {
+        background-color: transparent;
+        color: #374151;
+    }
+
+    .btn-ghost:hover {
+        background-color: var(--muted);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        height: 2rem;
+        width: 2rem;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Badge styles */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .badge-default {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .badge-outline {
+        background-color: transparent;
+        border: 1px solid var(--border);
+        color: #374151;
+    }
+
+    .badge-secondary {
+        background-color: var(--secondary);
+        color: var(--secondary-foreground);
+    }
+
+    .badge-success {
+        background-color: var(--success);
+        color: white;
+    }
+
+    .badge-destructive {
+        background-color: var(--destructive);
+        color: white;
+    }
+
+    /* Table styles */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+    }
+
+    .table th {
+        font-weight: 500;
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        background-color: rgba(243, 244, 246, 0.5);
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(243, 244, 246, 0.3);
+    }
+
+    .table tbody tr.expanded {
+        background-color: rgba(243, 244, 246, 0.2);
+    }
+
+    /* Dropdown styles */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 50;
+        background-color: white;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem 0;
+        min-width: 12rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    .dropdown-content.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--muted);
+    }
+
+    /* Modal styles */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 0.5rem;
+        max-width: 64rem;
+        width: 90%;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+
+    .modal.show .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    /* Tab styles */
+    .tabs-list {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        background-color: var(--muted);
+        border-radius: 0.375rem;
+        padding: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .tab-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        background-color: transparent;
+        color: var(--muted-foreground);
+        border: none;
+    }
+
+    .tab-trigger.active {
+        background-color: white;
+        color: var(--primary);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Scroll area styles */
+    .scroll-area {
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
+
+    .scroll-area::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scroll-area::-webkit-scrollbar-track {
+        background: var(--muted);
+        border-radius: 3px;
+    }
+
+    .scroll-area::-webkit-scrollbar-thumb {
+        background: var(--muted-foreground);
+        border-radius: 3px;
+    }
+
+    .scroll-area::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Utility classes */
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .capitalize { text-transform: capitalize; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mr-1 { margin-right: 0.25rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .ml-2 { margin-left: 0.5rem; }
+    .p-0 { padding: 0; }
+    .p-2 { padding: 0.5rem; }
+    .p-4 { padding: 1rem; }
+    .p-6 { padding: 1.5rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    .pb-3 { padding-bottom: 0.75rem; }
+    .pt-2 { padding-top: 0.5rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+    .justify-start { justify-content: flex-start; }
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    .grid { display: grid; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .w-full { width: 100%; }
+    .w-4 { width: 1rem; }
+    .w-5 { width: 1.25rem; }
+    .w-8 { width: 2rem; }
+    .h-4 { width: 1rem; height: 1rem; }
+    .h-5 { width: 1.25rem; height: 1.25rem; }
+    .h-8 { width: 2rem; height: 2rem; }
+    .h-200 { height: 200px; }
+    .h-500 { height: 500px; }
+    .max-w-4xl { max-width: 56rem; }
+    .overflow-hidden { overflow: hidden; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .border { border-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    .rounded { border-radius: 0.25rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-full { border-radius: 9999px; }
+    .bg-white { background-color: white; }
+    .bg-gray-100 { background-color: #f3f4f6; }
+    .bg-gray-200 { background-color: #e5e7eb; }
+    .bg-gray-500 { background-color: #6b7280; }
+    .bg-gray-600 { background-color: #4b5563; }
+    .bg-blue-100 { background-color: #dbeafe; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-green-100 { background-color: #dcfce7; }
+    .bg-green-500 { background-color: #22c55e; }
+    .bg-green-600 { background-color: #16a34a; }
+    .bg-amber-100 { background-color: #fef3c7; }
+    .bg-amber-500 { background-color: #f59e0b; }
+    .bg-amber-600 { background-color: #d97706; }
+    .bg-purple-500 { background-color: #a855f7; }
+    .bg-red-500 { background-color: #ef4444; }
+    .text-blue-500 { color: #3b82f6; }
+    .text-blue-600 { color: #2563eb; }
+    .text-green-500 { color: #22c55e; }
+    .text-green-600 { color: #16a34a; }
+    .text-amber-500 { color: #f59e0b; }
+    .text-amber-600 { color: #d97706; }
+    .text-purple-500 { color: #a855f7; }
+    .text-red-500 { color: #ef4444; }
+    .text-gray-500 { color: #6b7280; }
+    .text-gray-600 { color: #4b5563; }
+    .text-muted-foreground { color: var(--muted-foreground); }
+    .cursor-pointer { cursor: pointer; }
+    .transition-colors { transition: color 0.2s, background-color 0.2s; }
+
+    /* Responsive design */
+    @media (min-width: 768px) {
+        .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .md\\:col-span-2 { grid-column: span 2 / span 2; }
+    }
+</style>
+</head>
+<body class="bg-gray-100">
+<div class="p-6">
+    <div class="space-y-4">
+        <!-- Filter Buttons -->
+        <div class="flex gap-2 mb-4">
+            <button class="btn btn-primary filter-btn active" data-status="all">All Applications</button>
+            <button class="btn btn-outline filter-btn" data-status="pending">Pending</button>
+            <button class="btn btn-outline filter-btn" data-status="approved">Approved</button>
+            <button class="btn btn-outline filter-btn" data-status="rejected">Rejected</button>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="card">
+            <div class="p-0">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Parcel ID</th>
+                            <th>File Number</th>
+                            <th>Applicant</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applications-table-body">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Application Details Modal -->
+<div id="details-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="flex items-center justify-between">
+                <h2 id="modal-title" class="text-xl font-semibold">Application Details</h2>
+                <button id="close-modal" class="btn btn-ghost btn-sm">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="tabs-list">
+                <button class="tab-trigger active" data-tab="overview">Overview</button>
+                <button class="tab-trigger" data-tab="applicant">Applicant</button>
+                <button class="tab-trigger" data-tab="property">Property</button>
+                <button class="tab-trigger" data-tab="documents">Documents</button>
+            </div>
+
+            <div class="scroll-area h-500">
+                <!-- Overview Tab -->
+                <div id="overview-tab" class="tab-content active space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="card">
+                            <div class="p-4">
+                                <h3 class="text-lg font-medium mb-2">Application Summary</h3>
+                                <div id="application-summary" class="space-y-2 text-sm">
+                                    <!-- Summary content will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="p-4">
+                                <h3 class="text-lg font-medium mb-2">Fees & Payments</h3>
+                                <div id="fees-summary" class="space-y-2 text-sm">
+                                    <!-- Fees content will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-2">Comments & Notes</h3>
+                            <p id="application-comments" class="text-sm"></p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-2">Application Timeline</h3>
+                            <div id="application-timeline" class="space-y-4">
+                                <!-- Timeline content will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applicant Tab -->
+                <div id="applicant-tab" class="tab-content space-y-4">
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-4">Applicant Information</h3>
+                            <div id="applicant-details" class="space-y-4">
+                                <!-- Applicant details will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-4">Ownership Information</h3>
+                            <div id="ownership-details" class="space-y-4">
+                                <!-- Ownership details will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Tab -->
+                <div id="property-tab" class="tab-content space-y-4">
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-4">Property Information</h3>
+                            <div id="property-details" class="space-y-4">
+                                <!-- Property details will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-4">Property Map</h3>
+                            <div class="bg-gray-100 rounded-md h-200 flex items-center justify-center">
+                                <div class="text-center">
+                                    <i data-lucide="map-pin" class="h-8 w-8 text-red-500 mx-auto mb-2"></i>
+                                    <p class="text-sm text-gray-600">GIS Map Integration</p>
+                                    <p class="text-xs text-gray-500">Interactive map would be displayed here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Tab -->
+                <div id="documents-tab" class="tab-content space-y-4">
+                    <div class="card">
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium mb-4">Document Status</h3>
+                            <div id="document-status" class="space-y-4">
+                                <!-- Document status will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="card">
+                            <div class="p-4">
+                                <h3 class="text-lg font-medium mb-4">Required Documents</h3>
+                                <ul id="required-documents" class="space-y-2">
+                                    <!-- Required documents list will be populated by JavaScript -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="p-4">
+                                <h3 class="text-lg font-medium mb-4">Document Actions</h3>
+                                <div class="space-y-2">
+                                    <button class="btn btn-outline w-full justify-start">
+                                        <i data-lucide="eye" class="h-4 w-4 mr-2"></i>
+                                        View All Documents
+                                    </button>
+                                    <button class="btn btn-outline w-full justify-start">
+                                        <i data-lucide="file-text" class="h-4 w-4 mr-2"></i>
+                                        Generate Document Report
+                                    </button>
+                                    <button class="btn btn-outline w-full justify-start">
+                                        <i data-lucide="check-circle-2" class="h-4 w-4 mr-2"></i>
+                                        Verify All Documents
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Mock data
+    const mockApplications = [
+        {
+            id: "SLTR-447052",
+            fileNumber: "SLTR-RES-2023-01",
+            arn: "ARN-RES-2023-01-123456",
+            applicantName: "John Doe",
+            applicantType: "individual",
+            applicantDetails: {
+                address: "123 Main Street, Abuja",
+                phone: "08012345678",
+                email: "john.doe@example.com",
+                nin: "12345678901",
+                idType: "National ID",
+            },
+            propertyDetails: {
+                plotNumber: "PLT-123",
+                blockNumber: "BLK-45",
+                streetName: "Ahmadu Bello Way",
+                location: "Garki District",
+                lga: "Abuja Municipal",
+                landUse: "residential",
+                gpsCoordinates: {
+                    lat: "9.0765",
+                    lng: "7.3986",
+                },
+            },
+            ownershipType: "inheritance",
+            dateSubmitted: "2023-05-15",
+            status: "pending",
+            documents: [
+                { name: "ID Document", status: "verified" },
+                { name: "Proof of Ownership", status: "pending" },
+                { name: "Survey Plan", status: "verified" },
+                { name: "Tax Receipt", status: "verified" },
+            ],
+            fees: {
+                applicationFee: "2,000.00",
+                processingFee: "20,000.00",
+                surveyFee: "14,000.00",
+                totalPaid: "36,000.00",
+            },
+            comments: "Awaiting document verification",
+            assignedOfficer: "Sarah Johnson",
+        },
+        {
+            id: "SLTR-623891",
+            fileNumber: "SLTR-COM-2023-01",
+            arn: "ARN-COM-2023-01-789012",
+            applicantName: "ABC Corporation",
+            applicantType: "corporate",
+            applicantDetails: {
+                address: "45 Business Avenue, Abuja",
+                phone: "08023456789",
+                email: "contact@abccorp.com",
+                rcNumber: "RC123456",
+                contactPerson: "Jane Smith",
+            },
+            propertyDetails: {
+                plotNumber: "PLT-456",
+                blockNumber: "BLK-12",
+                streetName: "Shehu Shagari Way",
+                location: "Central Business District",
+                lga: "Abuja Municipal",
+                landUse: "commercial",
+                gpsCoordinates: {
+                    lat: "9.0543",
+                    lng: "7.4865",
+                },
+            },
+            ownershipType: "purchase",
+            dateSubmitted: "2023-05-10",
+            status: "approved",
+            documents: [
+                { name: "CAC Document", status: "verified" },
+                { name: "Proof of Ownership", status: "verified" },
+                { name: "Survey Plan", status: "verified" },
+                { name: "Tax Receipt", status: "verified" },
+            ],
+            fees: {
+                applicationFee: "5,000.00",
+                processingFee: "50,000.00",
+                surveyFee: "14,000.00",
+                totalPaid: "69,000.00",
+            },
+            comments: "All documents verified. Certificate issued.",
+            assignedOfficer: "Michael Okonkwo",
+        },
+        {
+            id: "SLTR-789456",
+            fileNumber: "SLTR-AGR-2023-01",
+            arn: "ARN-AGR-2023-01-345678",
+            applicantName: "Ministry of Agriculture",
+            applicantType: "government",
+            applicantDetails: {
+                address: "Federal Secretariat Complex, Abuja",
+                phone: "08034567890",
+                email: "info@agriculture.gov.ng",
+                idType: "Government ID",
+            },
+            propertyDetails: {
+                plotNumber: "PLT-789",
+                blockNumber: "BLK-78",
+                streetName: "N/A",
+                location: "Gwagwalada Area Council",
+                lga: "Gwagwalada",
+                landUse: "agriculture",
+                gpsCoordinates: {
+                    lat: "8.9456",
+                    lng: "7.0865",
+                },
+            },
+            ownershipType: "directLGA",
+            dateSubmitted: "2023-05-05",
+            status: "rejected",
+            documents: [
+                { name: "Government Allocation Letter", status: "verified" },
+                { name: "Survey Plan", status: "invalid" },
+                { name: "Environmental Impact Assessment", status: "missing" },
+            ],
+            fees: {
+                applicationFee: "5,000.00",
+                processingFee: "50,000.00",
+                surveyFee: "14,000.00",
+                totalPaid: "69,000.00",
+            },
+            comments: "Rejected due to invalid survey plan and missing environmental assessment",
+            assignedOfficer: "Fatima Abdullahi",
+        },
+        {
+            id: "SLTR-135792",
+            fileNumber: "SLTR-WAR-2023-01",
+            arn: "ARN-WAR-2023-01-901234",
+            applicantName: "XYZ Logistics Ltd",
+            applicantType: "corporate",
+            applicantDetails: {
+                address: "78 Industrial Layout, Abuja",
+                phone: "08045678901",
+                email: "operations@xyzlogistics.com",
+                rcNumber: "RC789012",
+                contactPerson: "Robert Eze",
+            },
+            propertyDetails: {
+                plotNumber: "PLT-321",
+                blockNumber: "BLK-33",
+                streetName: "Industrial Avenue",
+                location: "Idu Industrial Area",
+                lga: "Abuja Municipal",
+                landUse: "warehouse",
+                gpsCoordinates: {
+                    lat: "9.1234",
+                    lng: "7.3456",
+                },
+            },
+            ownershipType: "purchase",
+            dateSubmitted: "2023-05-01",
+            status: "pending",
+            documents: [
+                { name: "CAC Document", status: "verified" },
+                { name: "Proof of Ownership", status: "verified" },
+                { name: "Survey Plan", status: "pending" },
+                { name: "Tax Receipt", status: "pending" },
+                { name: "Building Plan", status: "pending" },
+            ],
+            fees: {
+                applicationFee: "10,000.00",
+                processingFee: "100,000.00",
+                surveyFee: "14,000.00",
+                totalPaid: "124,000.00",
+            },
+            comments: "Awaiting survey plan verification",
+            assignedOfficer: "David Adamu",
+        },
+    ];
+
+    // State management
+    let currentFilter = 'all';
+    let expandedRows = {};
+    let selectedApplication = null;
+
+    // DOM elements
+    const elements = {
+        tableBody: document.getElementById('applications-table-body'),
+        filterBtns: document.querySelectorAll('.filter-btn'),
+        detailsModal: document.getElementById('details-modal'),
+        closeModal: document.getElementById('close-modal'),
+        modalTitle: document.getElementById('modal-title'),
+        tabTriggers: document.querySelectorAll('.tab-trigger'),
+        tabContents: document.querySelectorAll('.tab-content'),
+        applicationSummary: document.getElementById('application-summary'),
+        feesSummary: document.getElementById('fees-summary'),
+        applicationComments: document.getElementById('application-comments'),
+        applicationTimeline: document.getElementById('application-timeline'),
+        applicantDetails: document.getElementById('applicant-details'),
+        ownershipDetails: document.getElementById('ownership-details'),
+        propertyDetails: document.getElementById('property-details'),
+        documentStatus: document.getElementById('document-status'),
+        requiredDocuments: document.getElementById('required-documents')
+    };
+
+    // Helper functions
+    function getLandUseIcon(landUse) {
+        const icons = {
+            residential: 'home',
+            commercial: 'building',
+            warehouse: 'warehouse',
+            agriculture: 'tractor'
+        };
+        return icons[landUse] || 'home';
+    }
+
+    function getLandUseColor(landUse) {
+        const colors = {
+            residential: 'text-blue-500',
+            commercial: 'text-purple-500',
+            warehouse: 'text-amber-500',
+            agriculture: 'text-green-500'
+        };
+        return colors[landUse] || 'text-gray-500';
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'approved': return 'badge-success';
+            case 'rejected': return 'badge-destructive';
+            case 'pending': return 'badge-default';
+            default: return 'badge-outline';
+        }
+    }
+
+    function getDocumentStatusIcon(status) {
+        const icons = {
+            verified: { icon: 'check-circle-2', color: 'text-green-500' },
+            invalid: { icon: 'x-circle', color: 'text-red-500' },
+            pending: { icon: 'clock', color: 'text-amber-500' },
+            missing: { icon: 'x-circle', color: 'text-gray-500' }
+        };
+        return icons[status] || icons.pending;
+    }
+
+    function filterApplications(status) {
+        return status === 'all' ? mockApplications : mockApplications.filter(app => app.status === status);
+    }
+
+    function toggleRowExpansion(id) {
+        expandedRows[id] = !expandedRows[id];
+        renderTable();
+    }
+
+    function openApplicationDetails(application) {
+        selectedApplication = application;
+        elements.modalTitle.textContent = `Application Details: ${application.id}`;
+        populateModalContent(application);
+        elements.detailsModal.classList.add('show');
+    }
+
+    function closeApplicationDetails() {
+        elements.detailsModal.classList.remove('show');
+        selectedApplication = null;
+    }
+
+    function switchTab(tabName) {
+        // Update tab triggers
+        elements.tabTriggers.forEach(trigger => {
+            trigger.classList.remove('active');
+            if (trigger.dataset.tab === tabName) {
+                trigger.classList.add('active');
+            }
+        });
+
+        // Update tab contents
+        elements.tabContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `${tabName}-tab`) {
+                content.classList.add('active');
+            }
+        });
+    }
+
+    function populateModalContent(application) {
+        // Application Summary
+        elements.applicationSummary.innerHTML = `
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Application ID:</span>
+                <span class="font-medium">${application.id}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">File Number:</span>
+                <span class="font-mono">${application.fileNumber}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">ARN:</span>
+                <span class="font-mono">${application.arn}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Date Submitted:</span>
+                <span>${application.dateSubmitted}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Status:</span>
+                <span class="badge ${getStatusBadgeClass(application.status)}">${application.status.charAt(0).toUpperCase() + application.status.slice(1)}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Assigned Officer:</span>
+                <span>${application.assignedOfficer}</span>
+            </div>
+        `;
+
+        // Fees Summary
+        elements.feesSummary.innerHTML = `
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Application Fee:</span>
+                <span>₦${application.fees.applicationFee}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Processing Fee:</span>
+                <span>₦${application.fees.processingFee}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Survey Fee:</span>
+                <span>₦${application.fees.surveyFee}</span>
+            </div>
+            <div class="flex justify-between border-t pt-2 mt-2">
+                <span class="text-muted-foreground font-medium">Total Paid:</span>
+                <span class="font-medium">₦${application.fees.totalPaid}</span>
+            </div>
+        `;
+
+        // Comments
+        elements.applicationComments.textContent = application.comments;
+
+        // Timeline
+        elements.applicationTimeline.innerHTML = `
+            <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                    <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <i data-lucide="check-circle-2" class="h-4 w-4 text-green-600"></i>
+                    </div>
+                    <div class="w-0.5 h-full bg-gray-200 mt-1"></div>
+                </div>
+                <div>
+                    <p class="font-medium">Application Submitted</p>
+                    <p class="text-sm text-muted-foreground">${application.dateSubmitted}</p>
+                    <p class="text-sm mt-1">Application was submitted by ${application.applicantName}</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="user" class="h-4 w-4 text-blue-600"></i>
+                    </div>
+                    <div class="w-0.5 h-full bg-gray-200 mt-1"></div>
+                </div>
+                <div>
+                    <p class="font-medium">Officer Assigned</p>
+                    <p class="text-sm text-muted-foreground">${application.dateSubmitted}</p>
+                    <p class="text-sm mt-1">Application assigned to ${application.assignedOfficer}</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                    <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                        <i data-lucide="file-text" class="h-4 w-4 text-amber-600"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="font-medium">Document Verification</p>
+                    <p class="text-sm text-muted-foreground">In Progress</p>
+                    <p class="text-sm mt-1">${application.documents.filter(d => d.status === 'verified').length} of ${application.documents.length} documents verified</p>
+                </div>
+            </div>
+        `;
+
+        // Applicant Details
+        const applicantDetailsHtml = `
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-muted-foreground">Full Name</p>
+                    <p class="font-medium">${application.applicantName}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Applicant Type</p>
+                    <p class="font-medium capitalize">${application.applicantType}</p>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm text-muted-foreground">Address</p>
+                <p class="font-medium">${application.applicantDetails.address}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-muted-foreground">Phone Number</p>
+                    <p class="font-medium">${application.applicantDetails.phone}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Email Address</p>
+                    <p class="font-medium">${application.applicantDetails.email}</p>
+                </div>
+            </div>
+        `;
+
+        if (application.applicantType === 'corporate') {
+            elements.applicantDetails.innerHTML = applicantDetailsHtml + `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-muted-foreground">RC Number</p>
+                        <p class="font-medium">${application.applicantDetails.rcNumber}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Contact Person</p>
+                        <p class="font-medium">${application.applicantDetails.contactPerson}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            elements.applicantDetails.innerHTML = applicantDetailsHtml + `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-muted-foreground">ID Type</p>
+                        <p class="font-medium">${application.applicantDetails.idType}</p>
+                    </div>
+                    ${application.applicantDetails.nin ? `
+                        <div>
+                            <p class="text-sm text-muted-foreground">NIN</p>
+                            <p class="font-medium">${application.applicantDetails.nin}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Ownership Details
+        elements.ownershipDetails.innerHTML = `
+            <div>
+                <p class="text-sm text-muted-foreground">Ownership Type</p>
+                <p class="font-medium capitalize">${application.ownershipType}</p>
+            </div>
+            <div>
+                <p class="text-sm text-muted-foreground">Declaration</p>
+                <p class="text-sm mt-1">I/we hereby declare that by signing this form I/we solemnly swear that information provided above in this application form is to the best of my/our knowledge complete, accurate and true, and that false declaration may lead to prosecution in term of Section 37 of the Land Use Act of 1978.</p>
+            </div>
+        `;
+
+        // Property Details
+        elements.propertyDetails.innerHTML = `
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-sm text-muted-foreground">Plot Number</p>
+                    <p class="font-medium">${application.propertyDetails.plotNumber}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Block Number</p>
+                    <p class="font-medium">${application.propertyDetails.blockNumber}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Land Use</p>
+                    <div class="flex items-center gap-1 font-medium">
+                        <i data-lucide="${getLandUseIcon(application.propertyDetails.landUse)}" class="h-4 w-4 ${getLandUseColor(application.propertyDetails.landUse)}"></i>
+                        <span class="capitalize">${application.propertyDetails.landUse}</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm text-muted-foreground">Street Name</p>
+                <p class="font-medium">${application.propertyDetails.streetName}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-muted-foreground">Location</p>
+                    <p class="font-medium">${application.propertyDetails.location}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">LGA</p>
+                    <p class="font-medium">${application.propertyDetails.lga}</p>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm text-muted-foreground">GPS Coordinates</p>
+                <p class="font-medium">Lat: ${application.propertyDetails.gpsCoordinates.lat}, Lng: ${application.propertyDetails.gpsCoordinates.lng}</p>
+            </div>
+        `;
+
+        // Document Status
+        elements.documentStatus.innerHTML = application.documents.map(doc => {
+            const statusIcon = getDocumentStatusIcon(doc.status);
+            return `
+                <div class="flex items-center justify-between border-b pb-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="file-text" class="h-5 w-5 text-blue-500"></i>
+                        <div>
+                            <p class="font-medium">${doc.name}</p>
+                            <p class="text-xs text-muted-foreground">
+                                ${doc.status === 'verified' ? 'Document verified successfully' :
+                                  doc.status === 'pending' ? 'Document verification in progress' :
+                                  doc.status === 'invalid' ? 'Document verification failed' :
+                                  'Document not submitted'}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="${statusIcon.icon}" class="h-4 w-4 ${statusIcon.color}"></i>
+                        <span class="text-sm capitalize">${doc.status}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Required Documents
+        const requiredDocs = [
+            'Proof of Identity (National ID, Passport, etc.)',
+            'Proof of Ownership (Deed, Certificate, etc.)',
+            'Survey Plan',
+            'Tax Receipt'
+        ];
+
+        if (application.applicantType === 'corporate') {
+            requiredDocs.push('CAC Registration Documents');
+        }
+
+        elements.requiredDocuments.innerHTML = requiredDocs.map(doc => `
+            <li class="flex items-center gap-2 text-sm">
+                <i data-lucide="check-circle-2" class="h-4 w-4 text-green-500"></i>
+                ${doc}
+            </li>
+        `).join('');
+
+        // Re-initialize Lucide icons for the modal content
+        lucide.createIcons();
+    }
+
+    function renderTable() {
+        const filteredApps = filterApplications(currentFilter);
+        elements.tableBody.innerHTML = '';
+
+        if (filteredApps.length === 0) {
+            elements.tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4">No applications found</td>
+                </tr>
+            `;
+            return;
+        }
+
+        filteredApps.forEach(application => {
+            // Main row
+            const mainRow = document.createElement('tr');
+            mainRow.className = 'cursor-pointer hover:bg-muted/30';
+            mainRow.innerHTML = `
+                <td class="font-medium">${application.id}</td>
+                <td class="font-mono text-sm">${application.fileNumber}</td>
+                <td>${application.applicantName}</td>
+                <td>
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="${getLandUseIcon(application.propertyDetails.landUse)}" class="h-4 w-4 ${getLandUseColor(application.propertyDetails.landUse)}"></i>
+                        <span class="capitalize">${application.propertyDetails.landUse}</span>
+                    </div>
+                </td>
+                <td>${application.propertyDetails.location}</td>
+                <td>${application.dateSubmitted}</td>
+                <td>
+                    <span class="badge ${getStatusBadgeClass(application.status)}">
+                        ${application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                    </span>
+                </td>
+                <td class="text-right">
+                    <div class="flex items-center justify-end gap-1">
+                        <button class="btn btn-ghost btn-sm expand-btn" data-id="${application.id}">
+                            <i data-lucide="${expandedRows[application.id] ? 'chevron-down' : 'chevron-right'}" class="h-4 w-4"></i>
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-ghost btn-sm dropdown-btn">
+                                <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <div class="dropdown-item view-details-btn" data-id="${application.id}">
+                                    <i data-lucide="eye" class="h-4 w-4 mr-2"></i>
+                                    View Details
+                                </div>
+                                ${application.status === 'pending' ? `
+                                    <div class="dropdown-item">
+                                        <i data-lucide="check-circle-2" class="h-4 w-4 mr-2"></i>
+                                        Approve
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <i data-lucide="x-circle" class="h-4 w-4 mr-2"></i>
+                                        Reject
+                                    </div>
+                                ` : ''}
+                                <div class="dropdown-item">
+                                    <i data-lucide="file-text" class="h-4 w-4 mr-2"></i>
+                                    Generate Report
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            `;
+            elements.tableBody.appendChild(mainRow);
+
+            // Expanded row
+            if (expandedRows[application.id]) {
+                const expandedRow = document.createElement('tr');
+                expandedRow.className = 'expanded';
+                expandedRow.innerHTML = `
+                    <td colspan="8" class="p-0">
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Applicant Details -->
+                            <div class="space-y-2">
+                                <h4 class="text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="user" class="h-4 w-4"></i> Applicant Details
+                                </h4>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="text-muted-foreground">Name:</span> ${application.applicantName}</p>
+                                    <p><span class="text-muted-foreground">Type:</span> ${application.applicantType}</p>
+                                    <p><span class="text-muted-foreground">Address:</span> ${application.applicantDetails.address}</p>
+                                    <p><span class="text-muted-foreground">Phone:</span> ${application.applicantDetails.phone}</p>
+                                    <p><span class="text-muted-foreground">Email:</span> ${application.applicantDetails.email}</p>
+                                    ${application.applicantType === 'corporate' ? 
+                                        `<p><span class="text-muted-foreground">RC Number:</span> ${application.applicantDetails.rcNumber}</p>` :
+                                        `<p><span class="text-muted-foreground">ID Type:</span> ${application.applicantDetails.idType}</p>`
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Property Details -->
+                            <div class="space-y-2">
+                                <h4 class="text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="h-4 w-4"></i> Property Details
+                                </h4>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="text-muted-foreground">Plot Number:</span> ${application.propertyDetails.plotNumber}</p>
+                                    <p><span class="text-muted-foreground">Block Number:</span> ${application.propertyDetails.blockNumber}</p>
+                                    <p><span class="text-muted-foreground">Street:</span> ${application.propertyDetails.streetName}</p>
+                                    <p><span class="text-muted-foreground">Location:</span> ${application.propertyDetails.location}</p>
+                                    <p><span class="text-muted-foreground">LGA:</span> ${application.propertyDetails.lga}</p>
+                                    <p><span class="text-muted-foreground">GPS:</span> ${application.propertyDetails.gpsCoordinates.lat}, ${application.propertyDetails.gpsCoordinates.lng}</p>
+                                </div>
+                            </div>
+
+                            <!-- Application Details -->
+                            <div class="space-y-2">
+                                <h4 class="text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="file-text" class="h-4 w-4"></i> Application Details
+                                </h4>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="text-muted-foreground">File Number:</span> ${application.fileNumber}</p>
+                                    <p><span class="text-muted-foreground">ARN:</span> ${application.arn}</p>
+                                    <p><span class="text-muted-foreground">Ownership:</span> ${application.ownershipType}</p>
+                                    <p><span class="text-muted-foreground">Date:</span> ${application.dateSubmitted}</p>
+                                    <p><span class="text-muted-foreground">Status:</span> ${application.status}</p>
+                                    <p><span class="text-muted-foreground">Officer:</span> ${application.assignedOfficer}</p>
+                                </div>
+                            </div>
+
+                            <!-- Documents -->
+                            <div class="md:col-span-2 space-y-2">
+                                <h4 class="text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="file-text" class="h-4 w-4"></i> Documents
+                                </h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    ${application.documents.map(doc => {
+                                        const statusIcon = getDocumentStatusIcon(doc.status);
+                                        return `
+                                            <div class="border rounded-md p-2 flex items-center gap-2">
+                                                <i data-lucide="${statusIcon.icon}" class="h-4 w-4 ${statusIcon.color}"></i>
+                                                <span class="text-sm">${doc.name}</span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Fees -->
+                            <div class="space-y-2">
+                                <h4 class="text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="calendar" class="h-4 w-4"></i> Fees & Payments
+                                </h4>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="text-muted-foreground">Application Fee:</span> ₦${application.fees.applicationFee}</p>
+                                    <p><span class="text-muted-foreground">Processing Fee:</span> ₦${application.fees.processingFee}</p>
+                                    <p><span class="text-muted-foreground">Survey Fee:</span> ₦${application.fees.surveyFee}</p>
+                                    <p><span class="text-muted-foreground">Total Paid:</span> ₦${application.fees.totalPaid}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                elements.tableBody.appendChild(expandedRow);
+            }
+        });
+
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+
+        // Add event listeners
+        addTableEventListeners();
+    }
+
+    function addTableEventListeners() {
+        // Expand/collapse buttons
+        document.querySelectorAll('.expand-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                toggleRowExpansion(id);
+            });
+        });
+
+        // Dropdown buttons
+        document.querySelectorAll('.dropdown-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = btn.nextElementSibling;
+                
+                // Close all other dropdowns
+                document.querySelectorAll('.dropdown-content').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                
+                dropdown.classList.toggle('show');
+            });
+        });
+
+        // View details buttons
+        document.querySelectorAll('.view-details-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                const application = mockApplications.find(app => app.id === id);
+                if (application) {
+                    openApplicationDetails(application);
+                }
+                
+                // Close dropdown
+                btn.closest('.dropdown-content').classList.remove('show');
+            });
+        });
+    }
+
+    function setActiveFilter(status) {
+        currentFilter = status;
+        
+        // Update button states
+        elements.filterBtns.forEach(btn => {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            
+            if (btn.dataset.status === status) {
+                btn.classList.remove('btn-outline');
+                btn.classList.add('btn-primary', 'active');
+            }
+        });
+        
+        renderTable();
+    }
+
+    // Event listeners
+    elements.filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            setActiveFilter(btn.dataset.status);
+        });
+    });
+
+    elements.closeModal.addEventListener('click', closeApplicationDetails);
+
+    elements.detailsModal.addEventListener('click', (e) => {
+        if (e.target === elements.detailsModal) {
+            closeApplicationDetails();
+        }
+    });
+
+    elements.tabTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            switchTab(trigger.dataset.tab);
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+    });
+
+    // Initialize the page
+    function init() {
+        renderTable();
+        lucide.createIcons();
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print File Labels - KLAS</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- QR Code Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<!-- JsBarcode Library -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<style>
+    /* Custom styles */
+    :root {
+        --primary: #3b82f6;
+        --primary-foreground: #ffffff;
+        --muted: #f3f4f6;
+        --muted-foreground: #6b7280;
+        --border: #e5e7eb;
+        --ring: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --destructive: #ef4444;
+        --secondary: #f1f5f9;
+        --secondary-foreground: #0f172a;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #0f172a;
+        background-color: #f8fafc;
+    }
+
+    /* Card styles */
+    .card {
+        background-color: white;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--border);
+        color: #374151;
+    }
+
+    .btn-outline:hover {
+        background-color: var(--muted);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        height: 2rem;
+        width: 2rem;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Input styles */
+    .input {
+        display: block;
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid var(--border);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        background-color: white;
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--ring);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Select styles */
+    .select {
+        display: block;
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid var(--border);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        background-color: white;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    .select:focus {
+        outline: none;
+        border-color: var(--ring);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Badge styles */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .badge-default {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .badge-outline {
+        background-color: transparent;
+        border: 1px solid var(--border);
+        color: #374151;
+    }
+
+    .badge-secondary {
+        background-color: var(--secondary);
+        color: var(--secondary-foreground);
+    }
+
+    .badge-success {
+        background-color: var(--success);
+        color: white;
+    }
+
+    .badge-green {
+        background-color: #22c55e;
+        color: white;
+    }
+
+    /* Checkbox styles */
+    .checkbox {
+        width: 1rem;
+        height: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.25rem;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .checkbox:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    /* Radio styles */
+    .radio {
+        width: 1rem;
+        height: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .radio:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    /* Tab styles */
+    .tabs-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background-color: var(--muted);
+        border-radius: 0.375rem;
+        padding: 0.25rem;
+    }
+
+    .tab-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        background-color: transparent;
+        color: var(--muted-foreground);
+        border: none;
+    }
+
+    .tab-trigger.active {
+        background-color: white;
+        color: var(--primary);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Tooltip styles */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip-content {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #1f2937;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+        margin-bottom: 0.25rem;
+        z-index: 50;
+    }
+
+    .tooltip:hover .tooltip-content {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Format selection styles */
+    .format-option {
+        border: 1px solid var(--border);
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .format-option.selected {
+        border-color: var(--primary);
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .format-option:hover {
+        background-color: var(--muted);
+    }
+
+    /* Utility classes */
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mr-1 { margin-right: 0.25rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .mr-4 { margin-right: 1rem; }
+    .ml-2 { margin-left: 0.5rem; }
+    .p-2 { padding: 0.5rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-4 { padding: 1rem; }
+    .p-6 { padding: 1.5rem; }
+    .p-8 { padding: 2rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .pt-4 { padding-top: 1rem; }
+    .pl-8 { padding-left: 2rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-1 { flex: 1 1 0%; }
+    .flex-wrap { flex-wrap: wrap; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+    .grid { display: grid; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .w-full { width: 100%; }
+    .w-4 { width: 1rem; }
+    .w-6 { width: 1.5rem; }
+    .w-8 { width: 2rem; }
+    .w-12 { width: 3rem; }
+    .w-20 { width: 5rem; }
+    .w-64 { width: 16rem; }
+    .h-3 { height: 0.75rem; }
+    .h-4 { width: 1rem; height: 1rem; }
+    .h-6 { width: 1.5rem; height: 1.5rem; }
+    .h-8 { width: 2rem; height: 2rem; }
+    .h-12 { width: 3rem; height: 3rem; }
+    .max-h-400 { max-height: 400px; }
+    .max-w-full { max-width: 100%; }
+    .min-1 { min-width: 0.25rem; }
+    .overflow-y-auto { overflow-y: auto; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .left-2 { left: 0.5rem; }
+    .left-2-5 { left: 0.625rem; }
+    .top-2 { top: 0.5rem; }
+    .top-2-5 { top: 0.625rem; }
+    .border { border-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    .rounded { border-radius: 0.25rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-full { border-radius: 9999px; }
+    .bg-white { background-color: white; }
+    .bg-gray-600 { background-color: #4b5563; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-green-500 { background-color: #22c55e; }
+    .bg-muted { background-color: var(--muted); }
+    .bg-muted-50 { background-color: rgba(243, 244, 246, 0.5); }
+    .bg-primary-5 { background-color: rgba(59, 130, 246, 0.05); }
+    .text-blue-500 { color: #3b82f6; }
+    .text-blue-600 { color: #2563eb; }
+    .text-gray-600 { color: #4b5563; }
+    .text-muted-foreground { color: var(--muted-foreground); }
+    .cursor-pointer { cursor: pointer; }
+    .whitespace-nowrap { white-space: nowrap; }
+    .divide-y > * + * { border-top-width: 1px; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+    /* Responsive design */
+    @media (min-width: 768px) {
+        .md\\:flex-row { flex-direction: row; }
+        .md\\:items-center { align-items: center; }
+        .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .md\\:w-auto { width: auto; }
+        .md\\:w-64 { width: 16rem; }
+    }
+
+    @media (min-width: 1024px) {
+        .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+</style>
+</head>
+<body class="bg-gray-50">
+<div class="container mx-auto py-6 space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Print File Labels</h1>
+            <p class="text-muted-foreground">Generate and print labels for physical files</p>
+        </div>
+        <div class="flex gap-2">
+            <div class="tooltip">
+                <button id="history-btn" class="btn btn-outline btn-sm">
+                    <i data-lucide="history" class="h-4 w-4"></i>
+                </button>
+                <div class="tooltip-content">Print History</div>
+            </div>
+            <div class="tooltip">
+                <button id="reset-btn" class="btn btn-outline btn-sm">
+                    <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                </button>
+                <div class="tooltip-content">Reset Form</div>
+            </div>
+            <button id="print-labels-btn" class="btn btn-primary">Print Labels</button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="card">
+            <div class="p-6 pb-2">
+                <h3 class="text-sm font-medium">Available Files</h3>
+            </div>
+            <div class="p-6">
+                <div id="available-files-count" class="text-2xl font-bold">5</div>
+                <p class="text-xs text-muted-foreground mt-1">Files available for label printing</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="p-6 pb-2">
+                <h3 class="text-sm font-medium">Selected Files</h3>
+            </div>
+            <div class="p-6">
+                <div id="selected-files-count" class="text-2xl font-bold">0</div>
+                <p class="text-xs text-muted-foreground mt-1">Files selected for label printing</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="p-6 pb-2">
+                <h3 class="text-sm font-medium">Printer Status</h3>
+            </div>
+            <div class="p-6">
+                <div class="text-2xl font-bold flex items-center">
+                    Ready
+                    <span class="badge badge-green ml-2">Online</span>
+                </div>
+                <p class="text-xs text-muted-foreground mt-1">Label printer status</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print History (Hidden by default) -->
+    <div id="print-history" class="card mb-6 hidden">
+        <div class="p-6 border-b">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold">Print History</h3>
+                    <p class="text-sm text-muted-foreground">Recent label printing activity</p>
+                </div>
+                <button id="close-history-btn" class="btn btn-outline btn-sm">
+                    <i data-lucide="trash-2" class="h-4 w-4"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="rounded-md border">
+                <div class="p-3 bg-muted-50 grid grid-cols-5 gap-4">
+                    <div class="text-sm font-medium">ID</div>
+                    <div class="text-sm font-medium">Date</div>
+                    <div class="text-sm font-medium">Files</div>
+                    <div class="text-sm font-medium">Template</div>
+                    <div class="text-sm font-medium">User</div>
+                </div>
+                <div class="divide-y">
+                    <div class="p-3 grid grid-cols-5 gap-4">
+                        <div class="text-sm">PRINT-001</div>
+                        <div class="text-sm">2023-06-15</div>
+                        <div class="text-sm">5</div>
+                        <div class="text-sm">Standard</div>
+                        <div class="text-sm">Admin</div>
+                    </div>
+                    <div class="p-3 grid grid-cols-5 gap-4">
+                        <div class="text-sm">PRINT-002</div>
+                        <div class="text-sm">2023-06-14</div>
+                        <div class="text-sm">3</div>
+                        <div class="text-sm">Compact</div>
+                        <div class="text-sm">Admin</div>
+                    </div>
+                    <div class="p-3 grid grid-cols-5 gap-4">
+                        <div class="text-sm">PRINT-003</div>
+                        <div class="text-sm">2023-06-12</div>
+                        <div class="text-sm">10</div>
+                        <div class="text-sm">QR Code</div>
+                        <div class="text-sm">Supervisor</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="w-full">
+        <div class="tabs-list">
+            <button class="tab-trigger active" data-tab="files">Select Files</button>
+            <button class="tab-trigger" data-tab="settings">Label Settings</button>
+            <button class="tab-trigger" data-tab="preview">Preview & Print</button>
+        </div>
+
+        <!-- Files Tab -->
+        <div id="files-tab" class="tab-content active mt-6">
+            <div class="card">
+                <div class="p-6 border-b">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold">Select Files for Labels</h3>
+                            <p class="text-sm text-muted-foreground">Choose files to generate and print labels</p>
+                        </div>
+                        <div class="relative w-full md:w-64">
+                            <i data-lucide="search" class="absolute left-2-5 top-2-5 h-4 w-4 text-muted-foreground"></i>
+                            <input id="search-input" type="search" placeholder="Search files..." class="input w-full pl-8">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4 flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="batch-mode" class="checkbox">
+                            <label for="batch-mode" class="text-sm font-medium">Batch Mode</label>
+                        </div>
+                        <div id="batch-controls" class="flex items-center gap-2 hidden">
+                            <label for="batch-start" class="text-sm whitespace-nowrap">Start Number:</label>
+                            <input id="batch-start" type="number" min="1" class="input w-20" value="1">
+                            <label for="batch-count" class="text-sm whitespace-nowrap">Count:</label>
+                            <input id="batch-count" type="number" min="1" class="input w-20" value="10">
+                            <button id="generate-batch-btn" class="btn btn-outline btn-sm">Generate</button>
+                        </div>
+                    </div>
+
+                    <div id="files-container">
+                        <div class="rounded-md border">
+                            <div class="p-3 bg-muted-50 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="select-all" class="checkbox">
+                                    <label for="select-all" class="text-sm font-medium">Select All</label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span id="selection-count" class="text-sm text-muted-foreground">0 of 5 selected</span>
+                                </div>
+                            </div>
+                            <div id="files-list" class="divide-y max-h-400 overflow-y-auto">
+                                <!-- Files will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t flex justify-between">
+                    <button class="btn btn-outline">Back to Indexing</button>
+                    <div class="flex gap-2">
+                        <button id="duplicate-btn" class="btn btn-outline gap-2 hidden">
+                            <i data-lucide="copy" class="h-4 w-4"></i>
+                            Duplicate
+                        </button>
+                        <button id="continue-to-settings-btn" class="btn btn-primary gap-2" disabled>
+                            <i data-lucide="settings" class="h-4 w-4"></i>
+                            Continue to Label Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content mt-6">
+            <div class="card">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-semibold">Label Settings</h3>
+                            <p class="text-sm text-muted-foreground">Configure label printing options</p>
+                        </div>
+                        <button id="advanced-options-btn" class="btn btn-outline">Show Advanced</button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="label-template" class="text-sm font-medium">Label Template</label>
+                                <select id="label-template" class="select mt-1">
+                                    <option value="standard">Standard - Standard label with barcode and text</option>
+                                    <option value="compact">Compact - Compact label with minimal information</option>
+                                    <option value="detailed">Detailed - Detailed label with all file information</option>
+                                    <option value="qrcode">QR Code - Label with QR code for scanning</option>
+                                    <option value="custom">Custom - Custom label template</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="label-size" class="text-sm font-medium">Label Size</label>
+                                <select id="label-size" class="select mt-1">
+                                    <option value="small">Small (2.5" x 1")</option>
+                                    <option value="standard" selected>Standard (3" x 2")</option>
+                                    <option value="large">Large (4" x 3")</option>
+                                    <option value="custom">Custom Size</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-sm font-medium">Label Format</label>
+                                <div class="mt-1 grid grid-cols-2 gap-4">
+                                    <div id="format-barcode" class="format-option selected">
+                                        <i data-lucide="bar-chart-4" class="h-8 w-8 mb-2"></i>
+                                        <span class="text-sm font-medium">Barcode</span>
+                                    </div>
+                                    <div id="format-qrcode" class="format-option">
+                                        <i data-lucide="qr-code" class="h-8 w-8 mb-2"></i>
+                                        <span class="text-sm font-medium">QR Code</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Orientation</label>
+                                <div class="mt-1 grid grid-cols-2 gap-4">
+                                    <div class="format-option selected">
+                                        <input type="radio" name="orientation" value="portrait" class="radio mr-2" checked>
+                                        <label class="cursor-pointer">Portrait</label>
+                                    </div>
+                                    <div class="format-option">
+                                        <input type="radio" name="orientation" value="landscape" class="radio mr-2">
+                                        <label class="cursor-pointer">Landscape</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="advanced-options" class="space-y-4 hidden">
+                            <div>
+                                <label for="margin" class="text-sm font-medium">Margin (inches)</label>
+                                <input id="margin" type="number" value="0.25" step="0.01" class="input mt-1">
+                            </div>
+                            <div>
+                                <label for="dpi" class="text-sm font-medium">DPI</label>
+                                <input id="dpi" type="number" value="300" class="input mt-1">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="copies" class="text-sm font-medium">Number of Copies</label>
+                            <input id="copies" type="number" min="1" value="1" class="input mt-1">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t flex justify-between">
+                    <button id="back-to-files-btn" class="btn btn-outline">Back to File Selection</button>
+                    <button id="continue-to-preview-btn" class="btn btn-primary gap-2">
+                        <i data-lucide="download" class="h-4 w-4"></i>
+                        Continue to Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Tab -->
+        <div id="preview-tab" class="tab-content mt-6">
+            <div class="card">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold">Preview and Print</h3>
+                    <p class="text-sm text-muted-foreground">Preview labels before printing</p>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <p id="preview-description">You have selected 0 files to print labels for. Please review the label previews below before printing.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div id="label-previews" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Label previews will be populated by JavaScript -->
+                        </div>
+
+                        <div class="border rounded-md p-4">
+                            <h4 class="text-sm font-medium mb-2">Print Summary</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-sm">Labels:</span>
+                                    <span id="summary-labels" class="text-sm font-medium">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm">Copies per label:</span>
+                                    <span id="summary-copies" class="text-sm font-medium">1</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm">Total labels to print:</span>
+                                    <span id="summary-total" class="text-sm font-medium">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm">Template:</span>
+                                    <span id="summary-template" class="text-sm font-medium">Standard</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm">Size:</span>
+                                    <span id="summary-size" class="text-sm font-medium">Standard (3" x 2")</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm">Format:</span>
+                                    <span id="summary-format" class="text-sm font-medium">Barcode</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2 mt-4">
+                        <button id="export-pdf-btn" class="btn btn-outline gap-2">
+                            <i data-lucide="upload" class="h-4 w-4"></i>
+                            Export as PDF
+                        </button>
+                        <button id="save-template-btn" class="btn btn-outline gap-2">
+                            <i data-lucide="save" class="h-4 w-4"></i>
+                            Save as Template
+                        </button>
+                        <button id="import-template-btn" class="btn btn-outline gap-2">
+                            <i data-lucide="file-text" class="h-4 w-4"></i>
+                            Import Template
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 border-t flex justify-between">
+                    <button id="back-to-settings-btn" class="btn btn-outline">Back to Settings</button>
+                    <button id="final-print-btn" class="btn btn-primary">Print Labels</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Sample data
+    const indexedFiles = [
+        {
+            id: "FILE-2023-001",
+            name: "Certificate of Occupancy - Alhaji Ibrahim Dantata",
+            fileNumber: "RES-2015-4859",
+            kangisFileNo: "KNGP 00338",
+            newKangisFileNo: "KNO001",
+            type: "Certificate of Occupancy",
+            location: "Cabinet A-12",
+            date: "2023-06-15",
+            status: "Indexed",
+        },
+        {
+            id: "FILE-2023-002",
+            name: "Site Plan - Hajiya Amina Yusuf",
+            fileNumber: "RES-86-2244",
+            kangisFileNo: "RES-86-2244",
+            newKangisFileNo: "KNO069",
+            type: "Site Plan",
+            location: "Cabinet B-05",
+            date: "2023-06-14",
+            status: "Indexed",
+        },
+        {
+            id: "FILE-2023-003",
+            name: "Letter of Administration - Kano Traders Association",
+            fileNumber: "COM-91-249",
+            kangisFileNo: "MLKN 03051",
+            newKangisFileNo: "KNO082",
+            type: "Letter of Administration",
+            location: "Cabinet C-08",
+            date: "2023-06-13",
+            status: "Indexed",
+        },
+        {
+            id: "FILE-2023-004",
+            name: "Right of Occupancy - Musa Usman Bayero",
+            fileNumber: "RES-2000-1904",
+            kangisFileNo: "KNML 08146",
+            newKangisFileNo: "KNO131",
+            type: "Right of Occupancy",
+            location: "Cabinet A-08",
+            date: "2023-06-12",
+            status: "Indexed",
+        },
+        {
+            id: "FILE-2023-005",
+            name: "Deed of Assignment - Hajiya Fatima Mohammed",
+            fileNumber: "CON-IND-2021-37",
+            kangisFileNo: "MLKN 03888",
+            newKangisFileNo: "KNO132",
+            type: "Deed of Assignment",
+            location: "Cabinet B-12",
+            date: "2023-06-10",
+            status: "Indexed",
+        },
+    ];
+
+    // State management
+    let selectedFiles = [];
+    let labelFormat = 'barcode';
+    let activeTab = 'files';
+    let batchMode = false;
+    let batchStartNumber = 1;
+    let batchCount = 10;
+    let copies = 1;
+    let showAdvancedOptions = false;
+    let searchTerm = '';
+
+    // DOM elements
+    const elements = {
+        historyBtn: document.getElementById('history-btn'),
+        resetBtn: document.getElementById('reset-btn'),
+        printLabelsBtn: document.getElementById('print-labels-btn'),
+        printHistory: document.getElementById('print-history'),
+        closeHistoryBtn: document.getElementById('close-history-btn'),
+        searchInput: document.getElementById('search-input'),
+        batchModeCheckbox: document.getElementById('batch-mode'),
+        batchControls: document.getElementById('batch-controls'),
+        batchStart: document.getElementById('batch-start'),
+        batchCount: document.getElementById('batch-count'),
+        generateBatchBtn: document.getElementById('generate-batch-btn'),
+        selectAllCheckbox: document.getElementById('select-all'),
+        filesList: document.getElementById('files-list'),
+        selectionCount: document.getElementById('selection-count'),
+        selectedFilesCount: document.getElementById('selected-files-count'),
+        duplicateBtn: document.getElementById('duplicate-btn'),
+        continueToSettingsBtn: document.getElementById('continue-to-settings-btn'),
+        advancedOptionsBtn: document.getElementById('advanced-options-btn'),
+        advancedOptions: document.getElementById('advanced-options'),
+        formatBarcode: document.getElementById('format-barcode'),
+        formatQrcode: document.getElementById('format-qrcode'),
+        copiesInput: document.getElementById('copies'),
+        backToFilesBtn: document.getElementById('back-to-files-btn'),
+        continueToPreviewBtn: document.getElementById('continue-to-preview-btn'),
+        backToSettingsBtn: document.getElementById('back-to-settings-btn'),
+        finalPrintBtn: document.getElementById('final-print-btn'),
+        previewDescription: document.getElementById('preview-description'),
+        labelPreviews: document.getElementById('label-previews'),
+        summaryLabels: document.getElementById('summary-labels'),
+        summaryCopies: document.getElementById('summary-copies'),
+        summaryTotal: document.getElementById('summary-total'),
+        summaryTemplate: document.getElementById('summary-template'),
+        summarySize: document.getElementById('summary-size'),
+        summaryFormat: document.getElementById('summary-format'),
+        exportPdfBtn: document.getElementById('export-pdf-btn'),
+        saveTemplateBtn: document.getElementById('save-template-btn'),
+        importTemplateBtn: document.getElementById('import-template-btn'),
+        tabTriggers: document.querySelectorAll('.tab-trigger'),
+        tabContents: document.querySelectorAll('.tab-content')
+    };
+
+    // Helper functions
+    function updateCounts() {
+        elements.selectedFilesCount.textContent = selectedFiles.length;
+        elements.selectionCount.textContent = `${selectedFiles.length} of ${getFilteredFiles().length} selected`;
+        
+        // Show/hide duplicate button
+        if (selectedFiles.length > 0) {
+            elements.duplicateBtn.classList.remove('hidden');
+        } else {
+            elements.duplicateBtn.classList.add('hidden');
+        }
+        
+        // Enable/disable continue button
+        if (selectedFiles.length > 0 || batchMode) {
+            elements.continueToSettingsBtn.disabled = false;
+        } else {
+            elements.continueToSettingsBtn.disabled = true;
+        }
+    }
+
+    function getFilteredFiles() {
+        return indexedFiles.filter(file =>
+            file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            file.fileNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            file.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            file.location.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    function toggleFileSelection(fileId) {
+        if (selectedFiles.includes(fileId)) {
+            selectedFiles = selectedFiles.filter(id => id !== fileId);
+        } else {
+            selectedFiles.push(fileId);
+        }
+        updateCounts();
+        renderFilesList();
+    }
+
+    function selectAllFiles() {
+        const filteredFiles = getFilteredFiles();
+        if (selectedFiles.length === filteredFiles.length) {
+            selectedFiles = [];
+        } else {
+            selectedFiles = filteredFiles.map(file => file.id);
+        }
+        updateCounts();
+        renderFilesList();
+    }
+
+    function renderFilesList() {
+        const filteredFiles = getFilteredFiles();
+        elements.filesList.innerHTML = '';
+
+        filteredFiles.forEach(file => {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'flex items-center p-4';
+            fileDiv.innerHTML = `
+                <input type="checkbox" class="checkbox mr-4" ${selectedFiles.includes(file.id) ? 'checked' : ''} 
+                       onchange="toggleFileSelection('${file.id}')">
+                <div class="flex flex-1 items-center gap-3">
+                    <i data-lucide="file-text" class="h-8 w-8 text-blue-500"></i>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="font-medium text-blue-600">${file.fileNumber}</p>
+                            <span class="badge badge-outline text-xs">${file.type}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">${file.name}</p>
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                            <span class="badge badge-secondary text-xs">${file.location}</span>
+                            <span class="text-xs text-muted-foreground">${file.date}</span>
+                            ${file.kangisFileNo ? `<span class="text-xs text-muted-foreground">KANGIS: ${file.kangisFileNo}</span>` : ''}
+                            ${file.newKangisFileNo ? `<span class="text-xs text-muted-foreground">New KANGIS: ${file.newKangisFileNo}</span>` : ''}
+                        </div>
+                    </div>
+                    <span class="badge badge-green">
+                        <i data-lucide="check-circle" class="h-3 w-3 mr-1"></i>
+                        Indexed
+                    </span>
+                </div>
+            `;
+            elements.filesList.appendChild(fileDiv);
+        });
+
+        // Update select all checkbox
+        elements.selectAllCheckbox.checked = selectedFiles.length === filteredFiles.length && filteredFiles.length > 0;
+        
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+    }
+
+    function switchTab(tabName) {
+        activeTab = tabName;
+        
+        // Update tab triggers
+        elements.tabTriggers.forEach(trigger => {
+            trigger.classList.remove('active');
+            if (trigger.dataset.tab === tabName) {
+                trigger.classList.add('active');
+            }
+        });
+
+        // Update tab contents
+        elements.tabContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `${tabName}-tab`) {
+                content.classList.add('active');
+            }
+        });
+
+        // Update preview when switching to preview tab
+        if (tabName === 'preview') {
+            updatePreview();
+        }
+    }
+
+    function generateBarcode(text, width = 200, height = 100) {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        
+        try {
+            JsBarcode(canvas, text, {
+                format: "CODE128",
+                width: 2,
+                height: height * 0.6,
+                displayValue: true,
+                fontSize: 12,
+                margin: 10
+            });
+        } catch (error) {
+            // Fallback if barcode generation fails
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, height * 0.2, width, height * 0.6);
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, width / 2, height * 0.9);
+        }
+        
+        return canvas;
+    }
+
+    function generateQRCode(text, size = 120) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        
+        try {
+            QRCode.toCanvas(canvas, text, {
+                width: size,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            });
+        } catch (error) {
+            // Fallback if QR code generation fails
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('QR', size / 2, size / 2);
+        }
+        
+        return canvas;
+    }
+
+    function updatePreview() {
+        const labelCount = batchMode ? batchCount : selectedFiles.length;
+        const totalLabels = labelCount * copies;
+        
+        elements.previewDescription.textContent = `You have selected ${labelCount} ${batchMode ? 'batch' : ''} labels to print. Please review the label previews below before printing.`;
+        
+        // Update summary
+        elements.summaryLabels.textContent = labelCount;
+        elements.summaryCopies.textContent = copies;
+        elements.summaryTotal.textContent = totalLabels;
+        elements.summaryFormat.textContent = labelFormat === 'barcode' ? 'Barcode' : 'QR Code';
+        
+        // Generate previews
+        elements.labelPreviews.innerHTML = '';
+        
+        if (batchMode) {
+            // Batch mode previews
+            const previewCount = Math.min(batchCount, 6);
+            for (let i = 0; i < previewCount; i++) {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'border p-6 rounded-md flex flex-col items-center';
+                
+                const labelText = `BATCH-${(batchStartNumber + i).toString().padStart(4, '0')}`;
+                
+                let codeElement;
+                if (labelFormat === 'barcode') {
+                    codeElement = generateBarcode(labelText);
+                } else {
+                    codeElement = generateQRCode(labelText);
+                }
+                
+                labelDiv.innerHTML = `
+                    <div class="mb-4 w-full flex justify-center"></div>
+                    <div class="text-center text-sm mt-2">
+                        <p class="font-bold">Batch Label #${batchStartNumber + i}</p>
+                        <p class="text-muted-foreground">Generated: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                `;
+                
+                labelDiv.querySelector('div').appendChild(codeElement);
+                elements.labelPreviews.appendChild(labelDiv);
+            }
+            
+            if (batchCount > 6) {
+                const moreDiv = document.createElement('div');
+                moreDiv.className = 'border p-6 rounded-md flex items-center justify-center';
+                moreDiv.innerHTML = `<p class="text-sm text-muted-foreground">+${batchCount - 6} more labels</p>`;
+                elements.labelPreviews.appendChild(moreDiv);
+            }
+        } else {
+            // File mode previews
+            const previewCount = Math.min(selectedFiles.length, 6);
+            for (let i = 0; i < previewCount; i++) {
+                const fileId = selectedFiles[i];
+                const file = indexedFiles.find(f => f.id === fileId);
+                if (!file) continue;
+                
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'border p-6 rounded-md flex flex-col items-center';
+                
+                let codeElement;
+                if (labelFormat === 'barcode') {
+                    codeElement = generateBarcode(file.fileNumber);
+                } else {
+                    codeElement = generateQRCode(file.fileNumber);
+                }
+                
+                labelDiv.innerHTML = `
+                    <div class="mb-4 w-full flex justify-center"></div>
+                    <div class="text-center text-sm mt-2">
+                        <p class="font-bold">${file.type}</p>
+                        <p class="text-muted-foreground">${file.location}</p>
+                        ${file.kangisFileNo ? `<p class="text-muted-foreground">KANGIS: ${file.kangisFileNo}</p>` : ''}
+                    </div>
+                `;
+                
+                labelDiv.querySelector('div').appendChild(codeElement);
+                elements.labelPreviews.appendChild(labelDiv);
+            }
+            
+            if (selectedFiles.length > 6) {
+                const moreDiv = document.createElement('div');
+                moreDiv.className = 'border p-6 rounded-md flex items-center justify-center';
+                moreDiv.innerHTML = `<p class="text-sm text-muted-foreground">+${selectedFiles.length - 6} more labels</p>`;
+                elements.labelPreviews.appendChild(moreDiv);
+            }
+        }
+    }
+
+    function resetForm() {
+        selectedFiles = [];
+        labelFormat = 'barcode';
+        batchMode = false;
+        batchStartNumber = 1;
+        batchCount = 10;
+        copies = 1;
+        showAdvancedOptions = false;
+        searchTerm = '';
+        
+        // Reset UI elements
+        elements.batchModeCheckbox.checked = false;
+        elements.batchControls.classList.add('hidden');
+        elements.batchStart.value = '1';
+        elements.batchCount.value = '10';
+        elements.copiesInput.value = '1';
+        elements.searchInput.value = '';
+        elements.formatBarcode.classList.add('selected');
+        elements.formatQrcode.classList.remove('selected');
+        elements.advancedOptions.classList.add('hidden');
+        elements.advancedOptionsBtn.textContent = 'Show Advanced';
+        
+        updateCounts();
+        renderFilesList();
+        switchTab('files');
+    }
+
+    function printLabels() {
+        if (selectedFiles.length === 0 && !batchMode) {
+            alert('Please select files to print labels for');
+            return;
+        }
+
+        if (batchMode) {
+            alert(`Printing ${batchCount} batch labels starting from ${batchStartNumber}`);
+        } else {
+            alert(`Printing ${selectedFiles.length} labels with ${copies} copies each`);
+        }
+    }
+
+    // Event listeners
+    elements.historyBtn.addEventListener('click', () => {
+        elements.printHistory.classList.toggle('hidden');
+    });
+
+    elements.closeHistoryBtn.addEventListener('click', () => {
+        elements.printHistory.classList.add('hidden');
+    });
+
+    elements.resetBtn.addEventListener('click', resetForm);
+    elements.printLabelsBtn.addEventListener('click', printLabels);
+    elements.finalPrintBtn.addEventListener('click', printLabels);
+
+    elements.searchInput.addEventListener('input', (e) => {
+        searchTerm = e.target.value;
+        renderFilesList();
+        updateCounts();
+    });
+
+    elements.batchModeCheckbox.addEventListener('change', (e) => {
+        batchMode = e.target.checked;
+        if (batchMode) {
+            elements.batchControls.classList.remove('hidden');
+        } else {
+            elements.batchControls.classList.add('hidden');
+        }
+        updateCounts();
+    });
+
+    elements.batchStart.addEventListener('input', (e) => {
+        batchStartNumber = parseInt(e.target.value) || 1;
+    });
+
+    elements.batchCount.addEventListener('input', (e) => {
+        batchCount = parseInt(e.target.value) || 10;
+        updateCounts();
+    });
+
+    elements.generateBatchBtn.addEventListener('click', () => {
+        alert(`Generated ${batchCount} batch labels starting from ${batchStartNumber}`);
+    });
+
+    elements.selectAllCheckbox.addEventListener('change', selectAllFiles);
+
+    elements.duplicateBtn.addEventListener('click', () => {
+        copies++;
+        elements.copiesInput.value = copies;
+        alert(`Duplicated selected labels. Now printing ${copies} copies of each.`);
+    });
+
+    elements.continueToSettingsBtn.addEventListener('click', () => switchTab('settings'));
+    elements.backToFilesBtn.addEventListener('click', () => switchTab('files'));
+    elements.continueToPreviewBtn.addEventListener('click', () => switchTab('preview'));
+    elements.backToSettingsBtn.addEventListener('click', () => switchTab('settings'));
+
+    elements.advancedOptionsBtn.addEventListener('click', () => {
+        showAdvancedOptions = !showAdvancedOptions;
+        if (showAdvancedOptions) {
+            elements.advancedOptions.classList.remove('hidden');
+            elements.advancedOptionsBtn.textContent = 'Hide Advanced';
+        } else {
+            elements.advancedOptions.classList.add('hidden');
+            elements.advancedOptionsBtn.textContent = 'Show Advanced';
+        }
+    });
+
+    elements.formatBarcode.addEventListener('click', () => {
+        labelFormat = 'barcode';
+        elements.formatBarcode.classList.add('selected');
+        elements.formatQrcode.classList.remove('selected');
+    });
+
+    elements.formatQrcode.addEventListener('click', () => {
+        labelFormat = 'qrcode';
+        elements.formatQrcode.classList.add('selected');
+        elements.formatBarcode.classList.remove('selected');
+    });
+
+    elements.copiesInput.addEventListener('input', (e) => {
+        copies = parseInt(e.target.value) || 1;
+    });
+
+    elements.exportPdfBtn.addEventListener('click', () => {
+        alert('Exporting labels as PDF...');
+    });
+
+    elements.saveTemplateBtn.addEventListener('click', () => {
+        const templateName = prompt('Enter a name for this template:');
+        if (templateName) {
+            alert(`Template "${templateName}" saved successfully!`);
+        }
+    });
+
+    elements.importTemplateBtn.addEventListener('click', () => {
+        alert('Import template functionality would open a file dialog here');
+    });
+
+    // Tab triggers
+    elements.tabTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            switchTab(trigger.dataset.tab);
+        });
+    });
+
+    // Global function for file selection (called from HTML)
+    window.toggleFileSelection = toggleFileSelection;
+
+    // Initialize the page
+    function init() {
+        renderFilesList();
+        updateCounts();
+        lucide.createIcons();
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
