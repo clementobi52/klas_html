@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Integration - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: '#3b82f6',
+                'primary-foreground': '#ffffff',
+                muted: '#f3f4f6',
+                'muted-foreground': '#6b7280',
+                border: '#e5e7eb',
+                ring: '#3b82f6',
+                success: '#10b981',
+                warning: '#f59e0b',
+                destructive: '#ef4444',
+                secondary: '#f1f5f9',
+                'secondary-foreground': '#0f172a',
+            },
+            animation: {
+                'spin': 'spin 1s linear infinite',
+            }
+        }
+    }
+}
+</script>
+<style>
+    /* Minimal custom styles for JavaScript-controlled states */
+    .payment-method-btn.selected {
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+</style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+<div class="max-w-4xl mx-auto p-6">
+    <!-- Payment Integration Card -->
+    <div class="space-y-6">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <!-- Card Header -->
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i data-lucide="file-text" class="h-5 w-5"></i>
+                    Payment for SLTR Application
+                </h2>
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-6 space-y-6">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Left Column -->
+                    <div class="flex-1 space-y-4">
+                        <!-- Application Details -->
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h3 class="font-medium mb-2">Application Details</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <div id="property-type-icon">
+                                        <i data-lucide="home" class="h-6 w-6 text-blue-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium capitalize" id="property-type-display">Residential Property</p>
+                                        <p class="text-sm text-gray-500">File Number: <span id="file-number-display">SLTR-RES-2024-01</span></p>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2">
+                                    <p class="text-sm">
+                                        <span class="font-medium">Applicant:</span> <span id="applicant-name-display">John Doe</span>
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="font-medium">Applicant Type:</span> <span id="applicant-type-display">Individual</span>
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="font-medium">Application ID:</span> <span id="application-id-display">SLTR-123456</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Status -->
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h3 class="font-medium mb-2">Payment Status</h3>
+                            <div id="payment-status-pending" class="flex items-center gap-2 text-amber-600">
+                                <div class="rounded-full bg-amber-100 p-1">
+                                    <i data-lucide="credit-card" class="h-4 w-4"></i>
+                                </div>
+                                <span>Payment required to proceed</span>
+                            </div>
+                            <div id="payment-status-completed" class="flex items-center gap-2 text-green-600 hidden">
+                                <div class="rounded-full bg-green-100 p-1">
+                                    <i data-lucide="check" class="h-4 w-4"></i>
+                                </div>
+                                <span>Payment completed successfully</span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Summary -->
+                        <div class="bg-white p-4 rounded-md border border-gray-200">
+                            <h4 class="font-medium mb-3">Payment Summary</h4>
+                            <div id="payment-breakdown" class="space-y-2 text-sm">
+                                <!-- Payment breakdown will be populated by JavaScript -->
+                            </div>
+                            <div class="border-t border-gray-200 pt-2 mt-3">
+                                <div class="flex justify-between font-medium text-lg">
+                                    <span>Total Amount:</span>
+                                    <span id="payment-total-display" class="text-blue-600">₦75,000.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="w-full md:w-80 space-y-4">
+                        <!-- Next Steps -->
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h3 class="font-medium mb-2">Next Steps</h3>
+                            <ul class="space-y-2">
+                                <li class="flex items-center gap-2">
+                                    <div class="rounded-full bg-blue-100 p-1 flex-shrink-0">
+                                        <i data-lucide="credit-card" class="h-4 w-4 text-blue-600"></i>
+                                    </div>
+                                    <span class="text-sm">Complete payment for your application</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <div class="rounded-full bg-gray-100 p-1 flex-shrink-0">
+                                        <i data-lucide="file-text" class="h-4 w-4 text-gray-600"></i>
+                                    </div>
+                                    <span class="text-sm">Receive payment receipt</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <div class="rounded-full bg-gray-100 p-1 flex-shrink-0">
+                                        <i data-lucide="building" class="h-4 w-4 text-gray-600"></i>
+                                    </div>
+                                    <span class="text-sm">Application processing begins</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Help Section -->
+                        <div class="bg-blue-50 p-4 rounded-md">
+                            <h3 class="font-medium text-blue-700 mb-2">Need Help?</h3>
+                            <p class="text-sm text-blue-600 mb-2">
+                                If you have any questions about the payment process, please contact our support team.
+                            </p>
+                            <p class="text-sm text-blue-600">
+                                <span class="font-medium">Phone:</span> 0800-SLTR-HELP
+                            </p>
+                            <p class="text-sm text-blue-600">
+                                <span class="font-medium">Email:</span> support@sltr.gov.ng
+                            </p>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="bg-white p-4 rounded-md border border-gray-200">
+                            <h4 class="font-medium mb-3">Accepted Payment Methods</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex items-center gap-2 p-2 border border-gray-200 rounded">
+                                    <i data-lucide="credit-card" class="h-4 w-4 text-blue-500"></i>
+                                    <span class="text-xs">Card</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-2 border border-gray-200 rounded">
+                                    <i data-lucide="smartphone" class="h-4 w-4 text-green-500"></i>
+                                    <span class="text-xs">Transfer</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-2 border border-gray-200 rounded">
+                                    <i data-lucide="building-2" class="h-4 w-4 text-purple-500"></i>
+                                    <span class="text-xs">Bank</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-2 border border-gray-200 rounded">
+                                    <i data-lucide="wallet" class="h-4 w-4 text-amber-600"></i>
+                                    <span class="text-xs">Wallet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-between pt-4 border-t border-gray-200">
+                    <button type="button" id="back-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-colors bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <i data-lucide="arrow-left" class="h-4 w-4 mr-1"></i>
+                        Back
+                    </button>
+
+                    <div class="flex gap-2">
+                        <button type="button" id="proceed-payment-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-colors bg-blue-600 text-white hover:bg-blue-700">
+                            <i data-lucide="credit-card" class="h-4 w-4 mr-1"></i>
+                            Proceed to Payment
+                        </button>
+                        <button type="button" id="continue-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-colors bg-blue-600 text-white hover:bg-blue-700 hidden">
+                            Continue
+                            <i data-lucide="arrow-right" class="h-4 w-4 ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium">Complete Payment</h3>
+                    <button type="button" id="close-modal-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm p-2 transition-colors bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Payment Summary in Modal -->
+                    <div class="bg-gray-50 p-4 rounded-md">
+                        <h4 class="font-medium mb-3">Payment Summary</h4>
+                        <div id="modal-payment-breakdown" class="space-y-2 text-sm">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="border-t border-gray-200 pt-2 mt-3">
+                            <div class="flex justify-between font-medium text-lg">
+                                <span>Total Amount:</span>
+                                <span id="modal-payment-total" class="text-blue-600">₦75,000.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="space-y-4">
+                        <h4 class="font-medium">Select Payment Method</h4>
+                        <div class="grid grid-cols-1 gap-3">
+                            <div class="payment-method-btn p-4 border border-gray-200 rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50" data-method="card">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="credit-card" class="h-6 w-6 text-blue-500"></i>
+                                    <div class="text-left">
+                                        <p class="font-medium">Debit/Credit Card</p>
+                                        <p class="text-sm text-gray-500">Visa, Mastercard, Verve</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="payment-method-btn p-4 border border-gray-200 rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50" data-method="transfer">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="smartphone" class="h-6 w-6 text-green-500"></i>
+                                    <div class="text-left">
+                                        <p class="font-medium">Bank Transfer</p>
+                                        <p class="text-sm text-gray-500">Direct bank transfer</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="payment-method-btn p-4 border border-gray-200 rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50" data-method="ussd">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="phone" class="h-6 w-6 text-purple-500"></i>
+                                    <div class="text-left">
+                                        <p class="font-medium">USSD</p>
+                                        <p class="text-sm text-gray-500">*737# and others</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="payment-method-btn p-4 border border-gray-200 rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50" data-method="wallet">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="wallet" class="h-6 w-6 text-amber-600"></i>
+                                    <div class="text-left">
+                                        <p class="font-medium">Digital Wallet</p>
+                                        <p class="text-sm text-gray-500">Paystack, Flutterwave</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Processing -->
+                    <div id="payment-processing" class="hidden text-center py-8">
+                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                            <i data-lucide="loader" class="h-6 w-6 text-blue-600 animate-spin"></i>
+                        </div>
+                        <h4 class="font-medium mb-2">Processing Payment</h4>
+                        <p class="text-sm text-gray-600">Please wait while we process your payment...</p>
+                    </div>
+
+                    <!-- Payment Success -->
+                    <div id="payment-success" class="hidden text-center py-8">
+                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                            <i data-lucide="check" class="h-6 w-6 text-green-600"></i>
+                        </div>
+                        <h4 class="font-medium mb-2">Payment Successful!</h4>
+                        <p class="text-sm text-gray-600 mb-4">Your payment has been processed successfully.</p>
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <p class="text-sm"><span class="font-medium">Transaction ID:</span> <span id="transaction-id">TXN12345678</span></p>
+                            <p class="text-sm"><span class="font-medium">Receipt Number:</span> <span id="receipt-number">RCP123456</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="flex justify-between pt-4 border-t border-gray-200">
+                        <button type="button" id="modal-cancel-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-colors bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="button" id="process-payment-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-colors bg-blue-600 text-white hover:bg-blue-700 hidden">
+                            <span id="process-payment-text">Process Payment</span>
+                            <i id="process-payment-loading" data-lucide="loader" class="h-4 w-4 ml-2 hidden animate-spin"></i>
+                        </button>
+                        <button type="button" id="modal-continue-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-colors bg-blue-600 text-white hover:bg-blue-700 hidden">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // State management
+    let paymentCompleted = false;
+    let selectedPaymentMethod = null;
+
+    // Sample data - can be configured
+    const applicationData = {
+        applicationId: 'SLTR-123456',
+        applicantName: 'John Doe',
+        applicantType: 'individual',
+        propertyType: 'residential',
+        fileNumber: 'SLTR-RES-2024-01',
+        squareMeters: 500,
+        beaconCount: 4
+    };
+
+    // Fee structures
+    const feeStructures = {
+        residential: {
+            applicationForm: 2000,
+            sitePlan: 5000,
+            processingFee: 20000,
+            bettermentFee: 18000,
+            billBalance: 10000,
+            feesP_D: 15000,
+            surveyFee: 14000,
+            squareMeterFee: 1,
+            beaconFee: 2000
+        },
+        commercial: {
+            applicationForm: 5000,
+            sitePlan: 10000,
+            processingFee: 50000,
+            bettermentFee: 25000,
+            billBalance: 20000,
+            feesP_D: 29250,
+            surveyFee: 14000,
+            squareMeterFee: 1,
+            beaconFee: 2000
+        },
+        warehouse: {
+            applicationForm: 10000,
+            sitePlan: 10000,
+            processingFee: 100000,
+            bettermentFee: 35000,
+            billBalance: 20000,
+            feesP_D: 22500,
+            surveyFee: 14000,
+            squareMeterFee: 1,
+            beaconFee: 2000
+        },
+        agriculture: {
+            applicationForm: 5000,
+            sitePlan: 5000,
+            processingFee: 50000,
+            bettermentFee: 18000,
+            billBalance: 10000,
+            feesP_D: 25000,
+            surveyFee: 14000,
+            squareMeterFee: 1,
+            beaconFee: 2000
+        }
+    };
+
+    // DOM elements
+    const elements = {
+        propertyTypeIcon: document.getElementById('property-type-icon'),
+        propertyTypeDisplay: document.getElementById('property-type-display'),
+        fileNumberDisplay: document.getElementById('file-number-display'),
+        applicantNameDisplay: document.getElementById('applicant-name-display'),
+        applicantTypeDisplay: document.getElementById('applicant-type-display'),
+        applicationIdDisplay: document.getElementById('application-id-display'),
+        paymentStatusPending: document.getElementById('payment-status-pending'),
+        paymentStatusCompleted: document.getElementById('payment-status-completed'),
+        paymentBreakdown: document.getElementById('payment-breakdown'),
+        paymentTotalDisplay: document.getElementById('payment-total-display'),
+        proceedPaymentBtn: document.getElementById('proceed-payment-btn'),
+        continueBtn: document.getElementById('continue-btn'),
+        backBtn: document.getElementById('back-btn'),
+        paymentModal: document.getElementById('payment-modal'),
+        closeModalBtn: document.getElementById('close-modal-btn'),
+        modalPaymentBreakdown: document.getElementById('modal-payment-breakdown'),
+        modalPaymentTotal: document.getElementById('modal-payment-total'),
+        paymentMethodBtns: document.querySelectorAll('.payment-method-btn'),
+        processPaymentBtn: document.getElementById('process-payment-btn'),
+        modalCancelBtn: document.getElementById('modal-cancel-btn'),
+        modalContinueBtn: document.getElementById('modal-continue-btn'),
+        paymentProcessing: document.getElementById('payment-processing'),
+        paymentSuccess: document.getElementById('payment-success'),
+        transactionId: document.getElementById('transaction-id'),
+        receiptNumber: document.getElementById('receipt-number')
+    };
+
+    // Helper functions
+    function getPropertyTypeIcon(propertyType) {
+        const iconMap = {
+            residential: 'home',
+            commercial: 'building',
+            warehouse: 'warehouse',
+            agriculture: 'tractor'
+        };
+        return iconMap[propertyType] || 'home';
+    }
+
+    function getPropertyTypeColor(propertyType) {
+        const colorMap = {
+            residential: 'text-blue-500',
+            commercial: 'text-purple-500',
+            warehouse: 'text-amber-500',
+            agriculture: 'text-green-500'
+        };
+        return colorMap[propertyType] || 'text-blue-500';
+    }
+
+    function calculateTotalAmount(propertyType, squareMeters = 0, beaconCount = 4) {
+        const fees = feeStructures[propertyType];
+        if (!fees) return 0;
+
+        const baseFees = Object.values(fees).reduce((sum, fee) => sum + fee, 0);
+        const squareMeterCost = squareMeters * fees.squareMeterFee;
+        const beaconCost = beaconCount * fees.beaconFee;
+        
+        return baseFees + squareMeterCost + beaconCost - fees.squareMeterFee - fees.beaconFee;
+    }
+
+    function generatePaymentBreakdown(propertyType, squareMeters = 0, beaconCount = 4) {
+        const fees = feeStructures[propertyType];
+        if (!fees) return '';
+
+        const feeItems = [
+            { name: 'Application Form', amount: fees.applicationForm },
+            { name: 'Site Plan', amount: fees.sitePlan },
+            { name: 'Processing Fee', amount: fees.processingFee },
+            { name: 'Betterment Fee', amount: fees.bettermentFee },
+            { name: 'Bill Balance', amount: fees.billBalance },
+            { name: 'Fees P & D', amount: fees.feesP_D },
+            { name: 'Survey Fee', amount: fees.surveyFee }
+        ];
+
+        if (squareMeters > 0) {
+            feeItems.push({ name: `Square Meters (${squareMeters}m²)`, amount: squareMeters * fees.squareMeterFee });
+        }
+
+        if (beaconCount > 0) {
+            feeItems.push({ name: `Beacons (${beaconCount})`, amount: beaconCount * fees.beaconFee });
+        }
+
+        let breakdownHTML = '';
+        feeItems.forEach(item => {
+            breakdownHTML += `
+                <div class="flex justify-between">
+                    <span>${item.name}:</span>
+                    <span>₦${item.amount.toLocaleString()}.00</span>
+                </div>
+            `;
+        });
+
+        return breakdownHTML;
+    }
+
+    function updateDisplay() {
+        const { applicationId, applicantName, applicantType, propertyType, fileNumber, squareMeters, beaconCount } = applicationData;
+
+        // Update property type icon
+        const iconElement = elements.propertyTypeIcon.querySelector('i');
+        iconElement.setAttribute('data-lucide', getPropertyTypeIcon(propertyType));
+        iconElement.className = `h-6 w-6 ${getPropertyTypeColor(propertyType)}`;
+
+        // Update text displays
+        elements.propertyTypeDisplay.textContent = `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} Property`;
+        elements.fileNumberDisplay.textContent = fileNumber;
+        elements.applicantNameDisplay.textContent = applicantName;
+        elements.applicantTypeDisplay.textContent = applicantType.charAt(0).toUpperCase() + applicantType.slice(1);
+        elements.applicationIdDisplay.textContent = applicationId;
+
+        // Update payment breakdown
+        const breakdownHTML = generatePaymentBreakdown(propertyType, squareMeters, beaconCount);
+        elements.paymentBreakdown.innerHTML = breakdownHTML;
+        elements.modalPaymentBreakdown.innerHTML = breakdownHTML;
+
+        // Update total amount
+        const totalAmount = calculateTotalAmount(propertyType, squareMeters, beaconCount);
+        elements.paymentTotalDisplay.textContent = `₦${totalAmount.toLocaleString()}.00`;
+        elements.modalPaymentTotal.textContent = `₦${totalAmount.toLocaleString()}.00`;
+
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+    }
+
+    function openPaymentModal() {
+        elements.paymentModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePaymentModal() {
+        elements.paymentModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        
+        // Reset modal state
+        resetModalState();
+    }
+
+    function resetModalState() {
+        // Hide processing and success screens
+        elements.paymentProcessing.classList.add('hidden');
+        elements.paymentSuccess.classList.add('hidden');
+        
+        // Show payment method selection
+        document.querySelector('.space-y-4').classList.remove('hidden');
+        
+        // Reset buttons
+        elements.processPaymentBtn.classList.add('hidden');
+        elements.modalContinueBtn.classList.add('hidden');
+        
+        // Clear selected payment method
+        selectedPaymentMethod = null;
+        elements.paymentMethodBtns.forEach(btn => {
+            btn.classList.remove('selected');
+        });
+    }
+
+    function selectPaymentMethod(method) {
+        selectedPaymentMethod = method;
+        
+        // Update UI
+        elements.paymentMethodBtns.forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.method === method) {
+                btn.classList.add('selected');
+            }
+        });
+        
+        // Show process payment button
+        elements.processPaymentBtn.classList.remove('hidden');
+    }
+
+    function processPayment() {
+        if (!selectedPaymentMethod) return;
+
+        // Hide payment method selection
+        document.querySelector('.space-y-4').classList.add('hidden');
+        elements.processPaymentBtn.classList.add('hidden');
+        
+        // Show processing screen
+        elements.paymentProcessing.classList.remove('hidden');
+        
+        // Simulate payment processing
+        setTimeout(() => {
+            elements.paymentProcessing.classList.add('hidden');
+            
+            // Generate transaction details
+            const transactionId = 'TXN' + Date.now().toString().slice(-8);
+            const receiptNumber = 'RCP' + Math.floor(100000 + Math.random() * 900000);
+            
+            elements.transactionId.textContent = transactionId;
+            elements.receiptNumber.textContent = receiptNumber;
+            
+            // Show success screen
+            elements.paymentSuccess.classList.remove('hidden');
+            elements.modalContinueBtn.classList.remove('hidden');
+            
+            lucide.createIcons();
+        }, 3000);
+    }
+
+    function completePayment() {
+        paymentCompleted = true;
+        
+        // Update main UI
+        elements.paymentStatusPending.classList.add('hidden');
+        elements.paymentStatusCompleted.classList.remove('hidden');
+        elements.proceedPaymentBtn.classList.add('hidden');
+        elements.continueBtn.classList.remove('hidden');
+        
+        // Close modal
+        closePaymentModal();
+        
+        lucide.createIcons();
+    }
+
+    function handleContinue() {
+        // This would typically navigate to the next step
+        alert('Proceeding to next step...');
+    }
+
+    function handleBack() {
+        // This would typically navigate to the previous step
+        alert('Going back to previous step...');
+    }
+
+    // Event listeners
+    elements.proceedPaymentBtn.addEventListener('click', openPaymentModal);
+    elements.continueBtn.addEventListener('click', handleContinue);
+    elements.backBtn.addEventListener('click', handleBack);
+    elements.closeModalBtn.addEventListener('click', closePaymentModal);
+    elements.modalCancelBtn.addEventListener('click', closePaymentModal);
+    elements.processPaymentBtn.addEventListener('click', processPayment);
+    elements.modalContinueBtn.addEventListener('click', completePayment);
+
+    // Payment method selection
+    elements.paymentMethodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectPaymentMethod(btn.dataset.method);
+        });
+    });
+
+    // Close modal when clicking outside
+    elements.paymentModal.addEventListener('click', (e) => {
+        if (e.target === elements.paymentModal) {
+            closePaymentModal();
+        }
+    });
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !elements.paymentModal.classList.contains('hidden')) {
+            closePaymentModal();
+        }
+    });
+
+    // Initialize the component
+    function init() {
+        updateDisplay();
+        lucide.createIcons();
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+
+    // Expose functions for external use
+    window.PaymentIntegration = {
+        updateApplicationData: (data) => {
+            Object.assign(applicationData, data);
+            updateDisplay();
+        },
+        getPaymentStatus: () => paymentCompleted,
+        resetPayment: () => {
+            paymentCompleted = false;
+            elements.paymentStatusPending.classList.remove('hidden');
+            elements.paymentStatusCompleted.classList.add('hidden');
+            elements.proceedPaymentBtn.classList.remove('hidden');
+            elements.continueBtn.classList.add('hidden');
+            lucide.createIcons();
+        }
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhanced Payment Modal - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#3b82f6',
+                    'primary-foreground': '#ffffff',
+                    muted: '#f3f4f6',
+                    'muted-foreground': '#6b7280',
+                    border: '#e5e7eb',
+                    ring: '#3b82f6',
+                    success: '#10b981',
+                    warning: '#f59e0b',
+                    destructive: '#ef4444',
+                    secondary: '#f1f5f9',
+                    'secondary-foreground': '#0f172a',
+                }
+            }
+        }
+    }
+</script>
+<style>
+    /* Minimal custom CSS for JavaScript-controlled states */
+    .modal {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .modal.open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        transform: scale(0.95);
+        transition: transform 0.2s;
+    }
+
+    .modal.open .modal-content {
+        transform: scale(1);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .payment-method-option.selected {
+        background-color: rgba(59, 130, 246, 0.05);
+        border-color: #3b82f6;
+    }
+
+    .gateway-option.selected {
+        background-color: rgba(59, 130, 246, 0.05);
+        border-color: #3b82f6;
+    }
+</style>
+</head>
+<body class="bg-slate-50">
+    <!-- Demo Controls -->
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="bg-white p-8 rounded-lg shadow-md mb-6">
+            <h1 class="text-2xl font-bold mb-4">Enhanced SLTR Payment System</h1>
+            <p class="text-gray-600 mb-6">Test the payment modal with different property types and configurations.</p>
+            
+            <!-- Property Type Selector -->
+            <div class="mb-4">
+                <label class="font-medium mb-2 block">Property Type:</label>
+                <select id="property-type-selector" class="block w-full max-w-xs rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="residential">Residential</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="agriculture">Agriculture</option>
+                </select>
+            </div>
+
+            <!-- Additional Parameters -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="font-medium mb-2 block">Square Meters:</label>
+                    <input type="number" id="square-meters-input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="500" min="0">
+                </div>
+                <div>
+                    <label class="font-medium mb-2 block">Beacon Count:</label>
+                    <input type="number" id="beacon-count-input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="4" min="1">
+                </div>
+            </div>
+
+            <!-- Fee Preview -->
+            <div class="bg-gray-50 p-4 rounded-md mb-6">
+                <h3 class="font-medium mb-2">Fee Preview</h3>
+                <div id="fee-preview" class="text-sm space-y-1">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="border-t pt-2 mt-2">
+                    <div class="flex justify-between font-bold">
+                        <span>Total Amount:</span>
+                        <span id="total-preview" class="text-blue-600">₦0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="open-modal-btn" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                <i data-lucide="credit-card" class="h-4 w-4 mr-2"></i>
+                Open Payment Modal
+            </button>
+        </div>
+
+        <!-- Revenue Statistics -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4">Revenue Statistics</h2>
+            <div id="revenue-stats" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="modal-content bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-semibold">Payment Processing</h3>
+                        <p class="text-sm text-gray-600 mt-1">Complete your payment to proceed with your SLTR application</p>
+                    </div>
+                    <button type="button" id="close-modal-btn" class="inline-flex items-center justify-center rounded-md bg-transparent p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="payment-loading" class="text-center py-8">
+                <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                    <i data-lucide="loader" class="h-6 w-6 text-blue-600 animate-spin"></i>
+                </div>
+                <h4 class="font-medium mb-2">Generating Invoice</h4>
+                <p class="text-sm text-gray-600">Please wait while we prepare your payment details...</p>
+            </div>
+
+            <!-- Enhanced Payment Processor -->
+            <div id="payment-processor" class="hidden">
+                <!-- Content -->
+                <div class="p-6">
+                    <!-- Invoice Summary -->
+                    <div class="bg-gray-50 p-4 rounded-md mb-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-medium text-lg">Invoice Details</h3>
+                            <span id="invoice-status-badge" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Invoice Number:</span>
+                                <span id="invoice-number-display" class="font-medium">INV-SLTR-2024-123456</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Reference Number:</span>
+                                <span id="reference-number-display" class="font-medium">SLTR-PMT-123456-7890</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">File Number:</span>
+                                <span id="file-number-summary" class="font-medium">SLTR-RES-2024-01</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Applicant:</span>
+                                <span id="applicant-summary" class="font-medium">John Doe</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Property Type:</span>
+                                <span id="property-type-summary" class="font-medium">Residential</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Due Date:</span>
+                                <span id="due-date-summary" class="font-medium">Dec 31, 2024</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-200 mt-4 pt-4">
+                            <h4 class="font-medium mb-2">Fee Breakdown</h4>
+                            <div id="fee-breakdown-detailed" class="space-y-1">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                            <div class="flex justify-between font-bold pt-2 border-t border-gray-200 mt-2">
+                                <span>Total Amount:</span>
+                                <span id="total-amount-summary" class="text-blue-600">₦0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="mb-6" id="payment-method-section">
+                        <h3 class="font-medium text-lg mb-4">Select Payment Method</h3>
+                        
+                        <!-- Payment Tabs -->
+                        <div class="tabs-container">
+                            <div class="grid grid-cols-2 bg-gray-100 rounded-md p-1 mb-4">
+                                <button type="button" class="tab-trigger flex items-center justify-center px-4 py-2 rounded text-sm font-medium transition-all bg-white text-blue-600 shadow-sm" data-tab="online">Online Payment</button>
+                                <button type="button" class="tab-trigger flex items-center justify-center px-4 py-2 rounded text-sm font-medium transition-all text-gray-600 hover:text-gray-900" data-tab="offline">Offline Payment</button>
+                            </div>
+
+                            <!-- Online Payment Tab -->
+                            <div id="online-tab" class="tab-content active">
+                                <div class="space-y-3">
+                                    <!-- Bank Transfer -->
+                                    <div class="payment-method-option border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-method="bank_transfer">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="radio" name="payment_method" value="bank_transfer" id="bank_transfer" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <label for="bank_transfer" class="flex items-center cursor-pointer flex-1">
+                                                <i data-lucide="building" class="h-5 w-5 mr-3 text-blue-600"></i>
+                                                <div>
+                                                    <div class="font-medium">Bank Transfer</div>
+                                                    <div class="text-sm text-gray-500">Pay directly from your bank account</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- E-Wallet -->
+                                    <div class="payment-method-option border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-method="e_wallet">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="radio" name="payment_method" value="e_wallet" id="e_wallet" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <label for="e_wallet" class="flex items-center cursor-pointer flex-1">
+                                                <i data-lucide="wallet" class="h-5 w-5 mr-3 text-purple-600"></i>
+                                                <div>
+                                                    <div class="font-medium">E-Wallet</div>
+                                                    <div class="text-sm text-gray-500">Pay using your digital wallet</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card Payment -->
+                                    <div class="payment-method-option border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-method="pos">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="radio" name="payment_method" value="pos" id="pos" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <label for="pos" class="flex items-center cursor-pointer flex-1">
+                                                <i data-lucide="credit-card" class="h-5 w-5 mr-3 text-green-600"></i>
+                                                <div>
+                                                    <div class="font-medium">Card Payment</div>
+                                                    <div class="text-sm text-gray-500">Pay with your debit or credit card</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cash Payment -->
+                                    <div class="payment-method-option border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-method="cash">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="radio" name="payment_method" value="cash" id="cash" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <label for="cash" class="flex items-center cursor-pointer flex-1">
+                                                <i data-lucide="banknote" class="h-5 w-5 mr-3 text-amber-600"></i>
+                                                <div>
+                                                    <div class="font-medium">Cash Payment</div>
+                                                    <div class="text-sm text-gray-500">Pay at our office location</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Gateway Selection -->
+                                <div id="gateway-selection" class="mt-4 space-y-4 hidden">
+                                    <div class="space-y-2">
+                                        <label class="font-medium">Select Payment Gateway</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div class="gateway-option border border-gray-200 rounded-md p-2 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-gateway="flutterwave">
+                                                <div class="flex items-center space-x-2">
+                                                    <input type="radio" name="payment_gateway" value="flutterwave" id="flutterwave" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                                    <label for="flutterwave" class="cursor-pointer">Flutterwave</label>
+                                                </div>
+                                            </div>
+                                            <div class="gateway-option border border-gray-200 rounded-md p-2 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-gateway="paystack">
+                                                <div class="flex items-center space-x-2">
+                                                    <input type="radio" name="payment_gateway" value="paystack" id="paystack" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                                    <label for="paystack" class="cursor-pointer">Paystack</label>
+                                                </div>
+                                            </div>
+                                            <div class="gateway-option border border-gray-200 rounded-md p-2 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-gateway="interswitch">
+                                                <div class="flex items-center space-x-2">
+                                                    <input type="radio" name="payment_gateway" value="interswitch" id="interswitch" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                                    <label for="interswitch" class="cursor-pointer">Interswitch</label>
+                                                </div>
+                                            </div>
+                                            <div class="gateway-option border border-gray-200 rounded-md p-2 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all" data-gateway="remita">
+                                                <div class="flex items-center space-x-2">
+                                                    <input type="radio" name="payment_gateway" value="remita" id="remita" class="w-4 h-4 border border-gray-300 rounded-full bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                                    <label for="remita" class="cursor-pointer">Remita</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Details Form -->
+                                <div id="card-details-form" class="mt-4 space-y-4 hidden">
+                                    <div class="space-y-2">
+                                        <label class="font-medium" for="card_number_input">Card Number</label>
+                                        <input type="text" id="card_number_input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="1234 5678 9012 3456" maxlength="19">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="font-medium" for="expiry_date_input">Expiry Date</label>
+                                            <input type="text" id="expiry_date_input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="MM/YY" maxlength="5">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="font-medium" for="cvv_input">CVV</label>
+                                            <input type="password" id="cvv_input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="123" maxlength="4">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="font-medium" for="card_holder_input">Card Holder Name</label>
+                                        <input type="text" id="card_holder_input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="John Doe">
+                                    </div>
+                                </div>
+
+                                <!-- Cash Payment Instructions -->
+                                <div id="cash-payment-info" class="mt-4 bg-amber-50 p-4 rounded-md hidden">
+                                    <h4 class="font-medium text-amber-700 mb-2">Cash Payment Instructions</h4>
+                                    <p class="text-sm text-amber-600 mb-3">
+                                        Visit our office to complete your cash payment:
+                                    </p>
+                                    <div class="space-y-2 text-sm text-amber-700">
+                                        <div><span class="font-medium">Address:</span> SLTR Office, Plot 123, Central Business District, Abuja</div>
+                                        <div><span class="font-medium">Office Hours:</span> Monday - Friday, 8:00 AM - 4:00 PM</div>
+                                        <div><span class="font-medium">Reference:</span> <span id="cash-reference">Quote this invoice number</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Offline Payment Tab -->
+                            <div id="offline-tab" class="tab-content">
+                                <div class="space-y-4">
+                                    <div class="bg-blue-50 p-4 rounded-md">
+                                        <h4 class="font-medium text-blue-700 mb-2">Bank Transfer Instructions</h4>
+                                        <p class="text-sm text-blue-600 mb-4">
+                                            Make a transfer to the following account and upload your payment proof below:
+                                        </p>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">Bank Name:</span>
+                                                <span>First Bank of Nigeria</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">Account Name:</span>
+                                                <span>SLTR Revenue Account</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">Account Number:</span>
+                                                <span>0123456789</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">Amount:</span>
+                                                <span id="offline-amount">₦0.00</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">Reference:</span>
+                                                <span id="offline-reference">REF-123456</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="font-medium" for="payment_proof">Upload Payment Proof</label>
+                                        <input type="file" id="payment_proof" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" accept=".pdf,.jpg,.jpeg,.png">
+                                        <p class="text-xs text-gray-500">
+                                            Upload a screenshot or receipt of your payment (PDF, JPG, or PNG format)
+                                        </p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="font-medium" for="payment_date_input">Payment Date</label>
+                                        <input type="date" id="payment_date_input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="font-medium" for="payment_reference_input">Payment Reference/Transaction ID</label>
+                                        <input type="text" id="payment_reference_input" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter the reference number from your bank">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div id="payment-error" class="bg-red-50 p-4 rounded-md flex items-start mb-4 hidden">
+                        <i data-lucide="alert-circle" class="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0"></i>
+                        <div class="text-sm text-red-600" id="payment-error-message"></div>
+                    </div>
+
+                    <!-- Processing State -->
+                    <div id="payment-processing" class="text-center py-8 hidden">
+                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                            <i data-lucide="loader" class="h-6 w-6 text-blue-600 animate-spin"></i>
+                        </div>
+                        <h4 class="font-medium mb-2">Processing Payment</h4>
+                        <p class="text-sm text-gray-600">Please wait while we process your payment...</p>
+                        <div class="mt-4">
+                            <div class="text-xs text-gray-500">
+                                Gateway: <span id="processing-gateway">Flutterwave</span> | 
+                                Method: <span id="processing-method">Bank Transfer</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success State with Enhanced Receipt -->
+                    <div id="payment-success-enhanced" class="hidden">
+                        <div class="bg-green-50 border-b border-green-200 p-4 mb-6">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="rounded-full bg-green-100 p-3">
+                                    <i data-lucide="check" class="h-6 w-6 text-green-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-center text-green-700 font-medium text-lg">Payment Successful</h3>
+                            <p class="text-center text-green-600">Your payment has been processed successfully</p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 p-4 rounded-md">
+                                <h3 class="font-medium text-lg mb-4 text-center">Payment Receipt</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Receipt Number:</span>
+                                        <span id="receipt-number-display" class="font-medium">RCP-123456</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Invoice Number:</span>
+                                        <span id="receipt-invoice-number" class="font-medium">INV-SLTR-2024-123456</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Payment Reference:</span>
+                                        <span id="receipt-payment-reference" class="font-medium">SLTR-PMT-123456-7890</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Amount Paid:</span>
+                                        <span id="receipt-amount" class="font-medium">₦0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Payment Method:</span>
+                                        <span id="receipt-payment-method" class="font-medium">Bank Transfer</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Payment Gateway:</span>
+                                        <span id="receipt-payment-gateway" class="font-medium">Flutterwave</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Payment Date:</span>
+                                        <span id="receipt-payment-date" class="font-medium">Dec 1, 2024</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Applicant Name:</span>
+                                        <span id="receipt-applicant-name" class="font-medium">John Doe</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">File Number:</span>
+                                        <span id="receipt-file-number" class="font-medium">SLTR-RES-2024-01</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col space-y-2">
+                                <button type="button" id="print-receipt-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                    <i data-lucide="printer" class="h-4 w-4"></i>
+                                    Print Receipt
+                                </button>
+                                <button type="button" id="download-receipt-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                    <i data-lucide="download" class="h-4 w-4"></i>
+                                    Download Receipt
+                                </button>
+                                <button type="button" id="email-receipt-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                    <i data-lucide="send" class="h-4 w-4"></i>
+                                    Email Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div id="payment-footer" class="p-6 border-t border-gray-200 flex justify-between">
+                    <button type="button" id="cancel-payment-btn" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="button" id="process-payment-btn" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="process-payment-text">Pay ₦0.00</span>
+                        <i id="process-payment-loading" data-lucide="loader" class="h-4 w-4 ml-2 hidden animate-spin"></i>
+                    </button>
+                    <button type="button" id="continue-after-success-btn" class="hidden inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // ===== FEE STRUCTURE AND PAYMENT LOGIC =====
+    
+    // Fee structure based on property type
+    function getFeeStructure(propertyType) {
+        switch (propertyType) {
+            case "residential":
+                return {
+                    applicationForm: 2000,
+                    sitePlan: 5000,
+                    processingFee: 20000,
+                    bettermentFee: 18000,
+                    billBalance: 10000,
+                    feesP_D: 15000,
+                    surveyFee: 14000,
+                    squareMeterFee: 1,
+                    beaconFee: 2000,
+                };
+            case "commercial":
+                return {
+                    applicationForm: 5000,
+                    sitePlan: 10000,
+                    processingFee: 50000,
+                    bettermentFee: 25000,
+                    billBalance: 20000,
+                    feesP_D: 29250,
+                    surveyFee: 14000,
+                    squareMeterFee: 1,
+                    beaconFee: 2000,
+                };
+            case "warehouse":
+                return {
+                    applicationForm: 10000,
+                    sitePlan: 10000,
+                    processingFee: 100000,
+                    bettermentFee: 35000,
+                    billBalance: 20000,
+                    feesP_D: 22500,
+                    surveyFee: 14000,
+                    squareMeterFee: 1,
+                    beaconFee: 2000,
+                };
+            case "agriculture":
+                return {
+                    applicationForm: 5000,
+                    sitePlan: 5000,
+                    processingFee: 50000,
+                    bettermentFee: 18000,
+                    billBalance: 10000,
+                    feesP_D: 25000,
+                    surveyFee: 14000,
+                    squareMeterFee: 1,
+                    beaconFee: 2000,
+                };
+            default:
+                return {
+                    applicationForm: 2000,
+                    sitePlan: 5000,
+                    processingFee: 20000,
+                    bettermentFee: 18000,
+                    billBalance: 10000,
+                    feesP_D: 15000,
+                    surveyFee: 14000,
+                    squareMeterFee: 1,
+                    beaconFee: 2000,
+                };
+        }
+    }
+
+    // Calculate total fee based on property type and additional parameters
+    function calculateTotalFee(propertyType, squareMeters = 0, beaconCount = 4) {
+        const fees = getFeeStructure(propertyType);
+
+        const baseTotal =
+            fees.applicationForm +
+            fees.sitePlan +
+            fees.processingFee +
+            fees.bettermentFee +
+            fees.billBalance +
+            fees.feesP_D +
+            fees.surveyFee;
+
+        const additionalFees = squareMeters * fees.squareMeterFee + beaconCount * fees.beaconFee;
+
+        return baseTotal + additionalFees;
+    }
+
+    // Generate a unique payment reference number
+    function generatePaymentReference() {
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+        return `SLTR-PMT-${timestamp}-${random}`;
+    }
+
+    // Generate a unique invoice number
+    function generateInvoiceNumber() {
+        const year = new Date().getFullYear();
+        const timestamp = Date.now().toString().slice(-6);
+        return `INV-SLTR-${year}-${timestamp}`;
+    }
+
+    // Create an invoice for an application
+    function createInvoice(applicationId, applicantName, applicantType, propertyType, fileNumber, squareMeters = 0, beaconCount = 4) {
+        const fees = getFeeStructure(propertyType);
+        const totalAmount = calculateTotalFee(propertyType, squareMeters, beaconCount);
+
+        // Create invoice items
+        const items = [
+            {
+                description: "Application Form",
+                amount: fees.applicationForm,
+                quantity: 1,
+                total: fees.applicationForm,
+            },
+            {
+                description: "Site Plan",
+                amount: fees.sitePlan,
+                quantity: 1,
+                total: fees.sitePlan,
+            },
+            {
+                description: "Processing Fee",
+                amount: fees.processingFee,
+                quantity: 1,
+                total: fees.processingFee,
+            },
+            {
+                description: "Betterment Fee",
+                amount: fees.bettermentFee,
+                quantity: 1,
+                total: fees.bettermentFee,
+            },
+            {
+                description: "Bill Balance",
+                amount: fees.billBalance,
+                quantity: 1,
+                total: fees.billBalance,
+            },
+            {
+                description: "Fees P & D",
+                amount: fees.feesP_D,
+                quantity: 1,
+                total: fees.feesP_D,
+            },
+            {
+                description: "Survey Fee",
+                amount: fees.surveyFee,
+                quantity: 1,
+                total: fees.surveyFee,
+            },
+        ];
+
+        // Add square meter fee if applicable
+        if (squareMeters > 0) {
+            items.push({
+                description: "Square Meter Fee",
+                amount: fees.squareMeterFee,
+                quantity: squareMeters,
+                total: squareMeters * fees.squareMeterFee,
+            });
+        }
+
+        // Add beacon fee
+        items.push({
+            description: "Beacon Fee",
+            amount: fees.beaconFee,
+            quantity: beaconCount,
+            total: beaconCount * fees.beaconFee,
+        });
+
+        // Set due date to 7 days from now
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 7);
+
+        return {
+            id: 'invoice-' + Date.now(),
+            referenceNumber: generateInvoiceNumber(),
+            applicationId,
+            applicantName,
+            applicantType,
+            propertyType,
+            fileNumber,
+            amount: totalAmount,
+            currency: "NGN",
+            status: "pending",
+            dueDate: dueDate.toISOString(),
+            createdAt: new Date().toISOString(),
+            items,
+            payments: [],
+            squareMeters,
+            beaconCount
+        };
+    }
+
+    // Mock function to simulate payment processing
+    async function processPayment(invoiceId, amount, method, gateway) {
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        // Create payment details
+        const paymentDetails = {
+            id: 'payment-' + Date.now(),
+            referenceNumber: generatePaymentReference(),
+            amount,
+            currency: "NGN",
+            status: Math.random() > 0.1 ? "paid" : "failed", // 90% success rate for simulation
+            method,
+            gateway,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidAt: new Date().toISOString(),
+            metadata: {
+                invoiceId,
+                paymentProcessor: gateway,
+            },
+        };
+
+        return paymentDetails;
+    }
+
+    // Generate a receipt for a payment
+    function generateReceipt(invoice, payment) {
+        return {
+            receiptNumber: `RCP-${payment.referenceNumber.split('-').slice(-2).join('-')}`,
+            invoiceNumber: invoice.referenceNumber,
+            paymentReference: payment.referenceNumber,
+            amount: payment.amount,
+            currency: payment.currency,
+            paymentMethod: payment.method,
+            paymentGateway: payment.gateway,
+            paymentDate: payment.paidAt,
+            applicantName: invoice.applicantName,
+            fileNumber: invoice.fileNumber,
+            items: invoice.items,
+            issueDate: new Date().toISOString(),
+        };
+    }
+
+    // Mock revenue statistics
+    function getRevenueStatistics() {
+        return {
+            totalRevenue: 2450000,
+            pendingRevenue: 890000,
+            paidInvoices: 45,
+            pendingInvoices: 12,
+            overdueInvoices: 3,
+            totalInvoices: 60,
+        };
+    }
+
+    // ===== STATE MANAGEMENT =====
+    
+    let selectedPaymentMethod = null;
+    let selectedPaymentGateway = null;
+    let currentInvoice = null;
+    let isProcessing = false;
+    let paymentCompleted = false;
+
+    // Sample application data
+    let currentApplicationData = {
+        applicationId: 'SLTR-APP-' + Date.now(),
+        applicantName: 'John Doe',
+        applicantType: 'individual',
+        propertyType: 'residential',
+        fileNumber: 'SLTR-RES-2024-01',
+        squareMeters: 500,
+        beaconCount: 4
+    };
+
+    // ===== DOM ELEMENTS =====
+    
+    const elements = {
+        // Controls
+        propertyTypeSelector: document.getElementById('property-type-selector'),
+        squareMetersInput: document.getElementById('square-meters-input'),
+        beaconCountInput: document.getElementById('beacon-count-input'),
+        feePreview: document.getElementById('fee-preview'),
+        totalPreview: document.getElementById('total-preview'),
+        revenueStats: document.getElementById('revenue-stats'),
+        
+        // Modal
+        openModalBtn: document.getElementById('open-modal-btn'),
+        paymentModal: document.getElementById('payment-modal'),
+        paymentLoading: document.getElementById('payment-loading'),
+        paymentProcessor: document.getElementById('payment-processor'),
+        closeModalBtn: document.getElementById('close-modal-btn'),
+        
+        // Invoice display
+        invoiceStatusBadge: document.getElementById('invoice-status-badge'),
+        invoiceNumberDisplay: document.getElementById('invoice-number-display'),
+        referenceNumberDisplay: document.getElementById('reference-number-display'),
+        fileNumberSummary: document.getElementById('file-number-summary'),
+        applicantSummary: document.getElementById('applicant-summary'),
+        propertyTypeSummary: document.getElementById('property-type-summary'),
+        dueDateSummary: document.getElementById('due-date-summary'),
+        feeBreakdownDetailed: document.getElementById('fee-breakdown-detailed'),
+        totalAmountSummary: document.getElementById('total-amount-summary'),
+        
+        // Tab elements
+        tabTriggers: document.querySelectorAll('.tab-trigger'),
+        onlineTab: document.getElementById('online-tab'),
+        offlineTab: document.getElementById('offline-tab'),
+        
+        // Payment method elements
+        paymentMethodOptions: document.querySelectorAll('.payment-method-option'),
+        gatewaySelection: document.getElementById('gateway-selection'),
+        gatewayOptions: document.querySelectorAll('.gateway-option'),
+        cardDetailsForm: document.getElementById('card-details-form'),
+        cashPaymentInfo: document.getElementById('cash-payment-info'),
+        cashReference: document.getElementById('cash-reference'),
+        
+        // Offline payment elements
+        offlineAmount: document.getElementById('offline-amount'),
+        offlineReference: document.getElementById('offline-reference'),
+        
+        // Error and processing elements
+        paymentError: document.getElementById('payment-error'),
+        paymentErrorMessage: document.getElementById('payment-error-message'),
+        paymentProcessing: document.getElementById('payment-processing'),
+        processingGateway: document.getElementById('processing-gateway'),
+        processingMethod: document.getElementById('processing-method'),
+        paymentSuccessEnhanced: document.getElementById('payment-success-enhanced'),
+        paymentMethodSection: document.getElementById('payment-method-section'),
+        
+        // Footer buttons
+        cancelPaymentBtn: document.getElementById('cancel-payment-btn'),
+        processPaymentBtn: document.getElementById('process-payment-btn'),
+        processPaymentText: document.getElementById('process-payment-text'),
+        processPaymentLoading: document.getElementById('process-payment-loading'),
+        continueAfterSuccessBtn: document.getElementById('continue-after-success-btn'),
+        
+        // Receipt elements
+        receiptNumberDisplay: document.getElementById('receipt-number-display'),
+        receiptInvoiceNumber: document.getElementById('receipt-invoice-number'),
+        receiptPaymentReference: document.getElementById('receipt-payment-reference'),
+        receiptAmount: document.getElementById('receipt-amount'),
+        receiptPaymentMethod: document.getElementById('receipt-payment-method'),
+        receiptPaymentGateway: document.getElementById('receipt-payment-gateway'),
+        receiptPaymentDate: document.getElementById('receipt-payment-date'),
+        receiptApplicantName: document.getElementById('receipt-applicant-name'),
+        receiptFileNumber: document.getElementById('receipt-file-number'),
+        
+        // Receipt action buttons
+        printReceiptBtn: document.getElementById('print-receipt-btn'),
+        downloadReceiptBtn: document.getElementById('download-receipt-btn'),
+        emailReceiptBtn: document.getElementById('email-receipt-btn')
+    };
+
+    // ===== UTILITY FUNCTIONS =====
+    
+    function formatCurrency(amount) {
+        return `₦${amount.toLocaleString()}.00`;
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString();
+    }
+
+    function getPaymentMethodName(method) {
+        const names = {
+            bank_transfer: 'Bank Transfer',
+            e_wallet: 'E-Wallet',
+            pos: 'Card Payment',
+            cash: 'Cash Payment'
+        };
+        return names[method] || method;
+    }
+
+    function getPaymentGatewayName(gateway) {
+        const names = {
+            flutterwave: 'Flutterwave',
+            paystack: 'Paystack',
+            interswitch: 'Interswitch',
+            remita: 'Remita',
+            internal: 'Internal'
+        };
+        return names[gateway] || gateway;
+    }
+
+    // ===== UI UPDATE FUNCTIONS =====
+    
+    function updateFeePreview() {
+        const propertyType = elements.propertyTypeSelector.value;
+        const squareMeters = parseInt(elements.squareMetersInput.value) || 0;
+        const beaconCount = parseInt(elements.beaconCountInput.value) || 4;
+        
+        const fees = getFeeStructure(propertyType);
+        const totalAmount = calculateTotalFee(propertyType, squareMeters, beaconCount);
+        
+        // Update application data
+        currentApplicationData.propertyType = propertyType;
+        currentApplicationData.squareMeters = squareMeters;
+        currentApplicationData.beaconCount = beaconCount;
+        
+        // Update fee preview
+        let previewHTML = '';
+        const feeItems = [
+            { name: 'Application Form', amount: fees.applicationForm },
+            { name: 'Site Plan', amount: fees.sitePlan },
+            { name: 'Processing Fee', amount: fees.processingFee },
+            { name: 'Betterment Fee', amount: fees.bettermentFee },
+            { name: 'Bill Balance', amount: fees.billBalance },
+            { name: 'Fees P & D', amount: fees.feesP_D },
+            { name: 'Survey Fee', amount: fees.surveyFee }
+        ];
+        
+        feeItems.forEach(item => {
+            previewHTML += `
+                <div class="flex justify-between">
+                    <span>${item.name}:</span>
+                    <span>${formatCurrency(item.amount)}</span>
+                </div>
+            `;
+        });
+        
+        if (squareMeters > 0) {
+            previewHTML += `
+                <div class="flex justify-between">
+                    <span>Square Meters (${squareMeters}):</span>
+                    <span>${formatCurrency(squareMeters * fees.squareMeterFee)}</span>
+                </div>
+            `;
+        }
+        
+        previewHTML += `
+            <div class="flex justify-between">
+                <span>Beacons (${beaconCount}):</span>
+                <span>${formatCurrency(beaconCount * fees.beaconFee)}</span>
+            </div>
+        `;
+        
+        elements.feePreview.innerHTML = previewHTML;
+        elements.totalPreview.textContent = formatCurrency(totalAmount);
+    }
+
+    function updateRevenueStats() {
+        const stats = getRevenueStatistics();
+        
+        elements.revenueStats.innerHTML = `
+            <div class="bg-green-50 p-4 rounded-md">
+                <h3 class="font-medium text-green-700 mb-2">Total Revenue</h3>
+                <p class="text-2xl font-bold text-green-600">${formatCurrency(stats.totalRevenue)}</p>
+                <p class="text-sm text-green-600">${stats.paidInvoices} paid invoices</p>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-md">
+                <h3 class="font-medium text-amber-700 mb-2">Pending Revenue</h3>
+                <p class="text-2xl font-bold text-amber-600">${formatCurrency(stats.pendingRevenue)}</p>
+                <p class="text-sm text-amber-600">${stats.pendingInvoices} pending, ${stats.overdueInvoices} overdue</p>
+            </div>
+        `;
+    }
+
+    function populateInvoiceData() {
+        if (!currentInvoice) return;
+
+        // Update invoice display elements
+        if (elements.invoiceNumberDisplay) {
+            elements.invoiceNumberDisplay.textContent = currentInvoice.referenceNumber;
+        }
+        if (elements.referenceNumberDisplay) {
+            elements.referenceNumberDisplay.textContent = generatePaymentReference();
+        }
+        if (elements.fileNumberSummary) {
+            elements.fileNumberSummary.textContent = currentInvoice.fileNumber;
+        }
+        if (elements.applicantSummary) {
+            elements.applicantSummary.textContent = currentInvoice.applicantName;
+        }
+        if (elements.propertyTypeSummary) {
+            elements.propertyTypeSummary.textContent = currentInvoice.propertyType.charAt(0).toUpperCase() + currentInvoice.propertyType.slice(1);
+        }
+        if (elements.dueDateSummary) {
+            elements.dueDateSummary.textContent = formatDate(currentInvoice.dueDate);
+        }
+
+        // Update status badge
+        if (elements.invoiceStatusBadge) {
+            elements.invoiceStatusBadge.textContent = currentInvoice.status.charAt(0).toUpperCase() + currentInvoice.status.slice(1);
+            const statusClasses = {
+                pending: 'bg-yellow-100 text-yellow-800',
+                paid: 'bg-green-100 text-green-800',
+                failed: 'bg-red-100 text-red-800',
+                overdue: 'bg-red-100 text-red-800'
+            };
+            elements.invoiceStatusBadge.className = `inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${statusClasses[currentInvoice.status] || statusClasses.pending}`;
+        }
+
+        // Update fee breakdown
+        if (elements.feeBreakdownDetailed) {
+            let breakdownHTML = '';
+            currentInvoice.items.forEach(item => {
+                breakdownHTML += `
+                    <div class="flex justify-between text-sm">
+                        <span>${item.description} ${item.quantity > 1 ? `(x${item.quantity})` : ''}</span>
+                        <span>${formatCurrency(item.total)}</span>
+                    </div>
+                `;
+            });
+            elements.feeBreakdownDetailed.innerHTML = breakdownHTML;
+        }
+
+        // Update total amount
+        if (elements.totalAmountSummary) {
+            elements.totalAmountSummary.textContent = formatCurrency(currentInvoice.amount);
+        }
+
+        // Update process payment button
+        if (elements.processPaymentText) {
+            elements.processPaymentText.textContent = `Pay ${formatCurrency(currentInvoice.amount)}`;
+        }
+
+        // Update offline payment details
+        if (elements.offlineAmount) {
+            elements.offlineAmount.textContent = formatCurrency(currentInvoice.amount);
+        }
+        if (elements.offlineReference) {
+            elements.offlineReference.textContent = currentInvoice.referenceNumber;
+        }
+
+        // Update cash payment reference
+        if (elements.cashReference) {
+            elements.cashReference.textContent = `Quote invoice number: ${currentInvoice.referenceNumber}`;
+        }
+    }
+
+    function switchTab(tabName) {
+        // Update tab triggers
+        elements.tabTriggers.forEach(trigger => {
+            trigger.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+            trigger.classList.add('text-gray-600', 'hover:text-gray-900');
+            if (trigger.dataset.tab === tabName) {
+                trigger.classList.remove('text-gray-600', 'hover:text-gray-900');
+                trigger.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            }
+        });
+
+        // Update tab content
+        if (elements.onlineTab && elements.offlineTab) {
+            elements.onlineTab.classList.remove('active');
+            elements.offlineTab.classList.remove('active');
+            
+            if (tabName === 'online') {
+                elements.onlineTab.classList.add('active');
+            } else if (tabName === 'offline') {
+                elements.offlineTab.classList.add('active');
+            }
+        }
+    }
+
+    function selectPaymentMethod(method) {
+        selectedPaymentMethod = method;
+
+        // Update visual selection
+        elements.paymentMethodOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.method === method) {
+                option.classList.add('selected');
+            }
+        });
+
+        // Update radio buttons
+        const radioBtn = document.querySelector(`input[name="payment_method"][value="${method}"]`);
+        if (radioBtn) {
+            radioBtn.checked = true;
+        }
+
+        // Show/hide gateway selection based on method
+        if (elements.gatewaySelection) {
+            if (method === 'bank_transfer' || method === 'e_wallet') {
+                elements.gatewaySelection.classList.remove('hidden');
+            } else {
+                elements.gatewaySelection.classList.add('hidden');
+            }
+        }
+
+        // Show/hide card details form
+        if (elements.cardDetailsForm) {
+            if (method === 'pos') {
+                elements.cardDetailsForm.classList.remove('hidden');
+            } else {
+                elements.cardDetailsForm.classList.add('hidden');
+            }
+        }
+
+        // Show/hide cash payment info
+        if (elements.cashPaymentInfo) {
+            if (method === 'cash') {
+                elements.cashPaymentInfo.classList.remove('hidden');
+            } else {
+                elements.cashPaymentInfo.classList.add('hidden');
+            }
+        }
+    }
+
+    function selectPaymentGateway(gateway) {
+        selectedPaymentGateway = gateway;
+        
+        // Update visual selection
+        elements.gatewayOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.gateway === gateway) {
+                option.classList.add('selected');
+            }
+        });
+        
+        // Update radio buttons
+        const radioBtn = document.querySelector(`input[name="payment_gateway"][value="${gateway}"]`);
+        if (radioBtn) {
+            radioBtn.checked = true;
+        }
+    }
+
+    function showError(message) {
+        if (elements.paymentError && elements.paymentErrorMessage) {
+            elements.paymentErrorMessage.textContent = message;
+            elements.paymentError.classList.remove('hidden');
+        }
+    }
+
+    function hideError() {
+        if (elements.paymentError) {
+            elements.paymentError.classList.add('hidden');
+        }
+    }
+
+    async function processPaymentFlow() {
+        if (isProcessing) return;
+        
+        hideError();
+        
+        // Validate payment method selection
+        if (!selectedPaymentMethod) {
+            showError('Please select a payment method.');
+            return;
+        }
+
+        // Validate gateway selection for applicable methods
+        if ((selectedPaymentMethod === 'bank_transfer' || selectedPaymentMethod === 'e_wallet') && !selectedPaymentGateway) {
+            showError('Please select a payment gateway.');
+            return;
+        }
+
+        // Validate card details for card payments
+        if (selectedPaymentMethod === 'pos') {
+            const cardNumber = document.getElementById('card_number_input')?.value;
+            const expiryDate = document.getElementById('expiry_date_input')?.value;
+            const cvv = document.getElementById('cvv_input')?.value;
+            const cardHolder = document.getElementById('card_holder_input')?.value;
+
+            if (!cardNumber || !expiryDate || !cvv || !cardHolder) {
+                showError('Please fill in all card details.');
+                return;
+            }
+        }
+
+        // For cash payments, just show success immediately
+        if (selectedPaymentMethod === 'cash') {
+            completePayment({
+                id: 'payment-' + Date.now(),
+                referenceNumber: generatePaymentReference(),
+                amount: currentInvoice.amount,
+                currency: "NGN",
+                status: "paid",
+                method: selectedPaymentMethod,
+                gateway: 'internal',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                paidAt: new Date().toISOString(),
+                metadata: {
+                    invoiceId: currentInvoice.id,
+                    paymentProcessor: 'internal',
+                    note: 'Cash payment at office'
+                },
+            });
+            return;
+        }
+
+        isProcessing = true;
+        
+        // Show processing state
+        if (elements.paymentProcessing) {
+            elements.paymentProcessing.classList.remove('hidden');
+        }
+        
+        // Update processing info
+        if (elements.processingGateway) {
+            elements.processingGateway.textContent = getPaymentGatewayName(selectedPaymentGateway || 'internal');
+        }
+        if (elements.processingMethod) {
+            elements.processingMethod.textContent = getPaymentMethodName(selectedPaymentMethod);
+        }
+        
+        // Hide other content
+        if (elements.paymentMethodSection) {
+            elements.paymentMethodSection.classList.add('hidden');
+        }
+        
+        // Update button state
+        if (elements.processPaymentBtn) {
+            elements.processPaymentBtn.disabled = true;
+            if (elements.processPaymentText) {
+                elements.processPaymentText.textContent = 'Processing...';
+            }
+            if (elements.processPaymentLoading) {
+                elements.processPaymentLoading.classList.remove('hidden');
+            }
+        }
+
+        try {
+            // Process payment
+            const paymentResult = await processPayment(
+                currentInvoice.id,
+                currentInvoice.amount,
+                selectedPaymentMethod,
+                selectedPaymentGateway || 'internal'
+            );
+
+            if (paymentResult.status === 'paid') {
+                completePayment(paymentResult);
+            } else {
+                throw new Error('Payment failed. Please try again.');
+            }
+        } catch (error) {
+            isProcessing = false;
+            showError(error.message);
+            
+            // Hide processing state
+            if (elements.paymentProcessing) {
+                elements.paymentProcessing.classList.add('hidden');
+            }
+            
+            // Show payment method section
+            if (elements.paymentMethodSection) {
+                elements.paymentMethodSection.classList.remove('hidden');
+            }
+            
+            // Reset button state
+            if (elements.processPaymentBtn) {
+                elements.processPaymentBtn.disabled = false;
+                if (elements.processPaymentText) {
+                    elements.processPaymentText.textContent = `Pay ${formatCurrency(currentInvoice.amount)}`;
+                }
+                if (elements.processPaymentLoading) {
+                    elements.processPaymentLoading.classList.add('hidden');
+                }
+            }
+        }
+    }
+
+    function completePayment(paymentResult) {
+        isProcessing = false;
+        paymentCompleted = true;
+
+        // Update invoice with payment
+        currentInvoice.payments.push(paymentResult);
+        currentInvoice.status = 'paid';
+
+        // Generate receipt
+        const receipt = generateReceipt(currentInvoice, paymentResult);
+
+        // Hide processing state
+        if (elements.paymentProcessing) {
+            elements.paymentProcessing.classList.add('hidden');
+        }
+
+        // Show success state
+        if (elements.paymentSuccessEnhanced) {
+            elements.paymentSuccessEnhanced.classList.remove('hidden');
+        }
+
+        // Update receipt details
+        updateReceiptDetails(receipt);
+
+        // Update footer buttons
+        if (elements.processPaymentBtn) {
+            elements.processPaymentBtn.classList.add('hidden');
+        }
+        if (elements.continueAfterSuccessBtn) {
+            elements.continueAfterSuccessBtn.classList.remove('hidden');
+        }
+
+        lucide.createIcons();
+    }
+
+    function updateReceiptDetails(receipt) {
+        const receiptData = {
+            receiptNumberDisplay: receipt.receiptNumber,
+            receiptInvoiceNumber: receipt.invoiceNumber,
+            receiptPaymentReference: receipt.paymentReference,
+            receiptAmount: formatCurrency(receipt.amount),
+            receiptPaymentMethod: getPaymentMethodName(receipt.paymentMethod),
+            receiptPaymentGateway: getPaymentGatewayName(receipt.paymentGateway),
+            receiptPaymentDate: formatDate(receipt.paymentDate),
+            receiptApplicantName: receipt.applicantName,
+            receiptFileNumber: receipt.fileNumber
+        };
+
+        // Update receipt display elements
+        Object.keys(receiptData).forEach(key => {
+            const element = elements[key];
+            if (element) {
+                element.textContent = receiptData[key];
+            }
+        });
+    }
+
+    function openModal() {
+        if (elements.paymentModal) {
+            elements.paymentModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            // Show loading state initially
+            if (elements.paymentLoading) {
+                elements.paymentLoading.classList.remove('hidden');
+            }
+            if (elements.paymentProcessor) {
+                elements.paymentProcessor.classList.add('hidden');
+            }
+
+            // Generate invoice
+            setTimeout(() => {
+                currentInvoice = createInvoice(
+                    currentApplicationData.applicationId,
+                    currentApplicationData.applicantName,
+                    currentApplicationData.applicantType,
+                    currentApplicationData.propertyType,
+                    currentApplicationData.fileNumber,
+                    currentApplicationData.squareMeters,
+                    currentApplicationData.beaconCount
+                );
+                
+                // Hide loading and show processor
+                if (elements.paymentLoading) {
+                    elements.paymentLoading.classList.add('hidden');
+                }
+                if (elements.paymentProcessor) {
+                    elements.paymentProcessor.classList.remove('hidden');
+                }
+                
+                // Populate data
+                populateInvoiceData();
+                
+                lucide.createIcons();
+            }, 1500);
+        }
+    }
+
+    function closeModal() {
+        if (elements.paymentModal) {
+            elements.paymentModal.classList.remove('open');
+            document.body.style.overflow = 'auto';
+            
+            // Reset state
+            selectedPaymentMethod = null;
+            selectedPaymentGateway = null;
+            currentInvoice = null;
+            isProcessing = false;
+            paymentCompleted = false;
+            
+            // Reset UI
+            hideError();
+            
+            // Reset forms
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Remove visual selections
+            elements.paymentMethodOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+            elements.gatewayOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Hide conditional sections
+            if (elements.gatewaySelection) {
+                elements.gatewaySelection.classList.add('hidden');
+            }
+            if (elements.cardDetailsForm) {
+                elements.cardDetailsForm.classList.add('hidden');
+            }
+            if (elements.cashPaymentInfo) {
+                elements.cashPaymentInfo.classList.add('hidden');
+            }
+            if (elements.paymentSuccessEnhanced) {
+                elements.paymentSuccessEnhanced.classList.add('hidden');
+            }
+            if (elements.paymentProcessing) {
+                elements.paymentProcessing.classList.add('hidden');
+            }
+            
+            // Reset buttons
+            if (elements.processPaymentBtn) {
+                elements.processPaymentBtn.classList.remove('hidden');
+                elements.processPaymentBtn.disabled = false;
+                if (elements.processPaymentText) {
+                    elements.processPaymentText.textContent = 'Pay ₦0.00';
+                }
+                if (elements.processPaymentLoading) {
+                    elements.processPaymentLoading.classList.add('hidden');
+                }
+            }
+            if (elements.continueAfterSuccessBtn) {
+                elements.continueAfterSuccessBtn.classList.add('hidden');
+            }
+            
+            // Show main content
+            if (elements.paymentMethodSection) {
+                elements.paymentMethodSection.classList.remove('hidden');
+            }
+        }
+    }
+
+    // ===== EVENT LISTENERS =====
+    
+    // Controls event listeners
+    if (elements.propertyTypeSelector) {
+        elements.propertyTypeSelector.addEventListener('change', updateFeePreview);
+    }
+
+    if (elements.squareMetersInput) {
+        elements.squareMetersInput.addEventListener('input', updateFeePreview);
+    }
+
+    if (elements.beaconCountInput) {
+        elements.beaconCountInput.addEventListener('input', updateFeePreview);
+    }
+
+    if (elements.openModalBtn) {
+        elements.openModalBtn.addEventListener('click', openModal);
+    }
+
+    if (elements.closeModalBtn) {
+        elements.closeModalBtn.addEventListener('click', closeModal);
+    }
+
+    // Tab switching
+    elements.tabTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            switchTab(trigger.dataset.tab);
+        });
+    });
+
+    // Payment method selection
+    elements.paymentMethodOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const method = option.dataset.method;
+            selectPaymentMethod(method);
+        });
+    });
+
+    // Gateway selection
+    elements.gatewayOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const gateway = option.dataset.gateway;
+            selectPaymentGateway(gateway);
+        });
+    });
+
+    // Process payment button
+    if (elements.processPaymentBtn) {
+        elements.processPaymentBtn.addEventListener('click', processPaymentFlow);
+    }
+
+    // Cancel button
+    if (elements.cancelPaymentBtn) {
+        elements.cancelPaymentBtn.addEventListener('click', closeModal);
+    }
+
+    // Continue after success button
+    if (elements.continueAfterSuccessBtn) {
+        elements.continueAfterSuccessBtn.addEventListener('click', () => {
+            alert('Payment completed successfully! Redirecting to application status...');
+            closeModal();
+        });
+    }
+
+    // Receipt action buttons
+    if (elements.printReceiptBtn) {
+        elements.printReceiptBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
+
+    if (elements.downloadReceiptBtn) {
+        elements.downloadReceiptBtn.addEventListener('click', () => {
+            alert('Receipt download started...');
+        });
+    }
+
+    if (elements.emailReceiptBtn) {
+        elements.emailReceiptBtn.addEventListener('click', () => {
+            alert('Receipt sent to your email address.');
+        });
+    }
+
+    // Card input formatting
+    const cardNumberInput = document.getElementById('card_number_input');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            if (formattedValue.length <= 19) {
+                e.target.value = formattedValue;
+            }
+        });
+    }
+
+    const expiryDateInput = document.getElementById('expiry_date_input');
+    if (expiryDateInput) {
+        expiryDateInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    }
+
+    const cvvInput = document.getElementById('cvv_input');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Close modal when clicking outside
+    if (elements.paymentModal) {
+        elements.paymentModal.addEventListener('click', (e) => {
+            if (e.target === elements.paymentModal) {
+                closeModal();
+            }
+        });
+    }
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && elements.paymentModal && elements.paymentModal.classList.contains('open')) {
+            closeModal();
+        }
+    });
+
+    // ===== INITIALIZATION =====
+    
+    function init() {
+        updateFeePreview();
+        updateRevenueStats();
+        lucide.createIcons();
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

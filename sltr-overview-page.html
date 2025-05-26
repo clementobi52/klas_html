@@ -10,507 +10,59 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <!-- Chart.js for charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#3b82f6',
+                    success: '#10b981',
+                    warning: '#f59e0b',
+                    destructive: '#ef4444',
+                    pending: '#8b5cf6',
+                    info: '#06b6d4',
+                },
+                animation: {
+                    'fade-in': 'fadeIn 0.5s ease-in-out',
+                },
+                keyframes: {
+                    fadeIn: {
+                        '0%': { opacity: '0', transform: 'translateY(10px)' },
+                        '100%': { opacity: '1', transform: 'translateY(0)' },
+                    }
+                }
+            }
+        }
+    }
+</script>
 <style>
-    /* Custom styles */
-    :root {
-        --primary: #3b82f6;
-        --primary-foreground: #ffffff;
-        --muted: #f3f4f6;
-        --muted-foreground: #6b7280;
-        --border: #e5e7eb;
-        --ring: #3b82f6;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --destructive: #ef4444;
-        --secondary: #f1f5f9;
-        --secondary-foreground: #0f172a;
-        --pending: #8b5cf6;
-        --info: #06b6d4;
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        color: #0f172a;
-        background-color: #f8fafc;
-    }
-
-    /* Gradient card styles */
-    .gradient-card {
-        background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-        color: white;
-        border: none;
-    }
-
-    .gradient-card .text-muted-foreground {
-        color: rgba(255, 255, 255, 0.8) !important;
-    }
-
-    /* Hover scale animation */
-    .hover-scale {
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .hover-scale:hover {
-        transform: scale(1.02);
-    }
-
-    /* Fade in animation */
-    .animate-fade-in {
-        animation: fadeIn 0.5s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Card styles */
-    .card {
-        background-color: white;
-        border-radius: 0.5rem;
-        border: 1px solid var(--border);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Button styles */
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-primary {
-        background-color: var(--primary);
-        color: var(--primary-foreground);
-    }
-
-    .btn-primary:hover {
-        background-color: #2563eb;
-    }
-
-    .btn-outline {
-        background-color: transparent;
-        border: 1px solid var(--border);
-        color: #374151;
-    }
-
-    .btn-outline:hover {
-        background-color: var(--muted);
-    }
-
-    .btn-ghost {
-        background-color: transparent;
-        color: #374151;
-    }
-
-    .btn-ghost:hover {
-        background-color: var(--muted);
-    }
-
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
-
-    .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    /* Input styles */
-    .input {
-        display: block;
-        width: 100%;
-        border-radius: 0.375rem;
-        border: 1px solid var(--border);
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        background-color: white;
-    }
-
-    .input:focus {
-        outline: none;
-        border-color: var(--ring);
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-    }
-
-    /* Select styles */
-    .select {
-        display: block;
-        width: 100%;
-        border-radius: 0.375rem;
-        border: 1px solid var(--border);
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        background-color: white;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.5rem center;
-        background-repeat: no-repeat;
-        background-size: 1.5em 1.5em;
-        padding-right: 2.5rem;
-    }
-
-    .select:focus {
-        outline: none;
-        border-color: var(--ring);
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-    }
-
-    /* Badge styles */
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        line-height: 1;
-        padding: 0.25rem 0.5rem;
-        white-space: nowrap;
-    }
-
-    .badge-default {
-        background-color: var(--primary);
-        color: var(--primary-foreground);
-    }
-
-    .badge-outline {
-        background-color: transparent;
-        border: 1px solid var(--border);
-        color: #374151;
-    }
-
-    .badge-secondary {
-        background-color: var(--secondary);
-        color: var(--secondary-foreground);
-    }
-
-    .badge-success {
-        background-color: var(--success);
-        color: white;
-    }
-
-    .badge-destructive {
-        background-color: var(--destructive);
-        color: white;
-    }
-
-    /* Progress bar styles */
-    .progress {
-        position: relative;
-        height: 0.5rem;
-        width: 100%;
-        overflow: hidden;
-        border-radius: 9999px;
-        background-color: var(--secondary);
-    }
-
-    .progress-indicator {
-        height: 100%;
-        width: 0%;
-        background-color: var(--primary);
-        transition: width 0.3s ease-in-out;
-        border-radius: 9999px;
-    }
-
-    .progress-indicator.bg-yellow-500 {
-        background-color: #eab308;
-    }
-
-    .progress-indicator.bg-red-500 {
-        background-color: #ef4444;
-    }
-
-    .progress-indicator.bg-green-500 {
-        background-color: #22c55e;
-    }
-
-    /* Tab styles */
-    .tabs-list {
-        display: flex;
-        background-color: rgba(243, 244, 246, 0.5);
-        border-radius: 0.375rem;
-        padding: 0.25rem;
-    }
-
-    .tab-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.5rem 1rem;
-        border-radius: 0.25rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        background-color: transparent;
-        color: var(--muted-foreground);
-        border: none;
-        flex: 1;
-    }
-
-    .tab-trigger.active {
-        background-color: white;
-        color: var(--primary);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .tab-content {
-        display: none;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    /* Dropdown styles */
-    .dropdown {
-        position: relative;
-        display: inline-block;
-    }
-
+    /* Minimal custom CSS for JavaScript-controlled states */
     .dropdown-content {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        z-index: 50;
-        background-color: white;
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        padding: 0.5rem 0;
-        min-width: 12rem;
-        margin-top: 0.25rem;
         display: none;
     }
-
     .dropdown-content.show {
         display: block;
     }
-
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: background-color 0.2s;
+    .tab-content {
+        display: none;
     }
-
-    .dropdown-item:hover {
-        background-color: var(--muted);
+    .tab-content.active {
+        display: block;
     }
-
-    .dropdown-label {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--muted-foreground);
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 0.25rem;
-    }
-
-    /* Table styles */
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table th,
-    .table td {
-        padding: 0.75rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-        vertical-align: top;
-    }
-
-    .table th {
-        font-weight: 500;
-        color: var(--muted-foreground);
-        font-size: 0.875rem;
-        background-color: #f9fafb;
-        height: 3rem;
-    }
-
-    .table tbody tr:hover {
-        background-color: var(--muted);
-    }
-
-    /* Scroll area styles */
-    .scroll-area {
-        overflow-y: auto;
-        padding-right: 1rem;
-    }
-
+    /* Custom scrollbar */
     .scroll-area::-webkit-scrollbar {
         width: 6px;
     }
-
     .scroll-area::-webkit-scrollbar-track {
-        background: var(--muted);
+        background: #f3f4f6;
         border-radius: 3px;
     }
-
     .scroll-area::-webkit-scrollbar-thumb {
-        background: var(--muted-foreground);
+        background: #6b7280;
         border-radius: 3px;
     }
-
     .scroll-area::-webkit-scrollbar-thumb:hover {
         background: #555;
-    }
-
-    /* Chart container styles */
-    .chart-container {
-        position: relative;
-        height: 300px;
-        width: 100%;
-    }
-
-    /* Utility classes */
-    .hidden { display: none !important; }
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .text-left { text-align: left; }
-    .font-medium { font-weight: 500; }
-    .font-semibold { font-weight: 600; }
-    .font-bold { font-weight: 700; }
-    .text-sm { font-size: 0.875rem; }
-    .text-xs { font-size: 0.75rem; }
-    .text-lg { font-size: 1.125rem; }
-    .text-xl { font-size: 1.25rem; }
-    .text-2xl { font-size: 1.5rem; }
-    .text-3xl { font-size: 1.875rem; }
-    .mb-1 { margin-bottom: 0.25rem; }
-    .mb-2 { margin-bottom: 0.5rem; }
-    .mb-4 { margin-bottom: 1rem; }
-    .mb-6 { margin-bottom: 1.5rem; }
-    .mt-1 { margin-top: 0.25rem; }
-    .mt-2 { margin-top: 0.5rem; }
-    .mt-4 { margin-top: 1rem; }
-    .mt-6 { margin-top: 1.5rem; }
-    .mr-1 { margin-right: 0.25rem; }
-    .mr-2 { margin-right: 0.5rem; }
-    .ml-1 { margin-left: 0.25rem; }
-    .ml-2 { margin-left: 0.5rem; }
-    .p-1 { padding: 0.25rem; }
-    .p-2 { padding: 0.5rem; }
-    .p-3 { padding: 0.75rem; }
-    .p-4 { padding: 1rem; }
-    .p-6 { padding: 1.5rem; }
-    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-    .px-4 { padding-left: 1rem; padding-right: 1rem; }
-    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-    .pb-2 { padding-bottom: 0.5rem; }
-    .pt-0 { padding-top: 0; }
-    .pl-2 { padding-left: 0.5rem; }
-    .pl-8 { padding-left: 2rem; }
-    .pr-4 { padding-right: 1rem; }
-    .gap-1 { gap: 0.25rem; }
-    .gap-2 { gap: 0.5rem; }
-    .gap-4 { gap: 1rem; }
-    .gap-6 { gap: 1.5rem; }
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .flex-1 { flex: 1 1 0%; }
-    .flex-wrap { flex-wrap: wrap; }
-    .items-center { align-items: center; }
-    .items-start { align-items: flex-start; }
-    .justify-center { justify-content: center; }
-    .justify-between { justify-content: space-between; }
-    .justify-end { justify-content: flex-end; }
-    .space-y-1 > * + * { margin-top: 0.25rem; }
-    .space-y-2 > * + * { margin-top: 0.5rem; }
-    .space-y-4 > * + * { margin-top: 1rem; }
-    .space-y-6 > * + * { margin-top: 1.5rem; }
-    .grid { display: grid; }
-    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .col-span-2 { grid-column: span 2 / span 2; }
-    .w-full { width: 100%; }
-    .w-4 { width: 1rem; }
-    .w-3 { width: 0.75rem; }
-    .w-10 { width: 2.5rem; }
-    .w-16 { width: 4rem; }
-    .w-24 { width: 6rem; }
-    .w-64 { width: 16rem; }
-    .h-2 { height: 0.5rem; }
-    .h-3 { height: 0.75rem; }
-    .h-4 { width: 1rem; height: 1rem; }
-    .h-5 { width: 1.25rem; height: 1.25rem; }
-    .h-10 { width: 2.5rem; height: 2.5rem; }
-    .h-12 { width: 3rem; height: 3rem; }
-    .h-120 { height: 120px; }
-    .h-180 { height: 180px; }
-    .h-200 { height: 200px; }
-    .h-250 { height: 250px; }
-    .h-300 { height: 300px; }
-    .h-400 { height: 400px; }
-    .max-w-full { max-width: 100%; }
-    .min-h-screen { min-height: 100vh; }
-    .overflow-auto { overflow: auto; }
-    .overflow-hidden { overflow: hidden; }
-    .relative { position: relative; }
-    .absolute { position: absolute; }
-    .left-2 { left: 0.5rem; }
-    .top-2 { top: 0.5rem; }
-    .border { border-width: 1px; }
-    .border-b { border-bottom-width: 1px; }
-    .border-t { border-top-width: 1px; }
-    .rounded { border-radius: 0.25rem; }
-    .rounded-md { border-radius: 0.375rem; }
-    .rounded-lg { border-radius: 0.5rem; }
-    .rounded-full { border-radius: 9999px; }
-    .bg-white { background-color: white; }
-    .bg-gray-50 { background-color: #f9fafb; }
-    .bg-background { background-color: white; }
-    .bg-muted { background-color: var(--muted); }
-    .bg-blue-500 { background-color: #3b82f6; }
-    .bg-green-500 { background-color: #22c55e; }
-    .bg-yellow-500 { background-color: #eab308; }
-    .bg-purple-500 { background-color: #a855f7; }
-    .text-primary { color: var(--primary); }
-    .text-success { color: var(--success); }
-    .text-warning { color: var(--warning); }
-    .text-pending { color: var(--pending); }
-    .text-destructive { color: var(--destructive); }
-    .text-info { color: var(--info); }
-    .text-muted-foreground { color: var(--muted-foreground); }
-    .text-emerald-500 { color: #10b981; }
-    .text-red-500 { color: #ef4444; }
-    .cursor-pointer { cursor: pointer; }
-    .transition-colors { transition: color 0.2s, background-color 0.2s; }
-
-    /* Responsive design */
-    @media (min-width: 768px) {
-        .md\\:flex-row { flex-direction: row; }
-        .md\\:items-center { align-items: center; }
-        .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .md\\:col-span-2 { grid-column: span 2 / span 2; }
-    }
-
-    @media (min-width: 1024px) {
-        .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .lg\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .lg\\:grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-        .lg\\:col-span-2 { grid-column: span 2 / span 2; }
-        .lg\\:col-span-3 { grid-column: span 3 / span 3; }
-        .lg\\:col-span-4 { grid-column: span 4 / span 4; }
     }
 </style>
 </head>
@@ -520,15 +72,15 @@
     <div class="border-b bg-white">
         <div class="flex items-center justify-between p-6">
             <div>
-                <h1 class="text-2xl font-bold">SLTR/FIRST REGISTRATION Overview</h1>
-                <p class="text-muted-foreground">Systematic Land Titling and Registration in Kano State</p>
+                <h1 class="text-2xl font-bold text-slate-900">SLTR/FIRST REGISTRATION Overview</h1>
+                <p class="text-gray-600">Systematic Land Titling and Registration in Kano State</p>
             </div>
             <div class="flex items-center gap-2">
                 <div class="relative w-64">
-                    <i data-lucide="search" class="absolute left-2 top-2 h-4 w-4 text-muted-foreground"></i>
-                    <input type="search" placeholder="Search SLTR records..." class="input w-full pl-8">
+                    <i data-lucide="search" class="absolute left-2 top-2 h-4 w-4 text-gray-400"></i>
+                    <input type="search" placeholder="Search SLTR records..." class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <button class="btn btn-primary">
+                <button class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
                     <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
                     New Application
                 </button>
@@ -540,15 +92,15 @@
     <div class="flex-1 space-y-6 p-6 animate-fade-in">
         <!-- Statistics Cards -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div class="card gradient-card hover-scale" style="--gradient-start: hsl(221.2, 83.2%, 53.3%); --gradient-end: hsl(262, 83.3%, 57.8%);">
+            <div class="bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg shadow-sm hover:scale-105 transition-transform duration-200">
                 <div class="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
                     <h3 class="text-sm font-medium">Total Applications</h3>
-                    <i data-lucide="file-text" class="h-4 w-4 text-primary"></i>
+                    <i data-lucide="file-text" class="h-4 w-4"></i>
                 </div>
                 <div class="p-6 pt-0">
                     <div class="text-2xl font-bold">3,842</div>
-                    <p class="text-xs text-muted-foreground flex items-center mt-1">
-                        <span class="text-emerald-500 flex items-center mr-1">
+                    <p class="text-xs text-white/80 flex items-center mt-1">
+                        <span class="text-emerald-300 flex items-center mr-1">
                             <i data-lucide="arrow-up-right" class="h-3 w-3 mr-1"></i>
                             15%
                         </span>
@@ -557,15 +109,15 @@
                 </div>
             </div>
 
-            <div class="card gradient-card hover-scale" style="--gradient-start: hsl(142.1, 76.2%, 36.3%); --gradient-end: hsl(198, 93%, 60%);">
+            <div class="bg-gradient-to-br from-green-600 to-cyan-500 text-white rounded-lg shadow-sm hover:scale-105 transition-transform duration-200">
                 <div class="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
                     <h3 class="text-sm font-medium">Registered Properties</h3>
-                    <i data-lucide="building-2" class="h-4 w-4 text-success"></i>
+                    <i data-lucide="building-2" class="h-4 w-4"></i>
                 </div>
                 <div class="p-6 pt-0">
                     <div class="text-2xl font-bold">2,156</div>
-                    <p class="text-xs text-muted-foreground flex items-center mt-1">
-                        <span class="text-emerald-500 flex items-center mr-1">
+                    <p class="text-xs text-white/80 flex items-center mt-1">
+                        <span class="text-emerald-300 flex items-center mr-1">
                             <i data-lucide="arrow-up-right" class="h-3 w-3 mr-1"></i>
                             8%
                         </span>
@@ -574,15 +126,15 @@
                 </div>
             </div>
 
-            <div class="card gradient-card hover-scale" style="--gradient-start: hsl(262, 83.3%, 57.8%); --gradient-end: hsl(339.6, 82.2%, 51.6%);">
+            <div class="bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-lg shadow-sm hover:scale-105 transition-transform duration-200">
                 <div class="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
                     <h3 class="text-sm font-medium">Registered Claimants</h3>
-                    <i data-lucide="users" class="h-4 w-4 text-pending"></i>
+                    <i data-lucide="users" class="h-4 w-4"></i>
                 </div>
                 <div class="p-6 pt-0">
                     <div class="text-2xl font-bold">4,289</div>
-                    <p class="text-xs text-muted-foreground flex items-center mt-1">
-                        <span class="text-emerald-500 flex items-center mr-1">
+                    <p class="text-xs text-white/80 flex items-center mt-1">
+                        <span class="text-emerald-300 flex items-center mr-1">
                             <i data-lucide="arrow-up-right" class="h-3 w-3 mr-1"></i>
                             12%
                         </span>
@@ -591,15 +143,15 @@
                 </div>
             </div>
 
-            <div class="card gradient-card hover-scale" style="--gradient-start: hsl(38, 92%, 50%); --gradient-end: hsl(262, 83.3%, 57.8%);">
+            <div class="bg-gradient-to-br from-amber-500 to-purple-600 text-white rounded-lg shadow-sm hover:scale-105 transition-transform duration-200">
                 <div class="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
                     <h3 class="text-sm font-medium">Pending Approvals</h3>
-                    <i data-lucide="clock" class="h-4 w-4 text-warning"></i>
+                    <i data-lucide="clock" class="h-4 w-4"></i>
                 </div>
                 <div class="p-6 pt-0">
                     <div class="text-2xl font-bold">187</div>
-                    <p class="text-xs text-muted-foreground flex items-center mt-1">
-                        <span class="text-red-500 flex items-center mr-1">
+                    <p class="text-xs text-white/80 flex items-center mt-1">
+                        <span class="text-red-300 flex items-center mr-1">
                             <i data-lucide="arrow-down-right" class="h-3 w-3 mr-1"></i>
                             5%
                         </span>
@@ -611,56 +163,56 @@
 
         <!-- Tabs -->
         <div class="space-y-6">
-            <div class="tabs-list">
-                <button class="tab-trigger active" data-tab="summary">Summary</button>
-                <button class="tab-trigger" data-tab="performance">Performance</button>
-                <button class="tab-trigger" data-tab="geographic">Geographic Distribution</button>
-                <button class="tab-trigger" data-tab="reports">Reports</button>
+            <div class="flex bg-gray-100/50 rounded-md p-1">
+                <button class="tab-trigger flex-1 flex items-center justify-center px-4 py-2 rounded text-sm font-medium cursor-pointer transition-all duration-200 bg-white text-blue-600 shadow-sm active" data-tab="summary">Summary</button>
+                <button class="tab-trigger flex-1 flex items-center justify-center px-4 py-2 rounded text-sm font-medium cursor-pointer transition-all duration-200 text-gray-600" data-tab="performance">Performance</button>
+                <button class="tab-trigger flex-1 flex items-center justify-center px-4 py-2 rounded text-sm font-medium cursor-pointer transition-all duration-200 text-gray-600" data-tab="geographic">Geographic Distribution</button>
+                <button class="tab-trigger flex-1 flex items-center justify-center px-4 py-2 rounded text-sm font-medium cursor-pointer transition-all duration-200 text-gray-600" data-tab="reports">Reports</button>
             </div>
 
             <!-- Summary Tab -->
             <div id="summary-tab" class="tab-content active space-y-6">
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                     <!-- Registration Trends Chart -->
-                    <div class="card lg:col-span-4">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm lg:col-span-4">
                         <div class="flex flex-row items-center justify-between pb-2 p-6">
                             <div>
-                                <h3 class="text-lg font-semibold">Registration Trends</h3>
-                                <p class="text-sm text-muted-foreground">Monthly registration activity over the past 12 months</p>
+                                <h3 class="text-lg font-semibold text-slate-900">Registration Trends</h3>
+                                <p class="text-sm text-gray-600">Monthly registration activity over the past 12 months</p>
                             </div>
-                            <div class="dropdown">
-                                <button id="filter-dropdown-btn" class="btn btn-outline btn-sm">
+                            <div class="relative inline-block">
+                                <button id="filter-dropdown-btn" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                     <i data-lucide="filter" class="h-3 w-3 mr-2"></i>
                                     Filter
                                 </button>
-                                <div id="filter-dropdown" class="dropdown-content">
-                                    <div class="dropdown-label">Filter by</div>
-                                    <div class="dropdown-item">
-                                        <i data-lucide="check-circle-2" class="mr-2 h-4 w-4 text-success"></i>
+                                <div id="filter-dropdown" class="dropdown-content absolute top-full right-0 z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-48 mt-1">
+                                    <div class="px-3 py-2 text-xs font-semibold text-gray-600 border-b border-gray-200 mb-1">Filter by</div>
+                                    <div class="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <i data-lucide="check-circle-2" class="mr-2 h-4 w-4 text-green-600"></i>
                                         <span>Completed</span>
                                     </div>
-                                    <div class="dropdown-item">
-                                        <i data-lucide="clock" class="mr-2 h-4 w-4 text-warning"></i>
+                                    <div class="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <i data-lucide="clock" class="mr-2 h-4 w-4 text-amber-500"></i>
                                         <span>In Progress</span>
                                     </div>
-                                    <div class="dropdown-item">
-                                        <i data-lucide="x-circle" class="mr-2 h-4 w-4 text-destructive"></i>
+                                    <div class="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <i data-lucide="x-circle" class="mr-2 h-4 w-4 text-red-500"></i>
                                         <span>Rejected</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="p-6 pt-0 pl-2">
-                            <div class="h-300 w-full">
+                            <div class="h-[300px] w-full">
                                 <canvas id="registration-trends-chart"></canvas>
                             </div>
                         </div>
                         <div class="flex justify-between p-6 pt-0">
-                            <button class="btn btn-outline btn-sm">
+                            <button class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                 <i data-lucide="download" class="h-3 w-3 mr-2"></i>
                                 Download Report
                             </button>
-                            <button class="btn btn-ghost btn-sm">
+                            <button class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-transparent text-gray-700 hover:bg-gray-50 transition-colors">
                                 <i data-lucide="refresh-cw" class="h-3 w-3 mr-2"></i>
                                 Refresh Data
                             </button>
@@ -668,16 +220,16 @@
                     </div>
 
                     <!-- Recent Applications -->
-                    <div class="card lg:col-span-3">
-                        <div class="p-6 border-b">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm lg:col-span-3">
+                        <div class="p-6 border-b border-gray-200">
                             <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-semibold">Recent Applications</h3>
-                                <button class="btn btn-ghost btn-sm">View All</button>
+                                <h3 class="text-lg font-semibold text-slate-900">Recent Applications</h3>
+                                <button class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-transparent text-gray-700 hover:bg-gray-50 transition-colors">View All</button>
                             </div>
-                            <p class="text-sm text-muted-foreground">Latest SLTR applications submitted</p>
+                            <p class="text-sm text-gray-600">Latest SLTR applications submitted</p>
                         </div>
                         <div class="p-6">
-                            <div class="scroll-area h-300 pr-4">
+                            <div class="overflow-y-auto pr-4 h-[300px] scroll-area">
                                 <div id="recent-applications" class="space-y-4">
                                     <!-- Applications will be populated by JavaScript -->
                                 </div>
@@ -689,86 +241,86 @@
                 <!-- Process Status and Quick Stats -->
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <!-- Registration Process Status -->
-                    <div class="card col-span-2">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Registration Process Status</h3>
-                            <p class="text-sm text-muted-foreground">Current status of SLTR processes</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm col-span-2">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Registration Process Status</h3>
+                            <p class="text-sm text-gray-600">Current status of SLTR processes</p>
                         </div>
                         <div class="p-6 space-y-4">
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <i data-lucide="file-text" class="h-4 w-4 text-primary"></i>
+                                        <i data-lucide="file-text" class="h-4 w-4 text-blue-600"></i>
                                         <span class="text-sm">Applications</span>
                                     </div>
                                     <span class="text-sm font-medium">3,842 total</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="progress flex-1">
-                                        <div class="progress-indicator" style="width: 75%"></div>
+                                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 flex-1">
+                                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out" style="width: 75%"></div>
                                     </div>
-                                    <span class="text-xs text-muted-foreground">75%</span>
+                                    <span class="text-xs text-gray-600">75%</span>
                                 </div>
                             </div>
 
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <i data-lucide="clipboard-list" class="h-4 w-4 text-success"></i>
+                                        <i data-lucide="clipboard-list" class="h-4 w-4 text-green-600"></i>
                                         <span class="text-sm">Field Data Collection</span>
                                     </div>
                                     <span class="text-sm font-medium">2,895 completed</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="progress flex-1">
-                                        <div class="progress-indicator" style="width: 68%"></div>
+                                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 flex-1">
+                                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out" style="width: 68%"></div>
                                     </div>
-                                    <span class="text-xs text-muted-foreground">68%</span>
+                                    <span class="text-xs text-gray-600">68%</span>
                                 </div>
                             </div>
 
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <i data-lucide="landmark" class="h-4 w-4 text-warning"></i>
+                                        <i data-lucide="landmark" class="h-4 w-4 text-amber-500"></i>
                                         <span class="text-sm">Approvals</span>
                                     </div>
                                     <span class="text-sm font-medium">2,156 approved</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="progress flex-1">
-                                        <div class="progress-indicator" style="width: 56%"></div>
+                                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 flex-1">
+                                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out" style="width: 56%"></div>
                                     </div>
-                                    <span class="text-xs text-muted-foreground">56%</span>
+                                    <span class="text-xs text-gray-600">56%</span>
                                 </div>
                             </div>
 
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <i data-lucide="file-check" class="h-4 w-4 text-pending"></i>
+                                        <i data-lucide="file-check" class="h-4 w-4 text-purple-600"></i>
                                         <span class="text-sm">Certificates Issued</span>
                                     </div>
                                     <span class="text-sm font-medium">1,924 issued</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="progress flex-1">
-                                        <div class="progress-indicator" style="width: 50%"></div>
+                                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 flex-1">
+                                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out" style="width: 50%"></div>
                                     </div>
-                                    <span class="text-xs text-muted-foreground">50%</span>
+                                    <span class="text-xs text-gray-600">50%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Property Types -->
-                    <div class="card">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Property Types</h3>
-                            <p class="text-sm text-muted-foreground">Distribution by property type</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Property Types</h3>
+                            <p class="text-sm text-gray-600">Distribution by property type</p>
                         </div>
                         <div class="p-6 flex flex-col items-center justify-center">
-                            <div class="h-180 w-180 relative mb-4">
+                            <div class="h-[180px] w-[180px] relative mb-4">
                                 <canvas id="property-types-chart"></canvas>
                             </div>
                             <div class="grid grid-cols-2 gap-2 w-full text-xs">
@@ -793,10 +345,10 @@
                     </div>
 
                     <!-- Quick Stats -->
-                    <div class="card">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Quick Stats</h3>
-                            <p class="text-sm text-muted-foreground">SLTR performance metrics</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Quick Stats</h3>
+                            <p class="text-sm text-gray-600">SLTR performance metrics</p>
                         </div>
                         <div class="p-6 space-y-4" id="quick-stats">
                             <!-- Stats will be populated by JavaScript -->
@@ -807,15 +359,15 @@
 
             <!-- Performance Tab -->
             <div id="performance-tab" class="tab-content space-y-6">
-                <div class="card">
-                    <div class="p-6 border-b">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="p-6 border-b border-gray-200">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold">Performance Metrics</h3>
-                                <p class="text-sm text-muted-foreground">SLTR performance over time</p>
+                                <h3 class="text-lg font-semibold text-slate-900">Performance Metrics</h3>
+                                <p class="text-sm text-gray-600">SLTR performance over time</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <select class="select" style="width: 180px;">
+                                <select class="block w-[180px] border border-gray-300 rounded-md px-3 py-2 text-sm bg-white appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="month">This Month</option>
                                     <option value="quarter">This Quarter</option>
                                     <option value="year" selected>This Year</option>
@@ -833,22 +385,22 @@
                         </div>
 
                         <div class="mt-6">
-                            <div class="card">
-                                <div class="p-6 border-b">
-                                    <h4 class="text-lg font-semibold">Department Performance</h4>
-                                    <p class="text-sm text-muted-foreground">Processing efficiency by department</p>
+                            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                                <div class="p-6 border-b border-gray-200">
+                                    <h4 class="text-lg font-semibold text-slate-900">Department Performance</h4>
+                                    <p class="text-sm text-gray-600">Processing efficiency by department</p>
                                 </div>
                                 <div class="p-6">
-                                    <div class="rounded-md border">
+                                    <div class="rounded-md border border-gray-200">
                                         <div class="relative w-full overflow-auto">
-                                            <table class="table">
+                                            <table class="w-full border-collapse">
                                                 <thead>
                                                     <tr>
-                                                        <th>Department</th>
-                                                        <th>Applications</th>
-                                                        <th>Avg. Processing Time</th>
-                                                        <th>Approval Rate</th>
-                                                        <th>Efficiency</th>
+                                                        <th class="px-4 py-3 text-left border-b border-gray-200 font-medium text-gray-600 text-sm bg-gray-50 h-12">Department</th>
+                                                        <th class="px-4 py-3 text-left border-b border-gray-200 font-medium text-gray-600 text-sm bg-gray-50 h-12">Applications</th>
+                                                        <th class="px-4 py-3 text-left border-b border-gray-200 font-medium text-gray-600 text-sm bg-gray-50 h-12">Avg. Processing Time</th>
+                                                        <th class="px-4 py-3 text-left border-b border-gray-200 font-medium text-gray-600 text-sm bg-gray-50 h-12">Approval Rate</th>
+                                                        <th class="px-4 py-3 text-left border-b border-gray-200 font-medium text-gray-600 text-sm bg-gray-50 h-12">Efficiency</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="department-performance-table">
@@ -868,29 +420,29 @@
             <div id="geographic-tab" class="tab-content space-y-6">
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <!-- Geographic Distribution Map -->
-                    <div class="card lg:col-span-2">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Geographic Distribution</h3>
-                            <p class="text-sm text-muted-foreground">SLTR applications across Kano State</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm lg:col-span-2">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Geographic Distribution</h3>
+                            <p class="text-sm text-gray-600">SLTR applications across Kano State</p>
                         </div>
                         <div class="p-6">
-                            <div class="h-400 w-full">
+                            <div class="h-[400px] w-full">
                                 <canvas id="geographic-map-chart"></canvas>
                             </div>
                         </div>
                     </div>
 
                     <!-- LGA Distribution -->
-                    <div class="card">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">LGA Distribution</h3>
-                            <p class="text-sm text-muted-foreground">Applications by Local Government Area</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">LGA Distribution</h3>
+                            <p class="text-sm text-gray-600">Applications by Local Government Area</p>
                         </div>
                         <div class="p-6">
-                            <div class="h-200 mb-4">
+                            <div class="h-[200px] mb-4">
                                 <canvas id="lga-distribution-chart"></canvas>
                             </div>
-                            <div class="scroll-area h-180">
+                            <div class="overflow-y-auto pr-4 h-[180px] scroll-area">
                                 <div id="lga-list" class="space-y-2">
                                     <!-- LGA list will be populated by JavaScript -->
                                 </div>
@@ -901,37 +453,37 @@
 
                 <!-- Additional Geographic Views -->
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <div class="card">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Registration Density</h3>
-                            <p class="text-sm text-muted-foreground">Heat map of registration activity</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Registration Density</h3>
+                            <p class="text-sm text-gray-600">Heat map of registration activity</p>
                         </div>
                         <div class="p-6">
-                            <div class="h-250 w-full">
+                            <div class="h-[250px] w-full">
                                 <canvas id="density-heatmap-chart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Property Disputes</h3>
-                            <p class="text-sm text-muted-foreground">Areas with property disputes</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Property Disputes</h3>
+                            <p class="text-sm text-gray-600">Areas with property disputes</p>
                         </div>
                         <div class="p-6">
-                            <div class="h-250 w-full">
+                            <div class="h-[250px] w-full">
                                 <canvas id="disputes-map-chart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-semibold">Satellite View</h3>
-                            <p class="text-sm text-muted-foreground">Satellite imagery with parcel boundaries</p>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-slate-900">Satellite View</h3>
+                            <p class="text-sm text-gray-600">Satellite imagery with parcel boundaries</p>
                         </div>
                         <div class="p-6">
-                            <div class="h-250 w-full">
+                            <div class="h-[250px] w-full">
                                 <canvas id="satellite-view-chart"></canvas>
                             </div>
                         </div>
@@ -941,14 +493,14 @@
 
             <!-- Reports Tab -->
             <div id="reports-tab" class="tab-content space-y-6">
-                <div class="card">
-                    <div class="p-6 border-b">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="p-6 border-b border-gray-200">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold">SLTR Reports</h3>
-                                <p class="text-sm text-muted-foreground">Generate and download reports</p>
+                                <h3 class="text-lg font-semibold text-slate-900">SLTR Reports</h3>
+                                <p class="text-sm text-gray-600">Generate and download reports</p>
                             </div>
-                            <button class="btn btn-primary">
+                            <button class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
                                 <i data-lucide="download" class="h-4 w-4 mr-2"></i>
                                 Export All
                             </button>
@@ -1028,35 +580,35 @@
             value: "14.2 days",
             change: "-2.5 days",
             icon: "clock",
-            color: "text-success"
+            color: "text-green-600"
         },
         {
             label: "Approval Rate",
             value: "87%",
             change: "+3%",
             icon: "check-circle-2",
-            color: "text-success"
+            color: "text-green-600"
         },
         {
             label: "Rejection Rate",
             value: "8%",
             change: "-2%",
             icon: "x-circle",
-            color: "text-destructive"
+            color: "text-red-500"
         },
         {
             label: "Pending Rate",
             value: "5%",
             change: "-1%",
             icon: "alert-circle",
-            color: "text-warning"
+            color: "text-amber-500"
         },
         {
             label: "Revenue Generated",
             value: "₦42.5M",
             change: "+₦3.2M",
             icon: "trending-up",
-            color: "text-success"
+            color: "text-green-600"
         }
     ];
 
@@ -1123,37 +675,37 @@
             title: "Monthly Registration Summary",
             description: "Summary of all registrations by month",
             icon: "bar-chart-3",
-            color: "text-primary"
+            color: "text-blue-600"
         },
         {
             title: "LGA Performance Report",
             description: "Registration metrics by Local Government Area",
             icon: "map",
-            color: "text-success"
+            color: "text-green-600"
         },
         {
             title: "Certificate Issuance Report",
             description: "Details of all certificates issued",
             icon: "file-check",
-            color: "text-warning"
+            color: "text-amber-500"
         },
         {
             title: "Revenue Collection Report",
             description: "Financial summary of all SLTR transactions",
             icon: "trending-up",
-            color: "text-pending"
+            color: "text-purple-600"
         },
         {
             title: "Field Data Collection Report",
             description: "Summary of field data collection activities",
             icon: "clipboard-list",
-            color: "text-destructive"
+            color: "text-red-500"
         },
         {
             title: "Approval Process Report",
             description: "Analysis of the approval workflow",
             icon: "briefcase",
-            color: "text-info"
+            color: "text-cyan-500"
         }
     ];
 
@@ -1178,11 +730,11 @@
     // Helper functions
     function getBadgeClass(status) {
         switch (status) {
-            case 'Approved': return 'badge-success';
-            case 'Pending': return 'badge-secondary';
-            case 'In Progress': return 'badge-default';
-            case 'Rejected': return 'badge-destructive';
-            default: return 'badge-secondary';
+            case 'Approved': return 'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-100 text-green-800';
+            case 'Pending': return 'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-slate-100 text-slate-800';
+            case 'In Progress': return 'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800';
+            case 'Rejected': return 'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-100 text-red-800';
+            default: return 'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-slate-100 text-slate-800';
         }
     }
 
@@ -1191,21 +743,21 @@
         
         sampleApplications.forEach(application => {
             const applicationDiv = document.createElement('div');
-            applicationDiv.className = 'flex items-start gap-4 rounded-lg border p-3 hover:bg-muted transition-colors cursor-pointer';
+            applicationDiv.className = 'flex items-start gap-4 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition-colors cursor-pointer';
             applicationDiv.innerHTML = `
-                <div class="flex h-10 w-10 items-center justify-center rounded-full border bg-background">
-                    <i data-lucide="file-text" class="h-5 w-5 text-primary"></i>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white">
+                    <i data-lucide="file-text" class="h-5 w-5 text-blue-600"></i>
                 </div>
                 <div class="flex-1 space-y-1">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium">${application.id}</p>
-                        <span class="badge ${getBadgeClass(application.status)}">${application.status}</span>
+                        <p class="text-sm font-medium text-slate-900">${application.id}</p>
+                        <span class="${getBadgeClass(application.status)}">${application.status}</span>
                     </div>
-                    <div class="flex items-center text-xs text-muted-foreground">
+                    <div class="flex items-center text-xs text-gray-600">
                         <i data-lucide="users" class="mr-1 h-3 w-3"></i>
                         ${application.applicant}
                     </div>
-                    <div class="flex items-center text-xs text-muted-foreground">
+                    <div class="flex items-center text-xs text-gray-600">
                         <i data-lucide="map-pin" class="mr-1 h-3 w-3"></i>
                         ${application.location}
                     </div>
@@ -1226,11 +778,11 @@
             statDiv.innerHTML = `
                 <div class="flex items-center gap-2">
                     <i data-lucide="${stat.icon}" class="h-4 w-4 ${stat.color}"></i>
-                    <span class="text-sm">${stat.label}</span>
+                    <span class="text-sm text-slate-900">${stat.label}</span>
                 </div>
                 <div class="text-right">
-                    <div class="text-sm font-medium">${stat.value}</div>
-                    <div class="text-xs text-success">${stat.change}</div>
+                    <div class="text-sm font-medium text-slate-900">${stat.value}</div>
+                    <div class="text-xs text-green-600">${stat.change}</div>
                 </div>
             `;
             elements.quickStats.appendChild(statDiv);
@@ -1262,19 +814,19 @@
         
         performanceMetrics.forEach(metric => {
             const cardDiv = document.createElement('div');
-            cardDiv.className = 'card';
+            cardDiv.className = 'bg-white rounded-lg border border-gray-200 shadow-sm';
             cardDiv.innerHTML = `
                 <div class="p-6 pb-2">
-                    <h4 class="text-base font-semibold">${metric.title}</h4>
+                    <h4 class="text-base font-semibold text-slate-900">${metric.title}</h4>
                 </div>
                 <div class="p-6">
-                    <div class="text-2xl font-bold">${metric.value}</div>
-                    <p class="text-xs text-muted-foreground">${metric.description}</p>
-                    <div class="mt-4 h-120">
+                    <div class="text-2xl font-bold text-slate-900">${metric.value}</div>
+                    <p class="text-xs text-gray-600">${metric.description}</p>
+                    <div class="mt-4 h-[120px]">
                         <div class="flex items-center justify-center h-full">
                             <div class="text-center">
-                                <i data-lucide="bar-chart-3" class="h-12 w-12 text-muted-foreground mx-auto mb-2" style="opacity: 0.5;"></i>
-                                <p class="text-xs text-muted-foreground">Chart placeholder</p>
+                                <i data-lucide="bar-chart-3" class="h-12 w-12 text-gray-400 mx-auto mb-2 opacity-50"></i>
+                                <p class="text-xs text-gray-600">Chart placeholder</p>
                             </div>
                         </div>
                     </div>
@@ -1291,18 +843,18 @@
         
         departmentData.forEach(dept => {
             const row = document.createElement('tr');
-            row.className = 'border-b transition-colors hover:bg-muted cursor-pointer';
+            row.className = 'border-b border-gray-200 transition-colors hover:bg-gray-50 cursor-pointer';
             row.innerHTML = `
-                <td class="p-4 align-middle font-medium">${dept.department}</td>
-                <td class="p-4 align-middle">${dept.applications.toLocaleString()}</td>
-                <td class="p-4 align-middle">${dept.processingTime}</td>
-                <td class="p-4 align-middle">${dept.approvalRate}</td>
+                <td class="p-4 align-middle font-medium text-slate-900">${dept.department}</td>
+                <td class="p-4 align-middle text-slate-900">${dept.applications.toLocaleString()}</td>
+                <td class="p-4 align-middle text-slate-900">${dept.processingTime}</td>
+                <td class="p-4 align-middle text-slate-900">${dept.approvalRate}</td>
                 <td class="p-4 align-middle">
                     <div class="flex items-center gap-2">
-                        <div class="progress w-24">
-                            <div class="progress-indicator" style="width: ${dept.efficiency}%"></div>
+                        <div class="relative h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+                            <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out" style="width: ${dept.efficiency}%"></div>
                         </div>
-                        <span class="text-xs">${dept.efficiency}%</span>
+                        <span class="text-xs text-slate-900">${dept.efficiency}%</span>
                     </div>
                 </td>
             `;
@@ -1317,13 +869,13 @@
             const lgaDiv = document.createElement('div');
             lgaDiv.className = 'flex items-center justify-between';
             lgaDiv.innerHTML = `
-                <span class="text-sm">${lga.name}</span>
+                <span class="text-sm text-slate-900">${lga.name}</span>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-muted-foreground">${lga.count}</span>
-                    <div class="progress w-16">
-                        <div class="progress-indicator" style="width: ${lga.percent}%"></div>
+                    <span class="text-xs text-gray-600">${lga.count}</span>
+                    <div class="relative h-2 w-16 overflow-hidden rounded-full bg-slate-100">
+                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out" style="width: ${lga.percent}%"></div>
                     </div>
-                    <span class="text-xs font-medium">${lga.percent}%</span>
+                    <span class="text-xs font-medium text-slate-900">${lga.percent}%</span>
                 </div>
             `;
             elements.lgaList.appendChild(lgaDiv);
@@ -1335,20 +887,20 @@
         
         reports.forEach(report => {
             const reportDiv = document.createElement('div');
-            reportDiv.className = 'card hover-scale';
+            reportDiv.className = 'bg-white rounded-lg border border-gray-200 shadow-sm hover:scale-105 transition-transform duration-200';
             reportDiv.innerHTML = `
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <i data-lucide="${report.icon}" class="h-10 w-10 ${report.color}" style="opacity: 0.8;"></i>
-                        <button class="btn btn-ghost btn-sm">
+                        <i data-lucide="${report.icon}" class="h-10 w-10 ${report.color} opacity-80"></i>
+                        <button class="inline-flex items-center justify-center p-2 bg-transparent text-gray-700 hover:bg-gray-50 transition-colors">
                             <i data-lucide="download" class="h-4 w-4"></i>
                         </button>
                     </div>
-                    <h3 class="font-medium">${report.title}</h3>
-                    <p class="text-sm text-muted-foreground mt-1">${report.description}</p>
+                    <h3 class="font-medium text-slate-900">${report.title}</h3>
+                    <p class="text-sm text-gray-600 mt-1">${report.description}</p>
                 </div>
                 <div class="p-6 pt-0">
-                    <button class="btn btn-outline w-full">
+                    <button class="inline-flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                         <i data-lucide="chevron-right" class="h-4 w-4 mr-2"></i>
                         View Report
                     </button>
@@ -1562,9 +1114,11 @@
     function switchTab(tabName) {
         // Update tab triggers
         elements.tabTriggers.forEach(trigger => {
-            trigger.classList.remove('active');
+            trigger.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm');
+            trigger.classList.add('text-gray-600');
             if (trigger.dataset.tab === tabName) {
-                trigger.classList.add('active');
+                trigger.classList.remove('text-gray-600');
+                trigger.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm');
             }
         });
 
@@ -1635,4 +1189,3 @@
 </script>
 </body>
 </html>
-
