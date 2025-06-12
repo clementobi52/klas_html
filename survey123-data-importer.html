@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey123 Data Importer - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Papa Parse for CSV parsing -->
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+<!-- SheetJS for Excel parsing -->
+<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+// Tailwind config
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        'primary-foreground': '#ffffff',
+        muted: '#f3f4f6',
+        'muted-foreground': '#6b7280',
+        border: '#e5e7eb',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        secondary: '#f1f5f9',
+        'secondary-foreground': '#0f172a',
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* Minimal custom styles */
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.file-drop-zone {
+  border: 2px dashed #d1d5db;
+  transition: all 0.3s ease;
+}
+
+.file-drop-zone:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.file-drop-zone.dragover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<div class="container mx-auto py-6 space-y-4 max-w-6xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Header -->
+  <div>
+    <h2 class="text-2xl font-bold text-gray-900">Survey123 Data Importer</h2>
+    <p class="text-gray-600 mt-1">Import field data from Survey123 API or upload files</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="space-y-4">
+    <!-- Tab Navigation -->
+    <div class="grid grid-cols-2 bg-gray-100 rounded-lg p-1">
+      <button id="tab-api" class="tab-trigger px-4 py-2 rounded-md bg-white text-gray-900 shadow-sm font-medium text-sm transition-all">
+        API Import
+      </button>
+      <button id="tab-file" class="tab-trigger px-4 py-2 rounded-md bg-transparent text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all">
+        File Import
+      </button>
+    </div>
+
+    <!-- API Import Tab Content -->
+    <div id="content-api" class="tab-content space-y-4">
+      <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Import from Survey123 API</h3>
+          <p class="text-sm text-gray-600 mt-1">Connect to ArcGIS Survey123 to import field data directly from the service</p>
+        </div>
+        
+        <div class="p-6">
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                  ArcGIS Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  placeholder="Username (optional)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                />
+              </div>
+              <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                  ArcGIS Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Password (optional)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                />
+              </div>
+            </div>
+            <div class="text-sm text-gray-500">
+              If credentials are not provided, the system will use environment variables or anonymous access.
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-6 pt-0 flex justify-end">
+          <button id="load-api-data-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+            <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+            <span>Load Data</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Import Tab Content -->
+    <div id="content-file" class="tab-content space-y-4 hidden">
+      <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Import from File</h3>
+          <p class="text-sm text-gray-600 mt-1">Upload a CSV or Excel file containing field data</p>
+        </div>
+        
+        <div class="p-6">
+          <div class="space-y-4">
+            <!-- File Upload Area -->
+            <div id="file-drop-zone" class="file-drop-zone rounded-lg p-6 text-center cursor-pointer">
+              <input
+                id="file-upload"
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                class="hidden"
+              />
+              <label for="file-upload" class="cursor-pointer flex flex-col items-center justify-center">
+                <i data-lucide="upload" class="h-10 w-10 text-gray-400 mb-2"></i>
+                <span id="file-name" class="text-sm font-medium">Click to upload CSV or Excel file</span>
+                <span id="file-size" class="text-xs text-gray-500 mt-1">Supports CSV, XLSX, XLS</span>
+              </label>
+            </div>
+
+            <!-- Field Mapping (Hidden by default) -->
+            <div id="field-mapping-section" class="space-y-2 hidden">
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-700">Field Mapping</span>
+                <span id="record-count" class="text-xs text-gray-500">0 records found</span>
+              </div>
+              <div class="border border-gray-200 rounded-md p-2 max-h-40 overflow-y-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-gray-200">
+                      <th class="text-left p-1 text-gray-700">Source Field</th>
+                      <th class="text-left p-1 text-gray-700">Target Field</th>
+                    </tr>
+                  </thead>
+                  <tbody id="field-mapping-tbody">
+                    <!-- Field mapping rows will be inserted here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-6 pt-0 flex justify-end">
+          <button id="process-file-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <i data-lucide="database" class="h-4 w-4"></i>
+            <span>Process Data</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert (Hidden by default) -->
+  <div id="error-alert" class="bg-red-50 border border-red-200 rounded-lg p-4 hidden">
+    <div class="flex items-start gap-3">
+      <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"></i>
+      <div>
+        <h4 class="font-medium text-red-800 text-sm">Error</h4>
+        <p id="error-message" class="text-red-700 text-sm mt-1"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Alert (Hidden by default) -->
+  <div id="success-alert" class="bg-green-50 border border-green-200 rounded-lg p-4 hidden">
+    <div class="flex items-start gap-3">
+      <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"></i>
+      <div>
+        <h4 class="font-medium text-green-800 text-sm">Success</h4>
+        <p id="success-message" class="text-green-700 text-sm mt-1">Data imported successfully!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Preview Card (Hidden by default) -->
+  <div id="data-preview-card" class="bg-white rounded-lg shadow border border-gray-200 hidden">
+    <div class="p-6 border-b border-gray-200 pb-3">
+      <h3 class="text-base font-semibold text-gray-900">Available Data</h3>
+      <p id="data-count" class="text-sm text-gray-600 mt-1">0 records found</p>
+    </div>
+    
+    <div class="p-6">
+      <div class="border border-gray-200 rounded-md overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Parcel ID</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Owner Name</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Property Type</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Location</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Area</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Date</th>
+            </tr>
+          </thead>
+          <tbody id="data-preview-tbody">
+            <!-- Sample data will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+      <div id="preview-note" class="text-xs text-gray-500 mt-2 hidden">Showing 10 of 0 records</div>
+    </div>
+    
+    <div class="p-6 pt-0 flex justify-end gap-2">
+      <button id="view-all-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2">
+        <i data-lucide="eye" class="h-4 w-4"></i>
+        <span>View All Data</span>
+      </button>
+      <button id="import-data-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+        <i data-lucide="download" class="h-4 w-4"></i>
+        <span>Import Data</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Full Data Preview Modal (Hidden by default) -->
+<div id="full-data-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4 hidden">
+  <div class="bg-white border border-gray-200 rounded-lg shadow-lg w-full max-w-6xl flex flex-col max-h-[90vh]">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-gray-200 p-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Complete Data Preview</h2>
+        <p id="modal-description" class="text-sm text-gray-600">Viewing all 0 records from the imported data</p>
+      </div>
+      <button id="close-modal-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-2 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100 h-8 w-8 p-0">
+        <i data-lucide="x" class="h-4 w-4"></i>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-hidden p-4 flex flex-col">
+      <!-- Search and pagination controls -->
+      <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search data..."
+            class="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+          />
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-500 whitespace-nowrap">Rows per page:</span>
+          <select id="items-per-page" class="h-8 w-16 rounded-md border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:border-blue-600">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Data table -->
+      <div class="flex-1 overflow-auto border border-gray-200 rounded-md">
+        <table class="w-full">
+          <thead class="sticky top-0 bg-white z-10">
+            <tr class="bg-gray-50">
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Parcel ID</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Owner Name</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Property Type</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Location</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Area (sqm)</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Status</th>
+              <th class="text-left p-2 text-xs font-medium text-gray-600">Date</th>
+            </tr>
+          </thead>
+          <tbody id="modal-data-tbody">
+            <!-- Data rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination-section" class="flex items-center justify-between mt-4">
+        <div id="pagination-info" class="text-sm text-gray-500">
+          Showing 1-10 of 0 items
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="prev-page-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-lucide="chevron-left" class="h-4 w-4"></i>
+          </button>
+          <div id="page-info" class="text-sm mx-2">Page 1 of 1</div>
+          <button id="next-page-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-lucide="chevron-right" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-gray-200 p-4 flex justify-end gap-2">
+      <button id="modal-close-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+        Close
+      </button>
+      <button id="modal-import-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700">
+        Import Data
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loading-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+    <div class="text-center">
+      <div class="loading-spinner mx-auto mb-4"></div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Processing</h3>
+      <p id="loading-text" class="text-gray-600">Please wait...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sample data
+const sampleData = [
+  {
+    id: '1',
+    data: {
+      parcelId: 'SLTR-001-2024',
+      ownerName: 'John Doe',
+      propertyType: 'Residential',
+      location: 'Kano Municipal',
+      area: '500',
+      status: 'Active'
+    },
+    createdAt: '2024-01-15T09:00:00Z'
+  },
+  {
+    id: '2',
+    data: {
+      parcelId: 'SLTR-002-2024',
+      ownerName: 'Jane Smith',
+      propertyType: 'Commercial',
+      location: 'Fagge',
+      area: '1200',
+      status: 'Pending'
+    },
+    createdAt: '2024-01-14T14:30:00Z'
+  },
+  {
+    id: '3',
+    data: {
+      parcelId: 'SLTR-003-2024',
+      ownerName: 'Ahmed Hassan',
+      propertyType: 'Agricultural',
+      location: 'Gwale',
+      area: '2500',
+      status: 'Active'
+    },
+    createdAt: '2024-01-13T11:15:00Z'
+  },
+  {
+    id: '4',
+    data: {
+      parcelId: 'SLTR-004-2024',
+      ownerName: 'Fatima Ibrahim',
+      propertyType: 'Residential',
+      location: 'Dala',
+      area: '750',
+      status: 'Active'
+    },
+    createdAt: '2024-01-12T16:45:00Z'
+  },
+  {
+    id: '5',
+    data: {
+      parcelId: 'SLTR-005-2024',
+      ownerName: 'Mohammed Ali',
+      propertyType: 'Industrial',
+      location: 'Ungogo',
+      area: '3000',
+      status: 'Under Review'
+    },
+    createdAt: '2024-01-11T08:20:00Z'
+  }
+];
+
+// State management
+let activeTab = 'api';
+let isLoading = false;
+let submissions = [];
+let fields = [];
+let fileData = null;
+let fieldMapping = {};
+let currentPage = 1;
+let itemsPerPage = 10;
+let searchTerm = '';
+let filteredData = [];
+
+// DOM elements
+const elements = {
+  // Tabs
+  tabApi: document.getElementById('tab-api'),
+  tabFile: document.getElementById('tab-file'),
+  contentApi: document.getElementById('content-api'),
+  contentFile: document.getElementById('content-file'),
+  
+  // API Import
+  username: document.getElementById('username'),
+  password: document.getElementById('password'),
+  loadApiDataBtn: document.getElementById('load-api-data-btn'),
+  
+  // File Import
+  fileUpload: document.getElementById('file-upload'),
+  fileDropZone: document.getElementById('file-drop-zone'),
+  fileName: document.getElementById('file-name'),
+  fileSize: document.getElementById('file-size'),
+  fieldMappingSection: document.getElementById('field-mapping-section'),
+  recordCount: document.getElementById('record-count'),
+  fieldMappingTbody: document.getElementById('field-mapping-tbody'),
+  processFileBtn: document.getElementById('process-file-btn'),
+  
+  // Alerts
+  errorAlert: document.getElementById('error-alert'),
+  errorMessage: document.getElementById('error-message'),
+  successAlert: document.getElementById('success-alert'),
+  successMessage: document.getElementById('success-message'),
+  
+  // Data Preview
+  dataPreviewCard: document.getElementById('data-preview-card'),
+  dataCount: document.getElementById('data-count'),
+  dataPreviewTbody: document.getElementById('data-preview-tbody'),
+  previewNote: document.getElementById('preview-note'),
+  viewAllBtn: document.getElementById('view-all-btn'),
+  importDataBtn: document.getElementById('import-data-btn'),
+  
+  // Modal
+  fullDataModal: document.getElementById('full-data-modal'),
+  modalDescription: document.getElementById('modal-description'),
+  closeModalBtn: document.getElementById('close-modal-btn'),
+  searchInput: document.getElementById('search-input'),
+  itemsPerPageSelect: document.getElementById('items-per-page'),
+  modalDataTbody: document.getElementById('modal-data-tbody'),
+  paginationInfo: document.getElementById('pagination-info'),
+  pageInfo: document.getElementById('page-info'),
+  prevPageBtn: document.getElementById('prev-page-btn'),
+  nextPageBtn: document.getElementById('next-page-btn'),
+  modalCloseBtn: document.getElementById('modal-close-btn'),
+  modalImportBtn: document.getElementById('modal-import-btn'),
+  
+  // Loading
+  loadingModal: document.getElementById('loading-modal'),
+  loadingText: document.getElementById('loading-text')
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Set up event listeners
+  setupEventListeners();
+});
+
+function setupEventListeners() {
+  // Tab switching
+  elements.tabApi.addEventListener('click', () => switchTab('api'));
+  elements.tabFile.addEventListener('click', () => switchTab('file'));
+  
+  // API Import
+  elements.loadApiDataBtn.addEventListener('click', loadDataFromApi);
+  
+  // File Import
+  elements.fileUpload.addEventListener('change', handleFileChange);
+  elements.fileDropZone.addEventListener('click', () => elements.fileUpload.click());
+  elements.fileDropZone.addEventListener('dragover', handleDragOver);
+  elements.fileDropZone.addEventListener('drop', handleDrop);
+  elements.processFileBtn.addEventListener('click', processFileData);
+  
+  // Data Preview
+  elements.viewAllBtn.addEventListener('click', showFullDataModal);
+  elements.importDataBtn.addEventListener('click', handleImport);
+  
+  // Modal
+  elements.closeModalBtn.addEventListener('click', hideFullDataModal);
+  elements.modalCloseBtn.addEventListener('click', hideFullDataModal);
+  elements.modalImportBtn.addEventListener('click', () => {
+    handleImport();
+    hideFullDataModal();
+  });
+  
+  // Search and pagination
+  elements.searchInput.addEventListener('input', handleSearch);
+  elements.itemsPerPageSelect.addEventListener('change', handleItemsPerPageChange);
+  elements.prevPageBtn.addEventListener('click', () => changePage(currentPage - 1));
+  elements.nextPageBtn.addEventListener('click', () => changePage(currentPage + 1));
+  
+  // Close modal on backdrop click
+  elements.fullDataModal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      hideFullDataModal();
+    }
+  });
+}
+
+function switchTab(tabName) {
+  activeTab = tabName;
+  
+  if (tabName === 'api') {
+    elements.tabApi.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    elements.tabApi.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabFile.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabFile.classList.add('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    
+    elements.contentApi.classList.remove('hidden');
+    elements.contentFile.classList.add('hidden');
+  } else {
+    elements.tabFile.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    elements.tabFile.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabApi.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabApi.classList.add('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    
+    elements.contentFile.classList.remove('hidden');
+    elements.contentApi.classList.add('hidden');
+  }
+}
+
+function showLoading(message) {
+  elements.loadingText.textContent = message;
+  elements.loadingModal.classList.remove('hidden');
+  isLoading = true;
+}
+
+function hideLoading() {
+  elements.loadingModal.classList.add('hidden');
+  isLoading = false;
+}
+
+function showError(message) {
+  elements.errorMessage.textContent = message;
+  elements.errorAlert.classList.remove('hidden');
+  elements.successAlert.classList.add('hidden');
+}
+
+function showSuccess(message) {
+  elements.successMessage.textContent = message;
+  elements.successAlert.classList.remove('hidden');
+  elements.errorAlert.classList.add('hidden');
+}
+
+function hideAlerts() {
+  elements.errorAlert.classList.add('hidden');
+  elements.successAlert.classList.add('hidden');
+}
+
+function loadDataFromApi() {
+  showLoading('Loading data from Survey123 API...');
+  hideAlerts();
+  
+  // Simulate API call
+  setTimeout(() => {
+    hideLoading();
+    
+    // Use sample data
+    submissions = [...sampleData];
+    fields = [
+      { name: 'parcelId', alias: 'Parcel ID', type: 'string' },
+      { name: 'ownerName', alias: 'Owner Name', type: 'string' },
+      { name: 'propertyType', alias: 'Property Type', type: 'string' },
+      { name: 'location', alias: 'Location', type: 'string' },
+      { name: 'area', alias: 'Area (sqm)', type: 'double' },
+      { name: 'status', alias: 'Status', type: 'string' }
+    ];
+    
+    showDataPreview();
+    showSuccess('Successfully loaded data from Survey123 API!');
+  }, 2000);
+}
+
+function handleFileChange(e) {
+  const file = e.target.files?.[0];
+  if (file) {
+    elements.fileName.textContent = file.name;
+    elements.fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+    parseFile(file);
+  }
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  elements.fileDropZone.classList.add('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  elements.fileDropZone.classList.remove('dragover');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    const file = files[0];
+    elements.fileUpload.files = files;
+    elements.fileName.textContent = file.name;
+    elements.fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+    parseFile(file);
+  }
+}
+
+function parseFile(file) {
+  showLoading('Parsing file...');
+  hideAlerts();
+  
+  const fileExtension = file.name.split('.').pop()?.toLowerCase();
+  
+  if (fileExtension === 'csv') {
+    Papa.parse(file, {
+      header: true,
+      complete: (results) => {
+        hideLoading();
+        
+        if (results.errors.length > 0) {
+          showError(`Error parsing CSV: ${results.errors[0].message}`);
+          return;
+        }
+        
+        fileData = results.data;
+        setupFieldMapping(results.meta.fields || []);
+        elements.processFileBtn.disabled = false;
+      },
+      error: (error) => {
+        hideLoading();
+        showError(`Error parsing CSV: ${error.message}`);
+      }
+    });
+  } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        hideLoading();
+        fileData = jsonData;
+        
+        if (jsonData.length > 0) {
+          setupFieldMapping(Object.keys(jsonData[0]));
+        }
+        elements.processFileBtn.disabled = false;
+      } catch (error) {
+        hideLoading();
+        showError(`Error parsing Excel file: ${error.message}`);
+      }
+    };
+    reader.onerror = () => {
+      hideLoading();
+      showError('Error reading file');
+    };
+    reader.readAsBinaryString(file);
+  } else {
+    hideLoading();
+    showError('Unsupported file format. Please upload a CSV or Excel file.');
+  }
+}
+
+function setupFieldMapping(sourceFields) {
+  fieldMapping = {};
+  sourceFields.forEach(field => {
+    fieldMapping[field] = field;
+  });
+  
+  elements.recordCount.textContent = `${fileData.length} records found`;
+  elements.fieldMappingSection.classList.remove('hidden');
+  
+  elements.fieldMappingTbody.innerHTML = sourceFields.map(field => `
+    <tr class="border-b border-gray-200">
+      <td class="p-1 text-gray-700">${field}</td>
+      <td class="p-1">
+        <input
+          type="text"
+          value="${field}"
+          data-source="${field}"
+          class="field-mapping-input w-full h-7 text-xs px-2 border border-gray-300 rounded focus:outline-none focus:border-blue-600"
+        />
+      </td>
+    </tr>
+  `).join('');
+  
+  // Add event listeners to mapping inputs
+  document.querySelectorAll('.field-mapping-input').forEach(input => {
+    input.addEventListener('input', function() {
+      const sourceField = this.dataset.source;
+      fieldMapping[sourceField] = this.value;
+    });
+  });
+}
+
+function processFileData() {
+  if (!fileData) return;
+  
+  showLoading('Processing file data...');
+  hideAlerts();
+  
+  setTimeout(() => {
+    hideLoading();
+    
+    // Convert file data to submission format
+    submissions = fileData.map((row, index) => ({
+      id: `file-${index + 1}`,
+      data: row,
+      createdAt: new Date().toISOString()
+    }));
+    
+    // Generate fields from the first record
+    if (submissions.length > 0) {
+      const firstRecord = submissions[0].data;
+      fields = Object.keys(firstRecord).map(key => ({
+        name: key,
+        alias: fieldMapping[key] || key,
+        type: typeof firstRecord[key] === 'number' ? 'double' : 'string'
+      }));
+    }
+    
+    showDataPreview();
+    showSuccess('File data processed successfully!');
+  }, 1500);
+}
+
+function showDataPreview() {
+  if (submissions.length === 0) return;
+  
+  elements.dataCount.textContent = `${submissions.length} records found`;
+  elements.dataPreviewCard.classList.remove('hidden');
+  
+  // Show first 10 records
+  const previewData = submissions.slice(0, 10);
+  elements.dataPreviewTbody.innerHTML = previewData.map(submission => `
+    <tr class="border-t border-gray-200">
+      <td class="p-2 text-xs text-gray-700">${submission.data.parcelId || submission.data.id || '-'}</td>
+      <td class="p-2 text-xs text-gray-700">${submission.data.ownerName || submission.data.owner || '-'}</td>
+      <td class="p-2 text-xs text-gray-700">${submission.data.propertyType || submission.data.type || '-'}</td>
+      <td class="p-2 text-xs text-gray-700">${submission.data.location || '-'}</td>
+      <td class="p-2 text-xs text-gray-700">${submission.data.area || '-'}</td>
+      <td class="p-2 text-xs text-gray-700">${new Date(submission.createdAt).toLocaleDateString()}</td>
+    </tr>
+  `).join('');
+  
+  if (submissions.length > 10) {
+    elements.previewNote.textContent = `Showing 10 of ${submissions.length} records`;
+    elements.previewNote.classList.remove('hidden');
+  }
+}
+
+function showFullDataModal() {
+  elements.fullDataModal.classList.remove('hidden');
+  elements.modalDescription.textContent = `Viewing all ${submissions.length} records from the imported data`;
+  document.body.style.overflow = 'hidden';
+  
+  // Initialize modal data
+  filteredData = [...submissions];
+  currentPage = 1;
+  updateModalData();
+}
+
+function hideFullDataModal() {
+  elements.fullDataModal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function handleSearch() {
+  searchTerm = elements.searchInput.value.toLowerCase();
+  
+  if (!searchTerm) {
+    filteredData = [...submissions];
+  } else {
+    filteredData = submissions.filter(submission => {
+      return Object.values(submission.data).some(value => {
+        if (!value) return false;
+        return String(value).toLowerCase().includes(searchTerm);
+      });
+    });
+  }
+  
+  currentPage = 1;
+  updateModalData();
+}
+
+function handleItemsPerPageChange() {
+  itemsPerPage = parseInt(elements.itemsPerPageSelect.value);
+  currentPage = 1;
+  updateModalData();
+}
+
+function changePage(page) {
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  if (page >= 1 && page <= totalPages) {
+    currentPage = page;
+    updateModalData();
+  }
+}
+
+function updateModalData() {
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+  
+  // Update table
+  if (paginatedData.length > 0) {
+    elements.modalDataTbody.innerHTML = paginatedData.map(submission => `
+      <tr class="border-t border-gray-200 hover:bg-gray-50">
+        <td class="p-2 text-xs text-gray-700">${submission.data.parcelId || submission.data.id || '-'}</td>
+        <td class="p-2 text-xs text-gray-700">${submission.data.ownerName || submission.data.owner || '-'}</td>
+        <td class="p-2 text-xs text-gray-700">${submission.data.propertyType || submission.data.type || '-'}</td>
+        <td class="p-2 text-xs text-gray-700">${submission.data.location || '-'}</td>
+        <td class="p-2 text-xs text-gray-700">${submission.data.area || '-'}</td>
+        <td class="p-2 text-xs text-gray-700">
+          <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 ${getStatusColor(submission.data.status)}">
+            ${submission.data.status || 'Unknown'}
+          </span>
+        </td>
+        <td class="p-2 text-xs text-gray-700">${new Date(submission.createdAt).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+  } else {
+    elements.modalDataTbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="p-4 text-center text-gray-500">No matching records found</td>
+      </tr>
+    `;
+  }
+  
+  // Update pagination info
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+  elements.paginationInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredData.length} items`;
+  elements.pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+  
+  // Update pagination buttons
+  elements.prevPageBtn.disabled = currentPage === 1;
+  elements.nextPageBtn.disabled = currentPage === totalPages;
+}
+
+function getStatusColor(status) {
+  switch (status?.toLowerCase()) {
+    case 'active':
+      return 'bg-green-100 text-green-800';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'under review':
+      return 'bg-blue-100 text-blue-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+}
+
+function handleImport() {
+  showLoading('Importing data to SLTR system...');
+  
+  setTimeout(() => {
+    hideLoading();
+    showSuccess(`Successfully imported ${submissions.length} records to the SLTR system!`);
+    
+    // In a real application, this would trigger the onDataImported callback
+    console.log('Data imported:', { submissions, fields });
+  }, 2000);
+}
+</script>
+</body>
+</html>

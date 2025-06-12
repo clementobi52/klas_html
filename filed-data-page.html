@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Data Collection - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+// Tailwind config
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        'primary-foreground': '#ffffff',
+        muted: '#f3f4f6',
+        'muted-foreground': '#6b7280',
+        border: '#e5e7eb',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        secondary: '#f1f5f9',
+        'secondary-foreground': '#0f172a',
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* Minimal custom styles */
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.survey123-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 0.5rem;
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<div class="container mx-auto py-6 space-y-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Page Header -->
+  <div class="space-y-2">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Field Data Collection</h1>
+    <p class="text-lg text-gray-600">Import, collect, and manage field data from Survey123</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="bg-white rounded-lg shadow border border-gray-200">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">SLTR Field Data</h2>
+      <p class="text-sm text-gray-600 mt-1">Import data from Survey123, collect new field data, and view existing data</p>
+    </div>
+    
+    <div class="p-6">
+      <!-- Tabs -->
+      <div class="space-y-4">
+        <!-- Tab Navigation -->
+        <div class="grid grid-cols-3 bg-gray-100 rounded-lg p-1">
+          <button id="tab-directAccess" class="tab-trigger px-4 py-2 rounded-md bg-white text-gray-900 shadow-sm font-medium text-sm transition-all">
+            Direct Access
+          </button>
+          <button id="tab-importData" class="tab-trigger px-4 py-2 rounded-md bg-transparent text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all">
+            Import Data
+          </button>
+          <button id="tab-collectData" class="tab-trigger px-4 py-2 rounded-md bg-transparent text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all">
+            Collect New Data
+          </button>
+        </div>
+
+        <!-- Tab Content -->
+        
+        <!-- Direct Access Tab -->
+        <div id="content-directAccess" class="tab-content p-4 border border-gray-200 rounded-md">
+          <div class="space-y-6">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="external-link" class="w-8 h-8 text-blue-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Survey123 Direct Access</h3>
+              <p class="text-gray-600 mb-6">Access Survey123 forms directly through the integrated interface</p>
+            </div>
+
+            <!-- Survey123 Integration -->
+            <div class="bg-gray-50 rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-md font-medium text-gray-900">Survey123 Form</h4>
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span class="text-sm text-gray-600">Connected</span>
+                </div>
+              </div>
+              
+              <!-- Survey123 Iframe Placeholder -->
+              <div class="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                <div class="space-y-4">
+                  <i data-lucide="map" class="w-12 h-12 text-gray-400 mx-auto"></i>
+                  <div>
+                    <h5 class="text-lg font-medium text-gray-900">SLTR Field Survey</h5>
+                    <p class="text-gray-600">Survey123 form will load here</p>
+                  </div>
+                  <button id="load-survey" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700">
+                    <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+                    Load Survey Form
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Data Tab -->
+        <div id="content-importData" class="tab-content p-4 border border-gray-200 rounded-md hidden">
+          <div class="space-y-6">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="download" class="w-8 h-8 text-green-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Import Survey123 Data</h3>
+              <p class="text-gray-600 mb-6">Import existing field data from Survey123 forms</p>
+            </div>
+
+            <!-- Import Configuration -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Form ID</label>
+                  <input 
+                    type="text" 
+                    id="form-id"
+                    placeholder="Enter Survey123 Form ID"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    value="sltr-field-survey-2024"
+                  />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <input 
+                      type="date" 
+                      id="start-date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    />
+                    <input 
+                      type="date" 
+                      id="end-date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Import Options</label>
+                  <div class="space-y-2">
+                    <label class="flex items-center">
+                      <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                      <span class="ml-2 text-sm text-gray-700">Include attachments</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                      <span class="ml-2 text-sm text-gray-700">Validate coordinates</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                      <span class="ml-2 text-sm text-gray-700">Overwrite existing data</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"></i>
+                    <div>
+                      <h4 class="font-medium text-blue-800 text-sm">Import Information</h4>
+                      <p class="text-xs text-blue-700 mt-1">
+                        Data will be imported from the specified Survey123 form and processed for SLTR analysis.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h4 class="font-medium text-gray-900 mb-3">Import Status</h4>
+                  <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-600">Last Import:</span>
+                      <span class="text-gray-900">2024-01-15 14:30</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-600">Records Imported:</span>
+                      <span class="text-gray-900">247</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-600">Status:</span>
+                      <span class="text-green-600 font-medium">Success</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                Check Status
+              </button>
+              <button id="import-data-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-green-600 text-white hover:bg-green-700">
+                <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                Start Import
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collect New Data Tab -->
+        <div id="content-collectData" class="tab-content p-4 border border-gray-200 rounded-md hidden">
+          <div class="space-y-6">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="plus-circle" class="w-8 h-8 text-purple-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Collect New Field Data</h3>
+              <p class="text-gray-600 mb-6">Create new field data collection sessions and manage ongoing surveys</p>
+            </div>
+
+            <!-- Collection Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Quick Collection -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div class="text-center">
+                  <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="zap" class="w-6 h-6 text-blue-600"></i>
+                  </div>
+                  <h4 class="text-lg font-medium text-gray-900 mb-2">Quick Collection</h4>
+                  <p class="text-gray-600 text-sm mb-4">Start a new field data collection session immediately</p>
+                  <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 w-full">
+                    <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+                    Start Collection
+                  </button>
+                </div>
+              </div>
+
+              <!-- Scheduled Collection -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div class="text-center">
+                  <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="calendar" class="w-6 h-6 text-green-600"></i>
+                  </div>
+                  <h4 class="text-lg font-medium text-gray-900 mb-2">Scheduled Collection</h4>
+                  <p class="text-gray-600 text-sm mb-4">Schedule field data collection for specific dates and locations</p>
+                  <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 w-full">
+                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-2"></i>
+                    Schedule Collection
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Collections -->
+            <div class="bg-gray-50 rounded-lg p-6">
+              <h4 class="text-lg font-medium text-gray-900 mb-4">Active Collections</h4>
+              
+              <div class="space-y-3">
+                <!-- Collection Item -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div>
+                        <h5 class="font-medium text-gray-900">SLTR Survey - Zone A</h5>
+                        <p class="text-sm text-gray-600">Started: 2024-01-15 09:00</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-green-100 text-green-800">
+                        Active
+                      </span>
+                      <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                        View
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Collection Item -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <div>
+                        <h5 class="font-medium text-gray-900">SLTR Survey - Zone B</h5>
+                        <p class="text-sm text-gray-600">Scheduled: 2024-01-16 08:00</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-yellow-100 text-yellow-800">
+                        Scheduled
+                      </span>
+                      <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <i data-lucide="edit" class="w-4 h-4 mr-1"></i>
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Collection Item -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <h5 class="font-medium text-gray-900">SLTR Survey - Zone C</h5>
+                        <p class="text-sm text-gray-600">Completed: 2024-01-14 16:30</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800">
+                        Completed
+                      </span>
+                      <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                        Export
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loading-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+    <div class="text-center">
+      <div class="loading-spinner mx-auto mb-4"></div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Processing</h3>
+      <p id="loading-message" class="text-gray-600">Please wait...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Tab switching
+  const tabs = ['directAccess', 'importData', 'collectData'];
+  
+  tabs.forEach(tabId => {
+    const tabButton = document.getElementById(`tab-${tabId}`);
+    const tabContent = document.getElementById(`content-${tabId}`);
+    
+    tabButton.addEventListener('click', function() {
+      // Remove active state from all tabs
+      tabs.forEach(id => {
+        const btn = document.getElementById(`tab-${id}`);
+        const content = document.getElementById(`content-${id}`);
+        
+        btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        btn.classList.add('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+        content.classList.add('hidden');
+      });
+      
+      // Add active state to clicked tab
+      tabButton.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+      tabButton.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+      tabContent.classList.remove('hidden');
+    });
+  });
+  
+  // Load Survey button
+  document.getElementById('load-survey').addEventListener('click', function() {
+    showLoading('Loading Survey123 form...');
+    
+    setTimeout(() => {
+      hideLoading();
+      // Replace the placeholder with actual survey iframe
+      const placeholder = this.closest('.bg-white');
+      placeholder.innerHTML = `
+        <iframe 
+          src="https://survey123.arcgis.com/share/your-form-id" 
+          class="survey123-iframe"
+          title="SLTR Field Survey">
+        </iframe>
+      `;
+    }, 2000);
+  });
+  
+  // Import Data button
+  document.getElementById('import-data-btn').addEventListener('click', function() {
+    showLoading('Importing data from Survey123...');
+    
+    setTimeout(() => {
+      hideLoading();
+      alert('Data import completed successfully! 47 new records imported.');
+    }, 3000);
+  });
+});
+
+function showLoading(message) {
+  document.getElementById('loading-message').textContent = message;
+  document.getElementById('loading-modal').classList.remove('hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading-modal').classList.add('hidden');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey123 Integration - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+// Tailwind config
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        'primary-foreground': '#ffffff',
+        muted: '#f3f4f6',
+        'muted-foreground': '#6b7280',
+        border: '#e5e7eb',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        secondary: '#f1f5f9',
+        'secondary-foreground': '#0f172a',
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* Minimal custom styles */
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<div class="container mx-auto py-6 space-y-4 max-w-4xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <h3 class="text-lg font-semibold text-gray-900">Survey123 Integration</h3>
+    <button id="close-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-2 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100 h-8 w-8 p-0">
+      <i data-lucide="x" class="h-4 w-4"></i>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="space-y-4">
+    <!-- Tab Navigation -->
+    <div class="grid grid-cols-2 bg-gray-100 rounded-lg p-1">
+      <button id="tab-directAccess" class="tab-trigger px-4 py-2 rounded-md bg-white text-gray-900 shadow-sm font-medium text-sm transition-all">
+        Direct Access
+      </button>
+      <button id="tab-apiAccess" class="tab-trigger px-4 py-2 rounded-md bg-transparent text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all">
+        API Access
+      </button>
+    </div>
+
+    <!-- Direct Access Tab Content -->
+    <div id="content-directAccess" class="tab-content space-y-4 mt-4">
+      <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="p-6 border-b border-gray-200 pb-3">
+          <h4 class="text-base font-semibold text-gray-900">Access Survey123 Form Data</h4>
+          <p class="text-sm text-gray-600 mt-1">Access your form data directly through the Survey123 web interface</p>
+        </div>
+        
+        <div class="p-6 space-y-4">
+          <!-- Form ID Input -->
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label for="formId" class="block text-sm font-medium text-gray-700 mb-1">
+                Survey123 Form ID
+              </label>
+              <div class="flex gap-2">
+                <input
+                  id="formId"
+                  type="text"
+                  placeholder="Enter Survey123 Form ID"
+                  class="flex-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                  value="sltr-field-survey-2024"
+                />
+                <select id="form-select" class="w-44 px-3 py-2 border border-gray-300 rounded-md text-sm bg-white cursor-pointer focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                  <option value="">Select a form</option>
+                  <option value="sltr-field-survey-2024">SLTR Field Survey 2024</option>
+                  <option value="property-assessment-2024">Property Assessment 2024</option>
+                  <option value="land-use-survey-2024">Land Use Survey 2024</option>
+                </select>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                Enter a form ID directly or select from available forms
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2">
+              <button id="copy-url-btn" class="flex-1 inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+                <i data-lucide="copy" class="h-4 w-4"></i>
+                <span id="copy-text">Copy URL</span>
+              </button>
+              <button id="open-browser-btn" class="flex-1 inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-1">
+                <i data-lucide="external-link" class="h-4 w-4"></i>
+                Open in Browser
+              </button>
+            </div>
+          </div>
+
+          <!-- Geographic Extent -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Geographic Extent</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div>
+                <label for="xmin" class="block text-xs text-gray-500">X Min</label>
+                <input
+                  id="xmin"
+                  type="number"
+                  step="0.0001"
+                  value="7.5961"
+                  class="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label for="ymin" class="block text-xs text-gray-500">Y Min</label>
+                <input
+                  id="ymin"
+                  type="number"
+                  step="0.0001"
+                  value="11.8646"
+                  class="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label for="xmax" class="block text-xs text-gray-500">X Max</label>
+                <input
+                  id="xmax"
+                  type="number"
+                  step="0.0001"
+                  value="9.461"
+                  class="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label for="ymax" class="block text-xs text-gray-500">Y Max</label>
+                <input
+                  id="ymax"
+                  type="number"
+                  step="0.0001"
+                  value="12.1454"
+                  class="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Generated URL -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Generated URL</label>
+            <div class="flex items-center">
+              <input
+                id="generated-url"
+                type="text"
+                readonly
+                value="https://survey123.arcgis.com/api/featureservice/sltr-field-survey-2024/FeatureServer/0/query"
+                class="w-full p-2 text-sm border border-gray-300 rounded-l-md bg-gray-50 focus:outline-none"
+              />
+              <button id="copy-generated-url" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-2 transition-all cursor-pointer bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-l-none border border-l-0 border-gray-300">
+                <i data-lucide="copy" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Export Options -->
+          <div class="mt-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Export Options</h4>
+            <div class="flex flex-wrap gap-2">
+              <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                CSV
+              </button>
+              <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                Excel
+              </button>
+              <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                GeoJSON
+              </button>
+              <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                Shapefile
+              </button>
+              <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                KML
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Access Tab Content -->
+    <div id="content-apiAccess" class="tab-content space-y-4 mt-4 hidden">
+      <!-- Authentication Alert -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <h4 class="font-medium text-yellow-800 text-sm">Authentication Required</h4>
+            <p class="text-yellow-700 text-sm mt-1">
+              API access requires proper authentication. Consider using Direct Access tab instead for easier access to your Survey123 data.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Selection Card -->
+      <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="p-6 border-b border-gray-200 pb-3">
+          <h4 class="text-base font-semibold text-gray-900">Select Survey123 Form</h4>
+          <p class="text-sm text-gray-600 mt-1">Choose a form to import data from</p>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <select id="api-form-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white cursor-pointer focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                <option value="">Select a form</option>
+                <option value="sltr-field-survey-2024">SLTR Field Survey 2024</option>
+                <option value="property-assessment-2024">Property Assessment 2024</option>
+                <option value="land-use-survey-2024">Land Use Survey 2024</option>
+              </select>
+            </div>
+            <button id="load-data-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2 whitespace-nowrap">
+              <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+              Load Data
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Alert (Hidden by default) -->
+      <div id="success-alert" class="bg-green-50 border border-green-200 rounded-lg p-4 hidden">
+        <div class="flex items-start gap-3">
+          <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <h4 class="font-medium text-green-800 text-sm">Success</h4>
+            <p class="text-green-700 text-sm mt-1">
+              Successfully imported <span id="import-count">0</span> records from Survey123.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Alert (Hidden by default) -->
+      <div id="error-alert" class="bg-red-50 border border-red-200 rounded-lg p-4 hidden">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <h4 class="font-medium text-red-800 text-sm">Error</h4>
+            <p id="error-message" class="text-red-700 text-sm mt-1">
+              Failed to load submissions. Please use direct access instead.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submissions Table (Hidden by default) -->
+      <div id="submissions-card" class="bg-white rounded-lg shadow border border-gray-200 hidden">
+        <div class="p-6 border-b border-gray-200 pb-3">
+          <h4 class="text-base font-semibold text-gray-900">Available Submissions</h4>
+          <p class="text-sm text-gray-600 mt-1"><span id="submission-count">0</span> records found in selected form</p>
+        </div>
+        
+        <div class="p-6">
+          <div class="border border-gray-200 rounded-md overflow-hidden">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="text-left p-2 text-xs font-medium text-gray-600">Parcel ID</th>
+                  <th class="text-left p-2 text-xs font-medium text-gray-600">Owner</th>
+                  <th class="text-left p-2 text-xs font-medium text-gray-600">Type</th>
+                  <th class="text-left p-2 text-xs font-medium text-gray-600">Date</th>
+                </tr>
+              </thead>
+              <tbody id="submissions-tbody">
+                <!-- Sample data -->
+                <tr class="border-t border-gray-200">
+                  <td class="p-2 text-xs text-gray-700">SLTR-001-2024</td>
+                  <td class="p-2 text-xs text-gray-700">John Doe</td>
+                  <td class="p-2 text-xs">
+                    <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800">
+                      Residential
+                    </span>
+                  </td>
+                  <td class="p-2 text-xs text-gray-700">1/15/2024</td>
+                </tr>
+                <tr class="border-t border-gray-200">
+                  <td class="p-2 text-xs text-gray-700">SLTR-002-2024</td>
+                  <td class="p-2 text-xs text-gray-700">Jane Smith</td>
+                  <td class="p-2 text-xs">
+                    <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800">
+                      Commercial
+                    </span>
+                  </td>
+                  <td class="p-2 text-xs text-gray-700">1/14/2024</td>
+                </tr>
+                <tr class="border-t border-gray-200">
+                  <td class="p-2 text-xs text-gray-700">SLTR-003-2024</td>
+                  <td class="p-2 text-xs text-gray-700">Ahmed Hassan</td>
+                  <td class="p-2 text-xs">
+                    <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800">
+                      Agricultural
+                    </span>
+                  </td>
+                  <td class="p-2 text-xs text-gray-700">1/13/2024</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="p-6 pt-0 flex justify-end">
+          <button id="import-selected-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+            <i data-lucide="database" class="h-4 w-4"></i>
+            Import Selected Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loading-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+    <div class="text-center">
+      <div class="loading-spinner mx-auto mb-4"></div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Loading</h3>
+      <p id="loading-message" class="text-gray-600">Please wait...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sample data
+const sampleSubmissions = [
+  {
+    id: '1',
+    data: {
+      parcelId: 'SLTR-001-2024',
+      ownerName: 'John Doe',
+      propertyType: 'Residential'
+    },
+    createdAt: '2024-01-15T09:00:00Z'
+  },
+  {
+    id: '2',
+    data: {
+      parcelId: 'SLTR-002-2024',
+      ownerName: 'Jane Smith',
+      propertyType: 'Commercial'
+    },
+    createdAt: '2024-01-14T14:30:00Z'
+  },
+  {
+    id: '3',
+    data: {
+      parcelId: 'SLTR-003-2024',
+      ownerName: 'Ahmed Hassan',
+      propertyType: 'Agricultural'
+    },
+    createdAt: '2024-01-13T11:15:00Z'
+  }
+];
+
+// State management
+let activeTab = 'directAccess';
+let isLoading = false;
+let copySuccess = false;
+
+// DOM elements
+const elements = {
+  // Tabs
+  tabDirectAccess: document.getElementById('tab-directAccess'),
+  tabApiAccess: document.getElementById('tab-apiAccess'),
+  contentDirectAccess: document.getElementById('content-directAccess'),
+  contentApiAccess: document.getElementById('content-apiAccess'),
+  
+  // Direct Access elements
+  formId: document.getElementById('formId'),
+  formSelect: document.getElementById('form-select'),
+  copyUrlBtn: document.getElementById('copy-url-btn'),
+  copyText: document.getElementById('copy-text'),
+  openBrowserBtn: document.getElementById('open-browser-btn'),
+  generatedUrl: document.getElementById('generated-url'),
+  copyGeneratedUrl: document.getElementById('copy-generated-url'),
+  
+  // Extent inputs
+  xmin: document.getElementById('xmin'),
+  ymin: document.getElementById('ymin'),
+  xmax: document.getElementById('xmax'),
+  ymax: document.getElementById('ymax'),
+  
+  // API Access elements
+  apiFormSelect: document.getElementById('api-form-select'),
+  loadDataBtn: document.getElementById('load-data-btn'),
+  successAlert: document.getElementById('success-alert'),
+  errorAlert: document.getElementById('error-alert'),
+  submissionsCard: document.getElementById('submissions-card'),
+  submissionCount: document.getElementById('submission-count'),
+  submissionsTbody: document.getElementById('submissions-tbody'),
+  importSelectedBtn: document.getElementById('import-selected-btn'),
+  importCount: document.getElementById('import-count'),
+  
+  // Modal
+  loadingModal: document.getElementById('loading-modal'),
+  loadingMessage: document.getElementById('loading-message'),
+  
+  // Close button
+  closeBtn: document.getElementById('close-btn')
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // Update URL on load
+  updateGeneratedUrl();
+});
+
+function setupEventListeners() {
+  // Tab switching
+  elements.tabDirectAccess.addEventListener('click', () => switchTab('directAccess'));
+  elements.tabApiAccess.addEventListener('click', () => switchTab('apiAccess'));
+  
+  // Direct Access events
+  elements.formId.addEventListener('input', updateGeneratedUrl);
+  elements.formSelect.addEventListener('change', function() {
+    if (this.value) {
+      elements.formId.value = this.value;
+      updateGeneratedUrl();
+    }
+  });
+  
+  elements.copyUrlBtn.addEventListener('click', copyUrlToClipboard);
+  elements.copyGeneratedUrl.addEventListener('click', copyGeneratedUrlToClipboard);
+  elements.openBrowserBtn.addEventListener('click', openInBrowser);
+  
+  // Extent parameter updates
+  ['xmin', 'ymin', 'xmax', 'ymax'].forEach(param => {
+    elements[param].addEventListener('input', updateGeneratedUrl);
+  });
+  
+  // API Access events
+  elements.loadDataBtn.addEventListener('click', loadSubmissions);
+  elements.importSelectedBtn.addEventListener('click', importData);
+  
+  // Export buttons
+  document.querySelectorAll('[data-export]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const format = this.dataset.export;
+      exportData(format);
+    });
+  });
+  
+  // Close button
+  elements.closeBtn.addEventListener('click', function() {
+    // In a real app, this would close the component
+    console.log('Close Survey123 Integration');
+  });
+}
+
+function switchTab(tabName) {
+  // Update active tab
+  activeTab = tabName;
+  
+  // Update tab buttons
+  if (tabName === 'directAccess') {
+    elements.tabDirectAccess.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    elements.tabDirectAccess.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabApiAccess.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabApiAccess.classList.add('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    
+    elements.contentDirectAccess.classList.remove('hidden');
+    elements.contentApiAccess.classList.add('hidden');
+  } else {
+    elements.tabApiAccess.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    elements.tabApiAccess.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabDirectAccess.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+    elements.tabDirectAccess.classList.add('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    
+    elements.contentApiAccess.classList.remove('hidden');
+    elements.contentDirectAccess.classList.add('hidden');
+  }
+}
+
+function updateGeneratedUrl() {
+  const formId = elements.formId.value || 'sltr-field-survey-2024';
+  const xmin = elements.xmin.value;
+  const ymin = elements.ymin.value;
+  const xmax = elements.xmax.value;
+  const ymax = elements.ymax.value;
+  
+  const url = `https://survey123.arcgis.com/api/featureservice/${formId}/FeatureServer/0/query?geometry=${xmin},${ymin},${xmax},${ymax}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&f=json`;
+  
+  elements.generatedUrl.value = url;
+}
+
+function copyUrlToClipboard() {
+  const url = elements.generatedUrl.value;
+  
+  navigator.clipboard.writeText(url).then(() => {
+    // Update button text
+    const icon = elements.copyUrlBtn.querySelector('i');
+    const text = elements.copyText;
+    
+    icon.setAttribute('data-lucide', 'check-circle-2');
+    text.textContent = 'Copied!';
+    lucide.createIcons();
+    
+    // Reset after 2 seconds
+    setTimeout(() => {
+      icon.setAttribute('data-lucide', 'copy');
+      text.textContent = 'Copy URL';
+      lucide.createIcons();
+    }, 2000);
+  }).catch(err => {
+    console.error('Failed to copy URL:', err);
+  });
+}
+
+function copyGeneratedUrlToClipboard() {
+  const url = elements.generatedUrl.value;
+  
+  navigator.clipboard.writeText(url).then(() => {
+    const icon = elements.copyGeneratedUrl.querySelector('i');
+    icon.setAttribute('data-lucide', 'check-circle-2');
+    lucide.createIcons();
+    
+    setTimeout(() => {
+      icon.setAttribute('data-lucide', 'copy');
+      lucide.createIcons();
+    }, 2000);
+  }).catch(err => {
+    console.error('Failed to copy URL:', err);
+  });
+}
+
+function openInBrowser() {
+  const url = elements.generatedUrl.value;
+  window.open(url, '_blank');
+}
+
+function showLoading(message) {
+  elements.loadingMessage.textContent = message;
+  elements.loadingModal.classList.remove('hidden');
+  isLoading = true;
+}
+
+function hideLoading() {
+  elements.loadingModal.classList.add('hidden');
+  isLoading = false;
+}
+
+function loadSubmissions() {
+  const selectedForm = elements.apiFormSelect.value;
+  
+  if (!selectedForm) {
+    showError('Please select a form first.');
+    return;
+  }
+  
+  showLoading('Loading submissions from Survey123...');
+  
+  // Simulate API call
+  setTimeout(() => {
+    hideLoading();
+    
+    // Show submissions
+    elements.submissionsCard.classList.remove('hidden');
+    elements.submissionCount.textContent = sampleSubmissions.length;
+    
+    // Update table
+    elements.submissionsTbody.innerHTML = sampleSubmissions.map(submission => `
+      <tr class="border-t border-gray-200">
+        <td class="p-2 text-xs text-gray-700">${submission.data.parcelId}</td>
+        <td class="p-2 text-xs text-gray-700">${submission.data.ownerName}</td>
+        <td class="p-2 text-xs">
+          <span class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800">
+            ${submission.data.propertyType}
+          </span>
+        </td>
+        <td class="p-2 text-xs text-gray-700">${new Date(submission.createdAt).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+    
+    // Hide any previous alerts
+    elements.errorAlert.classList.add('hidden');
+    elements.successAlert.classList.add('hidden');
+  }, 2000);
+}
+
+function importData() {
+  showLoading('Importing data to SLTR system...');
+  
+  setTimeout(() => {
+    hideLoading();
+    
+    // Show success alert
+    elements.importCount.textContent = sampleSubmissions.length;
+    elements.successAlert.classList.remove('hidden');
+    elements.errorAlert.classList.add('hidden');
+    
+    // Scroll to success message
+    elements.successAlert.scrollIntoView({ behavior: 'smooth' });
+  }, 3000);
+}
+
+function showError(message) {
+  elements.errorAlert.querySelector('#error-message').textContent = message;
+  elements.errorAlert.classList.remove('hidden');
+  elements.successAlert.classList.add('hidden');
+}
+
+function exportData(format) {
+  const url = elements.generatedUrl.value + `&fileType=${format}`;
+  window.open(url, '_blank');
+}
+</script>
+</body>
+</html>
