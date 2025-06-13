@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey123 Links - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+// Tailwind config
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        'primary-foreground': '#ffffff',
+        muted: '#f3f4f6',
+        'muted-foreground': '#6b7280',
+        border: '#e5e7eb',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        secondary: '#f1f5f9',
+        'secondary-foreground': '#0f172a',
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* Minimal custom styles */
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<div class="container mx-auto py-6 space-y-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Page Header -->
+  <div class="space-y-2">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Survey123 Data Links</h1>
+    <p class="text-lg text-gray-600">Generate and manage links to Survey123 form data</p>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <!-- Main Form Card (Left Side) -->
+    <div class="md:col-span-2 bg-white rounded-lg shadow border border-gray-200">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Survey123 Data Links</h2>
+        <p class="text-sm text-gray-600 mt-1">Generate and access links to Survey123 form data</p>
+      </div>
+      
+      <div class="p-6 space-y-4">
+        <!-- Form Name Input -->
+        <div class="space-y-2">
+          <label for="form-name" class="block text-sm font-medium text-gray-700">Form Name (for reference)</label>
+          <input
+            id="form-name"
+            type="text"
+            value="My Survey Form"
+            placeholder="Enter a name for this form"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+          />
+        </div>
+
+        <!-- Form ID Input -->
+        <div class="space-y-2">
+          <label for="form-id" class="block text-sm font-medium text-gray-700">Survey123 Form ID</label>
+          <input
+            id="form-id"
+            type="text"
+            placeholder="Enter Survey123 Form ID"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+          />
+          <p id="default-form-notice" class="text-xs text-gray-500 hidden">Default form ID from environment: <span id="default-form-id"></span></p>
+        </div>
+
+        <!-- Geographic Extent -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-sm font-medium text-gray-700">Geographic Extent (Optional)</label>
+            <button id="reset-extent-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-50 h-6 text-xs">
+              Reset to Default
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="xmin" class="block text-xs text-gray-700">Min X (Longitude)</label>
+              <input
+                id="xmin"
+                type="number"
+                step="0.0001"
+                value="7.5961"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+              />
+            </div>
+            <div>
+              <label for="ymin" class="block text-xs text-gray-700">Min Y (Latitude)</label>
+              <input
+                id="ymin"
+                type="number"
+                step="0.0001"
+                value="11.8646"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+              />
+            </div>
+            <div>
+              <label for="xmax" class="block text-xs text-gray-700">Max X (Longitude)</label>
+              <input
+                id="xmax"
+                type="number"
+                step="0.0001"
+                value="9.461"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+              />
+            </div>
+            <div>
+              <label for="ymax" class="block text-xs text-gray-700">Max Y (Latitude)</label>
+              <input
+                id="ymax"
+                type="number"
+                step="0.0001"
+                value="12.1454"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Generated URL -->
+        <div class="pt-4 space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Generated URL</label>
+          <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-md overflow-x-auto">
+            <code id="generated-url" class="text-xs font-mono flex-1 whitespace-nowrap text-gray-800">Enter a Form ID to generate URL</code>
+            <button id="copy-url-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-2 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-50 h-8 w-8 p-0" title="Copy URL">
+              <i data-lucide="copy" class="h-4 w-4"></i>
+            </button>
+          </div>
+          <p id="copy-success" class="text-xs text-green-600 hidden">URL copied to clipboard!</p>
+        </div>
+      </div>
+      
+      <!-- Card Footer -->
+      <div class="p-6 pt-0 flex justify-between">
+        <button id="save-link-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <i data-lucide="bookmark" class="h-4 w-4"></i>
+          <span>Save Link</span>
+        </button>
+        <button id="open-tab-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <i data-lucide="external-link" class="h-4 w-4"></i>
+          <span>Open in New Tab</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Saved Links Card (Right Side) -->
+    <div class="bg-white rounded-lg shadow border border-gray-200">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Saved Links</h2>
+        <p class="text-sm text-gray-600 mt-1">Quick access to your saved Survey123 forms</p>
+      </div>
+      
+      <div class="p-6">
+        <!-- Empty State -->
+        <div id="empty-state" class="text-center py-8 text-gray-500">
+          <p>No saved forms yet</p>
+          <p class="text-xs mt-2">Save forms to quickly access them later</p>
+        </div>
+
+        <!-- Saved Forms List -->
+        <div id="saved-forms-container" class="h-[400px] overflow-y-auto pr-2 space-y-4 hidden">
+          <!-- Saved forms will be dynamically inserted here -->
+        </div>
+      </div>
+      
+      <div class="p-6 pt-0">
+        <p class="text-xs text-gray-500">Links are saved in your browser's local storage</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Toast (Hidden by default) -->
+<div id="success-toast" class="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg z-50 hidden">
+  <div class="flex items-center gap-2">
+    <i data-lucide="check-circle" class="h-4 w-4"></i>
+    <span id="toast-message">Success!</span>
+  </div>
+</div>
+
+<script>
+// State management
+let formName = 'My Survey Form';
+let formId = '';
+let extent = {
+  xmin: 7.5961,
+  ymin: 11.8646,
+  xmax: 9.461,
+  ymax: 12.1454
+};
+let savedForms = [];
+let isCopied = false;
+
+// DOM elements
+const elements = {
+  formName: document.getElementById('form-name'),
+  formId: document.getElementById('form-id'),
+  defaultFormNotice: document.getElementById('default-form-notice'),
+  defaultFormId: document.getElementById('default-form-id'),
+  resetExtentBtn: document.getElementById('reset-extent-btn'),
+  xmin: document.getElementById('xmin'),
+  ymin: document.getElementById('ymin'),
+  xmax: document.getElementById('xmax'),
+  ymax: document.getElementById('ymax'),
+  generatedUrl: document.getElementById('generated-url'),
+  copyUrlBtn: document.getElementById('copy-url-btn'),
+  copySuccess: document.getElementById('copy-success'),
+  saveLinkBtn: document.getElementById('save-link-btn'),
+  openTabBtn: document.getElementById('open-tab-btn'),
+  emptyState: document.getElementById('empty-state'),
+  savedFormsContainer: document.getElementById('saved-forms-container'),
+  successToast: document.getElementById('success-toast'),
+  toastMessage: document.getElementById('toast-message')
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Load saved forms from localStorage
+  loadSavedForms();
+  
+  // Check for default form ID from environment
+  checkDefaultFormId();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // Update URL initially
+  updateGeneratedUrl();
+});
+
+function setupEventListeners() {
+  // Form inputs
+  elements.formName.addEventListener('input', function() {
+    formName = this.value;
+  });
+  
+  elements.formId.addEventListener('input', function() {
+    formId = this.value;
+    updateGeneratedUrl();
+    updateButtonStates();
+  });
+  
+  // Extent inputs
+  elements.xmin.addEventListener('input', function() {
+    extent.xmin = parseFloat(this.value) || 0;
+    updateGeneratedUrl();
+  });
+  
+  elements.ymin.addEventListener('input', function() {
+    extent.ymin = parseFloat(this.value) || 0;
+    updateGeneratedUrl();
+  });
+  
+  elements.xmax.addEventListener('input', function() {
+    extent.xmax = parseFloat(this.value) || 0;
+    updateGeneratedUrl();
+  });
+  
+  elements.ymax.addEventListener('input', function() {
+    extent.ymax = parseFloat(this.value) || 0;
+    updateGeneratedUrl();
+  });
+  
+  // Reset extent button
+  elements.resetExtentBtn.addEventListener('click', resetExtent);
+  
+  // Action buttons
+  elements.copyUrlBtn.addEventListener('click', copyUrlToClipboard);
+  elements.saveLinkBtn.addEventListener('click', saveCurrentForm);
+  elements.openTabBtn.addEventListener('click', openInNewTab);
+}
+
+function checkDefaultFormId() {
+  // In a real environment, this would check for environment variables
+  // For demo purposes, we'll use a placeholder
+  const defaultFormId = 'sltr-field-survey-2024'; // This would come from process.env.NEXT_PUBLIC_SURVEY123_FORM_ID
+  
+  if (defaultFormId) {
+    elements.defaultFormId.textContent = defaultFormId;
+    elements.defaultFormNotice.classList.remove('hidden');
+    
+    // Set as default if no form ID is entered
+    if (!formId) {
+      formId = defaultFormId;
+      elements.formId.value = defaultFormId;
+      updateGeneratedUrl();
+      updateButtonStates();
+    }
+  }
+}
+
+function resetExtent() {
+  extent = {
+    xmin: 7.5961,
+    ymin: 11.8646,
+    xmax: 9.461,
+    ymax: 12.1454
+  };
+  
+  elements.xmin.value = extent.xmin;
+  elements.ymin.value = extent.ymin;
+  elements.xmax.value = extent.xmax;
+  elements.ymax.value = extent.ymax;
+  
+  updateGeneratedUrl();
+}
+
+function generateSurvey123Url(id, ext) {
+  if (!id) return '';
+  
+  if (ext) {
+    return `https://survey123.arcgis.com/surveys/${id}/data?extent=${ext.xmin},${ext.ymin},${ext.xmax},${ext.ymax}`;
+  } else {
+    return `https://survey123.arcgis.com/surveys/${id}/data`;
+  }
+}
+
+function updateGeneratedUrl() {
+  const url = generateSurvey123Url(formId, extent);
+  elements.generatedUrl.textContent = url || 'Enter a Form ID to generate URL';
+}
+
+function updateButtonStates() {
+  const hasFormId = formId.trim() !== '';
+  elements.saveLinkBtn.disabled = !hasFormId;
+  elements.openTabBtn.disabled = !hasFormId;
+}
+
+function copyUrlToClipboard() {
+  const url = generateSurvey123Url(formId, extent);
+  if (!url) return;
+  
+  navigator.clipboard.writeText(url).then(() => {
+    showCopySuccess();
+    showToast('URL copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy URL:', err);
+    showToast('Failed to copy URL', 'error');
+  });
+}
+
+function showCopySuccess() {
+  elements.copySuccess.classList.remove('hidden');
+  setTimeout(() => {
+    elements.copySuccess.classList.add('hidden');
+  }, 2000);
+}
+
+function showToast(message, type = 'success') {
+  elements.toastMessage.textContent = message;
+  elements.successToast.classList.remove('hidden');
+  
+  if (type === 'error') {
+    elements.successToast.classList.remove('bg-green-600');
+    elements.successToast.classList.add('bg-red-600');
+  } else {
+    elements.successToast.classList.remove('bg-red-600');
+    elements.successToast.classList.add('bg-green-600');
+  }
+  
+  setTimeout(() => {
+    elements.successToast.classList.add('hidden');
+  }, 3000);
+}
+
+function saveCurrentForm() {
+  if (!formId.trim()) return;
+  
+  const newForm = {
+    id: formId,
+    name: formName || `Form ${formId.substring(0, 8)}...`,
+    extent: { ...extent }
+  };
+  
+  savedForms.push(newForm);
+  saveForms();
+  renderSavedForms();
+  showToast('Form saved successfully!');
+}
+
+function openInNewTab() {
+  const url = generateSurvey123Url(formId, extent);
+  if (url) {
+    window.open(url, '_blank');
+  }
+}
+
+function loadSavedForms() {
+  const saved = localStorage.getItem('survey123SavedForms');
+  if (saved) {
+    try {
+      savedForms = JSON.parse(saved);
+      renderSavedForms();
+    } catch (e) {
+      console.error('Error loading saved forms:', e);
+    }
+  }
+}
+
+function saveForms() {
+  localStorage.setItem('survey123SavedForms', JSON.stringify(savedForms));
+}
+
+function renderSavedForms() {
+  if (savedForms.length === 0) {
+    elements.emptyState.classList.remove('hidden');
+    elements.savedFormsContainer.classList.add('hidden');
+    return;
+  }
+  
+  elements.emptyState.classList.add('hidden');
+  elements.savedFormsContainer.classList.remove('hidden');
+  
+  elements.savedFormsContainer.innerHTML = savedForms.map((form, index) => `
+    <div class="space-y-2">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-medium text-gray-900">${form.name}</h3>
+          <p class="text-xs text-gray-500 truncate w-56">ID: ${form.id}</p>
+        </div>
+        <button onclick="removeSavedForm(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-2 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-50 h-8 w-8 p-0" title="Remove">
+          <i data-lucide="trash" class="h-4 w-4 text-red-500"></i>
+        </button>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="loadSavedForm(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 h-7 text-xs">
+          Load
+        </button>
+        <button onclick="copySavedFormUrl(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 h-7 text-xs">
+          Copy URL
+        </button>
+        <button onclick="openSavedForm(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 h-7 text-xs">
+          Open
+        </button>
+      </div>
+      ${form.extent ? `
+        <div class="inline-flex items-center rounded-full text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800 border border-gray-300">
+          Extent: ${form.extent.xmin.toFixed(2)},${form.extent.ymin.toFixed(2)} to ${form.extent.xmax.toFixed(2)},${form.extent.ymax.toFixed(2)}
+        </div>
+      ` : ''}
+      <div class="border-t border-gray-200 my-2"></div>
+    </div>
+  `).join('');
+  
+  // Re-initialize Lucide icons for dynamically added content
+  lucide.createIcons();
+}
+
+function removeSavedForm(index) {
+  savedForms.splice(index, 1);
+  saveForms();
+  renderSavedForms();
+  showToast('Form removed successfully!');
+}
+
+function loadSavedForm(index) {
+  const form = savedForms[index];
+  if (!form) return;
+  
+  formId = form.id;
+  formName = form.name;
+  extent = form.extent || extent;
+  
+  elements.formId.value = formId;
+  elements.formName.value = formName;
+  elements.xmin.value = extent.xmin;
+  elements.ymin.value = extent.ymin;
+  elements.xmax.value = extent.xmax;
+  elements.ymax.value = extent.ymax;
+  
+  updateGeneratedUrl();
+  updateButtonStates();
+  showToast('Form loaded successfully!');
+}
+
+function copySavedFormUrl(index) {
+  const form = savedForms[index];
+  if (!form) return;
+  
+  const url = generateSurvey123Url(form.id, form.extent);
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('URL copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy URL:', err);
+    showToast('Failed to copy URL', 'error');
+  });
+}
+
+function openSavedForm(index) {
+  const form = savedForms[index];
+  if (!form) return;
+  
+  const url = generateSurvey123Url(form.id, form.extent);
+  window.open(url, '_blank');
+}
+
+// Global functions for onclick handlers
+window.removeSavedForm = removeSavedForm;
+window.loadSavedForm = loadSavedForm;
+window.copySavedFormUrl = copySavedFormUrl;
+window.openSavedForm = openSavedForm;
+</script>
+</body>
+</html>
