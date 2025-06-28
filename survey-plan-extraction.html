@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey Plan Extraction - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Tesseract.js for OCR -->
+<script src="https://unpkg.com/tesseract.js@4/dist/tesseract.min.js"></script>
+
+<script>
+// Tailwind config
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        'primary-foreground': '#ffffff',
+        muted: '#f3f4f6',
+        'muted-foreground': '#6b7280',
+        border: '#e5e7eb',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        secondary: '#f1f5f9',
+        'secondary-foreground': '#0f172a',
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* Loading spinner animation */
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* File drop zone styles */
+.file-drop-zone {
+  border: 2px dashed #d1d5db;
+  transition: all 0.3s ease;
+}
+
+.file-drop-zone:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.file-drop-zone.dragover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 0.5s ease-in-out;
+}
+
+/* AI stage indicator animations */
+.stage-indicator {
+  transition: all 0.3s ease;
+}
+
+.stage-indicator.active {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Tab styles */
+.tab-trigger {
+  transition: all 0.2s ease;
+}
+
+.tab-trigger.active {
+  background-color: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-default {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Course and beacon coordinate cards */
+.data-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+/* Collapsible content */
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.collapsible-content.expanded {
+  max-height: 1000px;
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<div class="container mx-auto py-6 space-y-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Page Header -->
+  <div class="space-y-2">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Survey Plan Extraction</h1>
+    <p class="text-lg text-gray-600">Upload scanned survey plans for automated data extraction</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow border border-gray-200">
+      <div class="p-6 pb-2">
+        <h3 class="text-sm font-medium text-gray-600">Plans Selected</h3>
+      </div>
+      <div class="px-6 pb-6">
+        <div id="selected-count" class="text-2xl font-bold">0</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow border border-gray-200">
+      <div class="p-6 pb-2">
+        <h3 class="text-sm font-medium text-gray-600">Processed / Extracted</h3>
+      </div>
+      <div class="px-6 pb-6">
+        <div id="processed-count" class="text-2xl font-bold">0</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow border border-gray-200">
+      <div class="p-6 pb-2">
+        <h3 class="text-sm font-medium text-gray-600">AI Analysis Status</h3>
+      </div>
+      <div class="px-6 pb-6">
+        <div class="text-lg font-bold flex items-center">
+          <span id="ai-status-text">Ready</span>
+          <span id="ai-status-badge" class="badge badge-default ml-2">Idle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tabs -->
+  <div class="w-full">
+    <!-- Tab Navigation -->
+    <div class="grid grid-cols-2 bg-gray-100 rounded-lg p-1 mb-6">
+      <button id="tab-upload" class="tab-trigger px-4 py-2 rounded-md bg-white text-gray-900 shadow-sm font-medium text-sm transition-all active">
+        Upload Survey Plans
+      </button>
+      <button id="tab-extracted" class="tab-trigger px-4 py-2 rounded-md bg-transparent text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all" disabled>
+        Extracted Data
+      </button>
+    </div>
+
+    <!-- Upload Tab Content -->
+    <div id="content-upload" class="tab-content active">
+      <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900">Upload Survey Plans</h2>
+          <p class="text-sm text-gray-600 mt-1">Upload scanned survey plan documents (PDF, JPG, PNG, TIFF, WebP). Max 5 files.</p>
+        </div>
+        
+        <div class="p-6 space-y-6">
+          <!-- File Upload Area -->
+          <div id="upload-area" class="file-drop-zone rounded-lg p-8 text-center cursor-pointer">
+            <input
+              id="file-input"
+              type="file"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.tiff,.tif,.webp"
+              class="hidden"
+            />
+            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+              <i data-lucide="scan-line" class="h-6 w-6 text-gray-600"></i>
+            </div>
+            <h3 class="mb-2 text-lg font-medium">Drag and drop survey plans here</h3>
+            <p class="mb-4 text-sm text-gray-500">or click to browse files</p>
+            <button id="browse-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+              <i data-lucide="upload" class="h-4 w-4"></i>
+              Browse Files
+            </button>
+            <p class="text-xs text-gray-500 mt-2">Max 5 files. Supported: PDF, JPG, PNG, TIFF, WebP.</p>
+          </div>
+
+          <!-- Selected Files List -->
+          <div id="selected-files" class="hidden">
+            <div class="rounded-md border divide-y">
+              <div class="p-3 bg-gray-50 flex justify-between items-center">
+                <span id="files-count" class="font-medium">0 survey plan(s) selected</span>
+                <button id="clear-all-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100">
+                  Clear All
+                </button>
+              </div>
+              <div id="files-list" class="divide-y">
+                <!-- Files will be inserted here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Progress -->
+          <div id="upload-progress" class="hidden space-y-2">
+            <div class="flex justify-between text-sm">
+              <span id="upload-status-text">Uploading files...</span>
+              <span id="upload-percentage">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div id="upload-progress-bar" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col md:flex-row gap-4 justify-center">
+            <button id="start-upload-btn" class="hidden inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+              <i data-lucide="brain" class="h-4 w-4"></i>
+              Start Upload & Extraction
+            </button>
+            <button id="cancel-upload-btn" class="hidden inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700 gap-2">
+              <i data-lucide="alert-circle" class="h-4 w-4"></i>
+              Cancel Upload
+            </button>
+            <button id="new-batch-btn" class="hidden inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2">
+              <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+              Start New Batch
+            </button>
+          </div>
+
+          <!-- AI Processing Visualizer -->
+          <div id="ai-processing" class="hidden mt-4 p-4 bg-gray-50 border rounded-md">
+            <div class="flex justify-between mb-2">
+              <span class="text-sm font-medium">Survey Plan AI Analysis Pipeline</span>
+              <span id="ai-progress-text" class="text-sm">0% Complete</span>
+            </div>
+            <div class="relative">
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div id="ai-progress-bar" class="h-full bg-blue-500 rounded-full transition-all duration-500 ease-in-out" style="width: 0%"></div>
+              </div>
+              <div class="flex justify-between mt-2">
+                <div class="flex flex-col items-center stage-indicator" data-stage="0">
+                  <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                  <span class="text-xs text-gray-500">Init</span>
+                </div>
+                <div class="flex flex-col items-center stage-indicator" data-stage="1">
+                  <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                  <span class="text-xs text-gray-500">OCR</span>
+                </div>
+                <div class="flex flex-col items-center stage-indicator" data-stage="2">
+                  <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                  <span class="text-xs text-gray-500">Layout</span>
+                </div>
+                <div class="flex flex-col items-center stage-indicator" data-stage="3">
+                  <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                  <span class="text-xs text-gray-500">Extract</span>
+                </div>
+                <div class="flex flex-col items-center stage-indicator" data-stage="4">
+                  <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                  <span class="text-xs text-gray-500">Assemble</span>
+                </div>
+                <div class="flex flex-col items-center stage-indicator" data-stage="5">
+                  <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                  <span class="text-xs text-gray-500">Done</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 flex items-start gap-3">
+              <div class="p-2 rounded-full bg-blue-100">
+                <i id="ai-stage-icon" data-lucide="brain" class="h-5 w-5 text-blue-600"></i>
+              </div>
+              <div>
+                <p id="ai-stage-title" class="text-sm font-medium mb-1">Current Stage: Initializing</p>
+                <p id="ai-stage-description" class="text-xs text-gray-600">Preparing for AI analysis...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extracted Data Tab Content -->
+    <div id="content-extracted" class="tab-content">
+      <!-- AI Processing (when active) -->
+      <div id="ai-processing-extracted" class="hidden mb-6">
+        <!-- Same AI processing visualizer as above -->
+      </div>
+
+      <!-- Extracted Data Results -->
+      <div id="extracted-results" class="hidden">
+        <div class="bg-white rounded-lg shadow border border-gray-200">
+          <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Extracted Survey Plan Data</h2>
+            <p class="text-sm text-gray-600 mt-1">Review and edit the data extracted from the uploaded survey plans.</p>
+          </div>
+          <div class="p-6 space-y-6">
+            <div id="extracted-data-list">
+              <!-- Extracted data items will be inserted here -->
+            </div>
+            <div class="flex justify-end border-t pt-4 mt-4">
+              <button id="save-to-db-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+                <i data-lucide="database" class="h-4 w-4"></i>
+                Save Extracted Data to Cadastral Records
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Data State -->
+      <div id="no-data-state" class="text-center py-10">
+        <i data-lucide="file-search" class="mx-auto h-12 w-12 text-gray-400 mb-4"></i>
+        <h3 class="text-sm font-medium text-gray-900 mb-2">No data extracted yet</h3>
+        <p class="text-sm text-gray-500">Upload survey plans to see extracted data here.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Document Preview Modal -->
+<div id="preview-modal" class="fixed inset-0 z-50 hidden">
+  <div class="modal-backdrop fixed inset-0" onclick="closePreviewModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-gray-900">Document Preview</h2>
+          <button onclick="closePreviewModal()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-2 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100 h-8 w-8 p-0">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="preview-content">
+          <!-- Preview content will be inserted here -->
+        </div>
+        
+        <!-- Raw OCR Text Toggle -->
+        <div class="mt-6 border rounded-md">
+          <button id="toggle-raw-text" onclick="toggleRawText()" class="flex justify-between items-center w-full p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <span class="font-medium text-sm">View Raw OCR Text (for Debugging)</span>
+            <i data-lucide="chevron-down" class="h-5 w-5"></i>
+          </button>
+          <div id="raw-text-content" class="collapsible-content">
+            <div class="p-3 bg-gray-900 text-white rounded-b-md">
+              <pre id="raw-text" class="text-xs whitespace-pre-wrap font-mono">No OCR text available.</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-200">
+        <button onclick="closePreviewModal()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Metadata Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 hidden">
+  <div class="modal-backdrop fixed inset-0" onclick="closeEditModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-[90vw] md:w-[80vw] lg:w-[70vw] h-[90vh] flex flex-col">
+      <div class="p-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Edit Extracted Data & Preview</h2>
+      </div>
+      <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- Form Section -->
+        <div class="w-full md:w-1/2 lg:w-2/5 p-4 space-y-3 overflow-y-auto border-r">
+          <h3 id="edit-file-name" class="text-md font-semibold mb-2 border-b pb-1">File: </h3>
+          
+          <!-- Basic Fields -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">File No.</label>
+              <input id="edit-file-no" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Applicant Name</label>
+              <input id="edit-applicant-name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Approved Plan No.</label>
+              <input id="edit-approved-plan-no" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Starting Beacon No.</label>
+              <input id="edit-starting-beacon-no" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+            </div>
+          </div>
+
+          <!-- Beacon Coordinates -->
+          <div class="mt-3 space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="text-base font-medium text-gray-700">Beacon Coordinates</label>
+              <button onclick="addBeaconCoordinate()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Add Beacon
+              </button>
+            </div>
+            <div id="beacon-coordinates-list" class="space-y-2">
+              <!-- Beacon coordinates will be inserted here -->
+            </div>
+          </div>
+
+          <!-- Courses -->
+          <div class="mt-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="text-base font-medium text-gray-700">Courses</label>
+              <button onclick="addCourse()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Add Course
+              </button>
+            </div>
+            <div id="courses-list" class="space-y-2">
+              <!-- Courses will be inserted here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="w-full md:w-1/2 lg:w-3/5 p-4 flex flex-col bg-gray-50 overflow-hidden">
+          <div id="edit-preview-content" class="flex-1 overflow-y-auto mb-2 border rounded-md bg-white shadow-inner">
+            <!-- Preview content will be inserted here -->
+          </div>
+          
+          <!-- Page Navigation -->
+          <div id="edit-page-nav" class="hidden flex items-center justify-center gap-2 mt-2">
+            <button id="edit-prev-page" onclick="changeEditPreviewPage(-1)" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+              <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <span id="edit-page-info" class="text-sm">Page 1 of 1</span>
+            <button id="edit-next-page" onclick="changeEditPreviewPage(1)" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+              <i data-lucide="chevron-right" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-gray-200 flex justify-end gap-2">
+        <button onclick="closeEditModal()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+          Cancel
+        </button>
+        <button onclick="saveEditChanges()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COGO Export Modal -->
+<div id="cogo-modal" class="fixed inset-0 z-50 hidden">
+  <div class="modal-backdrop fixed inset-0" onclick="closeCogoModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">COGO Data Format</h2>
+        <p class="text-sm text-gray-600 mt-1">Copy the formatted data below or download it as a .txt file.</p>
+      </div>
+      <div class="p-6">
+        <textarea id="cogo-output" readonly rows="15" class="w-full font-mono text-xs whitespace-pre bg-gray-50 border border-gray-300 rounded-md p-3"></textarea>
+      </div>
+      <div class="p-6 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between gap-2">
+        <button onclick="downloadCogoFile()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto gap-2">
+          <i data-lucide="download" class="h-4 w-4"></i>
+          Download COGO File
+        </button>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button onclick="copyCogoData()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 flex-1">
+            Copy
+          </button>
+          <button onclick="closeCogoModal()" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-gray-200 text-gray-700 hover:bg-gray-300 flex-1">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="fixed inset-0 z-50 hidden">
+  <div class="modal-backdrop fixed inset-0"></div>
+  <div class="fixed inset-0 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
+      <div class="text-center">
+        <div class="loading-spinner mx-auto mb-4"></div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Processing</h3>
+        <p id="loading-message" class="text-gray-600">Please wait...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+  <!-- Toast messages will be inserted here -->
+</div>
+
+<script>
+// Global state
+let selectedFiles = [];
+let extractedMetadata = {};
+let rawOcrText = {};
+let uploadStatus = 'idle';
+let uploadProgress = 0;
+let aiStage = 'idle';
+let aiProgress = 0;
+let currentEditingFile = null;
+let currentPreviewFile = null;
+let pdfPages = {};
+let currentEditPreviewPage = 0;
+
+// Document rendering cache
+let renderedDocuments = {};
+let fileObjectUrls = {};
+
+// Initialize PDF.js
+if (window.pdfjsLib) {
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // Update UI
+  updateUI();
+});
+
+function setupEventListeners() {
+  // File input and upload area
+  const fileInput = document.getElementById('file-input');
+  const uploadArea = document.getElementById('upload-area');
+  const browseBtn = document.getElementById('browse-btn');
+  
+  fileInput.addEventListener('change', handleFileSelect);
+  browseBtn.addEventListener('click', () => fileInput.click());
+  uploadArea.addEventListener('click', () => fileInput.click());
+  
+  // Drag and drop
+  uploadArea.addEventListener('dragover', handleDragOver);
+  uploadArea.addEventListener('drop', handleDrop);
+  uploadArea.addEventListener('dragleave', handleDragLeave);
+  
+  // Tab switching
+  document.getElementById('tab-upload').addEventListener('click', () => switchTab('upload'));
+  document.getElementById('tab-extracted').addEventListener('click', () => switchTab('extracted'));
+  
+  // Action buttons
+  document.getElementById('clear-all-btn').addEventListener('click', clearAllFiles);
+  document.getElementById('start-upload-btn').addEventListener('click', startUpload);
+  document.getElementById('cancel-upload-btn').addEventListener('click', cancelUpload);
+  document.getElementById('new-batch-btn').addEventListener('click', startNewBatch);
+  document.getElementById('save-to-db-btn').addEventListener('click', saveToDatabase);
+}
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  if (files.length > 5) {
+    showToast('Maximum 5 files allowed', 'error');
+    selectedFiles = files.slice(0, 5);
+  } else {
+    selectedFiles = files;
+  }
+  
+  // Create object URLs for the files
+  selectedFiles.forEach((file, index) => {
+    const fileId = `file-${Date.now()}-${index}`;
+    fileObjectUrls[fileId] = URL.createObjectURL(file);
+  });
+  
+  updateUI();
+}
+
+function handleDragOver(event) {
+  event.preventDefault();
+  document.getElementById('upload-area').classList.add('dragover');
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  document.getElementById('upload-area').classList.remove('dragover');
+  
+  const files = Array.from(event.dataTransfer.files);
+  if (files.length > 5) {
+    showToast('Maximum 5 files allowed', 'error');
+    selectedFiles = files.slice(0, 5);
+  } else {
+    selectedFiles = files;
+  }
+  
+  // Create object URLs for the files
+  selectedFiles.forEach((file, index) => {
+    const fileId = `file-${Date.now()}-${index}`;
+    fileObjectUrls[fileId] = URL.createObjectURL(file);
+  });
+  
+  updateUI();
+}
+
+function handleDragLeave(event) {
+  document.getElementById('upload-area').classList.remove('dragover');
+}
+
+function clearAllFiles() {
+  // Clean up object URLs
+  Object.values(fileObjectUrls).forEach(url => URL.revokeObjectURL(url));
+  
+  selectedFiles = [];
+  extractedMetadata = {};
+  rawOcrText = {};
+  pdfPages = {};
+  renderedDocuments = {};
+  fileObjectUrls = {};
+  uploadStatus = 'idle';
+  uploadProgress = 0;
+  aiStage = 'idle';
+  aiProgress = 0;
+  document.getElementById('file-input').value = '';
+  updateUI();
+}
+
+function removeFile(index) {
+  // Clean up object URL for removed file
+  const fileId = `file-${Date.now()}-${index}`;
+  if (fileObjectUrls[fileId]) {
+    URL.revokeObjectURL(fileObjectUrls[fileId]);
+    delete fileObjectUrls[fileId];
+  }
+  
+  selectedFiles.splice(index, 1);
+  updateUI();
+}
+
+// Document rendering functions
+async function renderPDFPages(file) {
+  try {
+    if (!window.pdfjsLib) {
+      throw new Error('PDF.js not loaded');
+    }
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pageImages = [];
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      await page.render({ canvasContext: context, viewport: viewport }).promise;
+      pageImages.push(canvas.toDataURL('image/png'));
+    }
+    
+    return pageImages;
+  } catch (error) {
+    console.error('Error rendering PDF:', error);
+    return [`data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800"><rect width="600" height="800" fill="#f3f4f6"/><text x="300" y="400" text-anchor="middle" font-family="Arial" font-size="16" fill="#6b7280">PDF Render Failed</text></svg>')}`];
+  }
+}
+
+async function renderImageFile(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve([e.target.result]);
+    reader.onerror = () => resolve([`data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800"><rect width="600" height="800" fill="#f3f4f6"/><text x="300" y="400" text-anchor="middle" font-family="Arial" font-size="16" fill="#6b7280">Image Load Failed</text></svg>')}`]);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function ensureDocumentRendered(fileId) {
+  if (renderedDocuments[fileId]) {
+    return renderedDocuments[fileId];
+  }
+  
+  const metadata = extractedMetadata[fileId];
+  if (!metadata) {
+    return [`data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800"><rect width="600" height="800" fill="#f3f4f6"/><text x="300" y="400" text-anchor="middle" font-family="Arial" font-size="16" fill="#6b7280">File Not Found</text></svg>')}`];
+  }
+  
+  const originalFile = selectedFiles[metadata.originalFileIndex];
+  if (!originalFile) {
+    return [`data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800"><rect width="600" height="800" fill="#f3f4f6"/><text x="300" y="400" text-anchor="middle" font-family="Arial" font-size="16" fill="#6b7280">Original File Missing</text></svg>')}`];
+  }
+  
+  try {
+    let pages;
+    if (originalFile.type === 'application/pdf') {
+      pages = await renderPDFPages(originalFile);
+    } else if (originalFile.type.startsWith('image/')) {
+      pages = await renderImageFile(originalFile);
+    } else {
+      pages = [`data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800"><rect width="600" height="800" fill="#f3f4f6"/><text x="300" y="400" text-anchor="middle" font-family="Arial" font-size="16" fill="#6b7280">Unsupported File Type</text></svg>')}`];
+    }
+    
+    renderedDocuments[fileId] = pages;
+    return pages;
+  } catch (error) {
+    console.error('Error rendering document:', error);
+    return [`data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800"><rect width="600" height="800" fill="#f3f4f6"/><text x="300" y="400" text-anchor="middle" font-family="Arial" font-size="16" fill="#6b7280">Render Error</text></svg>')}`];
+  }
+}
+
+function switchTab(tab) {
+  // Update tab buttons
+  document.querySelectorAll('.tab-trigger').forEach(btn => {
+    btn.classList.remove('active');
+    btn.classList.add('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+  });
+  
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  
+  // Activate selected tab
+  const tabBtn = document.getElementById(`tab-${tab}`);
+  const tabContent = document.getElementById(`content-${tab}`);
+  
+  tabBtn.classList.add('active');
+  tabBtn.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+  tabBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+  
+  tabContent.classList.add('active');
+}
+
+function updateUI() {
+  // Update stats
+  document.getElementById('selected-count').textContent = selectedFiles.length;
+  document.getElementById('processed-count').textContent = Object.keys(extractedMetadata).length;
+  
+  // Update AI status
+  updateAIStatus();
+  
+  // Update file list
+  updateFilesList();
+  
+  // Update upload area visibility
+  updateUploadArea();
+  
+  // Update action buttons
+  updateActionButtons();
+  
+  // Update extracted data tab
+  updateExtractedDataTab();
+  
+  // Update tab states
+  updateTabStates();
+}
+
+function updateAIStatus() {
+  const statusText = document.getElementById('ai-status-text');
+  const statusBadge = document.getElementById('ai-status-badge');
+  
+  if (aiStage === 'idle') {
+    statusText.textContent = 'Ready';
+    statusBadge.textContent = 'Idle';
+    statusBadge.className = 'badge badge-default ml-2';
+  } else if (aiStage === 'complete') {
+    statusText.textContent = Object.keys(extractedMetadata).length > 0 ? 'Complete' : 'Ready';
+    statusBadge.textContent = Object.keys(extractedMetadata).length > 0 ? 'Done' : 'Idle';
+    statusBadge.className = Object.keys(extractedMetadata).length > 0 ? 'badge badge-success ml-2' : 'badge badge-default ml-2';
+  } else {
+    statusText.textContent = 'Processing...';
+    statusBadge.textContent = 'Active';
+    statusBadge.className = 'badge ml-2 bg-blue-500 text-white animate-pulse';
+  }
+}
+
+function updateFilesList() {
+  const selectedFilesDiv = document.getElementById('selected-files');
+  const filesCountSpan = document.getElementById('files-count');
+  const filesList = document.getElementById('files-list');
+  
+  if (selectedFiles.length === 0) {
+    selectedFilesDiv.classList.add('hidden');
+    return;
+  }
+  
+  selectedFilesDiv.classList.remove('hidden');
+  filesCountSpan.textContent = `${selectedFiles.length} survey plan(s) selected`;
+  
+  filesList.innerHTML = selectedFiles.map((file, index) => `
+    <div class="flex items-center justify-between p-3">
+      <div class="flex items-center gap-3">
+        ${getFileIcon(file.type)}
+        <div>
+          <p class="font-medium">${file.name}</p>
+          <p class="text-xs text-gray-500">${formatFileSize(file.size)}</p>
+        </div>
+      </div>
+      <button onclick="removeFile(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-2 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100 h-8 w-8 p-0" ${uploadStatus === 'uploading' || (aiStage !== 'idle' && aiStage !== 'complete') ? 'disabled' : ''}>
+        <i data-lucide="x" class="h-4 w-4"></i>
+      </button>
+    </div>
+  `).join('');
+  
+  // Re-initialize Lucide icons
+  lucide.createIcons();
+}
+
+function updateUploadArea() {
+  const uploadArea = document.getElementById('upload-area');
+  
+  if (selectedFiles.length > 0) {
+    uploadArea.classList.add('hidden');
+  } else {
+    uploadArea.classList.remove('hidden');
+  }
+}
+
+function updateActionButtons() {
+  const startBtn = document.getElementById('start-upload-btn');
+  const cancelBtn = document.getElementById('cancel-upload-btn');
+  const newBatchBtn = document.getElementById('new-batch-btn');
+  
+  // Hide all buttons first
+  startBtn.classList.add('hidden');
+  cancelBtn.classList.add('hidden');
+  newBatchBtn.classList.add('hidden');
+  
+  if (uploadStatus === 'idle' && selectedFiles.length > 0 && aiStage === 'idle') {
+    startBtn.classList.remove('hidden');
+  } else if (uploadStatus === 'uploading' || (aiStage !== 'idle' && aiStage !== 'complete')) {
+    cancelBtn.classList.remove('hidden');
+  } else if (aiStage === 'complete') {
+    newBatchBtn.classList.remove('hidden');
+  }
+}
+
+function updateExtractedDataTab() {
+  const tabBtn = document.getElementById('tab-extracted');
+  
+  if (Object.keys(extractedMetadata).length === 0 && aiStage !== 'complete') {
+    tabBtn.disabled = true;
+    tabBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  } else {
+    tabBtn.disabled = false;
+    tabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+  
+  // Update extracted data content
+  updateExtractedDataContent();
+}
+
+function updateExtractedDataContent() {
+  const aiProcessingExtracted = document.getElementById('ai-processing-extracted');
+  const extractedResults = document.getElementById('extracted-results');
+  const noDataState = document.getElementById('no-data-state');
+  const extractedDataList = document.getElementById('extracted-data-list');
+  
+  if (aiStage !== 'idle' && aiStage !== 'complete') {
+    // Show AI processing
+    aiProcessingExtracted.classList.remove('hidden');
+    extractedResults.classList.add('hidden');
+    noDataState.classList.add('hidden');
+  } else if (aiStage === 'complete' && Object.keys(extractedMetadata).length > 0) {
+    // Show extracted results
+    aiProcessingExtracted.classList.add('hidden');
+    extractedResults.classList.remove('hidden');
+    noDataState.classList.add('hidden');
+    
+    // Populate extracted data
+    extractedDataList.innerHTML = Object.entries(extractedMetadata).map(([fileId, data]) => 
+      createExtractedDataCard(fileId, data)
+    ).join('');
+    
+    // Re-initialize Lucide icons
+    lucide.createIcons();
+  } else {
+    // Show no data state
+    aiProcessingExtracted.classList.add('hidden');
+    extractedResults.classList.add('hidden');
+    noDataState.classList.remove('hidden');
+  }
+}
+
+function updateTabStates() {
+  // Auto-switch to extracted data tab when processing is complete
+  if (aiStage === 'complete' && Object.keys(extractedMetadata).length > 0) {
+    switchTab('extracted');
+  }
+}
+
+function getFileIcon(fileType) {
+  if (fileType && fileType.includes('pdf')) {
+    return '<i data-lucide="file-text" class="h-8 w-8 text-red-500"></i>';
+  } else if (fileType && fileType.includes('image')) {
+    return '<i data-lucide="file-text" class="h-8 w-8 text-purple-500"></i>';
+  } else {
+    return '<i data-lucide="file" class="h-8 w-8 text-gray-500"></i>';
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function startUpload() {
+  if (selectedFiles.length === 0) {
+    showToast('Please select files to upload', 'error');
+    return;
+  }
+  
+  uploadStatus = 'uploading';
+  uploadProgress = 0;
+  aiStage = 'idle';
+  aiProgress = 0;
+  
+  updateUI();
+  showUploadProgress();
+  
+  // Simulate upload progress
+  const uploadInterval = setInterval(() => {
+    uploadProgress += 20;
+    updateUploadProgress();
+    
+    if (uploadProgress >= 100) {
+      clearInterval(uploadInterval);
+      uploadStatus = 'complete';
+      hideUploadProgress();
+      setTimeout(() => startAIProcessing(), 300);
+    }
+  }, 100);
+}
+
+function cancelUpload() {
+  uploadStatus = 'idle';
+  uploadProgress = 0;
+  aiStage = 'idle';
+  aiProgress = 0;
+  hideUploadProgress();
+  hideAIProcessing();
+  updateUI();
+  showToast('Upload cancelled', 'info');
+}
+
+function startNewBatch() {
+  clearAllFiles();
+  showToast('Ready for new batch', 'success');
+}
+
+function showUploadProgress() {
+  document.getElementById('upload-progress').classList.remove('hidden');
+}
+
+function hideUploadProgress() {
+  document.getElementById('upload-progress').classList.add('hidden');
+}
+
+function updateUploadProgress() {
+  document.getElementById('upload-percentage').textContent = `${uploadProgress}%`;
+  document.getElementById('upload-progress-bar').style.width = `${uploadProgress}%`;
+}
+
+async function startAIProcessing() {
+  if (selectedFiles.length === 0) {
+    showToast('No files to process', 'info');
+    return;
+  }
+  
+  aiStage = 'initializing';
+  aiProgress = 5;
+  
+  showAIProcessing();
+  updateAIProcessingUI();
+  
+  // Simulate AI processing stages
+  setTimeout(() => {
+    aiStage = 'ocr';
+    aiProgress = 20;
+    updateAIProcessingUI();
+    
+    setTimeout(() => {
+      aiStage = 'layoutAnalysis';
+      aiProgress = 40;
+      updateAIProcessingUI();
+      
+      setTimeout(() => {
+        aiStage = 'dataExtraction';
+        aiProgress = 70;
+        updateAIProcessingUI();
+        
+        setTimeout(() => {
+          aiStage = 'dataAssembly';
+          aiProgress = 90;
+          updateAIProcessingUI();
+          
+          setTimeout(async () => {
+            aiStage = 'complete';
+            aiProgress = 100;
+            updateAIProcessingUI();
+            
+            // Generate mock extracted data and pre-render documents
+            await generateMockExtractedData();
+            updateUI();
+            showToast('All survey plans processed!', 'success');
+          }, 1000);
+        }, 1500);
+      }, 2000);
+    }, 1500);
+  }, 1000);
+}
+
+function showAIProcessing() {
+  document.getElementById('ai-processing').classList.remove('hidden');
+}
+
+function hideAIProcessing() {
+  document.getElementById('ai-processing').classList.add('hidden');
+}
+
+function updateAIProcessingUI() {
+  // Update progress bar
+  document.getElementById('ai-progress-text').textContent = `${aiProgress}% Complete`;
+  document.getElementById('ai-progress-bar').style.width = `${aiProgress}%`;
+  
+  // Update stage indicators
+  const stages = ['initializing', 'ocr', 'layoutAnalysis', 'dataExtraction', 'dataAssembly', 'complete'];
+  const currentStageIndex = stages.indexOf(aiStage);
+  
+  document.querySelectorAll('.stage-indicator').forEach((indicator, index) => {
+    const circle = indicator.querySelector('.w-4');
+    const text = indicator.querySelector('.text-xs');
+    
+    if (index < currentStageIndex) {
+      // Completed stage
+      circle.className = 'w-4 h-4 rounded-full bg-blue-500 mb-1';
+      text.className = 'text-xs font-medium text-blue-600';
+    } else if (index === currentStageIndex) {
+      // Current stage
+      circle.className = 'w-4 h-4 rounded-full bg-blue-500 ring-4 ring-blue-100 animate-pulse mb-1';
+      text.className = 'text-xs font-bold text-blue-700';
+    } else {
+      // Future stage
+      circle.className = 'w-4 h-4 rounded-full bg-gray-300 mb-1';
+      text.className = 'text-xs text-gray-500';
+    }
+  });
+  
+  // Update stage description
+  updateStageDescription();
+  updateUI();
+}
+
+function updateStageDescription() {
+  const stageTitle = document.getElementById('ai-stage-title');
+  const stageDescription = document.getElementById('ai-stage-description');
+  const stageIcon = document.getElementById('ai-stage-icon');
+  
+  const stageInfo = {
+    'initializing': {
+      title: 'Initializing',
+      description: 'Initializing AI models and preparing for survey plan analysis...',
+      icon: 'brain'
+    },
+    'ocr': {
+      title: 'OCR',
+      description: 'Performing Optical Character Recognition (OCR) on the document to extract raw text...',
+      icon: 'file-digit'
+    },
+    'layoutAnalysis': {
+      title: 'Layout Analysis',
+      description: 'Analyzing document structure, identifying text blocks, and potential data fields...',
+      icon: 'file-search'
+    },
+    'dataExtraction': {
+      title: 'Data Extraction',
+      description: 'Extracting key survey details: File No, Applicant, Plan No, Beacons, Courses...',
+      icon: 'layers'
+    },
+    'dataAssembly': {
+      title: 'Data Assembly',
+      description: 'Assembling and structuring extracted information...',
+      icon: 'zap'
+    },
+    'complete': {
+      title: 'Complete',
+      description: 'Survey plan analysis complete! Data is ready for review.',
+      icon: 'sparkles'
+    }
+  };
+  
+  const info = stageInfo[aiStage] || stageInfo['initializing'];
+  
+  stageTitle.textContent = `Current Stage: ${info.title}`;
+  stageDescription.textContent = info.description;
+  stageIcon.setAttribute('data-lucide', info.icon);
+  
+  // Re-initialize Lucide icons
+  lucide.createIcons();
+}
+
+async function generateMockExtractedData() {
+  extractedMetadata = {};
+  rawOcrText = {};
+  
+  // Process each file and pre-render documents
+  for (let index = 0; index < selectedFiles.length; index++) {
+    const file = selectedFiles[index];
+    const fileId = `SURVEYPLAN-${Date.now()}-${index}`;
+    
+    extractedMetadata[fileId] = {
+      originalFileName: file.name,
+      fileNo: `LKN/RES/2024/${1000 + index}`,
+      fileNoFound: true,
+      applicantName: `Sample Applicant ${index + 1}`,
+      applicantNameFound: true,
+      approvedPlanNo: `APP-${2024}-${1000 + index}`,
+      approvedPlanNoFound: true,
+      startingBeaconNo: `B${index + 1}`,
+      startingBeaconNoFound: true,
+      beaconCoordinates: [
+        { beaconNo: `B${index + 1}`, x: `${500000 + index * 100}`, y: `${1200000 + index * 100}`, zone: '32N', origin: 'K2' },
+        { beaconNo: `B${index + 2}`, x: `${500100 + index * 100}`, y: `${1200100 + index * 100}`, zone: '32N', origin: 'K2' }
+      ],
+      beaconCoordinatesFound: true,
+      courses: [
+        {
+          id: `course-${index}-1`,
+          type: 'DD',
+          fromBeacon: `B${index + 1}`,
+          toBeacon: `B${index + 2}`,
+          direction: 'N45°30\'15"E',
+          distance: '105.50m'
+        }
+      ],
+      coursesFound: true,
+      extractedText: `Sample extracted text for ${file.name}`,
+      fileSize: formatFileSize(file.size),
+      fileType: file.type,
+      originalFileIndex: index,
+      confidence: 75 + Math.floor(Math.random() * 20),
+      extractionStatus: 'Partially Extracted',
+      quality: 'Good',
+      pageCount: 1
+    };
+    
+    rawOcrText[fileId] = `Raw OCR text for ${file.name}\n\nThis would contain the actual OCR output from the document processing.`;
+    
+    // Pre-render the document for faster preview
+    try {
+      await ensureDocumentRendered(fileId);
+    } catch (error) {
+      console.error(`Error pre-rendering document ${file.name}:`, error);
+    }
+  }
+}
+
+function createExtractedDataCard(fileId, data) {
+  const confidenceClass = data.confidence > 75 ? 'badge-success' : 
+                         data.confidence > 40 ? 'badge-warning' : 'badge-error';
+  
+  return `
+    <div class="border rounded-lg p-4 shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <h4 class="font-semibold text-lg">${data.originalFileName}</h4>
+          <span class="badge ${confidenceClass}">Confidence: ${data.confidence}%</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="showDocumentPreview('${fileId}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+            <i data-lucide="eye" class="h-4 w-4"></i>
+            Preview
+          </button>
+          <button onclick="editMetadata('${fileId}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
+            <i data-lucide="edit" class="h-4 w-4"></i>
+            Edit
+          </button>
+          <button onclick="exportCogo('${fileId}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-gray-200 text-gray-700 hover:bg-gray-300 gap-1">
+            <i data-lucide="share" class="h-4 w-4"></i>
+            Export COGO
+          </button>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div><strong>File No:</strong> ${data.fileNo || '<span class="text-red-500">Not found</span>'}</div>
+        <div><strong>Applicant:</strong> ${data.applicantName || '<span class="text-red-500">Not found</span>'}</div>
+        <div><strong>Approved Plan No:</strong> ${data.approvedPlanNo || '<span class="text-red-500">Not found</span>'}</div>
+        <div><strong>Start Beacon:</strong> ${data.startingBeaconNo || '<span class="text-red-500">Not found</span>'}</div>
+      </div>
+      
+      ${data.beaconCoordinates.length > 0 ? `
+        <div class="mt-3">
+          <h5 class="font-medium text-sm mb-1">Beacon Coordinates:</h5>
+          <ul class="list-disc list-inside pl-1 text-xs space-y-0.5">
+            ${data.beaconCoordinates.map(bc => `
+              <li>${bc.beaconNo}: X=${bc.x}, Y=${bc.y}</li>
+            `).join('')}
+          </ul>
+        </div>
+      ` : ''}
+      
+      ${data.courses && data.courses.length > 0 ? `
+        <div class="mt-3">
+          <h5 class="font-medium text-sm mb-1">Survey Courses:</h5>
+          <div class="space-y-2">
+            ${data.courses.map((course, idx) => `
+              <div class="p-2 border rounded-md text-xs bg-gray-50">
+                <p class="font-semibold">Course #${idx + 1} (${course.type})</p>
+                ${course.type === 'DD' ? `
+                  <p>From: ${course.fromBeacon || 'N/A'} ${course.toBeacon ? ` to ${course.toBeacon}` : ''} | Dir: ${course.direction}, Dist: ${course.distance}</p>
+                ` : ''}
+                ${course.type === 'AD' ? `
+                  <p>Angle: ${course.angle}, Dist: ${course.distance}</p>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// Modal functions
+async function showDocumentPreview(fileId) {
+  currentPreviewFile = fileId;
+  const data = extractedMetadata[fileId];
+  
+  if (!data) {
+    showToast('Metadata not found for preview', 'error');
+    return;
+  }
+  
+  // Show preview modal
+  document.getElementById('preview-modal').classList.remove('hidden');
+  
+  // Show loading state
+  const previewContent = document.getElementById('preview-content');
+  previewContent.innerHTML = `
+    <div class="flex items-center justify-center py-8">
+      <div class="loading-spinner mr-3"></div>
+      <span>Rendering document...</span>
+    </div>
+  `;
+  
+  try {
+    // Render the document
+    const pages = await ensureDocumentRendered(fileId);
+    
+    // Generate preview content
+    previewContent.innerHTML = `
+      <div class="space-y-6">
+        <div class="text-sm text-gray-500 text-center">
+          Showing ${pages.length} page(s) from ${data.originalFileName}
+        </div>
+        ${pages.map((pageImage, index) => `
+          <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+            <div class="bg-gray-50 px-4 py-2 border-b">
+              <span class="text-sm font-medium text-gray-700">Page ${index + 1}</span>
+            </div>
+            <div class="p-4">
+              <img
+                src="${pageImage}"
+                alt="Page ${index + 1}"
+                class="w-full object-contain border shadow-sm rounded"
+                style="max-height: 600px"
+                onerror="this.src='data:image/svg+xml;base64,${btoa('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"800\" viewBox=\"0 0 600 800\"><rect width=\"600\" height=\"800\" fill=\"#f3f4f6\"/><text x=\"300\" y=\"400\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"16\" fill=\"#6b7280\">Image Load Error</text></svg>')}'"
+              />
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error showing document preview:', error);
+    previewContent.innerHTML = `
+      <div class="text-center py-8 text-red-600">
+        <i data-lucide="alert-circle" class="h-8 w-8 mx-auto mb-2"></i>
+        <p>Error loading document preview</p>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+  
+  // Set raw OCR text
+  document.getElementById('raw-text').textContent = rawOcrText[fileId] || 'No OCR text available.';
+}
+
+function closePreviewModal() {
+  document.getElementById('preview-modal').classList.add('hidden');
+  currentPreviewFile = null;
+}
+
+function toggleRawText() {
+  const content = document.getElementById('raw-text-content');
+  const icon = document.querySelector('#toggle-raw-text i');
+  
+  if (content.classList.contains('expanded')) {
+    content.classList.remove('expanded');
+    icon.setAttribute('data-lucide', 'chevron-down');
+  } else {
+    content.classList.add('expanded');
+    icon.setAttribute('data-lucide', 'chevron-up');
+  }
+  
+  lucide.createIcons();
+}
+
+async function editMetadata(fileId) {
+  currentEditingFile = fileId;
+  const data = extractedMetadata[fileId];
+  
+  if (!data) {
+    showToast('Metadata not found for editing', 'error');
+    return;
+  }
+  
+  // Show edit modal
+  document.getElementById('edit-modal').classList.remove('hidden');
+  
+  // Populate form fields
+  document.getElementById('edit-file-name').textContent = `File: ${data.originalFileName}`;
+  document.getElementById('edit-file-no').value = data.fileNo || '';
+  document.getElementById('edit-applicant-name').value = data.applicantName || '';
+  document.getElementById('edit-approved-plan-no').value = data.approvedPlanNo || '';
+  document.getElementById('edit-starting-beacon-no').value = data.startingBeaconNo || '';
+  
+  // Populate beacon coordinates
+  populateBeaconCoordinates(data.beaconCoordinates || []);
+  
+  // Populate courses
+  populateCourses(data.courses || []);
+  
+  // Show preview with loading state
+  await showEditPreview(fileId);
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+  currentEditingFile = null;
+  currentEditPreviewPage = 0;
+}
+
+function saveEditChanges() {
+  if (!currentEditingFile) return;
+  
+  // Update metadata with form values
+  const data = extractedMetadata[currentEditingFile];
+  data.fileNo = document.getElementById('edit-file-no').value;
+  data.applicantName = document.getElementById('edit-applicant-name').value;
+  data.approvedPlanNo = document.getElementById('edit-approved-plan-no').value;
+  data.startingBeaconNo = document.getElementById('edit-starting-beacon-no').value;
+  
+  // Update beacon coordinates and courses from form
+  // (Implementation would collect data from dynamic form elements)
+  
+  showToast('Changes saved locally. Save to DB via main button.', 'success');
+  closeEditModal();
+  updateUI();
+}
+
+async function showEditPreview(fileId) {
+  const previewContent = document.getElementById('edit-preview-content');
+  const pageNav = document.getElementById('edit-page-nav');
+  
+  // Show loading state
+  previewContent.innerHTML = `
+    <div class="flex items-center justify-center h-full">
+      <div class="loading-spinner mr-3"></div>
+      <span>Loading preview...</span>
+    </div>
+  `;
+  
+  try {
+    // Render the document
+    const pages = await ensureDocumentRendered(fileId);
+    
+    // Store pages for navigation
+    renderedDocuments[fileId] = pages;
+    currentEditPreviewPage = 0;
+    
+    // Show first page
+    updateEditPreview(fileId, pages);
+    
+    // Show/hide page navigation
+    if (pages.length > 1) {
+      pageNav.classList.remove('hidden');
+      updateEditPageNavigation(pages.length);
+    } else {
+      pageNav.classList.add('hidden');
+    }
+  } catch (error) {
+    console.error('Error showing edit preview:', error);
+    previewContent.innerHTML = `
+      <div class="flex items-center justify-center h-full text-red-600">
+        <div class="text-center">
+          <i data-lucide="alert-circle" class="h-8 w-8 mx-auto mb-2"></i>
+          <p>Error loading preview</p>
+        </div>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+}
+
+function updateEditPreview(fileId, pages) {
+  const previewContent = document.getElementById('edit-preview-content');
+  const currentPage = pages[currentEditPreviewPage];
+  
+  previewContent.innerHTML = `
+    <img
+      src="${currentPage}"
+      alt="Page ${currentEditPreviewPage + 1}"
+      class="w-full h-auto object-contain p-2"
+      onerror="this.src='data:image/svg+xml;base64,${btoa('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"600\" viewBox=\"0 0 400 600\"><rect width=\"400\" height=\"600\" fill=\"#f3f4f6\"/><text x=\"200\" y=\"300\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"16\" fill=\"#6b7280\">Image Load Error</text></svg>')}'"
+    />
+  `;
+}
+
+function updateEditPageNavigation(totalPages) {
+  const pageInfo = document.getElementById('edit-page-info');
+  const prevBtn = document.getElementById('edit-prev-page');
+  const nextBtn = document.getElementById('edit-next-page');
+  
+  pageInfo.textContent = `Page ${currentEditPreviewPage + 1} of ${totalPages}`;
+  
+  prevBtn.disabled = currentEditPreviewPage === 0;
+  nextBtn.disabled = currentEditPreviewPage === totalPages - 1;
+  
+  if (prevBtn.disabled) {
+    prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  } else {
+    prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+  
+  if (nextBtn.disabled) {
+    nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  } else {
+    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+}
+
+function changeEditPreviewPage(direction) {
+  if (!currentEditingFile || !renderedDocuments[currentEditingFile]) return;
+  
+  const pages = renderedDocuments[currentEditingFile];
+  const newPage = currentEditPreviewPage + direction;
+  
+  if (newPage >= 0 && newPage < pages.length) {
+    currentEditPreviewPage = newPage;
+    updateEditPreview(currentEditingFile, pages);
+    updateEditPageNavigation(pages.length);
+  }
+}
+
+function populateBeaconCoordinates(coordinates) {
+  const container = document.getElementById('beacon-coordinates-list');
+  container.innerHTML = coordinates.map((coord, index) => `
+    <div class="data-card">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium">Beacon #${index + 1}</span>
+        <button onclick="removeBeaconCoordinate(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-red-500 hover:bg-red-50">
+          <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div>
+          <label class="text-xs text-gray-700">Beacon No.</label>
+          <input type="text" value="${coord.beaconNo}" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-700">X</label>
+          <input type="text" value="${coord.x}" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-700">Y</label>
+          <input type="text" value="${coord.y}" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+        <div>
+          <label class="text-xs text-gray-700">Zone</label>
+          <input type="text" value="${coord.zone || ''}" placeholder="e.g., 32N" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-700">Origin</label>
+          <input type="text" value="${coord.origin || ''}" placeholder="e.g., K2" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  lucide.createIcons();
+}
+
+function populateCourses(courses) {
+  const container = document.getElementById('courses-list');
+  container.innerHTML = courses.map((course, index) => `
+    <div class="data-card">
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium">Course #${index + 1}</span>
+          <select onchange="changeCourseType(${index}, this.value)" class="p-1 border rounded text-xs bg-white">
+            <option value="DD" ${course.type === 'DD' ? 'selected' : ''}>Direction-Distance</option>
+            <option value="AD" ${course.type === 'AD' ? 'selected' : ''}>Angle-Distance</option>
+          </select>
+        </div>
+        <button onclick="removeCourse(${index})" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-red-500 hover:bg-red-50">
+          <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      </div>
+      
+      ${course.type === 'DD' ? `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+          <div>
+            <label class="text-xs text-gray-700">From Beacon</label>
+            <input type="text" value="${course.fromBeacon || ''}" placeholder="e.g., B1" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-700">To Beacon</label>
+            <input type="text" value="${course.toBeacon || ''}" placeholder="e.g., B2" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-gray-700">Direction</label>
+            <input type="text" value="${course.direction}" placeholder="e.g., N45-30-15E" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-700">Distance</label>
+            <input type="text" value="${course.distance}" placeholder="e.g., 105.50m" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+          </div>
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-gray-700">Angle</label>
+            <input type="text" value="${course.angle || ''}" placeholder="e.g., 45-00-00" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-700">Distance</label>
+            <input type="text" value="${course.distance}" placeholder="e.g., 100.00m" class="w-full px-2 py-1 border border-gray-300 rounded text-xs" />
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">Note: 'From Beacon' for AD courses is implied.</p>
+      `}
+    </div>
+  `).join('');
+  
+  lucide.createIcons();
+}
+
+function addBeaconCoordinate() {
+  if (!currentEditingFile) return;
+  
+  const data = extractedMetadata[currentEditingFile];
+  data.beaconCoordinates.push({ beaconNo: '', x: '', y: '', zone: '', origin: '' });
+  populateBeaconCoordinates(data.beaconCoordinates);
+}
+
+function removeBeaconCoordinate(index) {
+  if (!currentEditingFile) return;
+  
+  const data = extractedMetadata[currentEditingFile];
+  data.beaconCoordinates.splice(index, 1);
+  populateBeaconCoordinates(data.beaconCoordinates);
+}
+
+function addCourse() {
+  if (!currentEditingFile) return;
+  
+  const data = extractedMetadata[currentEditingFile];
+  const newCourse = {
+    id: `course-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    type: 'DD',
+    fromBeacon: '',
+    toBeacon: '',
+    direction: '',
+    distance: ''
+  };
+  data.courses.push(newCourse);
+  populateCourses(data.courses);
+}
+
+function removeCourse(index) {
+  if (!currentEditingFile) return;
+  
+  const data = extractedMetadata[currentEditingFile];
+  data.courses.splice(index, 1);
+  populateCourses(data.courses);
+}
+
+function changeCourseType(index, newType) {
+  if (!currentEditingFile) return;
+  
+  const data = extractedMetadata[currentEditingFile];
+  const course = data.courses[index];
+  
+  if (newType === 'DD') {
+    course.type = 'DD';
+    course.fromBeacon = course.fromBeacon || '';
+    course.toBeacon = course.toBeacon || '';
+    course.direction = course.direction || '';
+    delete course.angle;
+  } else if (newType === 'AD') {
+    course.type = 'AD';
+    course.angle = course.angle || '';
+    delete course.fromBeacon;
+    delete course.toBeacon;
+    delete course.direction;
+  }
+  
+  populateCourses(data.courses);
+}
+
+function exportCogo(fileId) {
+  const data = extractedMetadata[fileId];
+  if (!data) {
+    showToast('Metadata not found for COGO export', 'error');
+    return;
+  }
+  
+  // Generate COGO format data
+  const cogoData = generateCogoData(data);
+  
+  // Show COGO modal
+  document.getElementById('cogo-output').value = cogoData;
+  document.getElementById('cogo-modal').classList.remove('hidden');
+}
+
+function closeCogoModal() {
+  document.getElementById('cogo-modal').classList.add('hidden');
+}
+
+function generateCogoData(data) {
+  let cogo = `; COGO Data Export for ${data.originalFileName}\n`;
+  cogo += `; File No: ${data.fileNo}\n`;
+  cogo += `; Applicant: ${data.applicantName}\n`;
+  cogo += `; Generated: ${new Date().toISOString()}\n\n`;
+  
+  // Add beacon coordinates
+  if (data.beaconCoordinates && data.beaconCoordinates.length > 0) {
+    cogo += "; Beacon Coordinates\n";
+    data.beaconCoordinates.forEach(coord => {
+      cogo += `PT ${coord.beaconNo} ${coord.x} ${coord.y}\n`;
+    });
+    cogo += "\n";
+  }
+  
+  // Add courses
+  if (data.courses && data.courses.length > 0) {
+    cogo += "; Survey Courses\n";
+    data.courses.forEach((course, index) => {
+      if (course.type === 'DD') {
+        cogo += `; Course ${index + 1}: ${course.fromBeacon} to ${course.toBeacon}\n`;
+        cogo += `BD ${course.direction} ${course.distance}\n`;
+      } else if (course.type === 'AD') {
+        cogo += `; Course ${index + 1}: Angle-Distance\n`;
+        cogo += `AD ${course.angle} ${course.distance}\n`;
+      }
+    });
+  }
+  
+  return cogo;
+}
+
+function copyCogoData() {
+  const cogoOutput = document.getElementById('cogo-output');
+  cogoOutput.select();
+  document.execCommand('copy');
+  showToast('COGO data copied to clipboard!', 'success');
+}
+
+function downloadCogoFile() {
+  const cogoOutput = document.getElementById('cogo-output').value;
+  if (!cogoOutput) {
+    showToast('No COGO data to download', 'error');
+    return;
+  }
+  
+  const blob = new Blob([cogoOutput], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  
+  const fileName = currentEditingFile 
+    ? `cogo-data-${extractedMetadata[currentEditingFile]?.originalFileName.split('.')[0] || 'survey'}.txt`
+    : 'cogo-data.txt';
+  
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  showToast('COGO data downloaded!', 'success');
+}
+
+function saveToDatabase() {
+  const entriesCount = Object.keys(extractedMetadata).length;
+  if (entriesCount === 0) {
+    showToast('No extracted data to save', 'info');
+    return;
+  }
+  
+  showLoading('Saving extracted data to cadastral records...');
+  
+  // Simulate database save
+  setTimeout(() => {
+    hideLoading();
+    showToast(`${entriesCount} record(s) saved to cadastral database!`, 'success');
+  }, 2000);
+}
+
+function showLoading(message) {
+  document.getElementById('loading-message').textContent = message;
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+function showToast(message, type = 'info') {
+  const toastContainer = document.getElementById('toast-container');
+  const toastId = `toast-${Date.now()}`;
+  
+  const typeClasses = {
+    success: 'bg-green-600 text-white',
+    error: 'bg-red-600 text-white',
+    warning: 'bg-yellow-600 text-white',
+    info: 'bg-blue-600 text-white'
+  };
+  
+  const toast = document.createElement('div');
+  toast.id = toastId;
+  toast.className = `${typeClasses[type]} px-4 py-2 rounded-md shadow-lg flex items-center gap-2 transform translate-x-full transition-transform duration-300`;
+  toast.innerHTML = `
+    <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : type === 'warning' ? 'alert-triangle' : 'info'}" class="h-4 w-4"></i>
+    <span>${message}</span>
+    <button onclick="removeToast('${toastId}')" class="ml-2 hover:bg-black/20 rounded p-1">
+      <i data-lucide="x" class="h-3 w-3"></i>
+    </button>
+  `;
+  
+  toastContainer.appendChild(toast);
+  lucide.createIcons();
+  
+  // Animate in
+  setTimeout(() => {
+    toast.classList.remove('translate-x-full');
+  }, 100);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    removeToast(toastId);
+  }, 5000);
+}
+
+function removeToast(toastId) {
+  const toast = document.getElementById(toastId);
+  if (toast) {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }
+}
+</script>
+</body>
+</html>
