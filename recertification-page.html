@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recertification Programme - SLTR</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+// Tailwind config
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        'primary-foreground': '#ffffff',
+        muted: '#f3f4f6',
+        'muted-foreground': '#6b7280',
+        border: '#e5e7eb',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        secondary: '#f1f5f9',
+        'secondary-foreground': '#0f172a',
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* Custom styles */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-default {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Toggle switch styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #3b82f6;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* Table hover effects */
+.table-row:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<div class="container mx-auto py-6 space-y-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Recertification Programme</h1>
+      <p class="text-gray-600 mt-1">
+        Manage approved certificate recertification and re-issuance applications
+      </p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex items-center space-x-2">
+        <label class="toggle-switch">
+          <input type="checkbox" id="ocr-mode-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <label for="ocr-mode-toggle" class="flex items-center gap-2 cursor-pointer">
+          <i data-lucide="scan" class="h-4 w-4"></i>
+          OCR Mode
+        </label>
+      </div>
+      <button id="new-application-btn" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+        <i data-lucide="plus" class="h-4 w-4"></i>
+        New Application
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-2 bg-green-100 rounded-lg">
+          <i data-lucide="check-circle" class="h-6 w-6 text-green-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Approved</p>
+          <p class="text-2xl font-bold text-gray-900">8</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-2 bg-blue-100 rounded-lg">
+          <i data-lucide="file-text" class="h-6 w-6 text-blue-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">This Month</p>
+          <p class="text-2xl font-bold text-gray-900">8</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-2 bg-purple-100 rounded-lg">
+          <i data-lucide="users" class="h-6 w-6 text-purple-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Active Officers</p>
+          <p class="text-2xl font-bold text-gray-900">4</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-2 bg-orange-100 rounded-lg">
+          <i data-lucide="clock" class="h-6 w-6 text-orange-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Avg. Processing</p>
+          <p class="text-2xl font-bold text-gray-900">12 days</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg shadow border border-gray-200">
+    <div class="p-6">
+      <div class="flex gap-4 items-center">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search by applicant name, application number, plot number, or certificate number..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+          />
+        </div>
+        <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+          <i data-lucide="filter" class="h-4 w-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications Table -->
+  <div class="bg-white rounded-lg shadow border border-gray-200">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <i data-lucide="check-circle" class="h-5 w-5 text-green-600"></i>
+          Approved Recertification Applications (<span id="applications-count">8</span>)
+        </h3>
+        <span class="badge badge-success">
+          All applications have been successfully processed
+        </span>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="rounded-md border border-gray-200">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b bg-gray-50">
+                <th class="text-left p-4 font-medium text-gray-700">Application No.</th>
+                <th class="text-left p-4 font-medium text-gray-700">Applicant Name</th>
+                <th class="text-left p-4 font-medium text-gray-700">Plot Details</th>
+                <th class="text-left p-4 font-medium text-gray-700">Certificate No.</th>
+                <th class="text-left p-4 font-medium text-gray-700">LGA</th>
+                <th class="text-left p-4 font-medium text-gray-700">Assigned Officer</th>
+                <th class="text-left p-4 font-medium text-gray-700">Approval Date</th>
+                <th class="text-left p-4 font-medium text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applications-table-body">
+              <!-- Applications will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- No results state -->
+        <div id="no-results" class="hidden text-center py-12">
+          <i data-lucide="file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+          <h3 class="text-lg font-medium mb-2 text-gray-900">No applications found</h3>
+          <p id="no-results-message" class="text-gray-600">
+            No approved applications available
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OCR Mode View -->
+<div id="ocr-mode-view" class="hidden min-h-screen bg-gray-50">
+  <div class="container mx-auto py-6 space-y-6 max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-4 mb-6">
+      <button id="back-from-ocr" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i>
+        Back to Applications
+      </button>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">OCR Document Processing</h1>
+        <p class="text-gray-600">Process recertification documents using OCR technology</p>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-8">
+      <div class="text-center">
+        <i data-lucide="scan" class="h-16 w-16 text-blue-600 mx-auto mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">OCR Processing Mode</h3>
+        <p class="text-gray-600 mb-6">Upload documents to automatically extract recertification data</p>
+        <button class="inline-flex items-center justify-center rounded-md font-medium text-sm px-6 py-3 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+          <i data-lucide="upload" class="h-4 w-4"></i>
+          Upload Document
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Application Modal -->
+<div id="new-application-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">New Recertification Application</h3>
+        <button id="close-new-modal" class="text-gray-400 hover:text-gray-600">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <form id="new-application-form" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Applicant Name</label>
+            <input type="text" name="applicantName" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+            <input type="tel" name="phoneNumber" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Plot Number</label>
+            <input type="text" name="plotNumber" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">File Number</label>
+            <input type="text" name="fileNumber" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Certificate Number</label>
+            <input type="text" name="cofoNumber" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">LGA</label>
+            <select name="lga" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+              <option value="">Select LGA</option>
+              <option value="Kano Municipal">Kano Municipal</option>
+              <option value="Fagge">Fagge</option>
+              <option value="Gwale">Gwale</option>
+              <option value="Dala">Dala</option>
+              <option value="Tarauni">Tarauni</option>
+              <option value="Nassarawa">Nassarawa</option>
+              <option value="Ungogo">Ungogo</option>
+              <option value="Kumbotso">Kumbotso</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Reason for Recertification</label>
+            <select name="reason" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+              <option value="">Select reason</option>
+              <option value="Certificate Lost">Certificate Lost</option>
+              <option value="Certificate Damaged">Certificate Damaged</option>
+              <option value="Name Correction">Name Correction</option>
+              <option value="Certificate Renewal">Certificate Renewal</option>
+              <option value="Replacement">Replacement</option>
+              <option value="Certificate Update">Certificate Update</option>
+              <option value="Certificate Reissuance">Certificate Reissuance</option>
+              <option value="Certificate Correction">Certificate Correction</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" id="cancel-new-application" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+            Cancel
+          </button>
+          <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700">
+            Submit Application
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Application Details Modal -->
+<div id="details-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">Application Details</h3>
+        <button id="close-details-modal" class="text-gray-400 hover:text-gray-600">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div id="application-details-content">
+        <!-- Application details will be inserted here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+  <!-- Toast messages will be inserted here -->
+</div>
+
+<script>
+// Sample applications data
+const sampleApplications = [
+  {
+    id: "1",
+    applicationNumber: "RC/2024/001",
+    applicantName: "FATIMA AHMED IBRAHIM",
+    plotNumber: "Plot 123, Block A",
+    fileNumber: "KN/F/2020/456",
+    cofoNumber: "KN/C/2020/123",
+    lga: "Kano Municipal",
+    status: "approved",
+    submissionDate: "2024-01-15",
+    approvalDate: "2024-01-25",
+    assignedOfficer: "Musa Garba",
+    reason: "Certificate Lost",
+    phoneNumber: "08012345678",
+    email: "fatima.ahmed@email.com",
+  },
+  {
+    id: "2",
+    applicationNumber: "RC/2024/002",
+    applicantName: "IBRAHIM YUSUF MOHAMMED",
+    plotNumber: "Plot 45, Block C",
+    fileNumber: "KN/F/2019/789",
+    cofoNumber: "KN/C/2019/456",
+    lga: "Fagge",
+    status: "approved",
+    submissionDate: "2024-01-10",
+    approvalDate: "2024-01-20",
+    assignedOfficer: "Aisha Sani",
+    reason: "Name Correction",
+    phoneNumber: "08087654321",
+    email: "ibrahim.yusuf@email.com",
+  },
+  {
+    id: "3",
+    applicationNumber: "RC/2024/003",
+    applicantName: "KHADIJA MUSA ALI",
+    plotNumber: "Plot 67, Block B",
+    fileNumber: "KN/F/2021/234",
+    cofoNumber: "KN/C/2021/789",
+    lga: "Gwale",
+    status: "approved",
+    submissionDate: "2024-01-05",
+    approvalDate: "2024-01-18",
+    assignedOfficer: "Fatima Ahmed",
+    reason: "Certificate Damaged",
+    phoneNumber: "08098765432",
+    email: "khadija.musa@email.com",
+  },
+  {
+    id: "4",
+    applicationNumber: "RC/2024/004",
+    applicantName: "SANI ABDULLAHI HASSAN",
+    plotNumber: "Plot 89, Block D",
+    fileNumber: "KN/F/2018/567",
+    cofoNumber: "KN/C/2018/234",
+    lga: "Dala",
+    status: "approved",
+    submissionDate: "2024-01-12",
+    approvalDate: "2024-01-28",
+    assignedOfficer: "Ibrahim Yusuf",
+    reason: "Certificate Renewal",
+    phoneNumber: "08076543210",
+    email: "sani.abdullahi@email.com",
+  },
+  {
+    id: "5",
+    applicationNumber: "RC/2024/005",
+    applicantName: "AMINA GARBA USMAN",
+    plotNumber: "Plot 12, Block E",
+    fileNumber: "KN/F/2022/890",
+    cofoNumber: "KN/C/2022/567",
+    lga: "Tarauni",
+    status: "approved",
+    submissionDate: "2024-01-08",
+    approvalDate: "2024-01-22",
+    assignedOfficer: "Musa Garba",
+    reason: "Replacement",
+    phoneNumber: "08065432109",
+    email: "amina.garba@email.com",
+  },
+  {
+    id: "6",
+    applicationNumber: "RC/2024/006",
+    applicantName: "USMAN MOHAMMED BELLO",
+    plotNumber: "Plot 34, Block F",
+    fileNumber: "KN/F/2017/345",
+    cofoNumber: "KN/C/2017/890",
+    lga: "Nassarawa",
+    status: "approved",
+    submissionDate: "2024-01-03",
+    approvalDate: "2024-01-16",
+    assignedOfficer: "Aisha Sani",
+    reason: "Certificate Update",
+    phoneNumber: "08054321098",
+    email: "usman.mohammed@email.com",
+  },
+  {
+    id: "7",
+    applicationNumber: "RC/2024/007",
+    applicantName: "ZAINAB IBRAHIM YAKUBU",
+    plotNumber: "Plot 56, Block G",
+    fileNumber: "KN/F/2016/678",
+    cofoNumber: "KN/C/2016/123",
+    lga: "Ungogo",
+    status: "approved",
+    submissionDate: "2024-01-01",
+    approvalDate: "2024-01-14",
+    assignedOfficer: "Fatima Ahmed",
+    reason: "Certificate Reissuance",
+    phoneNumber: "08043210987",
+    email: "zainab.ibrahim@email.com",
+  },
+  {
+    id: "8",
+    applicationNumber: "RC/2024/008",
+    applicantName: "ALIYU HASSAN MUSA",
+    plotNumber: "Plot 78, Block H",
+    fileNumber: "KN/F/2015/901",
+    cofoNumber: "KN/C/2015/456",
+    lga: "Kumbotso",
+    status: "approved",
+    submissionDate: "2023-12-28",
+    approvalDate: "2024-01-12",
+    assignedOfficer: "Ibrahim Yusuf",
+    reason: "Certificate Correction",
+    phoneNumber: "08032109876",
+    email: "aliyu.hassan@email.com",
+  },
+];
+
+// Global state
+let filteredApplications = [...sampleApplications];
+let searchTerm = '';
+let ocrMode = false;
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // Render initial data
+  renderApplicationsTable();
+});
+
+function setupEventListeners() {
+  // Search functionality
+  document.getElementById('search-input').addEventListener('input', handleSearch);
+  
+  // OCR mode toggle
+  document.getElementById('ocr-mode-toggle').addEventListener('change', toggleOcrMode);
+  document.getElementById('back-from-ocr').addEventListener('click', () => toggleOcrMode(false));
+  
+  // Modal controls
+  document.getElementById('new-application-btn').addEventListener('click', openNewApplicationModal);
+  document.getElementById('close-new-modal').addEventListener('click', closeNewApplicationModal);
+  document.getElementById('cancel-new-application').addEventListener('click', closeNewApplicationModal);
+  document.getElementById('close-details-modal').addEventListener('click', closeDetailsModal);
+  
+  // Form submission
+  document.getElementById('new-application-form').addEventListener('submit', handleNewApplicationSubmit);
+  
+  // Close modals on backdrop click
+  document.getElementById('new-application-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeNewApplicationModal();
+  });
+  
+  document.getElementById('details-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetailsModal();
+  });
+}
+
+function handleSearch(event) {
+  searchTerm = event.target.value.toLowerCase();
+  filterApplications();
+}
+
+function filterApplications() {
+  filteredApplications = sampleApplications.filter(app => {
+    return app.applicantName.toLowerCase().includes(searchTerm) ||
+           app.applicationNumber.toLowerCase().includes(searchTerm) ||
+           app.plotNumber.toLowerCase().includes(searchTerm) ||
+           app.cofoNumber.toLowerCase().includes(searchTerm);
+  });
+  
+  renderApplicationsTable();
+}
+
+function renderApplicationsTable() {
+  const tbody = document.getElementById('applications-table-body');
+  const noResults = document.getElementById('no-results');
+  const noResultsMessage = document.getElementById('no-results-message');
+  const applicationsCount = document.getElementById('applications-count');
+  
+  applicationsCount.textContent = filteredApplications.length;
+  
+  if (filteredApplications.length === 0) {
+    tbody.innerHTML = '';
+    noResultsMessage.textContent = searchTerm ? 
+      'Try adjusting your search criteria' : 
+      'No approved applications available';
+    noResults.classList.remove('hidden');
+    return;
+  }
+  
+  noResults.classList.add('hidden');
+  
+  tbody.innerHTML = filteredApplications.map(application => `
+    <tr class="border-b table-row">
+      <td class="p-4 font-mono text-sm">${application.applicationNumber}</td>
+      <td class="p-4">
+        <div>
+          <div class="font-medium">${application.applicantName}</div>
+          <div class="text-sm text-gray-600">${application.phoneNumber}</div>
+        </div>
+      </td>
+      <td class="p-4">
+        <div>
+          <div class="font-medium">${application.plotNumber}</div>
+          <div class="text-sm text-gray-600">${application.fileNumber}</div>
+        </div>
+      </td>
+      <td class="p-4 font-mono text-sm">${application.cofoNumber}</td>
+      <td class="p-4">${application.lga}</td>
+      <td class="p-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="users" class="h-4 w-4 text-gray-400"></i>
+          ${application.assignedOfficer}
+        </div>
+      </td>
+      <td class="p-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calendar" class="h-4 w-4 text-gray-400"></i>
+          ${new Date(application.approvalDate).toLocaleDateString()}
+        </div>
+      </td>
+      <td class="p-4">
+        <div class="flex items-center gap-2">
+          <button onclick="viewApplicationDetails('${application.id}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100">
+            <i data-lucide="eye" class="h-4 w-4"></i>
+          </button>
+          <button onclick="editApplication('${application.id}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100">
+            <i data-lucide="edit" class="h-4 w-4"></i>
+          </button>
+          <button onclick="downloadApplication('${application.id}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100">
+            <i data-lucide="download" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  
+  // Re-initialize Lucide icons
+  lucide.createIcons();
+}
+
+function toggleOcrMode(force = null) {
+  const toggle = document.getElementById('ocr-mode-toggle');
+  const mainView = document.querySelector('.container');
+  const ocrView = document.getElementById('ocr-mode-view');
+  
+  if (force !== null) {
+    ocrMode = force;
+    toggle.checked = force;
+  } else {
+    ocrMode = toggle.checked;
+  }
+  
+  if (ocrMode) {
+    mainView.style.display = 'none';
+    ocrView.classList.remove('hidden');
+  } else {
+    mainView.style.display = 'block';
+    ocrView.classList.add('hidden');
+  }
+}
+
+function openNewApplicationModal() {
+  document.getElementById('new-application-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeNewApplicationModal() {
+  document.getElementById('new-application-modal').classList.add('hidden');
+  document.body.style.overflow = 'auto';
+  document.getElementById('new-application-form').reset();
+}
+
+function handleNewApplicationSubmit(event) {
+  event.preventDefault();
+  
+  const formData = new FormData(event.target);
+  const applicationData = Object.fromEntries(formData.entries());
+  
+  // Generate new application number
+  const nextNumber = String(sampleApplications.length + 1).padStart(3, '0');
+  const newApplication = {
+    id: String(sampleApplications.length + 1),
+    applicationNumber: `RC/2024/${nextNumber}`,
+    ...applicationData,
+    status: 'approved',
+    submissionDate: new Date().toISOString().split('T')[0],
+    approvalDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 10 days from now
+    assignedOfficer: 'System Admin'
+  };
+  
+  // Add to applications array
+  sampleApplications.push(newApplication);
+  
+  // Update filtered applications
+  filterApplications();
+  
+  // Close modal
+  closeNewApplicationModal();
+  
+  // Show success message
+  showToast('Application submitted successfully!', 'success');
+}
+
+function viewApplicationDetails(applicationId) {
+  const application = sampleApplications.find(app => app.id === applicationId);
+  if (!application) return;
+  
+  const detailsContent = document.getElementById('application-details-content');
+  
+  detailsContent.innerHTML = `
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold text-gray-900 border-b pb-2">Application Information</h4>
+          <div class="space-y-3">
+            <div>
+              <label class="text-sm font-medium text-gray-600">Application Number</label>
+              <p class="font-mono text-sm">${application.applicationNumber}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Status</label>
+              <p><span class="badge badge-success">Approved</span></p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Submission Date</label>
+              <p>${new Date(application.submissionDate).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Approval Date</label>
+              <p>${new Date(application.approvalDate).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Assigned Officer</label>
+              <p>${application.assignedOfficer}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Reason</label>
+              <p>${application.reason}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold text-gray-900 border-b pb-2">Applicant Information</h4>
+          <div class="space-y-3">
+            <div>
+              <label class="text-sm font-medium text-gray-600">Full Name</label>
+              <p class="font-medium">${application.applicantName}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Phone Number</label>
+              <p>${application.phoneNumber}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Email</label>
+              <p>${application.email}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">LGA</label>
+              <p>${application.lga}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <h4 class="text-lg font-semibold text-gray-900 border-b pb-2">Property Information</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="text-sm font-medium text-gray-600">Plot Number</label>
+            <p class="font-medium">${application.plotNumber}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600">File Number</label>
+            <p class="font-mono text-sm">${application.fileNumber}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600">Certificate Number</label>
+            <p class="font-mono text-sm">${application.cofoNumber}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-end gap-3 pt-4 border-t">
+        <button onclick="downloadApplication('${application.id}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2">
+          <i data-lucide="download" class="h-4 w-4"></i>
+          Download Certificate
+        </button>
+        <button onclick="editApplication('${application.id}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 gap-2">
+          <i data-lucide="edit" class="h-4 w-4"></i>
+          Edit Application
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('details-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  
+  // Re-initialize Lucide icons
+  lucide.createIcons();
+}
+
+function closeDetailsModal() {
+  document.getElementById('details-modal').classList.add('hidden');
+  document.body.style.overflow = 'auto';
+}
+
+function editApplication(applicationId) {
+  showToast('Edit functionality would be implemented here', 'info');
+}
+
+function downloadApplication(applicationId) {
+  const application = sampleApplications.find(app => app.id === applicationId);
+  if (!application) return;
+  
+  showToast(`Downloading certificate for ${application.applicantName}...`, 'success');
+  
+  // Simulate download
+  setTimeout(() => {
+    showToast('Certificate downloaded successfully!', 'success');
+  }, 2000);
+}
+
+function showToast(message, type = 'info') {
+  const toastContainer = document.getElementById('toast-container');
+  const toastId = `toast-${Date.now()}`;
+  
+  const typeClasses = {
+    success: 'bg-green-600 text-white',
+    error: 'bg-red-600 text-white',
+    warning: 'bg-yellow-600 text-white',
+    info: 'bg-blue-600 text-white'
+  };
+  
+  const toast = document.createElement('div');
+  toast.id = toastId;
+  toast.className = `${typeClasses[type]} px-4 py-2 rounded-md shadow-lg flex items-center gap-2 transform translate-x-full transition-transform duration-300 fade-in`;
+  toast.innerHTML = `
+    <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : type === 'warning' ? 'alert-triangle' : 'info'}" class="h-4 w-4"></i>
+    <span>${message}</span>
+    <button onclick="removeToast('${toastId}')" class="ml-2 hover:bg-black/20 rounded p-1">
+      <i data-lucide="x" class="h-3 w-3"></i>
+    </button>
+  `;
+  
+  toastContainer.appendChild(toast);
+  lucide.createIcons();
+  
+  // Animate in
+  setTimeout(() => {
+    toast.classList.remove('translate-x-full');
+  }, 100);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    removeToast(toastId);
+  }, 5000);
+}
+
+function removeToast(toastId) {
+  const toast = document.getElementById(toastId);
+  if (toast) {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }
+}
+</script>
+</body>
+</html>
