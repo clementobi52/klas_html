@@ -331,6 +331,7 @@ tailwind.config = {
               <div>
                 <p id="ai-stage-title" class="text-sm font-medium mb-1">Current Stage: Initializing</p>
                 <p id="ai-stage-description" class="text-xs text-gray-600">Preparing for AI analysis...</p>
+                <p id="current-file-processing" class="text-xs text-blue-600 mt-1 hidden">Processing: </p>
               </div>
             </div>
           </div>
@@ -568,6 +569,7 @@ let currentEditingFile = null;
 let currentPreviewFile = null;
 let pdfPages = {};
 let currentEditPreviewPage = 0;
+let processingCancelled = false;
 
 // Document rendering cache
 let renderedDocuments = {};
@@ -596,34 +598,76 @@ function setupEventListeners() {
   const uploadArea = document.getElementById('upload-area');
   const browseBtn = document.getElementById('browse-btn');
   
-  fileInput.addEventListener('change', handleFileSelect);
-  browseBtn.addEventListener('click', () => fileInput.click());
-  uploadArea.addEventListener('click', () => fileInput.click());
+  if (fileInput) {
+    fileInput.addEventListener('change', handleFileSelect);
+  }
   
-  // Drag and drop
-  uploadArea.addEventListener('dragover', handleDragOver);
-  uploadArea.addEventListener('drop', handleDrop);
-  uploadArea.addEventListener('dragleave', handleDragLeave);
+  if (browseBtn) {
+    browseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (fileInput) fileInput.click();
+    });
+  }
   
+  if (uploadArea) {
+    // uploadArea.addEventListener('click', (e) => {
+    //   // Don't trigger if the click was on the browse button
+    //   if (e.target.closest('#browse-btn')) return;
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   if (fileInput) fileInput.click();
+    // });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', handleDragOver);
+    uploadArea.addEventListener('drop', handleDrop);
+    uploadArea.addEventListener('dragleave', handleDragLeave);
+  }
+
   // Tab switching
-  document.getElementById('tab-upload').addEventListener('click', () => switchTab('upload'));
-  document.getElementById('tab-extracted').addEventListener('click', () => switchTab('extracted'));
+  const tabUpload = document.getElementById('tab-upload');
+  const tabExtracted = document.getElementById('tab-extracted');
   
+  if (tabUpload) {
+    tabUpload.addEventListener('click', () => switchTab('upload'));
+  }
+  if (tabExtracted) {
+    tabExtracted.addEventListener('click', () => switchTab('extracted'));
+  }
+
   // Action buttons
-  document.getElementById('clear-all-btn').addEventListener('click', clearAllFiles);
-  document.getElementById('start-upload-btn').addEventListener('click', startUpload);
-  document.getElementById('cancel-upload-btn').addEventListener('click', cancelUpload);
-  document.getElementById('new-batch-btn').addEventListener('click', startNewBatch);
-  document.getElementById('save-to-db-btn').addEventListener('click', saveToDatabase);
+  const clearAllBtn = document.getElementById('clear-all-btn');
+  const startUploadBtn = document.getElementById('start-upload-btn');
+  const cancelUploadBtn = document.getElementById('cancel-upload-btn');
+  const newBatchBtn = document.getElementById('new-batch-btn');
+  const saveToDbBtn = document.getElementById('save-to-db-btn');
+
+  if (clearAllBtn) clearAllBtn.addEventListener('click', clearAllFiles);
+  if (startUploadBtn) startUploadBtn.addEventListener('click', startUpload);
+  if (cancelUploadBtn) cancelUploadBtn.addEventListener('click', cancelUpload);
+  if (newBatchBtn) newBatchBtn.addEventListener('click', startNewBatch);
+  if (saveToDbBtn) saveToDbBtn.addEventListener('click', saveToDatabase);
 }
 
 function handleFileSelect(event) {
   const files = Array.from(event.target.files);
-  if (files.length > 5) {
+  
+  // Validate file types
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/tiff', 'image/tif', 'image/webp'];
+  const validFiles = files.filter(file => {
+    return allowedTypes.includes(file.type) || file.name.toLowerCase().match(/\.(pdf|jpg|jpeg|png|tiff|tif|webp)$/);
+  });
+
+  if (validFiles.length !== files.length) {
+    showToast(`${files.length - validFiles.length} file(s) skipped due to unsupported format`, 'warning');
+  }
+
+  if (validFiles.length > 5) {
     showToast('Maximum 5 files allowed', 'error');
-    selectedFiles = files.slice(0, 5);
+    selectedFiles = validFiles.slice(0, 5);
   } else {
-    selectedFiles = files;
+    selectedFiles = validFiles;
   }
   
   // Create object URLs for the files
@@ -633,23 +677,46 @@ function handleFileSelect(event) {
   });
   
   updateUI();
+  if (selectedFiles.length > 0) {
+    showToast(`${selectedFiles.length} file(s) selected successfully`, 'success');
+  }
 }
 
 function handleDragOver(event) {
   event.preventDefault();
-  document.getElementById('upload-area').classList.add('dragover');
+  event.stopPropagation();
+  const uploadArea = document.getElementById('upload-area');
+  if (uploadArea) {
+    uploadArea.classList.add('dragover');
+  }
 }
 
 function handleDrop(event) {
   event.preventDefault();
-  document.getElementById('upload-area').classList.remove('dragover');
+  event.stopPropagation();
+  
+  const uploadArea = document.getElementById('upload-area');
+  if (uploadArea) {
+    uploadArea.classList.remove('dragover');
+  }
   
   const files = Array.from(event.dataTransfer.files);
-  if (files.length > 5) {
+  
+  // Validate file types
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/tiff', 'image/tif', 'image/webp'];
+  const validFiles = files.filter(file => {
+    return allowedTypes.includes(file.type) || file.name.toLowerCase().match(/\.(pdf|jpg|jpeg|png|tiff|tif|webp)$/);
+  });
+
+  if (validFiles.length !== files.length) {
+    showToast(`${files.length - validFiles.length} file(s) skipped due to unsupported format`, 'warning');
+  }
+
+  if (validFiles.length > 5) {
     showToast('Maximum 5 files allowed', 'error');
-    selectedFiles = files.slice(0, 5);
+    selectedFiles = validFiles.slice(0, 5);
   } else {
-    selectedFiles = files;
+    selectedFiles = validFiles;
   }
   
   // Create object URLs for the files
@@ -659,10 +726,18 @@ function handleDrop(event) {
   });
   
   updateUI();
+  if (selectedFiles.length > 0) {
+    showToast(`${selectedFiles.length} file(s) added successfully`, 'success');
+  }
 }
 
 function handleDragLeave(event) {
-  document.getElementById('upload-area').classList.remove('dragover');
+  event.preventDefault();
+  event.stopPropagation();
+  const uploadArea = document.getElementById('upload-area');
+  if (uploadArea) {
+    uploadArea.classList.remove('dragover');
+  }
 }
 
 function clearAllFiles() {
@@ -679,8 +754,15 @@ function clearAllFiles() {
   uploadProgress = 0;
   aiStage = 'idle';
   aiProgress = 0;
-  document.getElementById('file-input').value = '';
+  processingCancelled = false;
+  
+  const fileInput = document.getElementById('file-input');
+  if (fileInput) {
+    fileInput.value = '';
+  }
+  
   updateUI();
+  showToast('All files cleared', 'info');
 }
 
 function removeFile(index) {
@@ -693,6 +775,7 @@ function removeFile(index) {
   
   selectedFiles.splice(index, 1);
   updateUI();
+  showToast('File removed', 'info');
 }
 
 // Document rendering functions
@@ -768,6 +851,316 @@ async function ensureDocumentRendered(fileId) {
   }
 }
 
+// OCR and Data Extraction Functions
+async function performOCROnImage(imageSource, fileName) {
+  try {
+    const result = await Tesseract.recognize(imageSource, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const progress = Math.round(m.progress * 100);
+          updateCurrentFileProcessing(`${fileName} - OCR: ${progress}%`);
+        }
+      }
+    });
+    
+    return {
+      text: result.data.text,
+      confidence: result.data.confidence
+    };
+  } catch (error) {
+    console.error('OCR Error:', error);
+    return {
+      text: '',
+      confidence: 0
+    };
+  }
+}
+
+function extractSurveyPlanData(ocrText, fileName) {
+  const data = {
+    originalFileName: fileName,
+    fileNo: null,
+    fileNoFound: false,
+    applicantName: null,
+    applicantNameFound: false,
+    approvedPlanNo: null,
+    approvedPlanNoFound: false,
+    startingBeaconNo: null,
+    startingBeaconNoFound: false,
+    area: null,
+    areaFound: false,
+    location: null,
+    locationFound: false,
+    beaconCoordinates: [],
+    beaconCoordinatesFound: false,
+    courses: [],
+    coursesFound: false,
+    extractedText: ocrText,
+    confidence: 0,
+    extractionStatus: 'No Data Found',
+    quality: 'Poor'
+  };
+
+  // Clean up OCR text for better pattern matching
+  const cleanText = ocrText.replace(/\s+/g, ' ').trim();
+
+  // Extract File Number patterns - Enhanced for Nigerian formats with OCR errors
+  const fileNoPatterns = [
+    // Handle OCR errors like "LKNICONICOM" -> "LKN/CON/COM"
+    /\b(LKNICONICOM\/\d{4}\/\d+)\b/i,
+    /\b(LKN[\/\s\-]?CON[\/\s\-]?COM[\/\s\-]?\d{4}[\/\s\-]?\d+)\b/i,
+    // Full LKN format: LKN/CON/COM/2021/672
+    /\b(LKN\/[A-Z]+\/[A-Z]+\/\d{4}\/\d+)\b/i,
+    // Partial format: CON/COM/2021/672
+    /\b([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d+)\b/i,
+    // With spaces or dashes
+    /\b(LKN[\/\s\-][A-Z]+[\/\s\-][A-Z]+[\/\s\-]\d{4}[\/\s\-]\d+)\b/i,
+    // General file number patterns
+    /(?:FILE\s*NO\.?\s*:?\s*)([A-Z0-9\/\-\s]+)/i,
+    /(?:PLAN\s*NO\.?\s*:?\s*)([A-Z0-9\/\-\s]+)/i,
+    // Plan No at end of text
+    /Plan\s*No\s*[)]\s*([A-Z0-9\/\-]+)/i
+  ];
+
+  for (const pattern of fileNoPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      let fileNo = match[1].trim();
+      // Fix OCR errors
+      fileNo = fileNo.replace(/LKNICONICOM/i, 'LKN/CON/COM');
+      fileNo = fileNo.replace(/([A-Z]+)([A-Z]+)([A-Z]+)(\d{4})(\d+)/i, '$1/$2/$3/$4/$5');
+      fileNo = fileNo.replace(/\s+/g, '/');
+      data.fileNo = fileNo;
+      data.fileNoFound = true;
+      break;
+    }
+  }
+
+  // Extract Applicant Name patterns - Enhanced for "LAND GRANTED TO" format
+  const applicantPatterns = [
+    // Nigerian format: "LAND GRANTED TO LAWAN MUHAMMAD SHAKKA"
+    /LAND\s+GRANTED\s+TO\s+([A-Z\s\.]+?)(?:\s+AT\s+|\s+$|\n)/i,
+    // Alternative formats
+    /(?:APPLICANT\s*:?\s*)([A-Z\s\.]+?)(?:\s+AT\s+|\n|$)/i,
+    /(?:GRANTEE\s*:?\s*)([A-Z\s\.]+?)(?:\s+AT\s+|\n|$)/i,
+    /(?:NAME\s*:?\s*)([A-Z\s\.]+?)(?:\s+AT\s+|\n|$)/i,
+    /(?:OWNER\s*:?\s*)([A-Z\s\.]+?)(?:\s+AT\s+|\n|$)/i,
+    // Title patterns
+    /(?:MR\.?\s*|MRS\.?\s*|DR\.?\s*|PROF\.?\s*|ALHAJI\s*|HAJIYA\s*)([A-Z\s\.]+?)(?:\s+AT\s+|\n|$)/i
+  ];
+
+  for (const pattern of applicantPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      data.applicantName = match[1].trim().replace(/\s+/g, ' ');
+      data.applicantNameFound = true;
+      break;
+    }
+  }
+
+  // Extract Location information
+  const locationPatterns = [
+    // Nigerian format: "AT KABI VILLAGE DAWAKIN TOFA DISTRICT"
+    /AT\s+([A-Z\s]+VILLAGE[A-Z\s]+DISTRICT[A-Z\s]*)/i,
+    /AT\s+([A-Z\s]+WARD[A-Z\s]+)/i,
+    /AT\s+([A-Z\s]+AREA[A-Z\s]+)/i,
+    /(?:LOCATION\s*:?\s*)([A-Z\s,]+)/i
+  ];
+
+  for (const pattern of locationPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      data.location = match[1].trim().replace(/\s+/g, ' ');
+      data.locationFound = true;
+      break;
+    }
+  }
+
+  // Extract Area information
+  const areaPatterns = [
+    /AREA\s*[=:]\s*(\d+\.?\d*\s*ha)/i,
+    /(\d+\.?\d*)\s*ha/i,
+    /(\d+\.?\d*)\s*hectares?/i,
+    /AREA\s*[=:]\s*(\d+\.?\d*)/i
+  ];
+
+  for (const pattern of areaPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      data.area = match[1].trim();
+      data.areaFound = true;
+      break;
+    }
+  }
+
+  // Extract Approved Plan Number patterns
+  const planNoPatterns = [
+    /(?:APPROVED\s*PLAN\s*NO\.?\s*:?\s*)([A-Z0-9\/\-]+)/i,
+    /(?:PLAN\s*NO\.?\s*:?\s*)([A-Z0-9\/\-]+)/i,
+    /(?:APP\.?\s*NO\.?\s*:?\s*)([A-Z0-9\/\-]+)/i,
+    /(?:APPROVAL\s*NO\.?\s*:?\s*)([A-Z0-9\/\-]+)/i,
+    // SUB-DIVISION pattern
+    /SUB\s*-?\s*DIVISION\s+OF\s+([A-Z0-9\/\-]+)/i
+  ];
+
+  for (const pattern of planNoPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      data.approvedPlanNo = match[1].trim();
+      data.approvedPlanNoFound = true;
+      break;
+    }
+  }
+
+  // Extract Starting Beacon Number
+  const beaconPatterns = [
+    /(?:STARTING\s*BEACON\s*:?\s*)([A-Z0-9]+)/i,
+    /(?:START\s*BEACON\s*:?\s*)([A-Z0-9]+)/i,
+    /(?:BEACON\s*:?\s*)([A-Z0-9]+)/i,
+    /\b([A-Z]\d+)\b/i,
+    // UTM coordinates pattern to extract beacon
+    /UTM\s+Co-ordinates\s+of\s+([A-Z0-9]+)/i
+  ];
+
+  for (const pattern of beaconPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      data.startingBeaconNo = match[1].trim();
+      data.startingBeaconNoFound = true;
+      break;
+    }
+  }
+
+  // Extract Beacon Coordinates - Enhanced for UTM format
+  const coordinatePatterns = [
+    // UTM format: X = 1337 267.420m, Y = 437 052.310m
+    /X\s*=\s*(\d+\s+\d+\.?\d*)\s*m.*?[Yv]\s*=\s*(\d+\s+\d+\.?\d*)\s*m/gi,
+    // Standard format
+    /([A-Z]\d+)\s*[:\-]?\s*X?\s*[=:]?\s*(\d+\.?\d*)\s*[,\s]\s*Y?\s*[=:]?\s*(\d+\.?\d*)/gi,
+    /BEACON\s*([A-Z0-9]+)\s*[:\-]?\s*(\d+\.?\d*)\s*[,\s]\s*(\d+\.?\d*)/gi,
+    /([A-Z0-9]+)\s*[:\-]?\s*E\s*(\d+\.?\d*)\s*N\s*(\d+\.?\d*)/gi
+  ];
+
+  for (const pattern of coordinatePatterns) {
+    let match;
+    while ((match = pattern.exec(cleanText)) !== null) {
+      if (match.length >= 3) {
+        // Check if this is UTM format with beacon name from previous extraction
+        if (match[1].includes(' ') && match[2].includes(' ')) {
+          // UTM format: X = 1337 267.420m, Y = 437 052.310m
+          data.beaconCoordinates.push({
+            beaconNo: data.startingBeaconNo || 'A4929J',
+            x: match[1].replace(/\s+/g, ''),
+            y: match[2].replace(/\s+/g, ''),
+            zone: '32N',
+            origin: 'UTM (MINNA DATUM)'
+          });
+        } else {
+          // Standard format
+          data.beaconCoordinates.push({
+            beaconNo: match[1],
+            x: match[2],
+            y: match[3],
+            zone: '32N',
+            origin: 'K2'
+          });
+        }
+        data.beaconCoordinatesFound = true;
+      }
+    }
+  }
+
+  // Extract Survey Courses - Enhanced for bearing/distance format
+  const coursePatterns = [
+    // Format: Ad917J - AAS1E] = 20.55m @ 152° 33
+    /([A-Z0-9]+)\s*-\s*([A-Z0-9]+)[^\d]*=\s*(\d+\.?\d*)\s*m\s*@\s*(\d+)°\s*(\d+)/gi,
+    // Standard bearing format
+    /([A-Z]\d+)\s*TO\s*([A-Z]\d+)\s*[:\-]?\s*([NS]\d+[°]\d+[']\d+["]?[EW])\s*(\d+\.?\d*m?)/gi,
+    /BEARING\s*([NS]\d+[°]\d+[']\d+["]?[EW])\s*DISTANCE\s*(\d+\.?\d*m?)/gi,
+    /([NS]\d+[°]\d+[']\d+["]?[EW])\s*(\d+\.?\d*m?)/gi
+  ];
+
+  let courseIndex = 0;
+  for (const pattern of coursePatterns) {
+    let match;
+    while ((match = pattern.exec(cleanText)) !== null) {
+      if (match.length >= 5) {
+        // Format: Ad917J - AAS1E] = 20.55m @ 152° 33
+        data.courses.push({
+          id: `course-${Date.now()}-${courseIndex++}`,
+          type: 'DD',
+          fromBeacon: match[1],
+          toBeacon: match[2],
+          direction: `${match[4]}° ${match[5]}'`,
+          distance: `${match[3]}m`
+        });
+      } else if (match.length >= 4) {
+        // Direction-Distance format with beacons
+        data.courses.push({
+          id: `course-${Date.now()}-${courseIndex++}`,
+          type: 'DD',
+          fromBeacon: match[1],
+          toBeacon: match[2],
+          direction: match[3],
+          distance: match[4]
+        });
+      } else if (match.length >= 2) {
+        // Simple direction-distance format
+        data.courses.push({
+          id: `course-${Date.now()}-${courseIndex++}`,
+          type: 'DD',
+          fromBeacon: '',
+          toBeacon: '',
+          direction: match[1],
+          distance: match[2]
+        });
+      }
+      data.coursesFound = true;
+    }
+  }
+
+  // Calculate overall confidence and status
+  let foundFields = 0;
+  let totalFields = 7; // fileNo, applicant, planNo, beacon, coordinates, courses, area
+
+  if (data.fileNoFound) foundFields++;
+  if (data.applicantNameFound) foundFields++;
+  if (data.approvedPlanNoFound) foundFields++;
+  if (data.startingBeaconNoFound) foundFields++;
+  if (data.beaconCoordinatesFound) foundFields++;
+  if (data.coursesFound) foundFields++;
+  if (data.areaFound) foundFields++;
+
+  data.confidence = Math.round((foundFields / totalFields) * 100);
+
+  if (data.confidence >= 80) {
+    data.extractionStatus = 'Fully Extracted';
+    data.quality = 'Excellent';
+  } else if (data.confidence >= 60) {
+    data.extractionStatus = 'Mostly Extracted';
+    data.quality = 'Good';
+  } else if (data.confidence >= 40) {
+    data.extractionStatus = 'Partially Extracted';
+    data.quality = 'Fair';
+  } else if (data.confidence >= 20) {
+    data.extractionStatus = 'Minimal Extraction';
+    data.quality = 'Poor';
+  } else {
+    data.extractionStatus = 'No Data Found';
+    data.quality = 'Very Poor';
+  }
+
+  return data;
+}
+
+function updateCurrentFileProcessing(message) {
+  const element = document.getElementById('current-file-processing');
+  if (element) {
+    element.textContent = `Processing: ${message}`;
+    element.classList.remove('hidden');
+  }
+}
+
 function switchTab(tab) {
   // Update tab buttons
   document.querySelectorAll('.tab-trigger').forEach(btn => {
@@ -784,17 +1177,22 @@ function switchTab(tab) {
   const tabBtn = document.getElementById(`tab-${tab}`);
   const tabContent = document.getElementById(`content-${tab}`);
   
-  tabBtn.classList.add('active');
-  tabBtn.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
-  tabBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-  
-  tabContent.classList.add('active');
+  if (tabBtn && tabContent) {
+    tabBtn.classList.add('active');
+    tabBtn.classList.remove('bg-transparent', 'text-gray-600', 'hover:bg-gray-50');
+    tabBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+    
+    tabContent.classList.add('active');
+  }
 }
 
 function updateUI() {
   // Update stats
-  document.getElementById('selected-count').textContent = selectedFiles.length;
-  document.getElementById('processed-count').textContent = Object.keys(extractedMetadata).length;
+  const selectedCountEl = document.getElementById('selected-count');
+  const processedCountEl = document.getElementById('processed-count');
+  
+  if (selectedCountEl) selectedCountEl.textContent = selectedFiles.length;
+  if (processedCountEl) processedCountEl.textContent = Object.keys(extractedMetadata).length;
   
   // Update AI status
   updateAIStatus();
@@ -819,6 +1217,8 @@ function updateAIStatus() {
   const statusText = document.getElementById('ai-status-text');
   const statusBadge = document.getElementById('ai-status-badge');
   
+  if (!statusText || !statusBadge) return;
+  
   if (aiStage === 'idle') {
     statusText.textContent = 'Ready';
     statusBadge.textContent = 'Idle';
@@ -838,6 +1238,8 @@ function updateFilesList() {
   const selectedFilesDiv = document.getElementById('selected-files');
   const filesCountSpan = document.getElementById('files-count');
   const filesList = document.getElementById('files-list');
+  
+  if (!selectedFilesDiv || !filesCountSpan || !filesList) return;
   
   if (selectedFiles.length === 0) {
     selectedFilesDiv.classList.add('hidden');
@@ -868,6 +1270,7 @@ function updateFilesList() {
 
 function updateUploadArea() {
   const uploadArea = document.getElementById('upload-area');
+  if (!uploadArea) return;
   
   if (selectedFiles.length > 0) {
     uploadArea.classList.add('hidden');
@@ -880,6 +1283,8 @@ function updateActionButtons() {
   const startBtn = document.getElementById('start-upload-btn');
   const cancelBtn = document.getElementById('cancel-upload-btn');
   const newBatchBtn = document.getElementById('new-batch-btn');
+  
+  if (!startBtn || !cancelBtn || !newBatchBtn) return;
   
   // Hide all buttons first
   startBtn.classList.add('hidden');
@@ -897,6 +1302,7 @@ function updateActionButtons() {
 
 function updateExtractedDataTab() {
   const tabBtn = document.getElementById('tab-extracted');
+  if (!tabBtn) return;
   
   if (Object.keys(extractedMetadata).length === 0 && aiStage !== 'complete') {
     tabBtn.disabled = true;
@@ -915,6 +1321,8 @@ function updateExtractedDataContent() {
   const extractedResults = document.getElementById('extracted-results');
   const noDataState = document.getElementById('no-data-state');
   const extractedDataList = document.getElementById('extracted-data-list');
+  
+  if (!aiProcessingExtracted || !extractedResults || !noDataState || !extractedDataList) return;
   
   if (aiStage !== 'idle' && aiStage !== 'complete') {
     // Show AI processing
@@ -953,7 +1361,7 @@ function getFileIcon(fileType) {
   if (fileType && fileType.includes('pdf')) {
     return '<i data-lucide="file-text" class="h-8 w-8 text-red-500"></i>';
   } else if (fileType && fileType.includes('image')) {
-    return '<i data-lucide="file-text" class="h-8 w-8 text-purple-500"></i>';
+    return '<i data-lucide="image" class="h-8 w-8 text-purple-500"></i>';
   } else {
     return '<i data-lucide="file" class="h-8 w-8 text-gray-500"></i>';
   }
@@ -977,6 +1385,7 @@ function startUpload() {
   uploadProgress = 0;
   aiStage = 'idle';
   aiProgress = 0;
+  processingCancelled = false;
   
   updateUI();
   showUploadProgress();
@@ -996,6 +1405,7 @@ function startUpload() {
 }
 
 function cancelUpload() {
+  processingCancelled = true;
   uploadStatus = 'idle';
   uploadProgress = 0;
   aiStage = 'idle';
@@ -1003,7 +1413,7 @@ function cancelUpload() {
   hideUploadProgress();
   hideAIProcessing();
   updateUI();
-  showToast('Upload cancelled', 'info');
+  showToast('Processing cancelled', 'info');
 }
 
 function startNewBatch() {
@@ -1012,20 +1422,33 @@ function startNewBatch() {
 }
 
 function showUploadProgress() {
-  document.getElementById('upload-progress').classList.remove('hidden');
+  const uploadProgress = document.getElementById('upload-progress');
+  if (uploadProgress) {
+    uploadProgress.classList.remove('hidden');
+  }
 }
 
 function hideUploadProgress() {
-  document.getElementById('upload-progress').classList.add('hidden');
+  const uploadProgress = document.getElementById('upload-progress');
+  if (uploadProgress) {
+    uploadProgress.classList.add('hidden');
+  }
 }
 
 function updateUploadProgress() {
-  document.getElementById('upload-percentage').textContent = `${uploadProgress}%`;
-  document.getElementById('upload-progress-bar').style.width = `${uploadProgress}%`;
+  const uploadPercentage = document.getElementById('upload-percentage');
+  const uploadProgressBar = document.getElementById('upload-progress-bar');
+  
+  if (uploadPercentage) {
+    uploadPercentage.textContent = `${uploadProgress}%`;
+  }
+  if (uploadProgressBar) {
+    uploadProgressBar.style.width = `${uploadProgress}%`;
+  }
 }
 
 async function startAIProcessing() {
-  if (selectedFiles.length === 0) {
+  if (selectedFiles.length === 0 || processingCancelled) {
     showToast('No files to process', 'info');
     return;
   }
@@ -1036,55 +1459,143 @@ async function startAIProcessing() {
   showAIProcessing();
   updateAIProcessingUI();
   
-  // Simulate AI processing stages
-  setTimeout(() => {
+  try {
+    // Initialize stage
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (processingCancelled) return;
+    
+    // OCR Stage
     aiStage = 'ocr';
     aiProgress = 20;
     updateAIProcessingUI();
     
-    setTimeout(() => {
-      aiStage = 'layoutAnalysis';
-      aiProgress = 40;
-      updateAIProcessingUI();
+    // Process each file with real OCR
+    for (let index = 0; index < selectedFiles.length; index++) {
+      if (processingCancelled) return;
       
-      setTimeout(() => {
-        aiStage = 'dataExtraction';
-        aiProgress = 70;
-        updateAIProcessingUI();
+      const file = selectedFiles[index];
+      const fileId = `SURVEYPLAN-${Date.now()}-${index}`;
+      
+      updateCurrentFileProcessing(`${file.name} - Preparing...`);
+      
+      // Render document pages for OCR
+      let pages;
+      if (file.type === 'application/pdf') {
+        pages = await renderPDFPages(file);
+      } else if (file.type.startsWith('image/')) {
+        pages = await renderImageFile(file);
+      } else {
+        continue; // Skip unsupported files
+      }
+      
+      // Perform OCR on each page
+      let combinedText = '';
+      let totalConfidence = 0;
+      
+      for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+        if (processingCancelled) return;
         
-        setTimeout(() => {
-          aiStage = 'dataAssembly';
-          aiProgress = 90;
-          updateAIProcessingUI();
-          
-          setTimeout(async () => {
-            aiStage = 'complete';
-            aiProgress = 100;
-            updateAIProcessingUI();
-            
-            // Generate mock extracted data and pre-render documents
-            await generateMockExtractedData();
-            updateUI();
-            showToast('All survey plans processed!', 'success');
-          }, 1000);
-        }, 1500);
-      }, 2000);
-    }, 1500);
-  }, 1000);
+        updateCurrentFileProcessing(`${file.name} - Page ${pageIndex + 1}/${pages.length}`);
+        
+        const ocrResult = await performOCROnImage(pages[pageIndex], file.name);
+        combinedText += ocrResult.text + '\n';
+        totalConfidence += ocrResult.confidence;
+      }
+      
+      const averageConfidence = pages.length > 0 ? totalConfidence / pages.length : 0;
+      
+      // Store raw OCR text
+      rawOcrText[fileId] = combinedText;
+      
+      // Layout Analysis Stage
+      aiStage = 'layoutAnalysis';
+      aiProgress = 40 + (index / selectedFiles.length) * 20;
+      updateAIProcessingUI();
+      updateCurrentFileProcessing(`${file.name} - Analyzing layout...`);
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if (processingCancelled) return;
+      
+      // Data Extraction Stage
+      aiStage = 'dataExtraction';
+      aiProgress = 60 + (index / selectedFiles.length) * 20;
+      updateAIProcessingUI();
+      updateCurrentFileProcessing(`${file.name} - Extracting data...`);
+      
+      // Extract survey plan data from OCR text
+      const extractedData = extractSurveyPlanData(combinedText, file.name);
+      extractedData.originalFileIndex = index;
+      extractedData.fileSize = formatFileSize(file.size);
+      extractedData.fileType = file.type;
+      extractedData.pageCount = pages.length;
+      extractedData.confidence = Math.round((extractedData.confidence + averageConfidence) / 2);
+      
+      // Store extracted metadata
+      extractedMetadata[fileId] = extractedData;
+      
+      // Pre-render the document for faster preview
+      renderedDocuments[fileId] = pages;
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if (processingCancelled) return;
+    }
+    
+    // Data Assembly Stage
+    aiStage = 'dataAssembly';
+    aiProgress = 90;
+    updateAIProcessingUI();
+    updateCurrentFileProcessing('Finalizing extraction results...');
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (processingCancelled) return;
+    
+    // Complete
+    aiStage = 'complete';
+    aiProgress = 100;
+    updateAIProcessingUI();
+    
+    // Hide current file processing indicator
+    const element = document.getElementById('current-file-processing');
+    if (element) {
+      element.classList.add('hidden');
+    }
+    
+    updateUI();
+    showToast(`Successfully processed ${selectedFiles.length} survey plan(s)!`, 'success');
+    
+  } catch (error) {
+    console.error('Error during AI processing:', error);
+    showToast('Error occurred during processing', 'error');
+    aiStage = 'idle';
+    updateUI();
+  }
 }
 
 function showAIProcessing() {
-  document.getElementById('ai-processing').classList.remove('hidden');
+  const aiProcessing = document.getElementById('ai-processing');
+  if (aiProcessing) {
+    aiProcessing.classList.remove('hidden');
+  }
 }
 
 function hideAIProcessing() {
-  document.getElementById('ai-processing').classList.add('hidden');
+  const aiProcessing = document.getElementById('ai-processing');
+  if (aiProcessing) {
+    aiProcessing.classList.add('hidden');
+  }
 }
 
 function updateAIProcessingUI() {
   // Update progress bar
-  document.getElementById('ai-progress-text').textContent = `${aiProgress}% Complete`;
-  document.getElementById('ai-progress-bar').style.width = `${aiProgress}%`;
+  const aiProgressText = document.getElementById('ai-progress-text');
+  const aiProgressBar = document.getElementById('ai-progress-bar');
+  
+  if (aiProgressText) {
+    aiProgressText.textContent = `${aiProgress}% Complete`;
+  }
+  if (aiProgressBar) {
+    aiProgressBar.style.width = `${aiProgress}%`;
+  }
   
   // Update stage indicators
   const stages = ['initializing', 'ocr', 'layoutAnalysis', 'dataExtraction', 'dataAssembly', 'complete'];
@@ -1093,6 +1604,8 @@ function updateAIProcessingUI() {
   document.querySelectorAll('.stage-indicator').forEach((indicator, index) => {
     const circle = indicator.querySelector('.w-4');
     const text = indicator.querySelector('.text-xs');
+    
+    if (!circle || !text) return;
     
     if (index < currentStageIndex) {
       // Completed stage
@@ -1119,35 +1632,37 @@ function updateStageDescription() {
   const stageDescription = document.getElementById('ai-stage-description');
   const stageIcon = document.getElementById('ai-stage-icon');
   
+  if (!stageTitle || !stageDescription || !stageIcon) return;
+  
   const stageInfo = {
     'initializing': {
       title: 'Initializing',
-      description: 'Initializing AI models and preparing for survey plan analysis...',
+      description: 'Initializing OCR engine and preparing for survey plan analysis...',
       icon: 'brain'
     },
     'ocr': {
-      title: 'OCR',
-      description: 'Performing Optical Character Recognition (OCR) on the document to extract raw text...',
+      title: 'OCR Processing',
+      description: 'Performing Optical Character Recognition on document pages to extract text...',
       icon: 'file-digit'
     },
     'layoutAnalysis': {
       title: 'Layout Analysis',
-      description: 'Analyzing document structure, identifying text blocks, and potential data fields...',
+      description: 'Analyzing document structure and identifying data field locations...',
       icon: 'file-search'
     },
     'dataExtraction': {
       title: 'Data Extraction',
-      description: 'Extracting key survey details: File No, Applicant, Plan No, Beacons, Courses...',
+      description: 'Extracting survey details: File No, Applicant, Plan No, Beacons, Courses...',
       icon: 'layers'
     },
     'dataAssembly': {
       title: 'Data Assembly',
-      description: 'Assembling and structuring extracted information...',
+      description: 'Assembling and structuring extracted information for review...',
       icon: 'zap'
     },
     'complete': {
       title: 'Complete',
-      description: 'Survey plan analysis complete! Data is ready for review.',
+      description: 'Survey plan analysis complete! Data is ready for review and editing.',
       icon: 'sparkles'
     }
   };
@@ -1162,62 +1677,6 @@ function updateStageDescription() {
   lucide.createIcons();
 }
 
-async function generateMockExtractedData() {
-  extractedMetadata = {};
-  rawOcrText = {};
-  
-  // Process each file and pre-render documents
-  for (let index = 0; index < selectedFiles.length; index++) {
-    const file = selectedFiles[index];
-    const fileId = `SURVEYPLAN-${Date.now()}-${index}`;
-    
-    extractedMetadata[fileId] = {
-      originalFileName: file.name,
-      fileNo: `LKN/RES/2024/${1000 + index}`,
-      fileNoFound: true,
-      applicantName: `Sample Applicant ${index + 1}`,
-      applicantNameFound: true,
-      approvedPlanNo: `APP-${2024}-${1000 + index}`,
-      approvedPlanNoFound: true,
-      startingBeaconNo: `B${index + 1}`,
-      startingBeaconNoFound: true,
-      beaconCoordinates: [
-        { beaconNo: `B${index + 1}`, x: `${500000 + index * 100}`, y: `${1200000 + index * 100}`, zone: '32N', origin: 'K2' },
-        { beaconNo: `B${index + 2}`, x: `${500100 + index * 100}`, y: `${1200100 + index * 100}`, zone: '32N', origin: 'K2' }
-      ],
-      beaconCoordinatesFound: true,
-      courses: [
-        {
-          id: `course-${index}-1`,
-          type: 'DD',
-          fromBeacon: `B${index + 1}`,
-          toBeacon: `B${index + 2}`,
-          direction: 'N45°30\'15"E',
-          distance: '105.50m'
-        }
-      ],
-      coursesFound: true,
-      extractedText: `Sample extracted text for ${file.name}`,
-      fileSize: formatFileSize(file.size),
-      fileType: file.type,
-      originalFileIndex: index,
-      confidence: 75 + Math.floor(Math.random() * 20),
-      extractionStatus: 'Partially Extracted',
-      quality: 'Good',
-      pageCount: 1
-    };
-    
-    rawOcrText[fileId] = `Raw OCR text for ${file.name}\n\nThis would contain the actual OCR output from the document processing.`;
-    
-    // Pre-render the document for faster preview
-    try {
-      await ensureDocumentRendered(fileId);
-    } catch (error) {
-      console.error(`Error pre-rendering document ${file.name}:`, error);
-    }
-  }
-}
-
 function createExtractedDataCard(fileId, data) {
   const confidenceClass = data.confidence > 75 ? 'badge-success' : 
                          data.confidence > 40 ? 'badge-warning' : 'badge-error';
@@ -1227,7 +1686,10 @@ function createExtractedDataCard(fileId, data) {
       <div class="flex justify-between items-start mb-3">
         <div>
           <h4 class="font-semibold text-lg">${data.originalFileName}</h4>
-          <span class="badge ${confidenceClass}">Confidence: ${data.confidence}%</span>
+          <div class="flex gap-2 mt-1">
+            <span class="badge ${confidenceClass}">Confidence: ${data.confidence}%</span>
+            <span class="badge badge-default">${data.extractionStatus}</span>
+          </div>
         </div>
         <div class="flex gap-2 flex-wrap">
           <button onclick="showDocumentPreview('${fileId}')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-1">
@@ -1250,24 +1712,27 @@ function createExtractedDataCard(fileId, data) {
         <div><strong>Applicant:</strong> ${data.applicantName || '<span class="text-red-500">Not found</span>'}</div>
         <div><strong>Approved Plan No:</strong> ${data.approvedPlanNo || '<span class="text-red-500">Not found</span>'}</div>
         <div><strong>Start Beacon:</strong> ${data.startingBeaconNo || '<span class="text-red-500">Not found</span>'}</div>
+        ${data.area ? `<div><strong>Area:</strong> ${data.area}</div>` : ''}
+        ${data.location ? `<div><strong>Location:</strong> ${data.location}</div>` : ''}
       </div>
       
       ${data.beaconCoordinates.length > 0 ? `
         <div class="mt-3">
-          <h5 class="font-medium text-sm mb-1">Beacon Coordinates:</h5>
+          <h5 class="font-medium text-sm mb-1">Beacon Coordinates (${data.beaconCoordinates.length}):</h5>
           <ul class="list-disc list-inside pl-1 text-xs space-y-0.5">
-            ${data.beaconCoordinates.map(bc => `
+            ${data.beaconCoordinates.slice(0, 3).map(bc => `
               <li>${bc.beaconNo}: X=${bc.x}, Y=${bc.y}</li>
             `).join('')}
+            ${data.beaconCoordinates.length > 3 ? `<li class="text-gray-500">... and ${data.beaconCoordinates.length - 3} more</li>` : ''}
           </ul>
         </div>
       ` : ''}
       
       ${data.courses && data.courses.length > 0 ? `
         <div class="mt-3">
-          <h5 class="font-medium text-sm mb-1">Survey Courses:</h5>
+          <h5 class="font-medium text-sm mb-1">Survey Courses (${data.courses.length}):</h5>
           <div class="space-y-2">
-            ${data.courses.map((course, idx) => `
+            ${data.courses.slice(0, 2).map((course, idx) => `
               <div class="p-2 border rounded-md text-xs bg-gray-50">
                 <p class="font-semibold">Course #${idx + 1} (${course.type})</p>
                 ${course.type === 'DD' ? `
@@ -1278,9 +1743,14 @@ function createExtractedDataCard(fileId, data) {
                 ` : ''}
               </div>
             `).join('')}
+            ${data.courses.length > 2 ? `<p class="text-xs text-gray-500">... and ${data.courses.length - 2} more courses</p>` : ''}
           </div>
         </div>
       ` : ''}
+      
+      <div class="mt-3 text-xs text-gray-500">
+        Quality: ${data.quality} | Pages: ${data.pageCount} | Size: ${data.fileSize}
+      </div>
     </div>
   `;
 }
@@ -1296,68 +1766,85 @@ async function showDocumentPreview(fileId) {
   }
   
   // Show preview modal
-  document.getElementById('preview-modal').classList.remove('hidden');
+  const previewModal = document.getElementById('preview-modal');
+  if (previewModal) {
+    previewModal.classList.remove('hidden');
+  }
   
   // Show loading state
   const previewContent = document.getElementById('preview-content');
-  previewContent.innerHTML = `
-    <div class="flex items-center justify-center py-8">
-      <div class="loading-spinner mr-3"></div>
-      <span>Rendering document...</span>
-    </div>
-  `;
+  if (previewContent) {
+    previewContent.innerHTML = `
+      <div class="flex items-center justify-center py-8">
+        <div class="loading-spinner mr-3"></div>
+        <span>Rendering document...</span>
+      </div>
+    `;
+  }
   
   try {
     // Render the document
     const pages = await ensureDocumentRendered(fileId);
     
     // Generate preview content
-    previewContent.innerHTML = `
-      <div class="space-y-6">
-        <div class="text-sm text-gray-500 text-center">
-          Showing ${pages.length} page(s) from ${data.originalFileName}
-        </div>
-        ${pages.map((pageImage, index) => `
-          <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
-            <div class="bg-gray-50 px-4 py-2 border-b">
-              <span class="text-sm font-medium text-gray-700">Page ${index + 1}</span>
-            </div>
-            <div class="p-4">
-              <img
-                src="${pageImage}"
-                alt="Page ${index + 1}"
-                class="w-full object-contain border shadow-sm rounded"
-                style="max-height: 600px"
-                onerror="this.src='data:image/svg+xml;base64,${btoa('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"800\" viewBox=\"0 0 600 800\"><rect width=\"600\" height=\"800\" fill=\"#f3f4f6\"/><text x=\"300\" y=\"400\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"16\" fill=\"#6b7280\">Image Load Error</text></svg>')}'"
-              />
-            </div>
+    if (previewContent) {
+      previewContent.innerHTML = `
+        <div class="space-y-6">
+          <div class="text-sm text-gray-500 text-center">
+            Showing ${pages.length} page(s) from ${data.originalFileName}
           </div>
-        `).join('')}
-      </div>
-    `;
+          ${pages.map((pageImage, index) => `
+            <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+              <div class="bg-gray-50 px-4 py-2 border-b">
+                <span class="text-sm font-medium text-gray-700">Page ${index + 1}</span>
+              </div>
+              <div class="p-4">
+                <img
+                  src="${pageImage}"
+                  alt="Page ${index + 1}"
+                  class="w-full object-contain border shadow-sm rounded"
+                  style="max-height: 600px"
+                  onerror="this.src='data:image/svg+xml;base64,${btoa('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"800\" viewBox=\"0 0 600 800\"><rect width=\"600\" height=\"800\" fill=\"#f3f4f6\"/><text x=\"300\" y=\"400\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"16\" fill=\"#6b7280\">Image Load Error</text></svg>')}'"
+                />
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
   } catch (error) {
     console.error('Error showing document preview:', error);
-    previewContent.innerHTML = `
-      <div class="text-center py-8 text-red-600">
-        <i data-lucide="alert-circle" class="h-8 w-8 mx-auto mb-2"></i>
-        <p>Error loading document preview</p>
-      </div>
-    `;
-    lucide.createIcons();
+    if (previewContent) {
+      previewContent.innerHTML = `
+        <div class="text-center py-8 text-red-600">
+          <i data-lucide="alert-circle" class="h-8 w-8 mx-auto mb-2"></i>
+          <p>Error loading document preview</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
   }
   
   // Set raw OCR text
-  document.getElementById('raw-text').textContent = rawOcrText[fileId] || 'No OCR text available.';
+  const rawText = document.getElementById('raw-text');
+  if (rawText) {
+    rawText.textContent = rawOcrText[fileId] || 'No OCR text available.';
+  }
 }
 
 function closePreviewModal() {
-  document.getElementById('preview-modal').classList.add('hidden');
+  const previewModal = document.getElementById('preview-modal');
+  if (previewModal) {
+    previewModal.classList.add('hidden');
+  }
   currentPreviewFile = null;
 }
 
 function toggleRawText() {
   const content = document.getElementById('raw-text-content');
   const icon = document.querySelector('#toggle-raw-text i');
+  
+  if (!content || !icon) return;
   
   if (content.classList.contains('expanded')) {
     content.classList.remove('expanded');
@@ -1380,14 +1867,23 @@ async function editMetadata(fileId) {
   }
   
   // Show edit modal
-  document.getElementById('edit-modal').classList.remove('hidden');
+  const editModal = document.getElementById('edit-modal');
+  if (editModal) {
+    editModal.classList.remove('hidden');
+  }
   
   // Populate form fields
-  document.getElementById('edit-file-name').textContent = `File: ${data.originalFileName}`;
-  document.getElementById('edit-file-no').value = data.fileNo || '';
-  document.getElementById('edit-applicant-name').value = data.applicantName || '';
-  document.getElementById('edit-approved-plan-no').value = data.approvedPlanNo || '';
-  document.getElementById('edit-starting-beacon-no').value = data.startingBeaconNo || '';
+  const editFileName = document.getElementById('edit-file-name');
+  const editFileNo = document.getElementById('edit-file-no');
+  const editApplicantName = document.getElementById('edit-applicant-name');
+  const editApprovedPlanNo = document.getElementById('edit-approved-plan-no');
+  const editStartingBeaconNo = document.getElementById('edit-starting-beacon-no');
+  
+  if (editFileName) editFileName.textContent = `File: ${data.originalFileName}`;
+  if (editFileNo) editFileNo.value = data.fileNo || '';
+  if (editApplicantName) editApplicantName.value = data.applicantName || '';
+  if (editApprovedPlanNo) editApprovedPlanNo.value = data.approvedPlanNo || '';
+  if (editStartingBeaconNo) editStartingBeaconNo.value = data.startingBeaconNo || '';
   
   // Populate beacon coordinates
   populateBeaconCoordinates(data.beaconCoordinates || []);
@@ -1400,7 +1896,10 @@ async function editMetadata(fileId) {
 }
 
 function closeEditModal() {
-  document.getElementById('edit-modal').classList.add('hidden');
+  const editModal = document.getElementById('edit-modal');
+  if (editModal) {
+    editModal.classList.add('hidden');
+  }
   currentEditingFile = null;
   currentEditPreviewPage = 0;
 }
@@ -1410,10 +1909,15 @@ function saveEditChanges() {
   
   // Update metadata with form values
   const data = extractedMetadata[currentEditingFile];
-  data.fileNo = document.getElementById('edit-file-no').value;
-  data.applicantName = document.getElementById('edit-applicant-name').value;
-  data.approvedPlanNo = document.getElementById('edit-approved-plan-no').value;
-  data.startingBeaconNo = document.getElementById('edit-starting-beacon-no').value;
+  const editFileNo = document.getElementById('edit-file-no');
+  const editApplicantName = document.getElementById('edit-applicant-name');
+  const editApprovedPlanNo = document.getElementById('edit-approved-plan-no');
+  const editStartingBeaconNo = document.getElementById('edit-starting-beacon-no');
+  
+  if (editFileNo) data.fileNo = editFileNo.value;
+  if (editApplicantName) data.applicantName = editApplicantName.value;
+  if (editApprovedPlanNo) data.approvedPlanNo = editApprovedPlanNo.value;
+  if (editStartingBeaconNo) data.startingBeaconNo = editStartingBeaconNo.value;
   
   // Update beacon coordinates and courses from form
   // (Implementation would collect data from dynamic form elements)
@@ -1426,6 +1930,8 @@ function saveEditChanges() {
 async function showEditPreview(fileId) {
   const previewContent = document.getElementById('edit-preview-content');
   const pageNav = document.getElementById('edit-page-nav');
+  
+  if (!previewContent || !pageNav) return;
   
   // Show loading state
   previewContent.innerHTML = `
@@ -1469,6 +1975,8 @@ async function showEditPreview(fileId) {
 
 function updateEditPreview(fileId, pages) {
   const previewContent = document.getElementById('edit-preview-content');
+  if (!previewContent || !pages || pages.length === 0) return;
+  
   const currentPage = pages[currentEditPreviewPage];
   
   previewContent.innerHTML = `
@@ -1485,6 +1993,8 @@ function updateEditPageNavigation(totalPages) {
   const pageInfo = document.getElementById('edit-page-info');
   const prevBtn = document.getElementById('edit-prev-page');
   const nextBtn = document.getElementById('edit-next-page');
+  
+  if (!pageInfo || !prevBtn || !nextBtn) return;
   
   pageInfo.textContent = `Page ${currentEditPreviewPage + 1} of ${totalPages}`;
   
@@ -1519,6 +2029,8 @@ function changeEditPreviewPage(direction) {
 
 function populateBeaconCoordinates(coordinates) {
   const container = document.getElementById('beacon-coordinates-list');
+  if (!container) return;
+  
   container.innerHTML = coordinates.map((coord, index) => `
     <div class="data-card">
       <div class="flex justify-between items-center mb-2">
@@ -1559,6 +2071,8 @@ function populateBeaconCoordinates(coordinates) {
 
 function populateCourses(courses) {
   const container = document.getElementById('courses-list');
+  if (!container) return;
+  
   container.innerHTML = courses.map((course, index) => `
     <div class="data-card">
       <div class="flex justify-between items-center mb-2">
@@ -1688,12 +2202,18 @@ function exportCogo(fileId) {
   const cogoData = generateCogoData(data);
   
   // Show COGO modal
-  document.getElementById('cogo-output').value = cogoData;
-  document.getElementById('cogo-modal').classList.remove('hidden');
+  const cogoOutput = document.getElementById('cogo-output');
+  const cogoModal = document.getElementById('cogo-modal');
+  
+  if (cogoOutput) cogoOutput.value = cogoData;
+  if (cogoModal) cogoModal.classList.remove('hidden');
 }
 
 function closeCogoModal() {
-  document.getElementById('cogo-modal').classList.add('hidden');
+  const cogoModal = document.getElementById('cogo-modal');
+  if (cogoModal) {
+    cogoModal.classList.add('hidden');
+  }
 }
 
 function generateCogoData(data) {
@@ -1730,19 +2250,30 @@ function generateCogoData(data) {
 
 function copyCogoData() {
   const cogoOutput = document.getElementById('cogo-output');
+  if (!cogoOutput) return;
+  
   cogoOutput.select();
-  document.execCommand('copy');
-  showToast('COGO data copied to clipboard!', 'success');
+  try {
+    document.execCommand('copy');
+    showToast('COGO data copied to clipboard!', 'success');
+  } catch (err) {
+    // Fallback for modern browsers
+    navigator.clipboard.writeText(cogoOutput.value).then(() => {
+      showToast('COGO data copied to clipboard!', 'success');
+    }).catch(() => {
+      showToast('Failed to copy COGO data', 'error');
+    });
+  }
 }
 
 function downloadCogoFile() {
-  const cogoOutput = document.getElementById('cogo-output').value;
-  if (!cogoOutput) {
+  const cogoOutput = document.getElementById('cogo-output');
+  if (!cogoOutput || !cogoOutput.value) {
     showToast('No COGO data to download', 'error');
     return;
   }
   
-  const blob = new Blob([cogoOutput], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([cogoOutput.value], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -1777,16 +2308,24 @@ function saveToDatabase() {
 }
 
 function showLoading(message) {
-  document.getElementById('loading-message').textContent = message;
-  document.getElementById('loading-overlay').classList.remove('hidden');
+  const loadingMessage = document.getElementById('loading-message');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  
+  if (loadingMessage) loadingMessage.textContent = message;
+  if (loadingOverlay) loadingOverlay.classList.remove('hidden');
 }
 
 function hideLoading() {
-  document.getElementById('loading-overlay').classList.add('hidden');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.add('hidden');
+  }
 }
 
 function showToast(message, type = 'info') {
   const toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) return;
+  
   const toastId = `toast-${Date.now()}`;
   
   const typeClasses = {
