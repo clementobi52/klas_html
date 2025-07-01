@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - KLAS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-card {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-badge-approved {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .status-badge-in-progress {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-badge-rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .module-badge-dashboard { background-color: #3b82f6; color: white; }
+        .module-badge-customer { background-color: #10b981; color: white; }
+        .module-badge-programmes { background-color: #8b5cf6; color: white; }
+        .module-badge-info-products { background-color: #f59e0b; color: white; }
+        .module-badge-instrument { background-color: #ef4444; color: white; }
+        .module-badge-file-registry { background-color: #06b6d4; color: white; }
+
+        .module-icon-dashboard { color: #3b82f6; }
+        .module-icon-customer { color: #10b981; }
+        .module-icon-programmes { color: #8b5cf6; }
+        .module-icon-info-products { color: #f59e0b; }
+        .module-icon-instrument { color: #ef4444; }
+        .module-icon-file-registry { color: #06b6d4; }
+        .module-icon-systems { color: #f97316; }
+        .module-icon-legacy { color: #6b7280; }
+        .module-icon-admin { color: #6366f1; }
+
+        .text-success { color: #10b981; }
+        .text-warning { color: #f59e0b; }
+        .text-pending { color: #8b5cf6; }
+        .text-destructive { color: #ef4444; }
+        .text-info { color: #06b6d4; }
+
+        .bg-success { background-color: #10b981; }
+        .bg-warning { background-color: #f59e0b; }
+        .bg-pending { background-color: #8b5cf6; }
+        .bg-destructive { background-color: #ef4444; }
+        .bg-info { background-color: #06b6d4; }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 50;
+            min-width: 12rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 0.25rem 0;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip .tooltip-content {
+            visibility: hidden;
+            position: absolute;
+            z-index: 50;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            text-align: center;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .tooltip:hover .tooltip-content {
+            visibility: visible;
+        }
+
+        .progress-bar {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-trigger {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .tab-trigger.active {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Chart styles */
+        .chart-bar {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+
+        .chart-tooltip.show {
+            opacity: 1;
+        }
+
+        /* Priority indicators */
+        .priority-high { background-color: #ef4444; }
+        .priority-medium { background-color: #f59e0b; }
+        .priority-low { background-color: #10b981; }
+
+        /* Enhanced shadows */
+        .shadow-enhanced {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Decorative elements */
+        .decorative-circle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5rem;
+            height: 5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(2.5rem, -2.5rem);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Chart Tooltip -->
+    <div id="chart-tooltip" class="chart-tooltip"></div>
+
+    <!-- Page Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                <p class="text-gray-600">Welcome to KLAS - Kano State Land Admin System</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="relative w-64">
+                    <i data-lucide="search" class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"></i>
+                    <input type="search" placeholder="Search..." class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="tooltip">
+                    <button class="relative bg-transparent border-0 p-0">
+                        <div class="relative">
+                            <div class="bg-gray-100 p-2 rounded-full">
+                                <i data-lucide="bell" class="h-4 w-4 text-gray-600"></i>
+                            </div>
+                            <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">3</span>
+                        </div>
+                    </button>
+                    <div class="tooltip-content">Notifications</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 space-y-6 p-6 animate-fade-in">
+        <!-- Enhanced Statistics Cards -->
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div class="gradient-card hover-scale rounded-lg p-6 shadow-enhanced" style="--gradient-start: hsl(221.2, 83.2%, 53.3%); --gradient-end: hsl(262, 83.3%, 57.8%);">
+                <div class="decorative-circle"></div>
+                <div class="flex items-center justify-between mb-2 relative z-10">
+                    <h3 class="text-sm font-medium text-white">Total Applications</h3>
+                    <i data-lucide="file-text" class="h-4 w-4 text-white/80"></i>
+                </div>
+                <div class="text-2xl font-bold text-white relative z-10">1,284</div>
+                <p class="text-xs text-white/80 flex items-center mt-1 relative z-10">
+                    <span class="text-emerald-300 flex items-center mr-1">
+                        <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                        12%
+                    </span>
+                    from last month
+                </p>
+            </div>
+
+            <div class="gradient-card hover-scale rounded-lg p-6 shadow-enhanced" style="--gradient-start: hsl(38, 92%, 50%); --gradient-end: hsl(262, 83.3%, 57.8%);">
+                <div class="decorative-circle"></div>
+                <div class="flex items-center justify-between mb-2 relative z-10">
+                    <h3 class="text-sm font-medium text-white">Pending Approvals</h3>
+                    <i data-lucide="clock" class="h-4 w-4 text-white/80"></i>
+                </div>
+                <div class="text-2xl font-bold text-white relative z-10">145</div>
+                <p class="text-xs text-white/80 flex items-center mt-1 relative z-10">
+                    <span class="text-red-300 flex items-center mr-1">
+                        <i data-lucide="trending-down" class="h-3 w-3 mr-1"></i>
+                        8%
+                    </span>
+                    from last month
+                </p>
+            </div>
+
+            <div class="gradient-card hover-scale rounded-lg p-6 shadow-enhanced" style="--gradient-start: hsl(142.1, 76.2%, 36.3%); --gradient-end: hsl(198, 93%, 60%);">
+                <div class="decorative-circle"></div>
+                <div class="flex items-center justify-between mb-2 relative z-10">
+                    <h3 class="text-sm font-medium text-white">Registered Properties</h3>
+                    <i data-lucide="building-2" class="h-4 w-4 text-white/80"></i>
+                </div>
+                <div class="text-2xl font-bold text-white relative z-10">8,549</div>
+                <p class="text-xs text-white/80 flex items-center mt-1 relative z-10">
+                    <span class="text-emerald-300 flex items-center mr-1">
+                        <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                        4%
+                    </span>
+                    from last month
+                </p>
+            </div>
+
+            <div class="gradient-card hover-scale rounded-lg p-6 shadow-enhanced" style="--gradient-start: hsl(262, 83.3%, 57.8%); --gradient-end: hsl(339.6, 82.2%, 51.6%);">
+                <div class="decorative-circle"></div>
+                <div class="flex items-center justify-between mb-2 relative z-10">
+                    <h3 class="text-sm font-medium text-white">Registered Users</h3>
+                    <i data-lucide="users" class="h-4 w-4 text-white/80"></i>
+                </div>
+                <div class="text-2xl font-bold text-white relative z-10">3,672</div>
+                <p class="text-xs text-white/80 flex items-center mt-1 relative z-10">
+                    <span class="text-emerald-300 flex items-center mr-1">
+                        <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                        9%
+                    </span>
+                    from last month
+                </p>
+            </div>
+
+            <div class="gradient-card hover-scale rounded-lg p-6 shadow-enhanced" style="--gradient-start: hsl(339.6, 82.2%, 51.6%); --gradient-end: hsl(198, 93%, 60%);">
+                <div class="decorative-circle"></div>
+                <div class="flex items-center justify-between mb-2 relative z-10">
+                    <h3 class="text-sm font-medium text-white">Active Modules</h3>
+                    <i data-lucide="layers" class="h-4 w-4 text-white/80"></i>
+                </div>
+                <div class="text-2xl font-bold text-white relative z-10">9</div>
+                <p class="text-xs text-white/80 flex items-center mt-1 relative z-10">
+                    <span class="text-emerald-300 flex items-center mr-1">
+                        <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                        2
+                    </span>
+                    new this month
+                </p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="space-y-6">
+            <div class="bg-gray-100 p-1 rounded-lg inline-flex">
+                <button class="tab-trigger active" data-tab="overview">Overview</button>
+                <button class="tab-trigger" data-tab="applications">Applications</button>
+                <button class="tab-trigger" data-tab="documents">Information Products</button>
+                <button class="tab-trigger" data-tab="analytics">Analytics</button>
+                <button class="tab-trigger" data-tab="modules">Modules</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active space-y-6">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                    <!-- Enhanced Applications Overview Chart -->
+                    <div class="lg:col-span-4 bg-white rounded-lg border-0 shadow-enhanced p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">Applications Overview</h3>
+                                <p class="text-gray-600">Application submissions over the past week</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select id="chart-period" class="px-3 py-2 border rounded-md text-sm">
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                </select>
+                                <div class="relative">
+                                    <button class="flex items-center gap-2 px-3 py-1 border rounded-md text-sm hover:bg-gray-50" onclick="toggleDropdown('filter-dropdown')">
+                                        <i data-lucide="filter" class="h-3.5 w-3.5"></i>
+                                        Filter
+                                    </button>
+                                    <div id="filter-dropdown" class="dropdown-menu">
+                                        <div class="px-3 py-2 text-sm font-medium text-gray-700 border-b">Filter by</div>
+                                        <button class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center">
+                                            <i data-lucide="check-circle-2" class="mr-2 h-4 w-4 text-success"></i>
+                                            Approved
+                                        </button>
+                                        <button class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center">
+                                            <i data-lucide="clock" class="mr-2 h-4 w-4 text-warning"></i>
+                                            Pending
+                                        </button>
+                                        <button class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center">
+                                            <i data-lucide="x-circle" class="mr-2 h-4 w-4 text-destructive"></i>
+                                            Rejected
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Stacked Bar Chart -->
+                        <div class="h-[300px] w-full relative">
+                            <div class="flex items-end justify-between h-full gap-2 px-4" id="chart-container">
+                                <!-- Chart bars will be generated by JavaScript -->
+                            </div>
+                            
+                            <!-- Legend -->
+                            <div class="flex items-center justify-center gap-6 mt-4 pt-4 border-t">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-3 w-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-400"></div>
+                                    <span class="text-xs font-medium">Sectional Titling</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="h-3 w-3 rounded-full bg-gradient-to-r from-green-500 to-green-400"></div>
+                                    <span class="text-xs font-medium">Recertification</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="h-3 w-3 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400"></div>
+                                    <span class="text-xs font-medium">Allocation</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t">
+                            <button class="flex items-center gap-2 px-4 py-2 border rounded-md text-sm hover:bg-blue-600 hover:text-white transition-colors">
+                                <i data-lucide="download" class="h-3.5 w-3.5"></i>
+                                Download Report
+                            </button>
+                            <button class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 transition-colors rounded-md">
+                                <i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>
+                                Refresh Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Upcoming Appointments -->
+                    <div class="lg:col-span-3 bg-white rounded-lg border-0 shadow-enhanced p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">Upcoming Appointments</h3>
+                                <p class="text-gray-600">Your schedule for today</p>
+                            </div>
+                            <button class="text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2 py-1 rounded">View All</button>
+                        </div>
+                        <div class="space-y-4 max-h-[300px] overflow-y-auto">
+                            <div class="flex items-start gap-4 rounded-lg border p-3 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full border bg-gradient-to-br from-blue-100 to-blue-50">
+                                    <i data-lucide="calendar" class="h-5 w-5 text-blue-600"></i>
+                                </div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium">Property Inspection</p>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-2 w-2 rounded-full priority-high"></div>
+                                            <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Upcoming</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="clock" class="mr-1 h-3 w-3"></i>
+                                        10:00 AM with John Smith
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="map-pin" class="mr-1 h-3 w-3"></i>
+                                        Riverside Apartments
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 rounded-lg border p-3 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full border bg-gradient-to-br from-blue-100 to-blue-50">
+                                    <i data-lucide="calendar" class="h-5 w-5 text-blue-600"></i>
+                                </div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium">Document Verification</p>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-2 w-2 rounded-full priority-medium"></div>
+                                            <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Upcoming</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="clock" class="mr-1 h-3 w-3"></i>
+                                        11:30 AM with Sarah Johnson
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="map-pin" class="mr-1 h-3 w-3"></i>
+                                        KLAS Office
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 rounded-lg border p-3 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full border bg-gradient-to-br from-blue-100 to-blue-50">
+                                    <i data-lucide="calendar" class="h-5 w-5 text-blue-600"></i>
+                                </div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium">Title Deed Handover</p>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-2 w-2 rounded-full priority-high"></div>
+                                            <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full border">Confirmed</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="clock" class="mr-1 h-3 w-3"></i>
+                                        1:00 PM with Michael Brown
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="map-pin" class="mr-1 h-3 w-3"></i>
+                                        Central Plaza
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 rounded-lg border p-3 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full border bg-gradient-to-br from-blue-100 to-blue-50">
+                                    <i data-lucide="calendar" class="h-5 w-5 text-blue-600"></i>
+                                </div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium">Land Survey Review</p>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-2 w-2 rounded-full priority-low"></div>
+                                            <span class="px-2 py-1 text-xs bg-gray-200 text-gray-800 rounded-full">Pending</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="clock" class="mr-1 h-3 w-3"></i>
+                                        2:30 PM with Emily Davis
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <i data-lucide="map-pin" class="mr-1 h-3 w-3"></i>
+                                        Field Office
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row -->
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <!-- Recent Activities -->
+                    <div class="col-span-2 bg-white rounded-lg border-0 shadow-enhanced p-6">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-semibold">Recent Activities</h3>
+                            <p class="text-gray-600">Latest system activities</p>
+                        </div>
+                        <div class="space-y-4 max-h-[200px] overflow-y-auto">
+                            <div class="flex items-start space-x-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="p-2 rounded-full bg-gray-100">
+                                    <i data-lucide="file-text" class="h-4 w-4 text-blue-600"></i>
+                                </div>
+                                <div class="space-y-1 flex-1">
+                                    <p class="text-sm font-medium">New application submitted</p>
+                                    <p class="text-xs text-gray-500">John Smith • 10 minutes ago</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full border">Sectional Titling</span>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="p-2 rounded-full bg-gray-100">
+                                    <i data-lucide="check-circle-2" class="h-4 w-4 text-green-600"></i>
+                                </div>
+                                <div class="space-y-1 flex-1">
+                                    <p class="text-sm font-medium">Document approved</p>
+                                    <p class="text-xs text-gray-500">Admin User • 30 minutes ago</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full border">Certificate of Occupancy</span>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="p-2 rounded-full bg-gray-100">
+                                    <i data-lucide="user-circle" class="h-4 w-4 text-purple-600"></i>
+                                </div>
+                                <div class="space-y-1 flex-1">
+                                    <p class="text-sm font-medium">User account created</p>
+                                    <p class="text-xs text-gray-500">System • 1 hour ago</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full border">System Admin</span>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="p-2 rounded-full bg-gray-100">
+                                    <i data-lucide="file-digit" class="h-4 w-4 text-cyan-600"></i>
+                                </div>
+                                <div class="space-y-1 flex-1">
+                                    <p class="text-sm font-medium">File uploaded</p>
+                                    <p class="text-xs text-gray-500">Sarah Johnson • 2 hours ago</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full border">File Digital Registry</span>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="p-2 rounded-full bg-gray-100">
+                                    <i data-lucide="calendar-days" class="h-4 w-4 text-yellow-600"></i>
+                                </div>
+                                <div class="space-y-1 flex-1">
+                                    <p class="text-sm font-medium">Appointment scheduled</p>
+                                    <p class="text-xs text-gray-500">Michael Brown • 3 hours ago</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full border">Customer Management</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module Usage -->
+                    <div class="bg-white rounded-lg border-0 shadow-enhanced p-6">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-semibold">Module Usage</h3>
+                            <p class="text-gray-600">Most active modules</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="building-2" class="h-4 w-4 text-blue-600"></i>
+                                        <span class="text-sm">Sectional Titling</span>
+                                    </div>
+                                    <span class="text-sm font-medium">42%</span>
+                                </div>
+                                <div class="progress-bar h-2">
+                                    <div class="progress-fill" style="width: 42%"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="file-check" class="h-4 w-4 text-green-600"></i>
+                                        <span class="text-sm">Recertification</span>
+                                    </div>
+                                    <span class="text-sm font-medium">28%</span>
+                                </div>
+                                <div class="progress-bar h-2">
+                                    <div class="progress-fill bg-green-500" style="width: 28%"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="file-digit" class="h-4 w-4 text-yellow-600"></i>
+                                        <span class="text-sm">File Digital Registry</span>
+                                    </div>
+                                    <span class="text-sm font-medium">15%</span>
+                                </div>
+                                <div class="progress-bar h-2">
+                                    <div class="progress-fill bg-yellow-500" style="width: 15%"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="users" class="h-4 w-4 text-purple-600"></i>
+                                        <span class="text-sm">Customer Management</span>
+                                    </div>
+                                    <span class="text-sm font-medium">15%</span>
+                                </div>
+                                <div class="progress-bar h-2">
+                                    <div class="progress-fill bg-purple-500" style="width: 15%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-lg border-0 shadow-enhanced p-6">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-semibold">Quick Stats</h3>
+                            <p class="text-gray-600">System performance</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-1 rounded-full bg-gray-100">
+                                        <i data-lucide="check-circle-2" class="h-4 w-4 text-green-600"></i>
+                                    </div>
+                                    <span class="text-sm">Approved Applications</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">432</div>
+                                    <div class="text-xs flex items-center text-green-600">
+                                        <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                                        +12%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-1 rounded-full bg-gray-100">
+                                        <i data-lucide="x-circle" class="h-4 w-4 text-red-600"></i>
+                                    </div>
+                                    <span class="text-sm">Rejected Applications</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">67</div>
+                                    <div class="text-xs flex items-center text-green-600">
+                                        <i data-lucide="trending-down" class="h-3 w-3 mr-1"></i>
+                                        -5%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-1 rounded-full bg-gray-100">
+                                        <i data-lucide="clock" class="h-4 w-4 text-yellow-600"></i>
+                                    </div>
+                                    <span class="text-sm">Average Processing Time</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">3.2 days</div>
+                                    <div class="text-xs flex items-center text-green-600">
+                                        <i data-lucide="trending-down" class="h-3 w-3 mr-1"></i>
+                                        -0.5 days
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-1 rounded-full bg-gray-100">
+                                        <i data-lucide="help-circle" class="h-4 w-4 text-blue-600"></i>
+                                    </div>
+                                    <span class="text-sm">User Satisfaction</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">92%</div>
+                                    <div class="text-xs flex items-center text-green-600">
+                                        <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                                        +4%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications Tab -->
+            <div id="applications" class="tab-content space-y-6">
+                <div class="bg-white rounded-lg border-0 shadow-enhanced">
+                    <div class="p-6 border-b">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold">Applications</h3>
+                                <p class="text-gray-600">Manage your land applications</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select class="px-3 py-2 border rounded-md text-sm">
+                                    <option>All Applications</option>
+                                    <option>Pending</option>
+                                    <option>Approved</option>
+                                    <option>Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="border-b bg-gray-50">
+                                <tr>
+                                    <th class="text-left p-4 font-medium text-gray-700">Application ID</th>
+                                    <th class="text-left p-4 font-medium text-gray-700">Type</th>
+                                    <th class="text-left p-4 font-medium text-gray-700">Applicant</th>
+                                    <th class="text-left p-4 font-medium text-gray-700">Date</th>
+                                    <th class="text-left p-4 font-medium text-gray-700">Status</th>
+                                    <th class="text-left p-4 font-medium text-gray-700">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4 font-medium">APP-2023-0042</td>
+                                    <td class="p-4">Sectional Titling</td>
+                                    <td class="p-4">John Smith</td>
+                                    <td class="p-4">2023-06-15</td>
+                                    <td class="p-4">
+                                        <span class="status-badge-in-progress px-2 py-1 text-xs rounded-full">In Progress</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <button class="text-blue-600 hover:text-blue-700 text-sm">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4 font-medium">APP-2023-0041</td>
+                                    <td class="p-4">CofO</td>
+                                    <td class="p-4">Sarah Johnson</td>
+                                    <td class="p-4">2023-06-12</td>
+                                    <td class="p-4">
+                                        <span class="status-badge-approved px-2 py-1 text-xs rounded-full">Approved</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <button class="text-blue-600 hover:text-blue-700 text-sm">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4 font-medium">APP-2023-0040</td>
+                                    <td class="p-4">Right of Occupancy</td>
+                                    <td class="p-4">Michael Brown</td>
+                                    <td class="p-4">2023-06-10</td>
+                                    <td class="p-4">
+                                        <span class="status-badge-pending px-2 py-1 text-xs rounded-full">Pending</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <button class="text-blue-600 hover:text-blue-700 text-sm">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4 font-medium">APP-2023-0039</td>
+                                    <td class="p-4">Recertification</td>
+                                    <td class="p-4">Emily Davis</td>
+                                    <td class="p-4">2023-06-05</td>
+                                    <td class="p-4">
+                                        <span class="status-badge-approved px-2 py-1 text-xs rounded-full">Approved</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <button class="text-blue-600 hover:text-blue-700 text-sm">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4 font-medium">APP-2023-0038</td>
+                                    <td class="p-4">Land Property Enumeration</td>
+                                    <td class="p-4">Robert Wilson</td>
+                                    <td class="p-4">2023-06-01</td>
+                                    <td class="p-4">
+                                        <span class="status-badge-rejected px-2 py-1 text-xs rounded-full">Rejected</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <button class="text-blue-600 hover:text-blue-700 text-sm">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 border-t flex items-center justify-between">
+                        <div class="text-sm text-gray-600">Showing 5 of 42 applications</div>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 border rounded text-sm" disabled>Previous</button>
+                            <button class="px-3 py-1 border rounded text-sm hover:bg-gray-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Products Tab -->
+            <div id="documents" class="tab-content space-y-6">
+                <div class="bg-white rounded-lg border-0 shadow-enhanced">
+                    <div class="p-6 border-b">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold">Information Products</h3>
+                                <p class="text-gray-600">Manage your land documents</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50">
+                                    <i data-lucide="download" class="h-4 w-4"></i>
+                                    Export
+                                </button>
+                                <button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                    <i data-lucide="plus" class="h-4 w-4"></i>
+                                    New Document
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            <div class="hover-scale bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-md rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium">CofO</h3>
+                                        <p class="text-2xl font-bold mt-2">1,284</p>
+                                    </div>
+                                    <i data-lucide="file-check" class="h-10 w-10 text-blue-600 opacity-80"></i>
+                                </div>
+                            </div>
+
+                            <div class="hover-scale bg-gradient-to-br from-green-50 to-green-100 border-0 shadow-md rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium">Right of Occupancy</h3>
+                                        <p class="text-2xl font-bold mt-2">856</p>
+                                    </div>
+                                    <i data-lucide="file-text" class="h-10 w-10 text-green-600 opacity-80"></i>
+                                </div>
+                            </div>
+
+                            <div class="hover-scale bg-gradient-to-br from-yellow-50 to-yellow-100 border-0 shadow-md rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium">Letter of Administration</h3>
+                                        <p class="text-2xl font-bold mt-2">432</p>
+                                    </div>
+                                    <i data-lucide="file-text" class="h-10 w-10 text-yellow-600 opacity-80"></i>
+                                </div>
+                            </div>
+
+                            <div class="hover-scale bg-gradient-to-br from-purple-50 to-purple-100 border-0 shadow-md rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium">Occupancy Permit</h3>
+                                        <p class="text-2xl font-bold mt-2">621</p>
+                                    </div>
+                                    <i data-lucide="file-text" class="h-10 w-10 text-purple-600 opacity-80"></i>
+                                </div>
+                            </div>
+
+                            <div class="hover-scale bg-gradient-to-br from-red-50 to-red-100 border-0 shadow-md rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium">Site Plan / Parcel Plan</h3>
+                                        <p class="text-2xl font-bold mt-2">1,842</p>
+                                    </div>
+                                    <i data-lucide="file-text" class="h-10 w-10 text-red-600 opacity-80"></i>
+                                </div>
+                            </div>
+
+                            <div class="hover-scale bg-gradient-to-br from-cyan-50 to-cyan-100 border-0 shadow-md rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium">Sectional Title Deeds</h3>
+                                        <p class="text-2xl font-bold mt-2">756</p>
+                                    </div>
+                                    <i data-lucide="building-2" class="h-10 w-10 text-cyan-600 opacity-80"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics" class="tab-content space-y-6">
+                <div class="bg-white rounded-lg border-0 shadow-enhanced">
+                    <div class="p-6 border-b">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold">Analytics</h3>
+                                <p class="text-gray-600">View system analytics and reports</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select class="px-3 py-2 border rounded-md text-sm">
+                                    <option>This Month</option>
+                                    <option>This Week</option>
+                                    <option>This Quarter</option>
+                                    <option>This Year</option>
+                                </select>
+                                <button class="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50">
+                                    <i data-lucide="download" class="h-4 w-4"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-[400px] flex items-center justify-center">
+                            <div class="text-center">
+                                <i data-lucide="bar-chart-3" class="h-16 w-16 text-gray-300 mx-auto mb-4"></i>
+                                <p class="text-gray-500">Advanced analytics visualization would appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modules Tab -->
+            <div id="modules" class="tab-content space-y-6">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="hover-scale bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="home" class="h-8 w-8 module-icon-dashboard"></i>
+                                <span class="module-badge-dashboard px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Dashboard</h3>
+                            <p class="text-gray-600">System overview and statistics</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-blue-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-green-50 to-green-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="users" class="h-8 w-8 module-icon-customer"></i>
+                                <span class="module-badge-customer px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Customer Management</h3>
+                            <p class="text-gray-600">Manage individuals, groups, and appointments</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-green-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-purple-50 to-purple-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="layers" class="h-8 w-8 module-icon-programmes"></i>
+                                <span class="module-badge-programmes px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Programmes</h3>
+                            <p class="text-gray-600">Land allocation, resettlement, and titling</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-purple-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-yellow-50 to-yellow-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="file-text" class="h-8 w-8 module-icon-info-products"></i>
+                                <span class="module-badge-info-products px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Information Products</h3>
+                            <p class="text-gray-600">Certificates, permits, and plans</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-yellow-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-red-50 to-red-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="book-open" class="h-8 w-8 module-icon-instrument"></i>
+                                <span class="module-badge-instrument px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Instrument Registration</h3>
+                            <p class="text-gray-600">Register land instruments</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-red-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-cyan-50 to-cyan-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="file-digit" class="h-8 w-8 module-icon-file-registry"></i>
+                                <span class="module-badge-file-registry px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">File Digital Registry</h3>
+                            <p class="text-gray-600">Archive, track, and index files</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-cyan-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-orange-50 to-orange-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="alert-circle" class="h-8 w-8 module-icon-systems"></i>
+                                <span class="module-badge-dashboard px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Systems</h3>
+                            <p class="text-gray-600">Caveat and encumbrance management</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-orange-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-gray-50 to-gray-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="history" class="h-8 w-8 module-icon-legacy"></i>
+                                <span class="module-badge-info-products px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">Legacy Systems</h3>
+                            <p class="text-gray-600">Access to legacy data</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hover-scale bg-gradient-to-br from-indigo-50 to-indigo-100 border-0 shadow-md rounded-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <i data-lucide="settings" class="h-8 w-8 module-icon-admin"></i>
+                                <span class="module-badge-instrument px-2 py-1 text-xs rounded-full">Module</span>
+                            </div>
+                            <h3 class="text-lg font-semibold mt-4">System Admin</h3>
+                            <p class="text-gray-600">User accounts and system settings</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md hover:bg-indigo-600 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                Access Module
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart data
+        const chartData = [
+            { day: "Mon", sectional: 45, recertification: 32, allocation: 28, total: 105 },
+            { day: "Tue", sectional: 52, recertification: 28, allocation: 35, total: 115 },
+            { day: "Wed", sectional: 38, recertification: 45, allocation: 22, total: 105 },
+            { day: "Thu", sectional: 61, recertification: 35, allocation: 40, total: 136 },
+            { day: "Fri", sectional: 48, recertification: 38, allocation: 32, total: 118 },
+            { day: "Sat", sectional: 35, recertification: 25, allocation: 18, total: 78 },
+            { day: "Sun", sectional: 28, recertification: 20, allocation: 15, total: 63 }
+        ];
+
+        const maxValue = Math.max(...chartData.map(d => d.total));
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Generate chart
+        function generateChart() {
+            const container = document.getElementById('chart-container');
+            container.innerHTML = '';
+
+            chartData.forEach((data, index) => {
+                const dayContainer = document.createElement('div');
+                dayContainer.className = 'flex flex-col items-center flex-1';
+
+                const barContainer = document.createElement('div');
+                barContainer.className = 'flex flex-col items-center justify-end h-64 w-full relative';
+
+                const stackContainer = document.createElement('div');
+                stackContainer.className = 'w-full flex flex-col justify-end h-full relative';
+
+                // Sectional Titling bar
+                const sectionalBar = document.createElement('div');
+                sectionalBar.className = 'w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-sm transition-all duration-300 hover:from-blue-600 hover:to-blue-500 chart-bar';
+                sectionalBar.style.height = `${(data.sectional / maxValue) * 100}%`;
+                sectionalBar.title = `Sectional Titling: ${data.sectional}`;
+
+                // Recertification bar
+                const recertBar = document.createElement('div');
+                recertBar.className = 'w-full bg-gradient-to-t from-green-500 to-green-400 transition-all duration-300 hover:from-green-600 hover:to-green-500 chart-bar';
+                recertBar.style.height = `${(data.recertification / maxValue) * 100}%`;
+                recertBar.title = `Recertification: ${data.recertification}`;
+
+                // Allocation bar
+                const allocBar = document.createElement('div');
+                allocBar.className = 'w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-b-sm transition-all duration-300 hover:from-yellow-600 hover:to-yellow-500 chart-bar';
+                allocBar.style.height = `${(data.allocation / maxValue) * 100}%`;
+                allocBar.title = `Allocation: ${data.allocation}`;
+
+                // Total tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600 opacity-0 hover:opacity-100 transition-opacity bg-white px-2 py-1 rounded shadow-sm border';
+                tooltip.textContent = data.total;
+
+                // Day label
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'text-xs font-medium text-gray-600 mt-2';
+                dayLabel.textContent = data.day;
+
+                stackContainer.appendChild(sectionalBar);
+                stackContainer.appendChild(recertBar);
+                stackContainer.appendChild(allocBar);
+                barContainer.appendChild(stackContainer);
+                barContainer.appendChild(tooltip);
+                dayContainer.appendChild(barContainer);
+                dayContainer.appendChild(dayLabel);
+                container.appendChild(dayContainer);
+
+                // Add hover effects
+                [sectionalBar, recertBar, allocBar].forEach(bar => {
+                    bar.addEventListener('mouseenter', () => {
+                        tooltip.style.opacity = '1';
+                    });
+                    bar.addEventListener('mouseleave', () => {
+                        tooltip.style.opacity = '0';
+                    });
+                });
+            });
+        }
+
+        // Tab functionality
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-trigger').forEach(trigger => {
+                trigger.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        // Add click event listeners to tab triggers
+        document.querySelectorAll('.tab-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const tabName = trigger.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        // Dropdown functionality
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.relative')) {
+                document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            }
+        });
+
+        // Search functionality
+        document.querySelector('input[type="search"]').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            console.log('Searching for:', searchTerm);
+        });
+
+        // Notification button
+        document.querySelector('.tooltip button').addEventListener('click', function() {
+            alert('You have 3 new notifications:\n1. New application submitted\n2. Document approved\n3. Appointment scheduled');
+        });
+
+        // Module access buttons
+        document.querySelectorAll('button').forEach(button => {
+            if (button.textContent.includes('Access Module')) {
+                button.addEventListener('click', function() {
+                    const moduleCard = button.closest('.hover-scale');
+                    const moduleName = moduleCard.querySelector('h3').textContent;
+                    alert(`Accessing ${moduleName} module...`);
+                });
+            }
+        });
+
+        // View buttons in applications table
+        document.querySelectorAll('button').forEach(button => {
+            if (button.textContent === 'View') {
+                button.addEventListener('click', function() {
+                    const row = button.closest('tr');
+                    const appId = row.querySelector('td').textContent;
+                    alert(`Viewing application ${appId}...`);
+                });
+            }
+        });
+
+        // Export buttons
+        document.querySelectorAll('button').forEach(button => {
+            if (button.textContent.includes('Export') || button.textContent.includes('Download Report')) {
+                button.addEventListener('click', function() {
+                    alert('Exporting data...');
+                });
+            }
+        });
+
+        // Refresh button
+        document.querySelectorAll('button').forEach(button => {
+            if (button.textContent.includes('Refresh Data')) {
+                button.addEventListener('click', function() {
+                    alert('Refreshing data...');
+                    generateChart(); // Regenerate chart
+                });
+            }
+        });
+
+        // Filter dropdown items
+        document.querySelectorAll('#filter-dropdown button').forEach(button => {
+            button.addEventListener('click', function() {
+                const filterType = button.textContent.trim();
+                alert(`Filtering by: ${filterType}`);
+                document.getElementById('filter-dropdown').classList.remove('show');
+            });
+        });
+
+        // Pagination buttons
+        document.querySelectorAll('button').forEach(button => {
+            if (button.textContent === 'Next' && !button.disabled) {
+                button.addEventListener('click', function() {
+                    alert('Loading next page...');
+                });
+            }
+        });
+
+        // Chart period selector
+        document.getElementById('chart-period').addEventListener('change', function() {
+            const period = this.value;
+            console.log('Chart period changed to:', period);
+            // Update chart description
+            const description = document.querySelector('.lg\\:col-span-4 p');
+            description.textContent = `Application submissions over the past ${period}`;
+        });
+
+        // Add hover effects for cards
+        document.querySelectorAll('.hover-scale').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Initialize progress bars animation
+        setTimeout(() => {
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }, 500);
+
+        // Initialize chart
+        generateChart();
+
+        console.log('Enhanced Dashboard initialized successfully');
+    </script>
+</body>
+</html>
