@@ -367,6 +367,11 @@ tailwind.config = {
             <label class="block text-sm font-medium text-gray-700">LGA/City</label>
             <input id="lga-city" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="e.g., Lokoja" />
           </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Title/Property Holder</label>
+            <input id="property-holder" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="e.g., ALH. AUWALU BATURE GARKUWA" />
+          </div>
         </div>
         
         <div class="space-y-2">
@@ -469,9 +474,10 @@ function setupEventListeners() {
   // Instruments
   document.getElementById('add-instrument-btn').addEventListener('click', addInstrument);
   
-  // Property form auto-generation
+  // Property form auto-generation and validation
   document.getElementById('file-prefix').addEventListener('input', updateCompleteFileNo);
   document.getElementById('file-serial-no').addEventListener('input', updateCompleteFileNo);
+  document.getElementById('file-number-type').addEventListener('change', handleFileNumberTypeChange);
   
   // Save record
   document.getElementById('save-record-btn').addEventListener('click', handleSaveRecord);
@@ -824,94 +830,316 @@ function extractPropertyInstrumentDetails(text, fileName) {
   };
   
   let foundFields = 0;
-  
-  // File number extraction
-  const fileNoMatch = cleanText.match(/(?:File\s*No\.?|FILE\s*NUMBER)\s*:\s*([A-Z0-9/\s-]+)/i);
-  if (fileNoMatch?.[1]) {
-    data.fileNo = fileNoMatch[1].trim();
-    const parts = data.fileNo.split(/[\s-]+/);
-    if (parts.length > 1) {
-      data.filePrefix = parts.slice(0, -1).join('-');
-      data.fileSerialNo = parts.pop();
-    } else {
-      data.fileSerialNo = data.fileNo;
+
+  // Enhanced extraction for RECERTIFICATION forms - highest priority
+  const recertificationPatterns = {
+    newFileNumber: [
+      /NEW\s+FILE\s+NUMBER[:\s]*([A-Z0-9/\s-]+?)(?:\s+PLOT|\s+TITLE|\s*$)/i,
+      /NEW\s+FILE\s+NO[:\s]*([A-Z0-9/\s-]+?)(?:\s+PLOT|\s+TITLE|\s*$)/i,
+      // Look for patterns after "NEW FILE NUMBER" label
+      /NEW\s+FILE\s+NUMBER.*?([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{2,4})/i,
+      /NEW\s+FILE\s+NUMBER.*?(LKN\/COM\/\d{4}\/\d{2,4})/i,
+    ],
+    plotNumber: [
+      /PLOT\s+NUMBER[:\s]*([A-Z0-9\s-]+?)(?:\s+TITLE|\s+OLD|\s*$)/i,
+      /PLOT\s+NO[:\s]*([A-Z0-9\s-]+?)(?:\s+TITLE|\s+OLD|\s*$)/i,
+      // Look for patterns after "PLOT NUMBER" label
+      /PLOT\s+NUMBER.*?([A-Z0-9\s-]+?)(?:\s|$)/i,
+    ],
+    title: [
+      /TITLE[:\s]*([A-Z\s.,'-]+?)(?:\s+OLD\s+FILE|\s+TO|\s*$)/i,
+      // More specific patterns for the TITLE field on recertification forms
+      /TITLE[:\s]+([A-Z][A-Z\s.,'-]{5,50})(?:\s+OLD|\s+TO|\s*$)/i,
+      // Handle handwritten names after TITLE label
+      /TITLE[:\s]*([A-Z][a-zA-Z\s.,'-]{10,60})(?:\s+OLD\s+FILE|\s+TO|\s*$)/i,
+      // Common Nigerian name patterns with titles
+      /TITLE[:\s]*(ALH\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      /TITLE[:\s]*(ALHAJI\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      /TITLE[:\s]*(DR\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      /TITLE[:\s]*(PROF\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      /TITLE[:\s]*(MR\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      /TITLE[:\s]*(MRS\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      /TITLE[:\s]*(MISS\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+      // Pattern to catch names that might have OCR artifacts
+      /TITLE[:\s]*([A-Z][A-Za-z\s.,'-_]{8,50})(?:\s+OLD|\s+TO|\s*$)/i,
+    ],
+    oldFileNumber: [
+      /OLD\s+FILE\s+NUMBER[:\s]*([A-Z0-9/\s-]+?)(?:\s+TO|\s*$)/i,
+      /OLD\s+FILE\s+NO[:\s]*([A-Z0-9/\s-]+?)(?:\s+TO|\s*$)/i,
+      // Look for patterns after "OLD FILE NUMBER" label
+      /OLD\s+FILE\s+NUMBER.*?([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{2,4})/i,
+      /OLD\s+FILE\s+NUMBER.*?(COM\/\d{4}\/\d{2,4})/i,
+    ]
+  };
+
+  // Extract NEW FILE NUMBER (highest priority)
+  for (const pattern of recertificationPatterns.newFileNumber) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      const fileNo = match[1].trim().replace(/[_\s]+/g, '');
+      if (fileNo.length > 3) { // Ensure it's not just noise
+        data.fileNo = fileNo;
+        
+        // Determine file number type
+        if (fileNo.includes('LKN') || cleanText.toLowerCase().includes('kangis')) {
+          data.fileNumberType = 'kangisFileNo';
+          data.kangisFileNo = fileNo;
+        } else if (fileNo.includes('MLS')) {
+          data.fileNumberType = 'mlsFileNo';
+          data.mlsFileNo = fileNo;
+        } else {
+          data.fileNumberType = 'kangisFileNo';
+          data.kangisFileNo = fileNo;
+        }
+        
+        // Parse components
+        const parts = fileNo.split('/');
+        if (parts.length >= 2) {
+          if (parts.length === 4) {
+            data.filePrefix = `${parts[0]}/${parts[1]}`;
+            data.fileSerialNo = `${parts[2]}/${parts[3]}`;
+          } else if (parts.length === 3) {
+            if (parts[1].match(/^\d{4}$/)) {
+              data.filePrefix = parts[0];
+              data.fileSerialNo = `${parts[1]}/${parts[2]}`;
+            } else {
+              data.filePrefix = `${parts[0]}/${parts[1]}`;
+              data.fileSerialNo = parts[2];
+            }
+          } else {
+            data.filePrefix = parts[0];
+            data.fileSerialNo = parts[1];
+          }
+        }
+        
+        foundFields++;
+        break;
+      }
     }
-    data.kangisFileNo = data.fileNo;
-    data.fileNumberType = 'kangisFileNo';
-    foundFields++;
+  }
+
+  // Extract PLOT NUMBER
+  for (const pattern of recertificationPatterns.plotNumber) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      const plotNo = match[1].trim().replace(/[_\s]+/g, ' ').replace(/[,.]$/, '');
+      if (plotNo.length > 0 && plotNo !== '_' && plotNo !== '-') {
+        data.plotNo = plotNo;
+        foundFields++;
+        break;
+      }
+    }
+  }
+
+  // Extract TITLE (property holder name) - enhanced for recertification forms
+  for (const pattern of recertificationPatterns.title) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      const title = match[1].trim().replace(/[_\s]+/g, ' ').replace(/[,.]$/, '');
+      if (title.length > 3 && title !== '_' && title !== '-') {
+        data.propertyHolder = title;
+        data.assignee = title; // Use as assignee for consistency
+        foundFields++;
+        break;
+      }
+    }
+  }
+
+  // Extract OLD FILE NUMBER
+  for (const pattern of recertificationPatterns.oldFileNumber) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      const oldFileNo = match[1].trim().replace(/[_\s]+/g, '');
+      if (oldFileNo.length > 3) {
+        data.oldFileNo = oldFileNo;
+        foundFields++;
+        break;
+      }
+    }
+  }
+
+  // If no recertification data found, fall back to standard patterns
+  if (!data.fileNo) {
+    const standardFileNoPatterns = [
+      /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*(LKN\/COM\/[A-Z0-9/\s-]+)/i,
+      /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*(COM\/[A-Z0-9/\s-]+)/i,
+      /(?:KANGIS\s*File\s*No\.?|KANGIS\s*FILE\s*NUMBER)\s*:?\s*([A-Z0-9/\s-]+)/i,
+      /(?:MLS\s*File\s*No\.?|MLS\s*FILE\s*NUMBER)\s*:?\s*([A-Z0-9/\s-]+)/i,
+      /(LKN\/COM\/\d{4}\/\d{2,4})/i,
+      /(COM\/\d{4}\/\d{2,4})/i,
+      /([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{3,4})/i,
+    ];
+    
+    for (const pattern of standardFileNoPatterns) {
+      const match = cleanText.match(pattern);
+      if (match?.[1]) {
+        const fileNo = match[1].trim();
+        data.fileNo = fileNo;
+        
+        if (cleanText.toLowerCase().includes('kangis') || fileNo.includes('LKN')) {
+          data.fileNumberType = 'kangisFileNo';
+          data.kangisFileNo = fileNo;
+        } else if (cleanText.toLowerCase().includes('mls') || fileNo.includes('MLS')) {
+          data.fileNumberType = 'mlsFileNo';
+          data.mlsFileNo = fileNo;
+        } else {
+          data.fileNumberType = 'kangisFileNo';
+          data.kangisFileNo = fileNo;
+        }
+        
+        const parts = fileNo.split('/');
+        if (parts.length >= 2) {
+          if (parts.length === 4) {
+            data.filePrefix = `${parts[0]}/${parts[1]}`;
+            data.fileSerialNo = `${parts[2]}/${parts[3]}`;
+          } else if (parts.length === 3) {
+            if (parts[1].match(/^\d{4}$/)) {
+              data.filePrefix = parts[0];
+              data.fileSerialNo = `${parts[1]}/${parts[2]}`;
+            } else {
+              data.filePrefix = `${parts[0]}/${parts[1]}`;
+              data.fileSerialNo = parts[2];
+            }
+          } else {
+            data.filePrefix = parts[0];
+            data.fileSerialNo = parts[1];
+          }
+        }
+        
+        foundFields++;
+        break;
+      }
+    }
+  }
+
+  // Enhanced LGA/City extraction
+  const lgaPatterns = [
+    /(?:LGA|Local\s*Government\s*Area)\s*:?\s*([A-Za-z\s]+?)(?:\s+State|\s+in\s+|\s*,|\s*\.|\n|$)/i,
+    /(?:in\s+|at\s+)([A-Za-z\s]+?)\s+Local\s+Government/i,
+    /(?:situate\s+at\s+|located\s+at\s+|being\s+at\s+)([A-Za-z\s]+?)(?:\s+in\s+|\s+State|\s*,)/i,
+    /(?:City\s*:?\s*|Town\s*:?\s*)([A-Za-z\s]+?)(?:\s+State|\s*,|\s*\.|\n|$)/i,
+    /(Abuja|Lagos|Kano|Ibadan|Port\s+Harcourt|Benin\s+City|Maiduguri|Zaria|Aba|Jos|Ilorin|Oyo|Enugu|Abeokuta|Sokoto|Katsina|Bauchi|Akure|Lokoja|Osogbo|Uyo|Calabar|Owerri|Abakaliki|Lafia|Jalingo|Yenagoa|Asaba|Awka|Makurdi|Gombe|Damaturu|Dutse|Birnin\s+Kebbi|Minna|Kaduna)/i
+  ];
+  
+  for (const pattern of lgaPatterns) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      data.lgsaOrCity = match[1].trim().replace(/[,.]$/, '');
+      foundFields++;
+      break;
+    }
   }
   
-  // MLS File number
-  const mlsFileNoMatch = cleanText.match(/(?:MLS\s*File\s*No\.?)\s*:\s*([A-Z0-9/\s-]+)/i);
-  if (mlsFileNoMatch?.[1]) {
-    data.mlsFileNo = mlsFileNoMatch[1].trim();
-    foundFields++;
+  // Enhanced Instrument type detection
+  const instrumentPatterns = [
+    /(DEED\s+OF\s+ASSIGNMENT)/i,
+    /(CERTIFICATE\s+OF\s+OCCUPANCY)/i,
+    /(RIGHT\s+OF\s+OCCUPANCY)/i,
+    /(DEED\s+OF\s+MORTGAGE)/i,
+    /(TRIPARTITE\s+MORTGAGE)/i,
+    /(DEED\s+OF\s+LEASE)/i,
+    /(DEED\s+OF\s+SUB-LEASE)/i,
+    /(DEED\s+OF\s+SUB-UNDER\s+LEASE)/i,
+    /(DEED\s+OF\s+SURRENDER)/i,
+    /(DEED\s+OF\s+ASSENT)/i,
+    /(DEED\s+OF\s+RELEASE)/i,
+    /(POWER\s+OF\s+ATTORNEY)/i,
+    /(IRREVOCABLE\s+POWER\s+OF\s+ATTORNEY)/i,
+    /(DEED\s+OF\s+SUB-DIVISION)/i,
+    /(DEED\s+OF\s+MERGER)/i,
+    /(SURVEY\s+PLAN)/i,
+    /(C\s+OF\s+O)/i,
+    /(R\s+OF\s+O)/i,
+    /(RECERTIFICATION)/i
+  ];
+  
+  for (const pattern of instrumentPatterns) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      data.instrument = match[1].trim().toUpperCase();
+      foundFields++;
+      break;
+    }
   }
   
-  // Instrument type
-  const instrumentMatch = cleanText.match(
-    /(DEED\s+OF\s+ASSIGNMENT|CERTIFICATE\s+OF\s+OCCUPANCY|RIGHT\s+OF\s+OCCUPANCY|DEED\s+OF\s+MORTGAGE)/i
-  );
-  if (instrumentMatch?.[1]) {
-    data.instrument = instrumentMatch[1].trim();
-    foundFields++;
+  // Enhanced Parties extraction (if not already found in title)
+  if (!data.assignor) {
+    const assignorPatterns = [
+      /(?:ASSIGNOR|VENDOR|GRANTOR)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\s+(?:ASSIGNEE|PURCHASER|GRANTEE|Address|Property|Consideration))/i,
+      /(?:being\s+the\s+property\s+of|belonging\s+to)\s+([A-Za-z\s.,'-]+?)(?:\s+(?:and|of|situate))/i,
+      /(?:Vendor|Grantor)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\n|$)/i
+    ];
+    
+    for (const pattern of assignorPatterns) {
+      const match = cleanText.match(pattern);
+      if (match?.[1]) {
+        data.assignor = match[1].trim().replace(/[,.]$/, '');
+        foundFields++;
+        break;
+      }
+    }
   }
   
-  // Parties
-  const assignorMatch = cleanText.match(
-    /(?:ASSIGNOR|VENDOR|GRANTOR)\s*:\s*([A-Za-z\s.,'-]+)(?:Assignee|Purchaser|Grantee|Address)/i
-  );
-  if (assignorMatch?.[1]) {
-    data.assignor = assignorMatch[1].trim().replace(/,\s*$/, '');
-    foundFields++;
+  if (!data.assignee && !data.propertyHolder) {
+    const assigneePatterns = [
+      /(?:ASSIGNEE|PURCHASER|GRANTEE|HOLDER)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\s+(?:Property|Address|Consideration|being))/i,
+      /(?:in\s+favour\s+of|assigned\s+to|granted\s+to)\s+([A-Za-z\s.,'-]+?)(?:\s+(?:of|being|situate))/i,
+      /(?:Purchaser|Grantee)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\n|$)/i
+    ];
+    
+    for (const pattern of assigneePatterns) {
+      const match = cleanText.match(pattern);
+      if (match?.[1]) {
+        data.assignee = match[1].trim().replace(/[,.]$/, '');
+        foundFields++;
+        break;
+      }
+    }
   }
   
-  const assigneeMatch = cleanText.match(
-    /(?:ASSIGNEE|PURCHASER|GRANTEE|HOLDER)\s*:\s*([A-Za-z\s.,'-]+)(?:Property|Address|Consideration)/i
-  );
-  if (assigneeMatch?.[1]) {
-    data.assignee = assigneeMatch[1].trim().replace(/,\s*$/, '');
-    foundFields++;
+  // Enhanced Registration details extraction
+  const regDetailsPatterns = [
+    /Registered\s+as\s+No\.?\s*(\d+)\s*\/?\s*Page\s*(\d+)\s*\/?\s*Volume\s*(\d+)/i,
+    /Registration\s+No\.?\s*(\d+)\s*\/?\s*Page\s*(\d+)\s*\/?\s*Vol\.?\s*(\d+)/i,
+    /Reg\.?\s*No\.?\s*(\d+)\s*\/?\s*P\.?\s*(\d+)\s*\/?\s*V\.?\s*(\d+)/i,
+    /Serial\s+No\.?\s*(\d+)\s*Page\s*(\d+)\s*Volume\s*(\d+)/i
+  ];
+  
+  for (const pattern of regDetailsPatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      data.serialNo = match[1];
+      data.page = match[2];
+      data.vol = match[3];
+      data.regNo = `${data.serialNo}/${data.page}/${data.vol}`;
+      foundFields += 3;
+      break;
+    }
   }
   
-  // Plot number
-  const plotNoMatch = cleanText.match(/(?:Plot\s*No\.?|PLOT)\s*([A-Za-z0-9\s-]+)/i);
-  if (plotNoMatch?.[1]) {
-    data.plotNo = plotNoMatch[1].trim();
-    foundFields++;
+  // Enhanced Description extraction
+  const descriptionPatterns = [
+    /(?:Property\s*Description|ALL\s*THAT\s*parcel\s*of\s*land|Description\s*of\s*Property)\s*:?\s*([^.]+?)(?:\.|$)/i,
+    /ALL\s+THAT\s+([^.]+?)(?:\.|situate)/i,
+    /being\s+([^.]+?)(?:\.|situate|measuring)/i,
+    /(?:comprising|containing)\s+([^.]+?)(?:\.|$)/i
+  ];
+  
+  for (const pattern of descriptionPatterns) {
+    const match = cleanText.match(pattern);
+    if (match?.[1]) {
+      data.description = match[1].trim();
+      foundFields++;
+      break;
+    }
   }
   
-  // LGA
-  const lgaMatch = cleanText.match(/(?:LGA|Local\s*Government\s*Area)\s*:\s*([A-Za-z\s]+)/i);
-  if (lgaMatch?.[1]) {
-    data.lgsaOrCity = lgaMatch[1].trim();
-    foundFields++;
-  }
-  
-  // Registration details
-  const regDetailsMatch = cleanText.match(
-    /Registered\s+as\s+No\.?\s*(\d+)\s*\/\s*Page\s*(\d+)\s*\/\s*Volume\s*(\d+)/i
-  );
-  if (regDetailsMatch) {
-    data.serialNo = regDetailsMatch[1];
-    data.page = regDetailsMatch[2];
-    data.vol = regDetailsMatch[3];
-    data.regNo = `${data.serialNo}/${data.page}/${data.vol}`;
-    foundFields += 3;
-  }
-  
-  // Description
-  const descriptionMatch = cleanText.match(
-    /(?:Property\s*Description|ALL\s*THAT\s*parcel\s*of\s*land)\s*:\s*([^.]+)/i
-  );
-  if (descriptionMatch?.[1]) {
-    data.description = descriptionMatch[1].trim();
-    foundFields++;
-  }
-  
-  data.confidence = Math.min(100, Math.round((foundFields / 10) * 100));
-  data.extractionStatus = data.confidence > 50 ? 'Partially Extracted' : 
-                         data.confidence > 20 ? 'Low Confidence' : 'Extraction Failed';
+  // Calculate confidence based on found fields
+  const totalPossibleFields = 12;
+  data.confidence = Math.min(100, Math.round((foundFields / totalPossibleFields) * 100));
+  data.extractionStatus = data.confidence > 70 ? 'High Confidence' :
+                         data.confidence > 40 ? 'Partially Extracted' : 
+                         data.confidence > 15 ? 'Low Confidence' : 'Extraction Failed';
   
   return data;
 }
@@ -936,7 +1164,8 @@ function analyzeTextForKeywords(text) {
     'C OF O',
     'RIGHT OF OCCUPANCY',
     'R OF O',
-    'SURVEY PLAN'
+    'SURVEY PLAN',
+    'RECERTIFICATION'
   ];
   
   const pageMarkerRegex = /--- Page (\d+)(?:\s*$$OCR$$)?\s*---/gi;
@@ -1109,46 +1338,95 @@ function populatePropertyForm() {
   
   const data = extractedPropertyData;
   
-  // Set confidence display
-  document.getElementById('extraction-confidence').textContent = 
-    `Review the details extracted by the AI. Add or modify instruments as needed, then save the record. Confidence: ${data.confidence}% (${data.extractionStatus})`;
+  // Set confidence display with additional info about file numbers and property holder
+  let confidenceText = `Review the details extracted by the AI. Add or modify instruments as needed, then save the record. Confidence: ${data.confidence}% (${data.extractionStatus})`;
+
+  if (data.oldFileNo && data.fileNo) {
+    confidenceText += ` | Found transition: ${data.oldFileNo} → ${data.fileNo}`;
+  } else if (data.oldFileNo) {
+    confidenceText += ` | Old File No: ${data.oldFileNo}`;
+  }
   
-  // Populate form fields
+  if (data.propertyHolder) {
+    confidenceText += ` | Property Holder: ${data.propertyHolder}`;
+  }
+
+  document.getElementById('extraction-confidence').textContent = confidenceText;
+
+  // Populate form fields with proper fallbacks
+  const fileNumberTypeField = document.getElementById('file-number-type');
   if (data.fileNumberType) {
-    document.getElementById('file-number-type').value = data.fileNumberType;
+    fileNumberTypeField.value = data.fileNumberType;
   }
+
+  const filePrefixField = document.getElementById('file-prefix');
   if (data.filePrefix) {
-    document.getElementById('file-prefix').value = data.filePrefix;
+    filePrefixField.value = data.filePrefix;
   }
+
+  const fileSerialNoField = document.getElementById('file-serial-no');
   if (data.fileSerialNo) {
-    document.getElementById('file-serial-no').value = data.fileSerialNo;
+    fileSerialNoField.value = data.fileSerialNo;
   }
+
+  const completeFileNoField = document.getElementById('complete-file-no');
   if (data.fileNo) {
-    document.getElementById('complete-file-no').value = data.fileNo;
+    completeFileNoField.value = data.fileNo;
   }
+
+  const plotNoField = document.getElementById('plot-no');
   if (data.plotNo) {
-    document.getElementById('plot-no').value = data.plotNo;
+    plotNoField.value = data.plotNo;
   }
+
+  const lgaCityField = document.getElementById('lga-city');
   if (data.lgsaOrCity) {
-    document.getElementById('lga-city').value = data.lgsaOrCity;
+    lgaCityField.value = data.lgsaOrCity;
   }
+
+  const propertyHolderField = document.getElementById('property-holder');
+  if (data.propertyHolder) {
+    propertyHolderField.value = data.propertyHolder;
+  }
+
+  const propertyDescField = document.getElementById('property-description');
   if (data.description) {
-    document.getElementById('property-description').value = data.description;
+    propertyDescField.value = data.description;
   }
+
+  // Trigger the complete file number update
+  updateCompleteFileNo();
 }
 
 function updateCompleteFileNo() {
   const prefix = document.getElementById('file-prefix').value.trim();
   const serialNo = document.getElementById('file-serial-no').value.trim();
   const completeField = document.getElementById('complete-file-no');
-  
+
   if (prefix && serialNo) {
     completeField.value = `${prefix}/${serialNo}`;
   } else if (serialNo) {
     completeField.value = serialNo;
+  } else if (prefix) {
+    completeField.value = prefix;
   } else {
     completeField.value = '';
   }
+}
+
+function handleFileNumberTypeChange() {
+  const fileNumberType = document.getElementById('file-number-type').value;
+  const filePrefixField = document.getElementById('file-prefix');
+  const fileSerialNoField = document.getElementById('file-serial-no');
+
+  // Set default prefixes based on type
+  if (fileNumberType === 'kangisFileNo' && !filePrefixField.value) {
+    filePrefixField.placeholder = 'e.g., LKN/RES, ABJ/COM';
+  } else if (fileNumberType === 'mlsFileNo' && !filePrefixField.value) {
+    filePrefixField.placeholder = 'e.g., MLS/2024';
+  }
+
+  updateCompleteFileNo();
 }
 
 function addInstrument() {
@@ -1158,7 +1436,7 @@ function addInstrument() {
     description: '',
     parties: {
       assignor: extractedPropertyData?.assignor || '',
-      assignee: extractedPropertyData?.assignee || ''
+      assignee: extractedPropertyData?.assignee || extractedPropertyData?.propertyHolder || ''
     },
     registrationDetails: {
       serialNo: extractedPropertyData?.serialNo || '',
@@ -1168,7 +1446,7 @@ function addInstrument() {
     },
     notes: ''
   };
-  
+
   instruments.push(newInstrument);
   editingInstrumentId = newInstrument.id;
   renderInstruments();
@@ -1212,15 +1490,15 @@ function updateInstrument(id, field, value) {
 function renderInstruments() {
   const container = document.getElementById('instruments-list');
   const noInstruments = document.getElementById('no-instruments');
-  
+
   if (instruments.length === 0) {
     container.innerHTML = '';
     noInstruments.classList.remove('hidden');
     return;
   }
-  
+
   noInstruments.classList.add('hidden');
-  
+
   const instrumentTypes = [
     'DEED OF ASSIGNMENT',
     'CERTIFICATE OF OCCUPANCY',
@@ -1238,9 +1516,10 @@ function renderInstruments() {
     'DEED OF SUB-DIVISION',
     'DEED OF MERGER',
     'SURVEY PLAN',
+    'RECERTIFICATION',
     'OTHER'
   ];
-  
+
   container.innerHTML = instruments.map((instrument, index) => {
     const isEditing = editingInstrumentId === instrument.id;
     
@@ -1423,7 +1702,7 @@ function renderInstruments() {
       </div>
     `;
   }).join('');
-  
+
   // Re-initialize Lucide icons
   lucide.createIcons();
 }
@@ -1432,7 +1711,7 @@ function toggleRawText() {
   const content = document.getElementById('raw-text-content');
   const button = document.getElementById('toggle-raw-text');
   const icon = button.querySelector('i');
-  
+
   if (content.classList.contains('expanded')) {
     content.classList.remove('expanded');
     icon.setAttribute('data-lucide', 'chevron-down');
@@ -1442,13 +1721,13 @@ function toggleRawText() {
     icon.setAttribute('data-lucide', 'chevron-up');
     button.innerHTML = '<i data-lucide="chevron-up" class="h-4 w-4"></i> Hide';
   }
-  
+
   lucide.createIcons();
 }
 
 function handleSaveRecord() {
   if (!extractedPropertyData) return;
-  
+
   // Collect form data
   const formData = {
     ...extractedPropertyData,
@@ -1458,14 +1737,15 @@ function handleSaveRecord() {
     fileNo: document.getElementById('complete-file-no').value,
     plotNo: document.getElementById('plot-no').value,
     lgsaOrCity: document.getElementById('lga-city').value,
+    propertyHolder: document.getElementById('property-holder').value,
     description: document.getElementById('property-description').value,
     instruments: instruments
   };
-  
+
   // Here you would typically save to your database
   console.log('Saving property record:', formData);
   showToast('Property record saved successfully!', 'success');
-  
+
   // Optionally reset the form after saving
   // resetState();
 }
@@ -1482,11 +1762,11 @@ function resetState() {
   aiProgress = 0;
   instruments = [];
   editingInstrumentId = null;
-  
+
   // Reset file input
   document.getElementById('file-input').value = '';
   document.getElementById('file-upload-text').textContent = 'Click to select a file';
-  
+
   // Hide all sections
   hideError();
   document.getElementById('image-preview').classList.add('hidden');
@@ -1495,7 +1775,7 @@ function resetState() {
   document.getElementById('keyword-findings').classList.add('hidden');
   document.getElementById('raw-text-card').classList.add('hidden');
   document.getElementById('extracted-details').classList.add('hidden');
-  
+
   updateUI();
 }
 
@@ -1507,7 +1787,7 @@ function resetExtractionState() {
   aiProgress = 0;
   instruments = [];
   editingInstrumentId = null;
-  
+
   hideAiProcessing();
   document.getElementById('keyword-findings').classList.add('hidden');
   document.getElementById('raw-text-card').classList.add('hidden');
@@ -1519,7 +1799,7 @@ function resetFileState() {
   previewUrl = null;
   pdfPagePreviews = [];
   currentPdfPreviewPageIdx = 0;
-  
+
   document.getElementById('file-input').value = '';
   document.getElementById('file-upload-text').textContent = 'Click to select a file';
   document.getElementById('image-preview').classList.add('hidden');
@@ -1529,7 +1809,7 @@ function resetFileState() {
 function updateUI() {
   const startBtn = document.getElementById('start-ai-btn');
   const resetBtn = document.getElementById('reset-btn');
-  
+
   // Update start button state
   if (selectedFile && (currentAiStage === 'idle' || currentAiStage === 'complete')) {
     startBtn.disabled = false;
@@ -1543,14 +1823,14 @@ function updateUI() {
     startBtn.disabled = true;
     startBtn.innerHTML = '<i data-lucide="wand-2" class="mr-2 h-4 w-4"></i>Extract Data with AI';
   }
-  
+
   // Update reset button visibility
   if (currentAiStage !== 'idle' || selectedFile) {
     resetBtn.classList.remove('hidden');
   } else {
     resetBtn.classList.add('hidden');
   }
-  
+
   // Re-initialize Lucide icons
   lucide.createIcons();
 }
@@ -1578,14 +1858,14 @@ function formatFileSize(bytes) {
 function showToast(message, type = 'info') {
   const toastContainer = document.getElementById('toast-container');
   const toastId = `toast-${Date.now()}`;
-  
+
   const typeClasses = {
     success: 'bg-green-600 text-white',
     error: 'bg-red-600 text-white',
     warning: 'bg-yellow-600 text-white',
     info: 'bg-blue-600 text-white'
   };
-  
+
   const toast = document.createElement('div');
   toast.id = toastId;
   toast.className = `${typeClasses[type]} px-4 py-2 rounded-md shadow-lg flex items-center gap-2 transform translate-x-full transition-transform duration-300`;
@@ -1596,15 +1876,15 @@ function showToast(message, type = 'info') {
       <i data-lucide="x" class="h-3 w-3"></i>
     </button>
   `;
-  
+
   toastContainer.appendChild(toast);
   lucide.createIcons();
-  
+
   // Animate in
   setTimeout(() => {
     toast.classList.remove('translate-x-full');
   }, 100);
-  
+
   // Auto remove after 5 seconds
   setTimeout(() => {
     removeToast(toastId);
