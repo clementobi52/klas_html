@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanned Files</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        /* Utility classes */
+        .mt-6 { margin-top: 1.5rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .w-auto { width: auto; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .left-2\.5 { left: 0.625rem; }
+        .top-2\.5 { top: 0.625rem; }
+        .h-4 { height: 1rem; }
+        .w-4 { width: 1rem; }
+        .text-muted-foreground { color: #6b7280; }
+        .pl-8 { padding-left: 2rem; }
+        .bg-transparent { background-color: transparent; }
+        .rounded-md { border-radius: 0.375rem; }
+        .border { border: 1px solid #e5e7eb; }
+        .p-8 { padding: 2rem; }
+        .text-center { text-align: center; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .mb-4 { margin-bottom: 1rem; }
+        .h-12 { height: 3rem; }
+        .w-12 { width: 3rem; }
+        .bg-muted { background-color: #f3f4f6; }
+        .rounded-full { border-radius: 9999px; }
+        .h-6 { height: 1.5rem; }
+        .w-6 { width: 1.5rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .font-medium { font-weight: 500; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .overflow-x-auto { overflow-x: auto; }
+        .min-w-\[150px\] { min-width: 150px; }
+        .min-w-\[200px\] { min-width: 200px; }
+        .min-w-\[120px\] { min-width: 120px; }
+        .min-w-\[100px\] { min-width: 100px; }
+        .cursor-pointer { cursor: pointer; }
+        .ml-2 { margin-left: 0.5rem; }
+        .inline { display: inline; }
+        .text-right { text-align: right; }
+        .justify-end { justify-content: flex-end; }
+        .border-t { border-top: 1px solid #e5e7eb; }
+        .pt-4 { padding-top: 1rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .whitespace-nowrap { white-space: nowrap; }
+        .md\:flex-row { flex-direction: row; }
+        .md\:items-center { align-items: center; }
+        .md\:w-auto { width: auto; }
+        .md\:w-64 { width: 16rem; }
+
+        /* Card styles */
+        .Card {
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .CardHeader {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .CardTitle {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.75rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .CardDescription {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .CardContent {
+            padding: 1.5rem;
+        }
+        
+        .CardFooter {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* Table styles */
+        .Table {
+            width: 100%;
+            font-size: 0.875rem;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        
+        .TableHeader {
+            background-color: #f9fafb;
+        }
+        
+        .TableRow {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .TableHead {
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .TableCell {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
+        /* Button styles */
+        .Button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .Button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .Button-variant-outline {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+        }
+        
+        .Button-variant-outline:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+        
+        .Button-variant-default {
+            background-color: #3b82f6;
+            border: 1px solid #3b82f6;
+            color: white;
+        }
+        
+        .Button-variant-default:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        .Button-size-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        /* Badge styles */
+        .Badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1rem;
+        }
+        
+        .Badge-variant-default {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .Badge-variant-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        
+        .Badge-variant-destructive {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .Badge-variant-outline {
+            background-color: transparent;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+        }
+        
+        .Badge-variant-black {
+            background-color: #000;
+            color: white;
+        }
+
+        /* Input styles */
+        .Input {
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        
+        .Input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        
+        /* Initially hide empty state and footer */
+        #empty-state {
+            display: none;
+        }
+        
+        #card-footer {
+            display: none;
+        }
+
+        /* Enhanced Preview Dialog Styles */
+        .dialog-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog-backdrop.hidden {
+            display: none;
+        }
+
+        .dialog-preview {
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            background-color: white;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dialog-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog-body {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .document-viewer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .document-image-container {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            background-color: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .document-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+
+        .thumbnail-container {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 120px;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            object-fit: cover;
+            transition: all 0.2s ease;
+        }
+
+        .thumbnail:hover {
+            border-color: #3b82f6;
+        }
+
+        .thumbnail.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .document-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background-color: #f9fafb;
+            border-radius: 0.375rem;
+        }
+
+        .document-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .page-indicator {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1rem;
+            background-color: #e5e7eb;
+            margin-right: 0.5rem;
+        }
+
+        .transition-transform {
+            transition: transform 0.2s ease;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-outline {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            border: 1px solid #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+
+        /* New styles for document type and paper size badges */
+        .document-type-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1rem;
+            background-color: #3b82f6;
+            color: white;
+            margin-right: 0.5rem;
+        }
+        
+        .paper-size-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1rem;
+            color: white;
+            margin-right: 0.5rem;
+        }
+        
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-green-500 { background-color: #10b981; }
+        .bg-purple-500 { background-color: #8b5cf6; }
+        .bg-amber-500 { background-color: #f59e0b; }
+        .bg-rose-500 { background-color: #f43f5e; }
+        .bg-gray-500 { background-color: #6b7280; }
+
+        /* Enhanced Folder View Styles */
+        .folder-view {
+            display: none;
+            padding: 1rem;
+        }
+
+        .folder-item {
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background-color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .folder-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            background-color: #f9fafb;
+        }
+
+        .folder-header:hover {
+            background-color: #f3f4f6;
+        }
+
+        .folder-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .folder-icon {
+            color: #f59e0b;
+        }
+
+        .folder-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        .folder-content.show {
+            display: block;
+        }
+
+        .document-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .document-item:last-child {
+            border-bottom: none;
+        }
+
+        .document-thumbnail {
+            width: 80px;
+            height: 100px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .document-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .document-title {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .document-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .document-paper-size {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            color: white;
+        }
+
+        .document-type {
+            font-size: 0.875rem;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        .document-number {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .document-scanned-by {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-self: center;
+        }
+
+        .folder-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        /* Paper size color classes */
+        .size-A4 { background-color: #3b82f6; }
+        .size-A5 { background-color: #10b981; }
+        .size-A3 { background-color: #8b5cf6; }
+        .size-Letter { background-color: #f59e0b; }
+        .size-Legal { background-color: #f43f5e; }
+        .size-Custom { background-color: #6b7280; }
+
+        /* Active view indicator */
+        .active-view {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="TabsContent mt-6">
+        <div class="Card">
+            <div class="CardHeader">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="CardTitle">Scanned Documents</h3>
+                        <p class="CardDescription">Documents scanned and ready for processing</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row items-end md:items-center gap-2">
+                        <div class="relative w-full md:w-64">
+                            <svg class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input type="search" placeholder="Search files..." class="Input w-full pl-8" id="search-input">
+                        </div>
+                        <button class="Button Button-variant-outline whitespace-nowrap" id="toggle-view">
+                            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>
+                            </svg>
+                            Folder View
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="CardContent">
+                <div id="empty-state" class="rounded-md border p-8 text-center">
+                    <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <line x1="10" y1="9" x2="8" y2="9"></line>
+                        </svg>
+                    </div>
+                    <h3 class="mb-2 text-lg font-medium">No scanned documents yet</h3>
+                    <p class="mb-4 text-sm text-muted-foreground">
+                        Scan documents to see them listed here
+                    </p>
+                    <button class="Button Button-variant-default gap-2" id="start-scanning">
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                            <rect width="7" height="5" x="3" y="8" rx="1"></rect>
+                            <rect width="7" height="5" x="14" y="8" rx="1"></rect>
+                        </svg>
+                        Start Scanning
+                    </button>
+                </div>
+                
+                <!-- Table View (default) -->
+                <div id="table-view" class="rounded-md border overflow-x-auto">
+                    <table class="Table">
+                        <thead class="TableHeader">
+                            <tr class="TableRow">
+                                <th class="TableHead cursor-pointer min-w-[150px]" data-sort="fileNumber">
+                                    File Number
+                                    <svg class="ml-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 16-4 4-4-4"></path>
+                                        <path d="M17 20V4"></path>
+                                        <path d="m3 8 4-4 4 4"></path>
+                                        <path d="M7 4v16"></path>
+                                    </svg>
+                                </th>
+                                <th class="TableHead cursor-pointer min-w-[200px]" data-sort="name">
+                                    Name
+                                    <svg class="ml-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 16-4 4-4-4"></path>
+                                        <path d="M17 20V4"></path>
+                                        <path d="m3 8 4-4 4 4"></path>
+                                        <path d="M7 4v16"></path>
+                                    </svg>
+                                </th>
+                                <th class="TableHead cursor-pointer min-w-[120px]" data-sort="date">
+                                    Scan Date
+                                    <svg class="ml-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 16-4 4-4-4"></path>
+                                        <path d="M17 20V4"></path>
+                                        <path d="m3 8 4-4 4 4"></path>
+                                        <path d="M7 4v16"></path>
+                                    </svg>
+                                </th>
+                                <th class="TableHead min-w-[120px]">
+                                    Status
+                                </th>
+                                <th class="TableHead cursor-pointer min-w-[120px]" data-sort="pages">
+                                    Pages
+                                    <svg class="ml-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 16-4 4-4-4"></path>
+                                        <path d="M17 20V4"></path>
+                                        <path d="m3 8 4-4 4 4"></path>
+                                        <path d="M7 4v16"></path>
+                                    </svg>
+                                </th>
+                                <th class="TableHead cursor-pointer min-w-[120px]" data-sort="scannedBy">
+                                    Scanned By
+                                    <svg class="ml-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 16-4 4-4-4"></path>
+                                        <path d="M17 20V4"></path>
+                                        <path d="m3 8 4-4 4 4"></path>
+                                        <path d="M7 4v16"></path>
+                                    </svg>
+                                </th>
+                                <th class="TableHead text-right min-w-[100px]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="TableBody">
+                            <!-- Table rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Folder View -->
+                <div id="folder-view" class="folder-view">
+                    <!-- Folder items will be inserted here by JavaScript -->
+                </div>
+            </div>
+            <div id="card-footer" class="CardFooter">
+                <button class="Button Button-variant-outline" id="scan-more">
+                    <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                        <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                        <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                        <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                        <rect width="7" height="5" x="3" y="8" rx="1"></rect>
+                        <rect width="7" height="5" x="14" y="8" rx="1"></rect>
+                    </svg>
+                    Scan More
+                </button>
+                <button class="Button Button-variant-default" id="process-selected">
+                    <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Process Selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Preview Dialog -->
+    <div id="preview-dialog" class="dialog-backdrop hidden" aria-hidden="true">
+      <div class="dialog-preview animate-fade-in">
+        <div class="dialog-header">
+          <h2 class="text-lg font-semibold" id="preview-title">Document Preview</h2>
+          <button id="close-preview" class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="dialog-body">
+          <div class="document-viewer">
+            <div class="document-image-container">
+              <img id="preview-image" src="/placeholder.svg" alt="Document preview" class="document-image">
+            </div>
+            
+            <div class="document-info">
+              <span class="document-type-badge" id="preview-document-type">-</span>
+              <span class="paper-size-badge" id="preview-paper-size">-</span>
+              <span class="badge" id="preview-file-number">File: -</span>
+              <span class="badge" id="preview-pages">Pages: -</span>
+              <span class="badge" id="preview-scan-date">Date: -</span>
+              <span class="badge" id="preview-scanned-by">Scanned By: -</span>
+            </div>
+            
+            <div class="document-meta">
+              <div class="control-group">
+                <button class="btn btn-outline btn-sm" id="prev-page-btn">
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  Previous
+                </button>
+                <span class="page-indicator" id="page-indicator">Page 1 of 1</span>
+                <button class="btn btn-outline btn-sm" id="next-page-btn">
+                  Next
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="control-group">
+                <button class="btn btn-outline btn-sm" id="zoom-out-btn">
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </button>
+                <span class="px-2 py-1 border rounded-md text-sm" id="zoom-level">100%</span>
+                <button class="btn btn-outline btn-sm" id="zoom-in-btn">
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </button>
+                <button class="btn btn-outline btn-sm" id="rotate-btn">
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="thumbnail-container" id="thumbnail-container">
+            <!-- Thumbnails will be added here -->
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-outline" id="cancel-preview-btn">
+            Close
+          </button>
+          <button class="btn btn-primary" id="proceed-to-typing-from-preview-btn">
+            Proceed to Page Typing
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        // Enhanced sample data with more realistic document images
+        const scannedDocuments = [
+            {
+                id: "KNML 09846-01",
+                fileNumber: "KNML 09846",
+                name: "Alhaji Ibrahim Dantata",
+                status: "Scanned",
+                scanDate: "2023-06-15",
+                pages: 5,
+                paperSize: "A4",
+                documentType: "Certificate",
+                scannedBy: "Admin User",
+                pageImages: [
+                    "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589261454707-4341a1ff5e6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ],
+                isProblematic: false
+            },
+            {
+                id: "KNML 09846-02",
+                fileNumber: "KNML 09846",
+                name: "Alhaji Ibrahim Dantata",
+                status: "Scanned",
+                scanDate: "2023-06-14",
+                pages: 3,
+                paperSize: "Legal",
+                documentType: "Deed",
+                scannedBy: "Scanner Operator",
+                pageImages: [
+                    "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ],
+                isProblematic: true,
+                problemDescription: "Page 3 is blurry"
+            },
+            {
+                id: "KNML 09846-03",
+                fileNumber: "KNML 09846",
+                name: "Alhaji Ibrahim Dantata",
+                status: "Scanned",
+                scanDate: "2023-06-10",
+                pages: 7,
+                paperSize: "A3",
+                documentType: "Letter",
+                scannedBy: "Data Entry Clerk",
+                pageImages: [
+                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589261454707-4341a1ff5e6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589261454707-4341a1ff5e6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ],
+                isProblematic: false
+            },
+            {
+                id: "MLKN 03888-01",
+                fileNumber: "MLKN 03888",
+                name: "Hajiya Fatima Mohammed",
+                status: "Scanned",
+                scanDate: "2023-06-18",
+                pages: 2,
+                paperSize: "Letter",
+                documentType: "Application Form",
+                scannedBy: "Admin User",
+                pageImages: [
+                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589261454707-4341a1ff5e6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ],
+                isProblematic: false
+            },
+            {
+                id: "KNML 08722-01",
+                fileNumber: "KNML 08722",
+                name: "Community Development Plan",
+                status: "Scanned",
+                scanDate: "2023-06-20",
+                pages: 1,
+                paperSize: "A5",
+                documentType: "Receipt",
+                scannedBy: "Scanner Operator",
+                pageImages: [
+                    "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ],
+                isProblematic: false
+            }
+        ];
+
+        // DOM elements
+        const emptyState = document.getElementById('empty-state');
+        const tableContainer = document.getElementById('table-container');
+        const tableBody = document.getElementById('table-body');
+        const folderView = document.getElementById('folder-view');
+        const cardFooter = document.getElementById('card-footer');
+        const searchInput = document.getElementById('search-input');
+        const startScanningBtn = document.getElementById('start-scanning');
+        const scanMoreBtn = document.getElementById('scan-more');
+        const processSelectedBtn = document.getElementById('process-selected');
+        const toggleViewBtn = document.getElementById('toggle-view');
+        const sortableHeaders = document.querySelectorAll('[data-sort]');
+        const previewDialog = document.getElementById('preview-dialog');
+
+        // Current state
+        let currentSort = {
+            field: 'scanDate',
+            direction: 'desc'
+        };
+        let currentFilter = {
+            searchTerm: ''
+        };
+        let filteredAndSortedDocuments = [...scannedDocuments];
+        let currentPreviewDoc = null;
+        let currentPreviewPage = 0;
+        let currentZoom = 1;
+        let currentRotation = 0;
+
+        // Helper function to get color class for paper size
+        function getPaperSizeColor(size) {
+            switch(size) {
+                case "A4": return "bg-blue-500";
+                case "A5": return "bg-green-500";
+                case "A3": return "bg-purple-500";
+                case "Letter": return "bg-amber-500";
+                case "Legal": return "bg-rose-500";
+                case "Custom": return "bg-gray-500";
+                default: return "bg-gray-500";
+            }
+        }
+
+        // Initialize the page
+        function init() {
+            folderView.style.display = 'none';
+            renderTable();
+            updateView();
+            
+            // Set up event listeners
+            searchInput.addEventListener('input', handleSearch);
+            startScanningBtn.addEventListener('click', startScanning);
+            scanMoreBtn.addEventListener('click', startScanning);
+            processSelectedBtn.addEventListener('click', processSelected);
+            toggleViewBtn.addEventListener('click', toggleView);
+            
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const field = header.getAttribute('data-sort');
+                    handleSort(field);
+                });
+            });
+
+            // Initialize preview dialog controls
+            initPreviewDialog();
+        }
+
+        // Update view based on data
+        function updateView() {
+            if (filteredAndSortedDocuments.length === 0) {
+                emptyState.style.display = 'block';
+                tableContainer.style.display = 'none';
+                folderView.style.display = 'none';
+                cardFooter.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                cardFooter.style.display = 'flex';
+            }
+        }
+
+        // Render the table with current data
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            filteredAndSortedDocuments.forEach(doc => {
+                const row = document.createElement('tr');
+                row.className = 'TableRow';
+                
+                // Add problematic document styling
+                if (doc.isProblematic) {
+                    row.style.backgroundColor = '#fff1f1';
+                }
+                
+                row.innerHTML = `
+                    <td class="TableCell font-medium">${doc.fileNumber}</td>
+                    <td class="TableCell">${doc.name}</td>
+                    <td class="TableCell">${doc.scanDate}</td>
+                    <td class="TableCell">
+                        <span class="Badge ${doc.isProblematic ? 'Badge-variant-destructive' : 'Badge-variant-default'}">
+                            ${doc.status}
+                        </span>
+                    </td>
+                    <td class="TableCell">${doc.pages}</td>
+                    <td class="TableCell">${doc.scannedBy}</td>
+                    <td class="TableCell text-right">
+                        <div class="flex justify-end">
+                            <button class="Button Button-variant-outline Button-size-sm preview-btn" data-id="${doc.id}">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.preview-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const docId = e.target.closest('button').getAttribute('data-id');
+                    showDocumentPreview(docId);
+                });
+            });
+        }
+
+        // Render the folder view with thumbnails and enhanced layout
+        function renderFolderView() {
+            folderView.innerHTML = '';
+            
+            // Group documents by file number
+            const groupedDocs = {};
+            filteredAndSortedDocuments.forEach(doc => {
+                if (!groupedDocs[doc.fileNumber]) {
+                    groupedDocs[doc.fileNumber] = {
+                        name: doc.name,
+                        documents: []
+                    };
+                }
+                groupedDocs[doc.fileNumber].documents.push(doc);
+            });
+            
+            // Create folder items for each group
+            for (const fileNumber in groupedDocs) {
+                const group = groupedDocs[fileNumber];
+                const folderItem = document.createElement('div');
+                folderItem.className = 'folder-item';
+                
+                folderItem.innerHTML = `
+                    <div class="folder-header">
+                        <div class="folder-title">
+                            <svg class="h-5 w-5 folder-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>
+                            </svg>
+                            <span>${fileNumber} - ${group.name}</span>
+                        </div>
+                        <div>
+                            <span class="text-sm text-muted-foreground">${group.documents.length} documents</span>
+                        </div>
+                    </div>
+                    <div class="folder-content">
+                        ${group.documents.map((doc, index) => `
+                            <div class="document-item">
+                                <img src="${doc.pageImages[0]}" alt="Document thumbnail" class="document-thumbnail">
+                                <div class="document-details">
+                                    <div class="document-title">${doc.id}</div>
+                                    <div class="document-meta">
+                                        <span class="document-paper-size size-${doc.paperSize}">${doc.paperSize}</span>
+                                        <span class="document-type">${doc.documentType}</span>
+                                    </div>
+                                    <div class="document-pages">Pages: ${doc.pages}</div>
+                                    <div class="document-scanned-by">Scanned By: ${doc.scannedBy}</div>
+                                    ${doc.isProblematic ? '<div class="text-sm text-rose-500">Problem: ' + doc.problemDescription + '</div>' : ''}
+                                </div>
+                                <div class="document-actions">
+                                    <button class="Button Button-variant-outline Button-size-sm preview-btn" data-id="${doc.id}">
+                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <div class="folder-actions">
+                            <button class="Button Button-variant-default start-typing-btn" data-filenumber="${fileNumber}">
+                                <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Start Page Typing for All Documents
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                folderView.appendChild(folderItem);
+            }
+            
+            // Add click event to folder headers to toggle content
+            document.querySelectorAll('.folder-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    content.classList.toggle('show');
+                });
+            });
+            
+            // Add event listeners to preview buttons
+            document.querySelectorAll('.preview-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const docId = e.target.closest('button').getAttribute('data-id');
+                    showDocumentPreview(docId);
+                });
+            });
+            
+            // Add event listeners to start typing buttons
+            document.querySelectorAll('.start-typing-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const fileNumber = e.target.closest('button').getAttribute('data-filenumber');
+                    proceedToTypingForFolder(fileNumber);
+                });
+            });
+        }
+
+        // Toggle between table and folder views
+        function toggleView() {
+            const tableView = document.getElementById('table-view');
+            const folderView = document.getElementById('folder-view');
+            const toggleBtn = document.getElementById('toggle-view');
+            
+            if (tableView.style.display === 'none') {
+                // Switch to table view
+                tableView.style.display = 'block';
+                folderView.style.display = 'none';
+                toggleBtn.innerHTML = `
+                    <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>
+                    </svg>
+                    Folder View
+                `;
+                toggleBtn.classList.remove('active-view');
+            } else {
+                // Switch to folder view
+                tableView.style.display = 'none';
+                folderView.style.display = 'block';
+                renderFolderView();
+                toggleBtn.innerHTML = `
+                    <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    List View
+                `;
+                toggleBtn.classList.add('active-view');
+            }
+        }
+
+        // Initialize preview dialog controls
+        function initPreviewDialog() {
+            document.getElementById('prev-page-btn').addEventListener('click', showPrevPage);
+            document.getElementById('next-page-btn').addEventListener('click', showNextPage);
+            document.getElementById('zoom-out-btn').addEventListener('click', zoomOut);
+            document.getElementById('zoom-in-btn').addEventListener('click', zoomIn);
+            document.getElementById('rotate-btn').addEventListener('click', rotate);
+            document.getElementById('proceed-to-typing-from-preview-btn').addEventListener('click', () => {
+                if (currentPreviewDoc) {
+                    proceedToTyping(currentPreviewDoc.id);
+                }
+            });
+            document.getElementById('cancel-preview-btn').addEventListener('click', () => {
+                previewDialog.classList.add('hidden');
+            });
+            document.getElementById('close-preview').addEventListener('click', () => {
+                previewDialog.classList.add('hidden');
+            });
+            
+            // Close dialog when clicking outside
+            previewDialog.addEventListener('click', (e) => {
+                if (e.target === previewDialog) {
+                    previewDialog.classList.add('hidden');
+                }
+            });
+        }
+
+        // Show document preview
+        function showDocumentPreview(docId) {
+            const doc = scannedDocuments.find(d => d.id === docId);
+            if (!doc) return;
+
+            currentPreviewDoc = doc;
+            currentPreviewPage = 0;
+            currentZoom = 1;
+            currentRotation = 0;
+            
+            // Update dialog content
+            document.getElementById('preview-title').textContent = `Preview: ${doc.name}`;
+            document.getElementById('preview-file-number').textContent = `File: ${doc.fileNumber}`;
+            document.getElementById('preview-pages').textContent = `Pages: ${doc.pages}`;
+            document.getElementById('preview-scan-date').textContent = `Date: ${doc.scanDate}`;
+            document.getElementById('preview-scanned-by').textContent = `Scanned By: ${doc.scannedBy}`;
+            
+            // Update document type and paper size badges
+            const paperSizeBadge = document.getElementById('preview-paper-size');
+            paperSizeBadge.textContent = doc.paperSize;
+            paperSizeBadge.className = `paper-size-badge ${getPaperSizeColor(doc.paperSize)}`;
+            
+            document.getElementById('preview-document-type').textContent = doc.documentType;
+            
+            // Update thumbnails
+            updateThumbnails();
+            updatePreviewImage();
+            
+            // Show the dialog
+            previewDialog.classList.remove('hidden');
+        }
+
+        // Update thumbnails
+        function updateThumbnails() {
+            if (!currentPreviewDoc) return;
+            
+            const container = document.getElementById('thumbnail-container');
+            container.innerHTML = '';
+            
+            currentPreviewDoc.pageImages.forEach((img, index) => {
+                const thumbnail = document.createElement('img');
+                thumbnail.src = img;
+                thumbnail.alt = `Page ${index + 1}`;
+                thumbnail.className = `thumbnail ${index === currentPreviewPage ? 'active' : ''}`;
+                thumbnail.addEventListener('click', () => {
+                    currentPreviewPage = index;
+                    updatePreviewImage();
+                    updateThumbnails();
+                });
+                container.appendChild(thumbnail);
+            });
+        }
+
+        // Update preview image based on current page
+        function updatePreviewImage() {
+            if (!currentPreviewDoc) return;
+            
+            const previewImg = document.getElementById('preview-image');
+            previewImg.src = currentPreviewDoc.pageImages[currentPreviewPage] || '/placeholder.svg';
+            
+            // Apply zoom and rotation
+            previewImg.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
+            
+            // Update page indicator
+            document.getElementById('page-indicator').textContent = 
+                `Page ${currentPreviewPage + 1} of ${currentPreviewDoc.pageImages.length}`;
+            
+            // Update zoom level
+            document.getElementById('zoom-level').textContent = `${Math.round(currentZoom * 100)}%`;
+            
+            // Disable/enable navigation buttons
+            document.getElementById('prev-page-btn').disabled = currentPreviewPage === 0;
+            document.getElementById('next-page-btn').disabled = currentPreviewPage === currentPreviewDoc.pageImages.length - 1;
+        }
+
+        // Show previous page in preview
+        function showPrevPage() {
+            if (currentPreviewPage > 0) {
+                currentPreviewPage--;
+                updatePreviewImage();
+                updateThumbnails();
+            }
+        }
+
+        // Show next page in preview
+        function showNextPage() {
+            if (currentPreviewPage < currentPreviewDoc.pageImages.length - 1) {
+                currentPreviewPage++;
+                updatePreviewImage();
+                updateThumbnails();
+            }
+        }
+
+        // Zoom out
+        function zoomOut() {
+            currentZoom = Math.max(0.5, currentZoom - 0.1);
+            updatePreviewImage();
+        }
+
+        // Zoom in
+        function zoomIn() {
+            currentZoom = Math.min(2, currentZoom + 0.1);
+            updatePreviewImage();
+        }
+
+        // Rotate image
+        function rotate() {
+            currentRotation = (currentRotation + 90) % 360;
+            updatePreviewImage();
+        }
+
+        // Proceed to typing for a single document
+        function proceedToTyping(docId) {
+            const doc = scannedDocuments.find(d => d.id === docId);
+            if (doc) {
+                alert(`Starting page typing for document ${doc.id}`);
+                previewDialog.classList.add('hidden');
+            }
+        }
+
+        // Proceed to typing for all documents in a folder
+        function proceedToTypingForFolder(fileNumber) {
+            const docsInFolder = scannedDocuments.filter(doc => doc.fileNumber === fileNumber);
+            if (docsInFolder.length > 0) {
+                const docIds = docsInFolder.map(doc => doc.id).join(', ');
+                alert(`Starting page typing for all documents in folder ${fileNumber}:\n${docIds}`);
+            }
+        }
+
+        // Handle search input
+        function handleSearch() {
+            currentFilter.searchTerm = searchInput.value.toLowerCase();
+            applyFilters();
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            filteredAndSortedDocuments = scannedDocuments.filter(doc => {
+                // Search term filter
+                const searchMatch = currentFilter.searchTerm === '' || 
+                    doc.fileNumber.toLowerCase().includes(currentFilter.searchTerm) ||
+                    doc.name.toLowerCase().includes(currentFilter.searchTerm) ||
+                    doc.documentType.toLowerCase().includes(currentFilter.searchTerm) ||
+                    doc.id.toLowerCase().includes(currentFilter.searchTerm) ||
+                    doc.scannedBy.toLowerCase().includes(currentFilter.searchTerm);
+                
+                return searchMatch;
+            });
+            
+            // Re-apply sorting
+            sortDocuments(currentSort.field, currentSort.direction);
+            
+            // Update current view
+            if (document.getElementById('table-view').style.display !== 'none') {
+                renderTable();
+            } else {
+                renderFolderView();
+            }
+            
+            updateView();
+        }
+
+        // Handle sorting
+        function handleSort(field) {
+            // Toggle direction if same field is clicked
+            const direction = currentSort.field === field && currentSort.direction === 'asc' ? 'desc' : 'asc';
+            
+            currentSort = { field, direction };
+            sortDocuments(field, direction);
+            
+            if (document.getElementById('table-view').style.display !== 'none') {
+                renderTable();
+            } else {
+                renderFolderView();
+            }
+        }
+
+        // Sort documents by field and direction
+        function sortDocuments(field, direction) {
+            filteredAndSortedDocuments.sort((a, b) => {
+                // Handle different field types
+                if (field === 'scanDate') {
+                    const dateA = new Date(a[field]);
+                    const dateB = new Date(b[field]);
+                    return direction === 'asc' ? dateA - dateB : dateB - dateA;
+                } else if (field === 'pages') {
+                    return direction === 'asc' ? a.pages - b.pages : b.pages - a.pages;
+                } else {
+                    // Default string comparison
+                    const valueA = String(a[field] || '').toLowerCase();
+                    const valueB = String(b[field] || '').toLowerCase();
+                    return direction === 'asc' 
+                        ? valueA.localeCompare(valueB) 
+                        : valueB.localeCompare(valueA);
+                }
+            });
+        }
+
+        // Start scanning process
+        function startScanning() {
+            alert('Opening scanning interface...');
+            // In a real app, this would launch the scanning dialog
+        }
+
+        // Process selected documents
+        function processSelected() {
+            alert('Processing selected documents...');
+            // In a real app, this would send documents to the next workflow step
+        }
+
+        // Initialize the page when loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
