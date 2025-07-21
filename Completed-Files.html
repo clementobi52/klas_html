@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completed Files</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #eff6ff;
+            --success: #10b981;
+            --muted: #6b7280;
+            --light-bg: #f9fafb;
+            --border: #e5e7eb;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.5;
+            color: #111827;
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+        
+        /* Clean Card Design */
+        .Card {
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: white;
+            overflow: hidden;
+        }
+        
+        .CardHeader {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .CardTitle {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .CardDescription {
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+        
+        .CardContent {
+            padding: 1.5rem;
+        }
+        
+        /* Improved Search Box */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Professional Table */
+        .Table {
+            width: 100%;
+            font-size: 0.875rem;
+            text-align: left;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .TableHeader {
+            background-color: var(--light-bg);
+        }
+        
+        .TableHead {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .TableRow {
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .TableCell {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
+        /* Status Badge */
+        .Badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .Badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        /* Simple Button */
+        .Button {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        .Button-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Expanded Content - No Scrollbar */
+        .expanded-content {
+            padding: 1rem;
+            background-color: var(--light-bg);
+            border-top: 1px solid var(--border);
+            overflow: hidden; /* Prevent scrollbar */
+        }
+        
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            overflow: visible; /* Ensure no scrollbar */
+        }
+        
+        .page-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        .page-image-container {
+            height: 160px;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .page-details {
+            padding: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .page-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .page-code {
+            font-size: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .page-type {
+            font-size: 0.75rem;
+            color: var(--muted);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: var(--light-bg);
+        }
+        
+        .page-subtype {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        
+        /* Empty State */
+        #empty-state {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: white;
+        }
+        
+        /* Progress Indicator */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background-color: var(--border);
+            border-radius: 2px;
+            margin-top: 4px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 2px;
+        }
+        
+        /* File Icon */
+        .file-icon {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+        
+        /* Typed By indicator */
+        .typed-by {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="TabsContent mt-6">
+        <div class="Card">
+            <div class="CardHeader">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="CardTitle">Completed Files</h3>
+                        <p class="CardDescription">Documents that have been fully processed and typed</p>
+                    </div>
+                    <div class="search-container">
+                        <svg class="search-icon h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input type="search" placeholder="Search files..." class="search-input" id="search-input">
+                    </div>
+                </div>
+            </div>
+            <div class="CardContent">
+                <div id="empty-state" class="rounded-lg border p-8 text-center">
+                    <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                        <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="mb-2 text-lg font-medium">No completed files yet</h3>
+                    <p class="mb-4 text-sm text-gray-500">
+                        Files will appear here once they've been fully processed
+                    </p>
+                </div>
+                
+                <div id="table-view" class="rounded-lg overflow-x-auto">
+                    <table class="Table">
+                        <thead class="TableHeader">
+                            <tr class="TableRow">
+                                <th class="TableHead min-w-[160px]">File Number</th>
+                                <th class="TableHead min-w-[220px]">File Name</th>
+                                <th class="TableHead min-w-[140px]">Date Typed</th>
+                                <th class="TableHead min-w-[140px]">Typed By</th>
+                                <th class="TableHead min-w-[120px]">Status</th>
+                                <th class="TableHead min-w-[140px]">Pages</th>
+                                <th class="TableHead text-right min-w-[100px]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="TableBody">
+                            <!-- Table rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for completed files
+        const completedFiles = [
+            {
+                id: "FILE-2023-004",
+                fileNumber: "KNGP 01478",
+                name: "Right of Occupancy - Musa Usman Bayero",
+                type: "Right of Occupancy",
+                pages: 4,
+                completed: 4,
+                date: "2023-06-12",
+                typedBy: "Admin User",
+                status: "Completed",
+                processedPages: [
+                    { pageNumber: 1, pageCode: "KNGP 01478-1-1-01", pageType: "File Cover", pageSubType: "New File Cover" },
+                    {
+                        pageNumber: 2,
+                        pageCode: "KNGP 01478-5-5-02",
+                        pageType: "Land Title",
+                        pageSubType: "Certificate of Occupancy",
+                    },
+                    { pageNumber: 3, pageCode: "KNGP 01478-9-25-03", pageType: "Survey", pageSubType: "Survey Plan" },
+                    {
+                        pageNumber: 4,
+                        pageCode: "KNGP 01478-4-8-04",
+                        pageType: "Correspondence",
+                        pageSubType: "Acknowledgment Letter",
+                    },
+                ],
+                pageImages: [
+                    "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589261454707-4341a1ff5e6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ]
+            },
+            {
+                id: "FILE-2023-005",
+                fileNumber: "KNML 37925",
+                name: "Deed of Assignment - Hajiya Fatima Mohammed",
+                type: "Deed of Assignment",
+                pages: 6,
+                completed: 6,
+                date: "2023-06-10",
+                typedBy: "Data Entry Clerk",
+                status: "Completed",
+                processedPages: [
+                    { pageNumber: 1, pageCode: "KNML 37925-1-1-01", pageType: "File Cover", pageSubType: "New File Cover" },
+                    { pageNumber: 2, pageCode: "KNML 37925-6-53-02", pageType: "Legal", pageSubType: "Deed of Assignment" },
+                    { pageNumber: 3, pageCode: "KNML 37925-6-53-03", pageType: "Legal", pageSubType: "Deed of Assignment" },
+                    { pageNumber: 4, pageCode: "KNML 37925-7-20-04", pageType: "Payment Evidence", pageSubType: "Bank Teller" },
+                    { pageNumber: 5, pageCode: "KNML 37925-7-78-05", pageType: "Payment Evidence", pageSubType: "Receipts" },
+                    {
+                        pageNumber: 6,
+                        pageCode: "KNML 37925-4-72-06",
+                        pageType: "Correspondence",
+                        pageSubType: "Letter of Acceptance",
+                    },
+                ],
+                pageImages: [
+                    "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80",
+                    "https://images.unsplash.com/photo-1589261454707-4341a1ff5e6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1131&q=80"
+                ]
+            }
+        ];
+
+        // DOM elements
+        const emptyState = document.getElementById('empty-state');
+        const tableBody = document.getElementById('table-body');
+        const searchInput = document.getElementById('search-input');
+
+        // Current state
+        let expandedFileId = null;
+        let filteredFiles = [...completedFiles];
+
+        // Initialize the page
+        function init() {
+            renderTable();
+            updateView();
+            
+            // Set up event listeners
+            searchInput.addEventListener('input', handleSearch);
+        }
+
+        // Update view based on data
+        function updateView() {
+            if (filteredFiles.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+
+        // Render the table with current data
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            filteredFiles.forEach(file => {
+                const isExpanded = expandedFileId === file.id;
+                const shortName = file.name.includes(' - ') ? file.name.split(' - ')[1] : file.name;
+                
+                // Main row
+                const row = document.createElement('tr');
+                row.className = 'TableRow';
+                
+                row.innerHTML = `
+                    <td class="TableCell font-medium">
+                        <div class="flex items-center">
+                            <svg class="file-icon h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <span>${file.fileNumber}</span>
+                        </div>
+                    </td>
+                    <td class="TableCell">
+                        <div class="font-medium">${shortName}</div>
+                    </td>
+                    <td class="TableCell">
+                        <div>${file.date}</div>
+                    </td>
+                    <td class="TableCell">
+                        <div>${file.typedBy}</div>
+                    </td>
+                    <td class="TableCell">
+                        <div class="Badge Badge-success">
+                            ${file.status}
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${(file.completed / file.pages) * 100}%"></div>
+                        </div>
+                    </td>
+                    <td class="TableCell">
+                        <div>${file.completed}/${file.pages}</div>
+                    </td>
+                    <td class="TableCell text-right">
+                        <button class="Button Button-sm toggle-expand-btn" data-id="${file.id}">
+                            ${isExpanded ? 'Hide' : 'Show'} Pages
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                
+                // Expanded content row
+                if (isExpanded) {
+                    const expandedRow = document.createElement('tr');
+                    expandedRow.className = 'TableRow';
+                    
+                    const expandedCell = document.createElement('td');
+                    expandedCell.colSpan = 7;
+                    expandedCell.className = 'TableCell p-0';
+                    
+                    expandedCell.innerHTML = `
+                        <div class="expanded-content">
+                            <h4 class="text-sm font-medium text-gray-700">Processed Pages</h4>
+                            <div class="page-grid">
+                                ${file.processedPages.map((page, index) => `
+                                    <div class="page-card">
+                                        <div class="page-image-container">
+                                            <img src="${file.pageImages[index]}" alt="Page ${page.pageNumber}" class="page-image">
+                                        </div>
+                                        <div class="page-details">
+                                            <div class="page-meta">
+                                                <span class="page-code" title="${page.pageCode}">${page.pageCode}</span>
+                                                <span class="page-type">${page.pageType}</span>
+                                            </div>
+                                            <div class="page-subtype">${page.pageSubType}</div>
+                                            <div class="typed-by">Typed by: ${file.typedBy}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    expandedRow.appendChild(expandedCell);
+                    tableBody.appendChild(expandedRow);
+                }
+            });
+            
+            // Add event listeners to toggle buttons
+            document.querySelectorAll('.toggle-expand-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const fileId = e.target.closest('button').getAttribute('data-id');
+                    toggleFileExpansion(fileId);
+                });
+            });
+        }
+
+        // Toggle file expansion
+        function toggleFileExpansion(fileId) {
+            if (expandedFileId === fileId) {
+                expandedFileId = null;
+            } else {
+                expandedFileId = fileId;
+            }
+            renderTable();
+        }
+
+        // Handle search input
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (searchTerm === '') {
+                filteredFiles = [...completedFiles];
+            } else {
+                filteredFiles = completedFiles.filter(file => 
+                    file.fileNumber.toLowerCase().includes(searchTerm) ||
+                    file.name.toLowerCase().includes(searchTerm) ||
+                    file.type.toLowerCase().includes(searchTerm) ||
+                    file.typedBy.toLowerCase().includes(searchTerm) ||
+                    file.date.toLowerCase().includes(searchTerm))
+            }
+            
+            renderTable();
+            updateView();
+        }
+
+        // Initialize the page when loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
+
