@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recertification Acknowledgement</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 0;
+            font-size: 14px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .logo img {
+            height: 80px;
+            float: right;
+        }
+        
+        .document-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 10px 0 20px 0;
+            text-decoration: underline;
+            clear: both;
+        }
+        
+        .content {
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+        
+        .content p {
+            margin: 10px 0;
+        }
+        
+        .content a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        .contact-info {
+            margin-top: 20px;
+        }
+        
+        .collection-section {
+            margin-top: 40px;
+        }
+        
+        .collection-section div {
+            margin-bottom: 15px;
+        }
+        
+        .underline {
+            display: inline-block;
+            min-width: 200px;
+            border-bottom: 1px solid #333;
+            margin-left: 5px;
+        }
+        
+        @media print {
+            body {
+                font-size: 12px;
+            }
+            .no-print {
+                display: none;
+            }
+            .content a {
+                color: #0066cc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="https://kangis.gov.ng/images/logo.png" alt="KANGIS Logo">
+        </div>
+    </div>
+
+    <div class="document-title">
+        RECERTIFICATION OF LAND TITLE<br>
+        COLLECTION OF ACKNOWLEDGEMENT LETTER
+    </div>
+    
+    <div class="content">
+        <p>Please note that you may be invited later for an Interview via Phone, SMS, WhatsApp or Email to provide additional information and documentation where necessary. You can always check the status of your application via our website <a href="https://kangis.gov.ng">https://kangis.gov.ng</a> or Contact the KANGIS Customer Service Desk via Phone:  , SMS, WhatsApp, or you can visit the KANGIS Customer Service Desk.</p>
+        
+        <p>You can track the progress of your recertification application using the QR code on the front page of the acknowledgement letter.</p>
+        
+        <p>Please keep the original acknowledgement letter in a safe place for future reference. It is one of the requirements for the collection of your new digital Certificate of Occupancy.</p>
+        
+        <div class="contact-info">
+            <p><strong>Contact Information:</strong></p>
+            <p>KANGIS Customer Service</p>
+            <p>KANGIS Complex, 2 Dr. Bala Muhammad Way,</p>
+            <p>Nassarawa G.R.A., Kano, Nigeria</p>
+            <p>Tel: +234 (0)900 000 0000 | Email: support@kangis.gov.ng</p>
+            <p>Website: <a href="https://kangis.gov.ng">https://kangis.gov.ng</a></p>
+        </div>
+        
+        <div class="collection-section">
+            <p>Original copy of acknowledgement letter for recertification was collected by me</p>
+            
+            <div>
+                Name: <span class="underline"></span>
+            </div>
+            
+            <div>
+                Address: <span class="underline"></span><br>
+                <span class="underline"></span>
+            </div>
+            
+            <div>
+                Phone No: <span class="underline"></span>
+            </div>
+            
+            <div>
+                Signature: <span class="underline"></span>
+            </div>
+            
+            <div>
+                Date: <span class="underline"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="no-print" style="text-align: center; margin-top: 15px;">
+        <button onclick="window.print()">Print This Page</button>
+    </div>
+</body>
+</html>
