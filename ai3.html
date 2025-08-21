@@ -1,0 +1,3193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Property Record Assistant - SLTR</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Tesseract.js for OCR -->
+    <script src="https://unpkg.com/tesseract.js@4/dist/tesseract.min.js"></script>
+
+    <script>
+      // Tailwind config
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3b82f6",
+              "primary-foreground": "#ffffff",
+              muted: "#f3f4f6",
+              "muted-foreground": "#6b7280",
+              border: "#e5e7eb",
+              destructive: "#ef4444",
+              "destructive-foreground": "#ffffff",
+              secondary: "#f1f5f9",
+              "secondary-foreground": "#0f172a",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Loading spinner animation */
+      .loading-spinner {
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #e5e7eb;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* File drop zone styles */
+      .file-drop-zone {
+        border: 2px dashed #d1d5db;
+        transition: all 0.3s ease;
+      }
+
+      .file-drop-zone:hover {
+        border-color: #3b82f6;
+        background-color: #f8fafc;
+      }
+
+      .file-drop-zone.dragover {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+      }
+
+      /* Progress bar animation */
+      .progress-bar {
+        transition: width 0.5s ease-in-out;
+      }
+
+      /* AI stage indicator animations */
+      .stage-indicator {
+        transition: all 0.3s ease;
+      }
+
+      .stage-indicator.active {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Modal backdrop */
+      .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+      }
+
+      /* Badge styles */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .badge-success {
+        background-color: "#dcfce7";
+        color: "#166534";
+      }
+
+      .badge-warning {
+        background-color: "#fef3c7";
+        color: "#92400e";
+      }
+
+      .badge-error {
+        background-color: "#fee2e2";
+        color: "#991b1b";
+      }
+
+      .badge-default {
+        background-color: "#f3f4f6";
+        color: "#374151";
+      }
+
+      /* Collapsible content */
+      .collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .collapsible-content.expanded {
+        max-height: 2000px;
+      }
+
+      /* Instrument card styles */
+      .instrument-card {
+        border-left: 4px solid #3b82f6;
+      }
+
+      .instrument-card.editing {
+        border-left-color: #10b981;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <div
+      class="container mx-auto py-6 space-y-6 max-w-6xl px-4 sm:px-6 lg:px-8"
+    >
+      <!-- Page Header -->
+      <div class="space-y-2">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+          AI Property Record Assistant
+        </h1>
+        <p class="text-lg text-gray-600">
+          Upload property documents for automated data extraction and record
+          creation
+        </p>
+      </div>
+
+      <!-- File Upload Card -->
+      <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Upload Property Record(s) for AI Extraction
+          </h2>
+          <p class="text-sm text-gray-600 mt-1">
+            Upload an image (JPEG, PNG) or PDF of the property document (e.g.,
+            Deed of Assignment, C of O).
+          </p>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <!-- Error Alert -->
+          <div
+            id="error-alert"
+            class="hidden bg-red-50 border border-red-200 rounded-md p-4"
+          >
+            <div class="flex">
+              <i data-lucide="alert-circle" class="h-5 w-5 text-red-400"></i>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Error</h3>
+                <div id="error-message" class="mt-2 text-sm text-red-700"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- File Upload Area -->
+          <div class="space-y-1">
+            <label class="block text-sm font-medium text-gray-700"
+              >Document File</label
+            >
+            <input
+              id="file-input"
+              type="file"
+              accept="image/jpeg,image/png,application/pdf"
+              class="hidden"
+            />
+            <button
+              id="file-upload-btn"
+              class="w-full flex items-center justify-start px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-left font-normal hover:bg-gray-50 transition-colors"
+            >
+              <i data-lucide="file-up" class="mr-2 h-4 w-4"></i>
+              <span id="file-upload-text">Click to select a file</span>
+            </button>
+          </div>
+
+          <!-- Image Preview -->
+          <div id="image-preview" class="hidden border p-2 rounded-md">
+            <label class="text-xs text-gray-500">Image Preview</label>
+            <img
+              id="image-preview-img"
+              class="max-w-full h-auto max-h-96 rounded-md mt-1"
+            />
+          </div>
+
+          <!-- PDF Preview -->
+          <div id="pdf-preview" class="hidden border p-2 rounded-md space-y-2">
+            <label id="pdf-preview-label" class="text-xs text-gray-500"
+              >PDF Preview</label
+            >
+            <div class="relative">
+              <img
+                id="pdf-preview-img"
+                class="max-w-full h-auto max-h-[30rem] rounded-md mt-1 border mx-auto"
+              />
+            </div>
+            <div
+              id="pdf-navigation"
+              class="hidden flex justify-center items-center space-x-2 mt-2"
+            >
+              <button
+                id="pdf-prev-btn"
+                class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <span id="pdf-page-info" class="text-sm text-gray-500"
+                >Page 1 / 1</span
+              >
+              <button
+                id="pdf-next-btn"
+                class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-6 pb-6 flex flex-col sm:flex-row gap-2">
+          <button
+            id="start-ai-btn"
+            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled
+          >
+            <i data-lucide="wand-2" class="mr-2 h-4 w-4"></i>
+            Extract Data with AI
+          </button>
+          <button
+            id="reset-btn"
+            class="hidden w-full sm:w-auto inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Processing Visualizer -->
+      <div
+        id="ai-processing"
+        class="hidden bg-white rounded-lg shadow border border-gray-200"
+      >
+        <div class="p-6">
+          <div class="flex justify-between mb-2">
+            <span class="text-sm font-medium"
+              >Property Document AI Analysis</span
+            >
+            <span id="ai-progress-text" class="text-sm">0% Complete</span>
+          </div>
+          <div class="relative">
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                id="ai-progress-bar"
+                class="h-full bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
+                style="width: 0%"
+              ></div>
+            </div>
+            <div class="flex justify-between mt-2">
+              <div
+                class="flex flex-col items-center stage-indicator"
+                data-stage="0"
+              >
+                <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                <span class="text-xs text-gray-500">Init</span>
+              </div>
+              <div
+                class="flex flex-col items-center stage-indicator"
+                data-stage="1"
+              >
+                <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                <span class="text-xs text-gray-500">OCR</span>
+              </div>
+              <div
+                class="flex flex-col items-center stage-indicator"
+                data-stage="2"
+              >
+                <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                <span class="text-xs text-gray-500">Layout</span>
+              </div>
+              <div
+                class="flex flex-col items-center stage-indicator"
+                data-stage="3"
+              >
+                <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                <span class="text-xs text-gray-500">Extract</span>
+              </div>
+              <div
+                class="flex flex-col items-center stage-indicator"
+                data-stage="4"
+              >
+                <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                <span class="text-xs text-gray-500">Assemble</span>
+              </div>
+              <div
+                class="flex flex-col items-center stage-indicator"
+                data-stage="5"
+              >
+                <div class="w-4 h-4 rounded-full bg-gray-300 mb-1"></div>
+                <span class="text-xs text-gray-500">Done</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 flex items-start gap-3">
+            <div class="p-2 rounded-full bg-blue-100">
+              <i
+                id="ai-stage-icon"
+                data-lucide="brain"
+                class="h-5 w-5 text-blue-600"
+              ></i>
+            </div>
+            <div>
+              <p id="ai-stage-title" class="text-sm font-medium mb-1">
+                Current Stage: Initializing
+              </p>
+              <p id="ai-stage-description" class="text-xs text-gray-600">
+                Preparing for AI analysis...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keyword Findings Display -->
+      <div
+        id="keyword-findings"
+        class="hidden bg-white rounded-lg shadow border border-gray-200"
+      >
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="file-key-2" class="h-6 w-6 text-blue-600"></i>
+            <h3 class="text-xl font-semibold text-gray-900">
+              Key Document Types Found
+            </h3>
+          </div>
+          <p
+            id="keyword-findings-description"
+            class="text-sm text-gray-600 mt-1"
+          ></p>
+        </div>
+        <div class="p-6">
+          <ul id="keyword-findings-list" class="space-y-2">
+            <!-- Keyword findings will be inserted here -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Raw Extracted Text -->
+      <div
+        id="raw-text-card"
+        class="hidden bg-white rounded-lg shadow border border-gray-200"
+      >
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-gray-900">
+              Raw Extracted Text
+            </h3>
+            <button
+              id="toggle-raw-text"
+              class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100"
+            >
+              <i data-lucide="chevron-down" class="h-4 w-4"></i>
+              Show
+            </button>
+          </div>
+        </div>
+        <div id="raw-text-content" class="collapsible-content">
+          <div class="p-6">
+            <textarea
+              id="raw-text-textarea"
+              readonly
+              rows="10"
+              class="w-full text-xs bg-gray-50 font-mono border border-gray-300 rounded-md p-3"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Extracted Property Details -->
+      <div
+        id="extracted-details"
+        class="hidden bg-white rounded-lg shadow border-l-4 border-l-green-500"
+      >
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="check-circle" class="h-6 w-6 text-green-600"></i>
+            <h3 class="text-xl font-semibold text-gray-900">
+              AI Extracted Property Details
+            </h3>
+          </div>
+          <p id="extraction-confidence" class="text-sm text-gray-600 mt-1">
+            Review the details extracted by the AI. Add or modify instruments as
+            needed, then save the record.
+          </p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- Updated Property Information Form to match the new layout design -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Panel - File Number Information -->
+            <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+              <div class="flex items-center space-x-2 mb-4">
+                <i data-lucide="file-text" class="h-5 w-5 text-green-600"></i>
+                <h4 class="text-lg font-medium text-gray-900">
+                  File Number Information
+                </h4>
+              </div>
+              <p class="text-sm text-gray-600 mb-6">
+                Detected file numbers from document
+              </p>
+
+              <!-- Dynamic file numbers container that shows all detected file numbers -->
+              <div id="detected-file-numbers" class="space-y-4 mb-6">
+                <!-- File numbers will be dynamically populated here -->
+              </div>
+
+              <!-- Manual entry section for additional file numbers -->
+              <div class="border-t pt-4">
+                <h5 class="text-sm font-medium text-gray-700 mb-3">
+                  Add Additional File Number
+                </h5>
+
+                <!-- File Type Tabs -->
+                <div class="flex space-x-1 mb-4 bg-white rounded-lg p-1 border">
+                  <button
+                    id="tab-mls"
+                    class="flex-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-100 text-blue-700 border border-blue-200"
+                    onclick="switchFileType('mls')"
+                  >
+                    MLS
+                  </button>
+                  <button
+                    id="tab-kangis"
+                    class="flex-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50"
+                    onclick="switchFileType('kangis')"
+                  >
+                    KANGIS
+                  </button>
+                  <button
+                    id="tab-new-kangis"
+                    class="flex-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50"
+                    onclick="switchFileType('new-kangis')"
+                  >
+                    New KANGIS
+                  </button>
+                </div>
+
+                <!-- MLS File Number Input -->
+                <div id="mls-input" class="file-type-input">
+                  <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Prefix</label
+                      >
+                      <select
+                        id="mls-prefix"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                      >
+                        <option value="">Select</option>
+                        <option value="CON-COM">CON-COM</option>
+                        <option value="RES">RES</option>
+                        <option value="COM">COM</option>
+                      </select>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Year</label
+                      >
+                      <input
+                        id="mls-year"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                        placeholder="2024"
+                      />
+                    </div>
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Serial</label
+                      >
+                      <input
+                        id="mls-serial"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                        placeholder="296"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- KANGIS File Number Input -->
+                <div id="kangis-input" class="file-type-input hidden">
+                  <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Prefix</label
+                      >
+                      <select
+                        id="kangis-prefix"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                      >
+                        <option value="">Select</option>
+                        <option value="KNML">KNML</option>
+                        <option value="MLKN">MLKN</option>
+                        <option value="KNGP">KNGP</option>
+                      </select>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Serial</label
+                      >
+                      <input
+                        id="kangis-serial"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                        placeholder="09846"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- New KANGIS File Number Input -->
+                <div id="new-kangis-input" class="file-type-input hidden">
+                  <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Prefix</label
+                      >
+                      <select
+                        id="new-kangis-prefix"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                      >
+                        <option value="">Select</option>
+                        <option value="KN">KN</option>
+                      </select>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700"
+                        >Serial</label
+                      >
+                      <input
+                        id="new-kangis-serial"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                        placeholder="0001"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onclick="addManualFileNumber()"
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Add File Number
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Panel - Property Details -->
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >House No</label
+                  >
+                  <input
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Plot No.</label
+                  >
+                  <input
+                    id="plot-no"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    placeholder="Enter plot number"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Street Name</label
+                  >
+                  <!-- Added street name options with Other option -->
+                  <select
+                    id="street-name"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    onchange="toggleOtherInput('street-name', 'street-name-other')"
+                  >
+                    <option value="">Select Street Name</option>
+                    <option value="Ibrahim Taiwo Road">
+                      Ibrahim Taiwo Road
+                    </option>
+                    <option value="Murtala Mohammed Way">
+                      Murtala Mohammed Way
+                    </option>
+                    <option value="Zoo Road">Zoo Road</option>
+                    <option value="Ahmadu Bello Way">Ahmadu Bello Way</option>
+                    <option value="Katsina Road">Katsina Road</option>
+                    <option value="Zaria Road">Zaria Road</option>
+                    <option value="Hadejia Road">Hadejia Road</option>
+                    <option value="Gwarzo Road">Gwarzo Road</option>
+                    <option value="Yankaba Road">Yankaba Road</option>
+                    <option value="Hotoro Road">Hotoro Road</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <!-- Added hidden input for custom street name -->
+                  <input
+                    id="street-name-other"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 hidden"
+                    placeholder="Enter street name"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >District Name</label
+                  >
+                  <!-- Added district name options with Other option -->
+                  <select
+                    id="district-name"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    onchange="toggleOtherInput('district-name', 'district-name-other')"
+                  >
+                    <option value="">Select District Name</option>
+                    <option value="Fagge">Fagge</option>
+                    <option value="Dala">Dala</option>
+                    <option value="Gwale">Gwale</option>
+                    <option value="Kano Municipal">Kano Municipal</option>
+                    <option value="Nasarawa">Nasarawa</option>
+                    <option value="Tarauni">Tarauni</option>
+                    <option value="Ungogo">Ungogo</option>
+                    <option value="Kumbotso">Kumbotso</option>
+                    <option value="Warawa">Warawa</option>
+                    <option value="Dawakin Tofa">Dawakin Tofa</option>
+                    <option value="Rimin Gado">Rimin Gado</option>
+                    <option value="Tofa">Tofa</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <!-- Added hidden input for custom district name -->
+                  <input
+                    id="district-name-other"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 hidden"
+                    placeholder="Enter district name"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >LGA</label
+                  >
+                  <select
+                    id="lga-city"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                  >
+                    <option value="">Select LGA</option>
+                  </select>
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >State</label
+                  >
+                  <input
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                    value="Kano"
+                  />
+                </div>
+              </div>
+
+              <!-- Additional fields to maintain existing functionality -->
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Property Description</label
+                >
+                <textarea
+                  id="property-description"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                  placeholder="Detailed property description..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instruments Manager -->
+          <div class="border-t pt-6">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="text-lg font-medium text-gray-900">
+                  Document Instruments
+                </h4>
+                <button
+                  id="add-instrument-btn"
+                  class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 gap-2"
+                >
+                  <i data-lucide="plus" class="h-4 w-4"></i>
+                  Add Instrument
+                </button>
+              </div>
+
+              <!-- No Instruments State -->
+              <div
+                id="no-instruments"
+                class="text-center py-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg"
+              >
+                <i
+                  data-lucide="file-key-2"
+                  class="h-8 w-8 mx-auto mb-2 text-gray-400"
+                ></i>
+                <p class="text-sm">No instruments added yet</p>
+                <p class="text-xs text-gray-400">
+                  Click "Add Instrument" to get started
+                </p>
+              </div>
+
+              <!-- Instruments List -->
+              <div id="instruments-list" class="space-y-3">
+                <!-- Instruments will be inserted here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="flex justify-end pt-4 border-t">
+            <button
+              id="save-record-btn"
+              class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-green-600 text-white hover:bg-green-700 gap-2"
+            >
+              <i data-lucide="check-circle" class="h-4 w-4"></i>
+              Save Property Record
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+      <!-- Toast messages will be inserted here -->
+    </div>
+
+    <script>
+      // Global state
+      let selectedFile = null;
+      let previewUrl = null;
+      let pdfPagePreviews = [];
+      let currentPdfPreviewPageIdx = 0;
+      let rawExtractedText = "";
+      let extractedPropertyData = null;
+      let keywordFindings = {};
+      let currentAiStage = "idle";
+      let aiProgress = 0;
+      let instruments = [];
+      let editingInstrumentId = null;
+      let detectedFileNumbers = [];
+
+      // Initialize PDF.js
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+
+      // Initialize the application
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Set up event listeners
+        setupEventListeners();
+
+        // Update UI
+        updateUI();
+      });
+
+      function setupEventListeners() {
+        // File input
+        const fileInput = document.getElementById("file-input");
+        const fileUploadBtn = document.getElementById("file-upload-btn");
+
+        fileInput.addEventListener("change", handleFileChange);
+        fileUploadBtn.addEventListener("click", () => fileInput.click());
+
+        // Action buttons
+        document
+          .getElementById("start-ai-btn")
+          .addEventListener("click", startAiPropertyProcessing);
+        document
+          .getElementById("reset-btn")
+          .addEventListener("click", resetState);
+
+        // PDF navigation
+        document
+          .getElementById("pdf-prev-btn")
+          .addEventListener("click", handlePrevPdfPage);
+        document
+          .getElementById("pdf-next-btn")
+          .addEventListener("click", handleNextPdfPage);
+
+        // Raw text toggle
+        document
+          .getElementById("toggle-raw-text")
+          .addEventListener("click", toggleRawText);
+
+        // Instruments
+        document
+          .getElementById("add-instrument-btn")
+          .addEventListener("click", addInstrument);
+
+        // Property form auto-generation and validation
+        document
+          .getElementById("file-prefix")
+          .addEventListener("input", updateCompleteFileNo);
+        document
+          .getElementById("file-serial-no")
+          .addEventListener("input", updateCompleteFileNo);
+        document
+          .getElementById("file-number-type")
+          .addEventListener("change", handleFileNumberTypeChange);
+
+        // Save record
+        document
+          .getElementById("save-record-btn")
+          .addEventListener("click", handleSaveRecord);
+      }
+
+      async function handleFileChange(event) {
+        const file = event.target.files?.[0];
+        if (file) {
+          if (
+            file.type.startsWith("image/") ||
+            file.type === "application/pdf"
+          ) {
+            selectedFile = file;
+            hideError();
+            resetExtractionState();
+
+            document.getElementById("file-upload-text").textContent = file.name;
+
+            if (file.type === "application/pdf") {
+              document.getElementById("image-preview").classList.add("hidden");
+              const pages = await renderPDFPagesToImages(file);
+              pdfPagePreviews = pages;
+              currentPdfPreviewPageIdx = 0;
+              if (pages.length > 0) {
+                showPdfPreview();
+              }
+            } else {
+              document.getElementById("pdf-preview").classList.add("hidden");
+              previewUrl = URL.createObjectURL(file);
+              showImagePreview();
+            }
+
+            updateUI();
+          } else {
+            showError(
+              "Invalid file type. Please upload an image (JPEG, PNG) or PDF."
+            );
+            resetFileState();
+          }
+        }
+      }
+
+      function showImagePreview() {
+        const preview = document.getElementById("image-preview");
+        const img = document.getElementById("image-preview-img");
+        img.src = previewUrl;
+        preview.classList.remove("hidden");
+      }
+
+      function showPdfPreview() {
+        const preview = document.getElementById("pdf-preview");
+        const img = document.getElementById("pdf-preview-img");
+        const label = document.getElementById("pdf-preview-label");
+        const navigation = document.getElementById("pdf-navigation");
+        const pageInfo = document.getElementById("pdf-page-info");
+
+        if (pdfPagePreviews.length > 0) {
+          img.src = pdfPagePreviews[currentPdfPreviewPageIdx];
+          label.textContent = `PDF Preview (Page ${
+            currentPdfPreviewPageIdx + 1
+          } of ${pdfPagePreviews.length})`;
+          pageInfo.textContent = `Page ${currentPdfPreviewPageIdx + 1} / ${
+            pdfPagePreviews.length
+          }`;
+
+          if (pdfPagePreviews.length > 1) {
+            navigation.classList.remove("hidden");
+          }
+
+          preview.classList.remove("hidden");
+          updatePdfNavigation();
+        }
+      }
+
+      function updatePdfNavigation() {
+        const prevBtn = document.getElementById("pdf-prev-btn");
+        const nextBtn = document.getElementById("pdf-next-btn");
+
+        prevBtn.disabled = currentPdfPreviewPageIdx === 0;
+        nextBtn.disabled =
+          currentPdfPreviewPageIdx === pdfPagePreviews.length - 1;
+
+        if (prevBtn.disabled) {
+          prevBtn.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+          prevBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+
+        if (nextBtn.disabled) {
+          nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+          nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+      }
+
+      function handlePrevPdfPage() {
+        if (currentPdfPreviewPageIdx > 0) {
+          currentPdfPreviewPageIdx--;
+          showPdfPreview();
+        }
+      }
+
+      function handleNextPdfPage() {
+        if (currentPdfPreviewPageIdx < pdfPagePreviews.length - 1) {
+          currentPdfPreviewPageIdx++;
+          showPdfPreview();
+        }
+      }
+
+      async function renderPDFPagesToImages(file) {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer })
+            .promise;
+          const pageImages = [];
+
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            if (!context) throw new Error("Could not get canvas context");
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport })
+              .promise;
+            pageImages.push(canvas.toDataURL("image/png"));
+          }
+
+          return pageImages;
+        } catch (error) {
+          console.error("Error rendering PDF pages:", error);
+          showToast("Failed to render PDF for preview.", "error");
+          return [];
+        }
+      }
+
+      async function startAiPropertyProcessing() {
+        if (!selectedFile) {
+          showToast("Please select a document file first.", "error");
+          return;
+        }
+
+        currentAiStage = "initializing";
+        aiProgress = 5;
+
+        showAiProcessing();
+        updateAiProcessingUI();
+
+        await new Promise((res) => setTimeout(res, 200));
+
+        aiProgress = 10;
+        currentAiStage = "ocr";
+        updateAiProcessingUI();
+
+        try {
+          let text = "";
+          if (selectedFile.type === "application/pdf") {
+            text = await extractTextFromPropertyDocumentPDF(selectedFile);
+          } else if (selectedFile.type.startsWith("image/")) {
+            text = await extractTextFromPropertyDocumentImage(selectedFile);
+          } else {
+            throw new Error("Unsupported file type for AI processing.");
+          }
+
+          rawExtractedText = text;
+          keywordFindings = analyzeTextForKeywords(text);
+
+          currentAiStage = "layoutAnalysis";
+          aiProgress = Math.min(65, aiProgress + 10);
+          updateAiProcessingUI();
+
+          await new Promise((res) => setTimeout(res, 100));
+
+          currentAiStage = "dataExtraction";
+          updateAiProcessingUI();
+
+          const extractedDetails = extractPropertyInstrumentDetails(
+            text,
+            selectedFile.name
+          );
+
+          aiProgress = Math.min(85, aiProgress + 20);
+          currentAiStage = "dataAssembly";
+          updateAiProcessingUI();
+
+          const finalData = {
+            ...extractedDetails,
+            fileSize: formatFileSize(selectedFile.size),
+            fileType: selectedFile.type,
+            pageCount:
+              selectedFile.type === "application/pdf"
+                ? pdfPagePreviews.length || 1
+                : 1,
+          };
+
+          extractedPropertyData = finalData;
+
+          aiProgress = 95;
+          await new Promise((res) => setTimeout(res, 100));
+
+          currentAiStage = "complete";
+          aiProgress = 100;
+          updateAiProcessingUI();
+
+          // Initialize instruments from extracted data
+          if (finalData.instrument) {
+            instruments = [
+              {
+                id: Date.now().toString(),
+                type: finalData.instrument,
+                description: "",
+                parties: {
+                  assignor: finalData.assignor || "",
+                  assignee: finalData.assignee || "",
+                },
+                registrationDetails: {
+                  serialNo: finalData.serialNo || "",
+                  page: finalData.page || "",
+                  vol: finalData.vol || "",
+                  regNo: finalData.regNo || "",
+                },
+                notes: "",
+              },
+            ];
+          }
+
+          showExtractionResults();
+          showToast(
+            "AI processing complete. Review extracted data.",
+            "success"
+          );
+        } catch (err) {
+          console.error("AI Property Processing Error:", err);
+          showError(`AI Processing failed: ${err.message}`);
+          currentAiStage = "idle";
+          aiProgress = 0;
+          hideAiProcessing();
+          showToast("AI processing failed.", "error");
+        }
+      }
+
+      async function extractTextFromPropertyDocumentPDF(file) {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer })
+            .promise;
+          let fullText = "";
+          let hasExtractableText = false;
+
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items
+              .map((item) => item.str)
+              .join(" ");
+
+            if (pageText.trim().length > 0) {
+              fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+              hasExtractableText = true;
+            }
+          }
+
+          if (hasExtractableText && fullText.trim().length > 20) {
+            aiProgress = Math.min(55, aiProgress + 40);
+            updateAiProcessingUI();
+            return fullText;
+          }
+
+          showToast(
+            "PDF has limited selectable text. Using OCR for all pages.",
+            "info"
+          );
+
+          let ocrText = "";
+          const totalPdfPagesForOcr = pdf.numPages;
+          const ocrStartProgress = aiProgress;
+          const ocrTotalProportion = 40;
+
+          for (let i = 1; i <= totalPdfPagesForOcr; i++) {
+            const progressWithinOcrStage =
+              ((i - 1) / totalPdfPagesForOcr) * ocrTotalProportion;
+            aiProgress = ocrStartProgress + progressWithinOcrStage;
+            updateAiProcessingUI();
+
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 2.0 });
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            if (!context)
+              throw new Error("Could not get canvas context for OCR");
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport })
+              .promise;
+
+            const blob = await new Promise((resolve) =>
+              canvas.toBlob(resolve, "image/png")
+            );
+            if (!blob) {
+              ocrText += `--- Page ${i} (OCR) ---\nError creating image blob for OCR\n\n`;
+              continue;
+            }
+
+            const imageUrl = URL.createObjectURL(blob);
+
+            const {
+              data: { text },
+            } = await window.Tesseract.recognize(imageUrl, "eng", {
+              logger: (m) => {
+                if (m.status === "recognizing text") {
+                  const pageOcrProgress =
+                    m.progress * (ocrTotalProportion / totalPdfPagesForOcr);
+                  aiProgress =
+                    ocrStartProgress + progressWithinOcrStage + pageOcrProgress;
+                  updateAiProcessingUI();
+                }
+              },
+            });
+
+            URL.revokeObjectURL(imageUrl);
+            ocrText += `--- Page ${i} (OCR) ---\n${
+              text || "No text found by OCR"
+            }\n\n`;
+          }
+
+          aiProgress = Math.min(55, aiProgress + ocrTotalProportion);
+          updateAiProcessingUI();
+          return ocrText || `Scanned PDF: ${file.name}. No text found.`;
+        } catch (error) {
+          console.error("Error processing PDF:", error);
+          aiProgress = Math.min(55, aiProgress + 40);
+          updateAiProcessingUI();
+          showToast(`Error processing PDF: ${error.message}`, "error");
+          return `Error processing PDF: ${error.message}`;
+        }
+      }
+
+      async function extractTextFromPropertyDocumentImage(file) {
+        try {
+          const imageUrl = URL.createObjectURL(file);
+          const ocrStartProgress = aiProgress;
+          const ocrTotalProportion = 40;
+
+          aiProgress = ocrStartProgress;
+          updateAiProcessingUI();
+
+          const {
+            data: { text },
+          } = await window.Tesseract.recognize(imageUrl, "eng", {
+            logger: (m) => {
+              if (m.status === "recognizing text") {
+                aiProgress = ocrStartProgress + m.progress * ocrTotalProportion;
+                updateAiProcessingUI();
+              }
+            },
+          });
+
+          URL.revokeObjectURL(imageUrl);
+          aiProgress = Math.min(55, aiProgress + ocrTotalProportion);
+          updateAiProcessingUI();
+          return text || "";
+        } catch (error) {
+          console.error("Error during OCR on image:", error);
+          aiProgress = Math.min(55, aiProgress + 40);
+          updateAiProcessingUI();
+          showToast(`Error during OCR: ${error.message}`, "error");
+          return "";
+        }
+      }
+
+      function extractPropertyInstrumentDetails(text, fileName) {
+        const cleanText = text
+          .replace(/(\r\n|\n|\r)/gm, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        const data = {
+          originalFileName: fileName,
+          extractedText: text,
+          confidence: 0,
+          instruments: [],
+        };
+
+        let foundFields = 0;
+
+        const recertificationPatterns = {
+          newFileNumber: [
+            /NEW\s+FILE\s+NUMBER[:\s]*([A-Z0-9/\s-]+?)(?:\s+PLOT|\s+TITLE|\s*$)/i,
+            /NEW\s+FILE\s+NO[:\s]*([A-Z0-9/\s-]+?)(?:\s+PLOT|\s+TITLE|\s*$)/i,
+            // Look for patterns after "NEW FILE NUMBER" label
+            /NEW\s+FILE\s+NUMBER.*?([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{2,4})/i,
+            /NEW\s+FILE\s+NUMBER.*?(LKN\/COM\/\d{4}\/\d{2,4})/i,
+            // MLS Format: CON-COM-2019-296, RES-2015-4859, COM-91-249
+            /NEW\s+FILE\s+NUMBER.*?([A-Z]{2,3}-[A-Z]{2,3}-\d{4}-\d{2,4})/i,
+            // KANGIS Format: KNML 09846, MLKN 01251, KNGP 00338
+            /NEW\s+FILE\s+NUMBER.*?([A-Z]{4}\s+\d{5})/i,
+            // New KANGIS Format: KN0001, KN2500, KN0131
+            /NEW\s+FILE\s+NUMBER.*?([A-Z]{2}\d{4})/i,
+          ],
+          plotNumber: [
+            /PLOT\s+NUMBER[:\s]*([A-Z0-9\s-]+?)(?:\s+TITLE|\s+OLD|\s*$)/i,
+            /PLOT\s+NO[:\s]*([A-Z0-9\s-]+?)(?:\s+TITLE|\s+OLD|\s*$)/i,
+            // Look for patterns after "PLOT NUMBER" label
+            /PLOT\s+NUMBER.*?([A-Z0-9\s-]+?)(?:\s|$)/i,
+          ],
+          title: [
+            /TITLE[:\s]*([A-Z\s.,'-]+?)(?:\s+OLD\s+FILE|\s+TO|\s*$)/i,
+            // More specific patterns for the TITLE field on recertification forms
+            /TITLE[:\s]+([A-Z][A-Z\s.,'-]{5,50})(?:\s+OLD|\s+TO|\s*$)/i,
+            // Handle handwritten names after TITLE label
+            /TITLE[:\s]*([A-Z][a-zA-Z\s.,'-]{10,60})(?:\s+OLD\s+FILE|\s+TO|\s*$)/i,
+            // Common Nigerian name patterns with titles
+            /TITLE[:\s]*(ALH\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            /TITLE[:\s]*(ALHAJI\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            /TITLE[:\s]*(DR\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            /TITLE[:\s]*(PROF\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            /TITLE[:\s]*(MR\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            /TITLE[:\s]*(MRS\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            /TITLE[:\s]*(MISS\.?\s+[A-Z\s.,'-]+?)(?:\s+OLD|\s+TO|\s*$)/i,
+            // Pattern to catch names that might have OCR artifacts
+            /TITLE[:\s]*([A-Z][A-Za-z\s.,'-_]{8,50})(?:\s+OLD|\s+TO|\s*$)/i,
+          ],
+          oldFileNumber: [
+            /OLD\s+FILE\s+NUMBER[:\s]*([A-Z0-9/\s-]+?)(?:\s+TO|\s*$)/i,
+            /OLD\s+FILE\s+NO[:\s]*([A-Z0-9/\s-]+?)(?:\s+TO|\s*$)/i,
+            // Look for patterns after "OLD FILE NUMBER" label
+            /OLD\s+FILE\s+NUMBER.*?([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{2,4})/i,
+            /OLD\s+FILE\s+NUMBER.*?(COM\/\d{4}\/\d{2,4})/i,
+            // MLS Format: CON-COM-2019-296, RES-2015-4859, COM-91-249
+            /OLD\s+FILE\s+NUMBER.*?([A-Z]{2,3}-[A-Z]{2,3}-\d{4}-\d{2,4})/i,
+            // KANGIS Format: KNML 09846, MLKN 01251, KNGP 00338
+            /OLD\s+FILE\s+NUMBER.*?([A-Z]{4}\s+\d{5})/i,
+            // New KANGIS Format: KN0001, KN2500, KN0131
+            /OLD\s+FILE\s+NUMBER.*?([A-Z]{2}\d{4})/i,
+          ],
+        };
+
+        // Extract NEW FILE NUMBER (highest priority)
+        for (const pattern of recertificationPatterns.newFileNumber) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            const fileNo = match[1]
+              .trim()
+              .replace(/[_\s]+/g, " ")
+              .trim();
+            if (fileNo.length > 3) {
+              // Ensure it's not just noise
+              data.fileNo = fileNo;
+
+              // Determine file number type and parse components
+              if (fileNo.match(/^[A-Z]{2,3}-[A-Z]{2,3}-\d{4}-\d{2,4}$/)) {
+                // MLS Format: CON-COM-2019-296, RES-2015-4859, COM-91-249
+                data.fileNumberType = "mlsFileNo";
+                data.mlsFileNo = fileNo;
+                const parts = fileNo.split("-");
+                data.filePrefix = `${parts[0]}-${parts[1]}`;
+                data.fileYear = parts[2];
+                data.fileSerialNo = parts[3];
+              } else if (fileNo.match(/^[A-Z]{4}\s+\d{5}$/)) {
+                // KANGIS Format: KNML 09846, MLKN 01251, KNGP 00338
+                data.fileNumberType = "kangisFileNo";
+                data.kangisFileNo = fileNo;
+                const parts = fileNo.split(" ");
+                data.filePrefix = parts[0];
+                data.fileSerialNo = parts[1];
+              } else if (fileNo.match(/^[A-Z]{2}\d{4}$/)) {
+                // New KANGIS Format: KN0001, KN2500, KN0131
+                data.fileNumberType = "newKangisFileNo";
+                data.newKangisFileNo = fileNo;
+                data.filePrefix = fileNo.substring(0, 2);
+                data.fileSerialNo = fileNo.substring(2);
+              } else if (
+                fileNo.includes("LKN") ||
+                cleanText.toLowerCase().includes("kangis")
+              ) {
+                // Legacy KANGIS format
+                data.fileNumberType = "kangisFileNo";
+                data.kangisFileNo = fileNo;
+              } else if (fileNo.includes("MLS")) {
+                // Legacy MLS format
+                data.fileNumberType = "mlsFileNo";
+                data.mlsFileNo = fileNo;
+              } else {
+                // Default to KANGIS
+                data.fileNumberType = "kangisFileNo";
+                data.kangisFileNo = fileNo;
+              }
+
+              // Legacy parsing for slash-separated formats
+              if (fileNo.includes("/")) {
+                const parts = fileNo.split("/");
+                if (parts.length >= 2) {
+                  if (parts.length === 4) {
+                    data.filePrefix = `${parts[0]}/${parts[1]}`;
+                    data.fileSerialNo = `${parts[2]}/${parts[3]}`;
+                  } else if (parts.length === 3) {
+                    if (parts[1].match(/^\d{4}$/)) {
+                      data.filePrefix = parts[0];
+                      data.fileSerialNo = `${parts[1]}/${parts[2]}`;
+                    } else {
+                      data.filePrefix = `${parts[0]}/${parts[1]}`;
+                      data.fileSerialNo = parts[2];
+                    }
+                  } else {
+                    data.filePrefix = parts[0];
+                    data.fileSerialNo = parts[1];
+                  }
+                }
+              }
+
+              foundFields++;
+              break;
+            }
+          }
+        }
+
+        // Extract PLOT NUMBER
+        for (const pattern of recertificationPatterns.plotNumber) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            const plotNo = match[1]
+              .trim()
+              .replace(/[_\s]+/g, " ")
+              .replace(/[,.]$/, "");
+            if (plotNo.length > 0 && plotNo !== "_" && plotNo !== "-") {
+              data.plotNo = plotNo;
+              foundFields++;
+              break;
+            }
+          }
+        }
+
+        // Extract TITLE (property holder name) - enhanced for recertification forms
+        for (const pattern of recertificationPatterns.title) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            const title = match[1]
+              .trim()
+              .replace(/[_\s]+/g, " ")
+              .replace(/[,.]$/, "");
+            if (title.length > 3 && title !== "_" && title !== "-") {
+              data.propertyHolder = title;
+              data.assignee = title; // Use as assignee for consistency
+              foundFields++;
+              break;
+            }
+          }
+        }
+
+        // Extract OLD FILE NUMBER
+        for (const pattern of recertificationPatterns.oldFileNumber) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            const oldFileNo = match[1].trim().replace(/[_\s]+/g, "");
+            if (oldFileNo.length > 3) {
+              data.oldFileNo = oldFileNo;
+              foundFields++;
+              break;
+            }
+          }
+        }
+
+        // If no recertification data found, fall back to standard patterns
+        if (!data.fileNo) {
+          const standardFileNoPatterns = [
+            // MLS Format: CON-COM-2019-296, RES-2015-4859, COM-91-249
+            /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*([A-Z]{2,3}-[A-Z]{2,3}-\d{4}-\d{2,4})/i,
+            // KANGIS Format: KNML 09846, MLKN 01251, KNGP 00338
+            /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*([A-Z]{4}\s+\d{5})/i,
+            // New KANGIS Format: KN0001, KN2500, KN0131
+            /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*([A-Z]{2}\d{4})/i,
+            // Legacy patterns
+            /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*(LKN\/COM\/[A-Z0-9/\s-]+)/i,
+            /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*(COM\/[A-Z0-9/\s-]+)/i,
+            /(?:KANGIS\s*File\s*No\.?|KANGIS\s*FILE\s*NUMBER)\s*:?\s*([A-Z0-9/\s-]+)/i,
+            /(?:MLS\s*File\s*No\.?|MLS\s*FILE\s*NUMBER)\s*:?\s*([A-Z0-9/\s-]+)/i,
+            /(LKN\/COM\/\d{4}\/\d{2,4})/i,
+            /(COM\/\d{4}\/\d{2,4})/i,
+            /([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{3,4})/i,
+            // Standalone patterns for the three formats
+            /([A-Z]{2,3}-[A-Z]{2,3}-\d{4}-\d{2,4})/i,
+            /([A-Z]{4}\s+\d{5})/i,
+            /([A-Z]{2}\d{4})/i,
+          ];
+
+          for (const pattern of standardFileNoPatterns) {
+            const match = cleanText.match(pattern);
+            if (match?.[1]) {
+              const fileNo = match[1].trim();
+              data.fileNo = fileNo;
+
+              if (fileNo.match(/^[A-Z]{2,3}-[A-Z]{2,3}-\d{4}-\d{2,4}$/)) {
+                // MLS Format: CON-COM-2019-296, RES-2015-4859, COM-91-249
+                data.fileNumberType = "mlsFileNo";
+                data.mlsFileNo = fileNo;
+                const parts = fileNo.split("-");
+                data.filePrefix = `${parts[0]}-${parts[1]}`;
+                data.fileYear = parts[2];
+                data.fileSerialNo = parts[3];
+              } else if (fileNo.match(/^[A-Z]{4}\s+\d{5}$/)) {
+                // KANGIS Format: KNML 09846, MLKN 01251, KNGP 00338
+                data.fileNumberType = "kangisFileNo";
+                data.kangisFileNo = fileNo;
+                const parts = fileNo.split(" ");
+                data.filePrefix = parts[0];
+                data.fileSerialNo = parts[1];
+              } else if (fileNo.match(/^[A-Z]{2}\d{4}$/)) {
+                // New KANGIS Format: KN0001, KN2500, KN0131
+                data.fileNumberType = "newKangisFileNo";
+                data.newKangisFileNo = fileNo;
+                data.filePrefix = fileNo.substring(0, 2);
+                data.fileSerialNo = fileNo.substring(2);
+              } else if (
+                cleanText.toLowerCase().includes("kangis") ||
+                fileNo.includes("LKN")
+              ) {
+                data.fileNumberType = "kangisFileNo";
+                data.kangisFileNo = fileNo;
+              } else if (
+                cleanText.toLowerCase().includes("mls") ||
+                fileNo.includes("MLS")
+              ) {
+                data.fileNumberType = "mlsFileNo";
+                data.mlsFileNo = fileNo;
+              } else {
+                data.fileNumberType = "kangisFileNo";
+                data.kangisFileNo = fileNo;
+              }
+
+              // Legacy parsing for slash-separated formats
+              if (fileNo.includes("/")) {
+                const parts = fileNo.split("/");
+                if (parts.length >= 2) {
+                  if (parts.length === 4) {
+                    data.filePrefix = `${parts[0]}/${parts[1]}`;
+                    data.fileSerialNo = `${parts[2]}/${parts[3]}`;
+                  } else if (parts.length === 3) {
+                    if (parts[1].match(/^\d{4}$/)) {
+                      data.filePrefix = parts[0];
+                      data.fileSerialNo = `${parts[1]}/${parts[2]}`;
+                    } else {
+                      data.filePrefix = `${parts[0]}/${parts[1]}`;
+                      data.fileSerialNo = parts[2];
+                    }
+                  } else {
+                    data.filePrefix = parts[0];
+                    data.fileSerialNo = parts[1];
+                  }
+                }
+              }
+
+              foundFields++;
+              break;
+            }
+          }
+        }
+
+        // Enhanced LGA/City extraction
+        const lgaPatterns = [
+          /(?:LGA|Local\s*Government\s*Area)\s*:?\s*([A-Za-z\s]+?)(?:\s+State|\s+in\s+|\s*,|\s*\.|\n|$)/i,
+          /(?:in\s+|at\s+)([A-Za-z\s]+?)\s+Local\s+Government/i,
+          /(?:situate\s+at\s+|located\s+at\s+|being\s+at\s+)([A-Za-z\s]+?)(?:\s+in\s+|\s+State|\s*,)/i,
+          /(?:City\s*:?\s*|Town\s*:?\s*)([A-Za-z\s]+?)(?:\s+State|\s*,|\s*\.|\n|$)/i,
+          /(Abuja|Lagos|Kano|Ibadan|Port\s+Harcourt|Benin\s+City|Maiduguri|Zaria|Aba|Jos|Ilorin|Oyo|Enugu|Abeokuta|Sokoto|Katsina|Bauchi|Akure|Lokoja|Osogbo|Uyo|Calabar|Owerri|Abakaliki|Lafia|Jalingo|Yenagoa|Asaba|Awka|Makurdi|Gombe|Damaturdi|Dutse|Birnin\s+Kebbi|Minna|Kaduna)/i,
+        ];
+
+        for (const pattern of lgaPatterns) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            data.lgsaOrCity = match[1].trim().replace(/[,.]$/, "");
+            foundFields++;
+            break;
+          }
+        }
+
+        // Enhanced Instrument type detection
+        const instrumentPatterns = [
+          /(DEED\s+OF\s+ASSIGNMENT)/i,
+          /(CERTIFICATE\s+OF\s+OCCUPANCY)/i,
+          /(RIGHT\s+OF\s+OCCUPANCY)/i,
+          /(DEED\s+OF\s+MORTGAGE)/i,
+          /(TRIPARTITE\s+MORTGAGE)/i,
+          /(DEED\s+OF\s+LEASE)/i,
+          /(DEED\s+OF\s+SUB-LEASE)/i,
+          /(DEED\s+OF\s+SUB-UNDER\s+LEASE)/i,
+          /(DEED\s+OF\s+SURRENDER)/i,
+          /(DEED\s+OF\s+ASSENT)/i,
+          /(DEED\s+OF\s+RELEASE)/i,
+          /(POWER\s+OF\s+ATTORNEY)/i,
+          /(IRREVOCABLE\s+POWER\s+ATTORNEY)/i,
+          /(DEED\s+OF\s+SUB-DIVISION)/i,
+          /(DEED\s+OF\s+MERGER)/i,
+          /(SURVEY\s+PLAN)/i,
+          /(C\s+OF\s+O)/i,
+          /(R\s+OF\s+O)/i,
+          /(RECERTIFICATION)/i,
+        ];
+
+        for (const pattern of instrumentPatterns) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            data.instrument = match[1].trim().toUpperCase();
+            foundFields++;
+            break;
+          }
+        }
+
+        // Enhanced Parties extraction (if not already found in title)
+        if (!data.assignor) {
+          const assignorPatterns = [
+            /(?:ASSIGNOR|VENDOR|GRANTOR)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\s+(?:ASSIGNEE|PURCHASER|GRANTEE|Address|Property|Consideration))/i,
+            /(?:being\s+the\s+property\s+of|belonging\s+to)\s+([A-Za-z\s.,'-]+?)(?:\s+(?:and|of|situate))/i,
+            /(?:Vendor|Grantor)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\n|$)/i,
+          ];
+
+          for (const pattern of assignorPatterns) {
+            const match = cleanText.match(pattern);
+            if (match?.[1]) {
+              data.assignor = match[1].trim().replace(/[,.]$/, "");
+              foundFields++;
+
+              break;
+            }
+          }
+        }
+
+        if (!data.assignee && !data.propertyHolder) {
+          const assigneePatterns = [
+            /(?:ASSIGNEE|PURCHASER|GRANTEE|HOLDER)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\s+(?:Property|Address|Consideration|being))/i,
+            /(?:in\s+favour\s+of|assigned\s+to|granted\s+to)\s+([A-Za-z\s.,'-]+?)(?:\s+(?:of|being|situate))/i,
+            /(?:Purchaser|Grantee)\s*:?\s*([A-Za-z\s.,'-]+?)(?:\n|$)/i,
+          ];
+
+          for (const pattern of assigneePatterns) {
+            const match = cleanText.match(pattern);
+            if (match?.[1]) {
+              data.assignee = match[1].trim().replace(/[,.]$/, "");
+              foundFields++;
+              break;
+            }
+          }
+        }
+
+        // Enhanced Registration details extraction
+        const regDetailsPatterns = [
+          /Registered\s+as\s+No\.?\s*(\d+)\s*\/?\s*Page\s*(\d+)\s*\/?\s*Volume\s*(\d+)/i,
+          /Registration\s+No\.?\s*(\d+)\s*\/?\s*Page\s*(\d+)\s*\/?\s*Vol\.?\s*(\d+)/i,
+          /Reg\.?\s*No\.?\s*(\d+)\s*\/?\s*P\.?\s*(\d+)\s*\/?\s*V\.?\s*(\d+)/i,
+          /Serial\s+No\.?\s*(\d+)\s*Page\s*(\d+)\s*Volume\s*(\d+)/i,
+        ];
+
+        for (const pattern of regDetailsPatterns) {
+          const match = cleanText.match(pattern);
+          if (match) {
+            data.serialNo = match[1];
+            data.page = match[2];
+            data.vol = match[3];
+            data.regNo = `${data.serialNo}/${data.page}/${data.vol}`;
+            foundFields += 3;
+            break;
+          }
+        }
+
+        // Enhanced Description extraction
+        const descriptionPatterns = [
+          /(?:Property\s*Description|ALL\s*THAT\s*parcel\s*of\s*land|Description\s*of\s*Property)\s*:?\s*([^.]+?)(?:\.|$)/i,
+          /ALL\s+THAT\s+([^.]+?)(?:\.|situate)/i,
+          /being\s+([^.]+?)(?:\.|situate|measuring)/i,
+          /(?:comprising|containing)\s+([^.]+?)(?:\.|$)/i,
+        ];
+
+        for (const pattern of descriptionPatterns) {
+          const match = cleanText.match(pattern);
+          if (match?.[1]) {
+            data.description = match[1].trim();
+            foundFields++;
+            break;
+          }
+        }
+
+        // Calculate confidence based on found fields
+        const totalPossibleFields = 12;
+        data.confidence = Math.min(
+          100,
+          Math.round((foundFields / totalPossibleFields) * 100)
+        );
+        data.extractionStatus =
+          data.confidence > 70
+            ? "High Confidence"
+            : data.confidence > 40
+            ? "Partially Extracted"
+            : data.confidence > 15
+            ? "Low Confidence"
+            : "Extraction Failed";
+
+        return data;
+      }
+
+      function analyzeTextForKeywords(text) {
+        const findings = {};
+        const keywords = [
+          "POWER OF ATTORNEY",
+          "IRREVOCABLE POWER OF ATTORNEY",
+          "DEED OF MORTGAGE",
+          "TRIPARTITE MORTGAGE",
+          "DEED OF ASSIGNMENT",
+          "DEED OF LEASE",
+          "DEED OF SUB-LEASE",
+          "DEED OF SUB-UNDER LEASE",
+          "DEED OF SUB-DIVISION",
+          "DEED OF MERGER",
+          "DEED OF SURRENDER",
+          "DEED OF ASSENT",
+          "DEED OF RELEASE",
+          "CERTIFICATE OF OCCUPANCY",
+          "C OF O",
+          "RIGHT OF OCCUPANCY",
+          "R OF O",
+          "SURVEY PLAN",
+          "RECERTIFICATION",
+        ];
+
+        const pageMarkerRegex = /--- Page (\d+)(?:\s*$$OCR$$)?\s*---/gi;
+        const pageContents = [];
+
+        // Split text by page markers and extract page numbers and content
+        const textParts = text.split(pageMarkerRegex);
+
+        // Process the split parts - every odd index is a page number, every even index after 0 is content
+        for (let i = 1; i < textParts.length; i += 2) {
+          const pageNum = parseInt(textParts[i], 10);
+          const content = textParts[i + 1] || "";
+
+          if (content.trim().length > 0) {
+            pageContents.push({ content: content.trim(), pageNum });
+          }
+        }
+
+        // If no page markers found, treat as single page
+        if (pageContents.length === 0 && text.trim().length > 0) {
+          pageContents.push({ content: text.trim(), pageNum: 1 });
+        }
+
+        console.log("[v0] Page contents found:", pageContents.length, "pages");
+        pageContents.forEach((page) => {
+          console.log(
+            `[v0] Page ${page.pageNum}: ${page.content.substring(0, 100)}...`
+          );
+        });
+
+        // Search for keywords in each page
+        pageContents.forEach(({ content, pageNum }) => {
+          const upperPageContent = content.toUpperCase();
+
+          keywords.forEach((keyword) => {
+            // More precise keyword matching with word boundaries
+            const keywordPattern = keyword.replace(/\s+/g, "\\s+");
+            const keywordRegex = new RegExp(`\\b${keywordPattern}\\b`, "gi");
+
+            if (keywordRegex.test(upperPageContent)) {
+              if (!findings[keyword]) {
+                findings[keyword] = [];
+              }
+              if (!findings[keyword].includes(pageNum)) {
+                findings[keyword].push(pageNum);
+              }
+            }
+          });
+
+          // Special handling for common abbreviations and variations
+          const specialPatterns = {
+            "CERTIFICATE OF OCCUPANCY": [
+              /\bCERTIFICATE\s+OF\s+OCCUPANCY\b/gi,
+              /\bC\.?\s*OF\s*O\.?\b/gi,
+              /\bC\s*\/\s*O\b/gi,
+            ],
+            "RIGHT OF OCCUPANCY": [
+              /\bRIGHT\s+OF\s+OCCUPANCY\b/gi,
+              /\bR\.?\s*OF\s*O\.?\b/gi,
+              /\bR\s*\/\s*O\b/gi,
+              /\bSTATUTORY\s+RIGHT\s+OF\s+OCCUPANCY\b/gi,
+            ],
+            "POWER OF ATTORNEY": [
+              /\bPOWER\s+OF\s+ATTORNEY\b/gi,
+              /\bP\.?\s*OF\s*A\.?\b/gi,
+            ],
+          };
+
+          Object.entries(specialPatterns).forEach(([keyword, patterns]) => {
+            patterns.forEach((pattern) => {
+              if (pattern.test(content)) {
+                if (!findings[keyword]) {
+                  findings[keyword] = [];
+                }
+                if (!findings[keyword].includes(pageNum)) {
+                  findings[keyword].push(pageNum);
+                }
+              }
+            });
+          });
+        });
+
+        // Filter out false positives and very short content
+        Object.keys(findings).forEach((keyword) => {
+          findings[keyword] = findings[keyword].filter((pageNum) => {
+            const pageContent = pageContents.find((p) => p.pageNum === pageNum);
+            if (!pageContent) return false;
+
+            const content = pageContent.content;
+            const keywordPattern = keyword.replace(/\s+/g, "\\s+");
+            const matches =
+              content.match(new RegExp(keywordPattern, "gi")) || [];
+
+            // Keep if keyword appears multiple times, content is substantial, or it's a key document type
+            const isSubstantialContent = content.length > 200;
+            const hasMultipleMatches = matches.length > 1;
+            const isKeyDocument = [
+              "CERTIFICATE OF OCCUPANCY",
+              "RIGHT OF OCCUPANCY",
+              "RECERTIFICATION",
+            ].includes(keyword);
+
+            return hasMultipleMatches || isSubstantialContent || isKeyDocument;
+          });
+
+          // Remove empty arrays
+          if (findings[keyword].length === 0) {
+            delete findings[keyword];
+          } else {
+            // Sort page numbers
+            findings[keyword].sort((a, b) => a - b);
+          }
+        });
+
+        console.log("[v0] Final keyword findings:", findings);
+        return findings;
+      }
+
+      function showAiProcessing() {
+        document.getElementById("ai-processing").classList.remove("hidden");
+      }
+
+      function hideAiProcessing() {
+        document.getElementById("ai-processing").classList.add("hidden");
+      }
+
+      function updateAiProcessingUI() {
+        // Update progress bar
+        document.getElementById(
+          "ai-progress-text"
+        ).textContent = `${aiProgress}% Complete`;
+        document.getElementById(
+          "ai-progress-bar"
+        ).style.width = `${aiProgress}%`;
+
+        // Update stage indicators
+        const stages = [
+          "initializing",
+          "ocr",
+          "layoutAnalysis",
+          "dataExtraction",
+          "dataAssembly",
+          "complete",
+        ];
+        const currentStageIndex = stages.indexOf(currentAiStage);
+
+        document
+          .querySelectorAll(".stage-indicator")
+          .forEach((indicator, index) => {
+            const circle = indicator.querySelector(".w-4");
+            const text = indicator.querySelector(".text-xs");
+
+            if (index < currentStageIndex) {
+              // Completed stage
+              circle.className = "w-4 h-4 rounded-full bg-blue-500 mb-1";
+              text.className = "text-xs font-medium text-blue-600";
+            } else if (index === currentStageIndex) {
+              // Current stage
+              circle.className =
+                "w-4 h-4 rounded-full bg-blue-500 ring-4 ring-blue-100 animate-pulse mb-1";
+              text.className = "text-xs font-bold text-blue-700";
+            } else {
+              // Future stage
+              circle.className = "w-4 h-4 rounded-full bg-gray-300 mb-1";
+              text.className = "text-xs text-gray-500";
+            }
+          });
+
+        // Update stage description
+        updateStageDescription();
+      }
+
+      function updateStageDescription() {
+        const stageTitle = document.getElementById("ai-stage-title");
+        const stageDescription = document.getElementById(
+          "ai-stage-description"
+        );
+        const stageIcon = document.getElementById("ai-stage-icon");
+
+        const stageInfo = {
+          initializing: {
+            title: "Initializing",
+            description: "Initializing AI for property document analysis...",
+            icon: "brain",
+          },
+          ocr: {
+            title: "OCR",
+            description: "Performing OCR to extract text from the document...",
+            icon: "file-digit",
+          },
+          layoutAnalysis: {
+            title: "Layout Analysis",
+            description: "Analyzing document structure...",
+            icon: "file-search",
+          },
+          dataExtraction: {
+            title: "Data Extraction",
+            description:
+              "Extracting key property details: File No, Parties, Plot, Instrument...",
+            icon: "layers",
+          },
+          dataAssembly: {
+            title: "Data Assembly",
+            description: "Structuring extracted information...",
+            icon: "zap",
+          },
+          complete: {
+            title: "Complete",
+            description:
+              "Property document analysis complete! Review data in the form.",
+            icon: "sparkles",
+          },
+        };
+
+        const info = stageInfo[currentAiStage] || stageInfo["initializing"];
+
+        stageTitle.textContent = `Current Stage: ${info.title}`;
+        stageDescription.textContent = info.description;
+        stageIcon.setAttribute("data-lucide", info.icon);
+
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+      }
+
+      function showExtractionResults() {
+        // Show keyword findings
+        const instrumentsFound = Object.keys(keywordFindings).filter(
+          (keyword) => keywordFindings[keyword].length > 0
+        );
+        if (instrumentsFound.length > 0) {
+          const keywordCard = document.getElementById("keyword-findings");
+          const description = document.getElementById(
+            "keyword-findings-description"
+          );
+          const list = document.getElementById("keyword-findings-list");
+
+          description.textContent = `This file contains ${
+            instrumentsFound.length
+          } ${instrumentsFound.length === 1 ? "instrument" : "instruments"}:`;
+
+          list.innerHTML = instrumentsFound
+            .map((instrument) => {
+              return `
+        <li class="flex items-center text-sm">
+          <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+          <span class="font-medium text-gray-800">${instrument}</span>
+        </li>
+      `;
+            })
+            .join("");
+
+          keywordCard.classList.remove("hidden");
+        }
+
+        // Show raw text
+        if (rawExtractedText) {
+          const rawTextCard = document.getElementById("raw-text-card");
+          const textarea = document.getElementById("raw-text-textarea");
+          textarea.value = rawExtractedText;
+          rawTextCard.classList.remove("hidden");
+        }
+
+        // Show extracted details
+        if (extractedPropertyData) {
+          populatePropertyForm();
+          renderInstruments();
+          document
+            .getElementById("extracted-details")
+            .classList.remove("hidden");
+        }
+      }
+
+      function populatePropertyForm() {
+        if (!extractedPropertyData) return;
+
+        const data = extractedPropertyData;
+
+        console.log("[v0] Starting populatePropertyForm with data:", data);
+
+        // Set confidence display with additional info about file numbers and property holder
+        let confidenceText = `Review the details extracted by the AI. Add or modify instruments as needed, then save the record. Confidence: ${data.confidence}% (${data.extractionStatus})`;
+
+        if (data.oldFileNo && data.fileNo) {
+          confidenceText += ` | Found transition: ${data.oldFileNo} → ${data.fileNo}`;
+        } else if (data.oldFileNo) {
+          confidenceText += ` | Old File No: ${data.oldFileNo}`;
+        }
+
+        if (data.propertyHolder) {
+          confidenceText += ` | Property Holder: ${data.propertyHolder}`;
+        }
+
+        const confidenceElement = document.getElementById(
+          "extraction-confidence"
+        );
+        if (confidenceElement) {
+          confidenceElement.textContent = confidenceText;
+        } else {
+          console.log("[v0] Warning: extraction-confidence element not found");
+        }
+
+        if (data.extractedText) {
+          detectedFileNumbers = extractMultipleFileNumbers(data.extractedText);
+          displayDetectedFileNumbers(detectedFileNumbers);
+        }
+
+        // Only populate non-file-number fields with null checks
+
+        const plotNoField = document.getElementById("plot-no");
+        if (plotNoField && data.plotNo) {
+          plotNoField.value = data.plotNo;
+        }
+
+        const lgaCityField = document.getElementById("lga-city");
+        if (lgaCityField && data.lgsaOrCity) {
+          lgaCityField.value = data.lgsaOrCity;
+        }
+
+        const propertyHolderField = document.getElementById("property-holder");
+        if (propertyHolderField && data.propertyHolder) {
+          propertyHolderField.value = data.propertyHolder;
+        }
+
+        const propertyDescField = document.getElementById(
+          "property-description"
+        );
+        if (propertyDescField && data.description) {
+          propertyDescField.value = data.description;
+        }
+
+        console.log("[v0] Completed populatePropertyForm");
+      }
+
+      function updateCompleteFileNo() {
+        const prefixField = document.getElementById("file-prefix");
+        const serialNoField = document.getElementById("file-serial-no");
+        const completeField = document.getElementById("complete-file-no");
+
+        if (!prefixField || !serialNoField || !completeField) {
+          console.log("[v0] Warning: File number fields not found in DOM");
+          return;
+        }
+
+        const prefix = prefixField.value.trim();
+        const serialNo = serialNoField.value.trim();
+
+        if (prefix && serialNo) {
+          completeField.value = `${prefix}/${serialNo}`;
+        } else if (serialNo) {
+          completeField.value = serialNo;
+        } else if (prefix) {
+          completeField.value = prefix;
+        } else {
+          completeField.value = "";
+        }
+      }
+
+      function handleFileNumberTypeChange() {
+        const fileNumberTypeField = document.getElementById("file-number-type");
+        if (!fileNumberTypeField) {
+          console.log("[v0] Warning: file-number-type field not found");
+          return;
+        }
+
+        const selectedType = fileNumberTypeField.value;
+        console.log("[v0] File number type changed to:", selectedType);
+
+        // Update UI based on selected type if needed
+        updateCompleteFileNo();
+      }
+
+      function addInstrument() {
+        const newInstrument = {
+          id: Date.now().toString(),
+          type: extractedPropertyData?.instrument || "",
+          description: "",
+          parties: {
+            assignor: extractedPropertyData?.assignor || "",
+            assignee:
+              extractedPropertyData?.assignee ||
+              extractedPropertyData?.propertyHolder ||
+              "",
+          },
+          registrationDetails: {
+            serialNo: extractedPropertyData?.serialNo || "",
+            page: extractedPropertyData?.page || "",
+            vol: extractedPropertyData?.vol || "",
+            regNo: extractedPropertyData?.regNo || "",
+          },
+          notes: "",
+        };
+
+        instruments.push(newInstrument);
+        editingInstrumentId = newInstrument.id;
+        renderInstruments();
+      }
+
+      function removeInstrument(id) {
+        instruments = instruments.filter((inst) => inst.id !== id);
+        if (editingInstrumentId === id) {
+          editingInstrumentId = null;
+        }
+        renderInstruments();
+      }
+
+      function toggleInstrumentEdit(id) {
+        editingInstrumentId = editingInstrumentId === id ? null : id;
+        renderInstruments();
+      }
+
+      function updateInstrument(id, field, value) {
+        const instrument = instruments.find((inst) => inst.id === id);
+        if (instrument) {
+          if (field.includes(".")) {
+            const [parent, child] = field.split(".");
+            if (!instrument[parent]) instrument[parent] = {};
+            instrument[parent][child] = value;
+
+            // Auto-generate regNo when all parts are available
+            if (parent === "registrationDetails") {
+              const details = instrument.registrationDetails;
+              if (details.serialNo && details.page && details.vol) {
+                details.regNo = `${details.serialNo}/${details.page}/${details.vol}`;
+              }
+            }
+          } else {
+            instrument[field] = value;
+
+            if (
+              field === "type" &&
+              (value === "CERTIFICATE OF OCCUPANCY" ||
+                value === "RIGHT OF OCCUPANCY")
+            ) {
+              if (!instrument.parties) instrument.parties = {};
+              instrument.parties.assignor = "KANO STATE GOVERNMENT";
+            } else if (field === "type") {
+              if (instrument.parties && instrument.parties.assignor) {
+                delete instrument.parties.assignor; // remove the assignor
+              }
+            }
+          }
+          renderInstruments();
+        }
+      }
+
+      function renderInstruments() {
+        const container = document.getElementById("instruments-list");
+        const noInstruments = document.getElementById("no-instruments");
+
+        if (instruments.length === 0) {
+          container.innerHTML = "";
+          noInstruments.classList.remove("hidden");
+          return;
+        }
+
+        noInstruments.classList.add("hidden");
+
+        const instrumentTypes = [
+          "DEED OF ASSIGNMENT",
+          "CERTIFICATE OF OCCUPANCY",
+          "RIGHT OF OCCUPANCY",
+          "DEED OF MORTGAGE",
+          "TRIPARTITE MORTGAGE",
+          "DEED OF LEASE",
+          "DEED OF SUB-LEASE",
+          "DEED OF SUB-UNDER LEASE",
+          "DEED OF SURRENDER",
+          "DEED OF ASSENT",
+          "DEED OF RELEASE",
+          "POWER OF ATTORNEY",
+          "IRREVOCABLE POWER OF ATTORNEY",
+          "DEED OF SUB-DIVISION",
+          "DEED OF MERGER",
+          "SURVEY PLAN",
+          "RECERTIFICATION",
+          "OTHER",
+        ];
+
+        container.innerHTML = instruments
+          .map((instrument, index) => {
+            const isEditing = editingInstrumentId === instrument.id;
+
+            return `
+      <div class="bg-white rounded-lg border instrument-card ${
+        isEditing ? "editing" : ""
+      }">
+        <div class="p-4 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium">Instrument #${index + 1}</span>
+              ${
+                instrument.type
+                  ? `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${instrument.type}</span>`
+                  : ""
+              }
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleInstrumentEdit('${
+                instrument.id
+              }')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-gray-700 hover:bg-gray-100">
+                <i data-lucide="edit-3" class="h-4 w-4"></i>
+              </button>
+              <button onclick="removeInstrument('${
+                instrument.id
+              }')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-2 py-1 transition-all cursor-pointer bg-transparent text-red-600 hover:bg-red-50">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        ${
+          isEditing
+            ? `
+          <div class="p-4 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs font-medium text-gray-700">Instrument Type</label>
+                <select onchange="updateInstrument('${
+                  instrument.id
+                }', 'type', this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                  <option value="">Select instrument type</option>
+                  ${instrumentTypes
+                    .map(
+                      (type) => `
+                    <option value="${type}" ${
+                        instrument.type === type ? "selected" : ""
+                      }>${type}</option>
+                  `
+                    )
+                    .join("")}
+                </select>
+              </div>
+              <div class="space-y-2">
+                <!-- Changed Description to Transaction/Certificate Date with date input -->
+                <label class="text-xs font-medium text-gray-700">Transaction/Certificate Date</label>
+                <input
+                  type="date"
+                  value="${instrument.transactionDate || ""}"
+                  onchange="updateInstrument('${
+                    instrument.id
+                  }', 'transactionDate', this.value)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10"
+                />
+              </div>
+            </div>
+            
+           <!-- Transaction Details -->
+<div class="space-y-2">
+  <label class="text-xs font-medium text-gray-700">Transaction Details</label>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-md">
+    ${
+      instrument.type?.includes("MORTGAGE")
+        ? `
+      <!-- Show ONLY for Mortgage instruments -->
+      <div class="space-y-1">
+        <label class="text-xs text-gray-600">Mortgagor</label>
+        <input
+          type="text"
+          value="${instrument.parties?.mortgagor || ""}"
+          onchange="updateInstrument('${
+            instrument.id
+          }', 'parties.mortgagor', this.value)"
+          placeholder="Name of mortgagor"
+          class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+        />
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-gray-600">Mortgagee</label>
+        <input
+          type="text"
+          value="${instrument.parties?.mortgagee || ""}"
+          onchange="updateInstrument('${
+            instrument.id
+          }', 'parties.mortgagee', this.value)"
+          placeholder="Name of mortgagee"
+          class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+        />
+      </div>
+    `
+        : `
+      <!-- Default (non-Mortgage) instruments: show Assignor/Assignee -->
+      <div class="space-y-1">
+        <label class="text-xs text-gray-600">Assignor/Grantor</label>
+        <input
+          type="text"
+          value="${
+            instrument.parties?.assignor || instrument.parties?.grantor || ""
+          }"
+          onchange="updateInstrument('${
+            instrument.id
+          }', 'parties.assignor', this.value)"
+          placeholder="Name of assignor/grantor"
+          class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+        />
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-gray-600">Assignee/Grantee</label>
+        <input
+          type="text"
+          value="${
+            instrument.parties?.assignee || instrument.parties?.grantee || ""
+          }"
+          onchange="updateInstrument('${
+            instrument.id
+          }', 'parties.assignee', this.value)"
+          placeholder="Name of assignee/grantee"
+          class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+        />
+      </div>
+    `
+    }
+  </div>
+</div>
+
+            
+            <!-- Registration Details Section -->
+            <div class="space-y-2">
+              <label class="text-xs font-medium text-gray-700">Registration Details</label>
+              <!-- Added Reg Date and Reg Time fields beside registration number -->
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-md">
+                <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Serial No.</label>
+                  <input
+                    type="text"
+                    value="${instrument.registrationDetails?.serialNo || ""}"
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.serialNo', this.value)"
+                    placeholder="e.g. 1"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  />
+                </div>
+               
+                <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Page</label>
+                  <input
+                    type="text"
+                    value="${instrument.registrationDetails?.page || ""}"
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.page', this.value)"
+                    placeholder="e.g. 1"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Volume</label>
+                  <input
+                    type="text"
+                    value="${instrument.registrationDetails?.vol || ""}"
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.vol', this.value)"
+                    placeholder="e.g. 2"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  />
+                </div>
+                 <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Reg Date</label>
+                  <input
+                    type="date"
+                    value="${instrument.registrationDetails?.regDate || ""}"
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.regDate', this.value)"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Reg Time</label>
+                  <input
+                    type="time"
+                    value="${instrument.registrationDetails?.regTime || ""}"
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.regTime', this.value)"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  />
+                </div>
+              </div>
+              <!-- Added Land Use and Tenancy/Period fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-md">
+                <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Land Use</label>
+                  <select
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.landUse', this.value)"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  >
+                    <option value="">Select land use</option>
+                    <option value="Residential" ${
+                      instrument.registrationDetails?.landUse === "Residential"
+                        ? "selected"
+                        : ""
+                    }>Residential</option>
+                    <option value="Commercial" ${
+                      instrument.registrationDetails?.landUse === "Commercial"
+                        ? "selected"
+                        : ""
+                    }>Commercial</option>
+                    <option value="Industrial" ${
+                      instrument.registrationDetails?.landUse === "Industrial"
+                        ? "selected"
+                        : ""
+                    }>Industrial</option>
+                    <option value="Agricultural" ${
+                      instrument.registrationDetails?.landUse === "Agricultural"
+                        ? "selected"
+                        : ""
+                    }>Agricultural</option>
+                    <option value="Mixed Use" ${
+                      instrument.registrationDetails?.landUse === "Mixed Use"
+                        ? "selected"
+                        : ""
+                    }>Mixed Use</option>
+                    <option value="Institutional" ${
+                      instrument.registrationDetails?.landUse ===
+                      "Institutional"
+                        ? "selected"
+                        : ""
+                    }>Institutional</option>
+                    <option value="Recreational" ${
+                      instrument.registrationDetails?.landUse === "Recreational"
+                        ? "selected"
+                        : ""
+                    }>Recreational</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-xs text-gray-600">Tenancy/Period</label>
+                  <input
+                    type="text"
+                    value="${
+                      instrument.registrationDetails?.tenancyPeriod || ""
+                    }"
+                    onchange="updateInstrument('${
+                      instrument.id
+                    }', 'registrationDetails.tenancyPeriod', this.value)"
+                    placeholder="e.g. 99 years, Freehold, etc."
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                  />
+                </div>
+              </div>
+              ${
+                instrument.registrationDetails?.regNo
+                  ? `
+                <div class="mt-2 p-2 bg-green-50 border border-green-100 rounded-md">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-green-700">REG NO:</span>
+                    <span class="text-sm font-medium text-green-800">${instrument.registrationDetails.regNo}</span>
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+            
+           
+            
+            
+            <div class="flex justify-end pt-2">
+              <button onclick="toggleInstrumentEdit('${
+                instrument.id
+              }')" class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-1 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Done Editing
+              </button>
+            </div>
+          </div>
+        `
+            : `
+          <div class="p-4">
+            <div class="text-sm text-gray-600 space-y-1">
+              <!-- Updated display to show new fields -->
+              ${
+                instrument.transactionDate
+                  ? `
+                <p><span class="font-medium">Transaction Date:</span> ${instrument.transactionDate}</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.parties?.assignor || instrument.parties?.grantor
+                  ? `
+                <p><span class="font-medium">From:</span> ${
+                  instrument.parties.assignor || instrument.parties.grantor
+                }</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.parties?.assignee || instrument.parties?.grantee
+                  ? `
+                <p><span class="font-medium">To:</span> ${
+                  instrument.parties.assignee || instrument.parties.grantee
+                }</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.registrationDetails?.regNo
+                  ? `
+                <p><span class="font-medium">Reg No:</span> ${instrument.registrationDetails.regNo}</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.registrationDetails?.regDate
+                  ? `
+                <p><span class="font-medium">Reg Date:</span> ${instrument.registrationDetails.regDate}</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.registrationDetails?.regTime
+                  ? `
+                <p><span class="font-medium">Reg Time:</span> ${instrument.registrationDetails.regTime}</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.registrationDetails?.landUse
+                  ? `
+                <p><span class="font-medium">Land Use:</span> ${instrument.registrationDetails.landUse}</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.registrationDetails?.tenancyPeriod
+                  ? `
+                <p><span class="font-medium">Tenancy/Period:</span> ${instrument.registrationDetails.tenancyPeriod}</p>
+              `
+                  : ""
+              }
+              ${
+                instrument.notes
+                  ? `
+                <p><span class="font-medium">Notes:</span> ${instrument.notes}</p>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        `
+        }
+      </div>
+    `;
+          })
+          .join("");
+
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+      }
+
+      function toggleRawText() {
+        const content = document.getElementById("raw-text-content");
+        const button = document.getElementById("toggle-raw-text");
+        const icon = button.querySelector("i");
+
+        if (content.classList.contains("expanded")) {
+          content.classList.remove("expanded");
+          icon.setAttribute("data-lucide", "chevron-down");
+          button.innerHTML =
+            '<i data-lucide="chevron-down" class="h-4 w-4"></i> Show';
+        } else {
+          content.classList.add("expanded");
+          icon.setAttribute("data-lucide", "chevron-up");
+          button.innerHTML =
+            '<i data-lucide="chevron-up" class="h-4 w-4"></i> Hide';
+        }
+
+        lucide.createIcons();
+      }
+
+      async function handleSaveRecord() {
+        if (!extractedPropertyData) {
+          showToast(
+            "Nothing to save yet. Please run AI extraction first.",
+            "warning"
+          );
+          return;
+        }
+
+        const saveBtn = document.getElementById("save-record-btn");
+        const originalBtnHtml = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<div class="loading-spinner mr-2"></div>Saving...';
+
+        try {
+          // 1) Upload the raw file (optional but useful for traceability)
+          let uploaded = null;
+          try {
+            uploaded = await uploadDocument(selectedFile); // may be null if no file or upload disabled
+          } catch (e) {
+            // If your flow requires the file upload, rethrow; otherwise just warn and proceed
+            console.warn("File upload failed:", e);
+            showToast(
+              "File upload failed. Saving record without file link...",
+              "warning"
+            );
+          }
+
+          // 2) Build the payload (collecting everything you already capture)
+          const payload = {
+            // Core file/AI info
+            originalFileName: extractedPropertyData.originalFileName,
+            fileType: extractedPropertyData.fileType,
+            fileSize: extractedPropertyData.fileSize,
+            pageCount: extractedPropertyData.pageCount,
+            // Link to uploaded file if available
+            fileUrl: uploaded?.fileUrl || null,
+            fileId: uploaded?.fileId || null,
+
+            // Raw OCR text (so you can re-parse server-side if needed)
+            // rawText: rawExtractedText || '',
+
+            // Confidence & status
+            confidence: extractedPropertyData.confidence,
+            extractionStatus: extractedPropertyData.extractionStatus,
+
+            // Property fields (UI values take precedence over AI guesses)
+            fileNumberType:
+              document.getElementById("file-number-type")?.value ||
+              extractedPropertyData.fileNumberType ||
+              "",
+            filePrefix:
+              document.getElementById("file-prefix")?.value ||
+              extractedPropertyData.filePrefix ||
+              "",
+            fileSerialNo:
+              document.getElementById("file-serial-no")?.value ||
+              extractedPropertyData.fileSerialNo ||
+              "",
+            fileNo:
+              document.getElementById("complete-file-no")?.value ||
+              extractedPropertyData.fileNo ||
+              "",
+            oldFileNo: extractedPropertyData.oldFileNo || "",
+            plotNo:
+              document.getElementById("plot-no")?.value ||
+              extractedPropertyData.plotNo ||
+              "",
+            lgsaOrCity:
+              document.getElementById("lga-city")?.value ||
+              extractedPropertyData.lgsaOrCity ||
+              "",
+            propertyHolder:
+              document.getElementById("property-holder")?.value ||
+              extractedPropertyData.propertyHolder ||
+              "",
+            description:
+              document.getElementById("property-description")?.value ||
+              extractedPropertyData.description ||
+              "",
+
+            // Any keyword detections per page (useful for audit)
+            keywordFindings,
+
+            // All instruments (exact structure you render/edit in UI)
+            instruments,
+
+            // Optional: keep the entire extractedPropertyData snapshot for auditing
+            extractedSnapshot: extractedPropertyData,
+          };
+
+          // 3) POST to your backend (UN-COMMENT WHEN WORKING WITH THE BACKEND)
+          // const saved = await postJSON(CONFIG.saveRecordUrl, payload);
+
+          showToast("Property record saved successfully!", "success");
+          console.log("Saved property record response:", saved);
+
+          // If server returns an ID, you might store it or show it in UI
+          // e.g., showToast(`Record ID: ${saved.id}`, 'info');
+        } catch (err) {
+          console.error("Save error:", err);
+          showToast(err.message || "Failed to save record.", "error");
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalBtnHtml;
+        }
+      }
+      function resetState() {
+        selectedFile = null;
+        previewUrl = null;
+        pdfPagePreviews = [];
+        currentPdfPreviewPageIdx = 0;
+        rawExtractedText = "";
+        extractedPropertyData = null;
+        keywordFindings = {};
+        currentAiStage = "idle";
+        aiProgress = 0;
+        instruments = [];
+        editingInstrumentId = null;
+        detectedFileNumbers = [];
+
+        // Reset file input
+        document.getElementById("file-input").value = "";
+        document.getElementById("file-upload-text").textContent =
+          "Click to select a file";
+
+        // Hide all sections
+        hideError();
+        document.getElementById("image-preview").classList.add("hidden");
+        document.getElementById("pdf-preview").classList.add("hidden");
+        hideAiProcessing();
+        document.getElementById("keyword-findings").classList.add("hidden");
+        document.getElementById("raw-text-card").classList.add("hidden");
+        document.getElementById("extracted-details").classList.add("hidden");
+
+        updateUI();
+      }
+
+      function resetExtractionState() {
+        rawExtractedText = "";
+        extractedPropertyData = null;
+        keywordFindings = {};
+        currentAiStage = "idle";
+        aiProgress = 0;
+        instruments = [];
+        editingInstrumentId = null;
+        detectedFileNumbers = [];
+
+        hideAiProcessing();
+        document.getElementById("keyword-findings").classList.add("hidden");
+        document.getElementById("raw-text-card").classList.add("hidden");
+        document.getElementById("extracted-details").classList.add("hidden");
+      }
+
+      function resetFileState() {
+        selectedFile = null;
+        previewUrl = null;
+        pdfPagePreviews = [];
+        currentPdfPreviewPageIdx = 0;
+
+        document.getElementById("file-input").value = "";
+        document.getElementById("file-upload-text").textContent =
+          "Click to select a file";
+        document.getElementById("image-preview").classList.add("hidden");
+        document.getElementById("pdf-preview").classList.add("hidden");
+      }
+
+      function updateUI() {
+        const startBtn = document.getElementById("start-ai-btn");
+        const resetBtn = document.getElementById("reset-btn");
+
+        // Update start button state
+        if (
+          selectedFile &&
+          (currentAiStage === "idle" || currentAiStage === "complete")
+        ) {
+          startBtn.disabled = false;
+          startBtn.innerHTML =
+            currentAiStage === "complete"
+              ? '<i data-lucide="wand-2" class="mr-2 h-4 w-4"></i>Re-process with AI'
+              : '<i data-lucide="wand-2" class="mr-2 h-4 w-4"></i>Extract Data with AI';
+        } else if (currentAiStage !== "idle" && currentAiStage !== "complete") {
+          startBtn.disabled = true;
+          startBtn.innerHTML =
+            '<div class="loading-spinner mr-2"></div>Processing...';
+        } else {
+          startBtn.disabled = true;
+          startBtn.innerHTML =
+            '<i data-lucide="wand-2" class="mr-2 h-4 w-4"></i>Extract Data with AI';
+        }
+
+        // Update reset button visibility
+        if (currentAiStage !== "idle" || selectedFile) {
+          resetBtn.classList.remove("hidden");
+        } else {
+          resetBtn.classList.add("hidden");
+        }
+
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+      }
+
+      function showError(message) {
+        const errorAlert = document.getElementById("error-alert");
+        const errorMessage = document.getElementById("error-message");
+        errorMessage.textContent = message;
+        errorAlert.classList.remove("hidden");
+        lucide.createIcons();
+      }
+
+      function hideError() {
+        document.getElementById("error-alert").classList.add("hidden");
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function showToast(message, type = "info") {
+        const toastContainer = document.getElementById("toast-container");
+        const toastId = `toast-${Date.now()}`;
+
+        const typeClasses = {
+          success: "bg-green-600 text-white",
+          error: "bg-red-600 text-white",
+          warning: "bg-yellow-600 text-white",
+          info: "bg-blue-600 text-white",
+        };
+
+        const toast = document.createElement("div");
+        toast.id = toastId;
+        toast.className = `${typeClasses[type]} px-4 py-2 rounded-md shadow-lg flex items-center gap-2 transform translate-x-full transition-transform duration-300`;
+        toast.innerHTML = `
+    <i data-lucide="${
+      type === "success"
+        ? "check-circle"
+        : type === "error"
+        ? "alert-circle"
+        : type === "warning"
+        ? "alert-triangle"
+        : "info"
+    }" class="h-4 w-4"></i>
+    <span>${message}</span>
+    <button onclick="removeToast('${toastId}')" class="ml-2 hover:bg-black/20 rounded p-1">
+      <i data-lucide="x" class="h-3 w-3"></i>
+    </button>
+  `;
+
+        toastContainer.appendChild(toast);
+        lucide.createIcons();
+
+        // Animate in
+        setTimeout(() => {
+          toast.classList.remove("translate-x-full");
+        }, 100);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          removeToast(toastId);
+        }, 5000);
+      }
+
+      function removeToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+          toast.classList.add("translate-x-full");
+          setTimeout(() => {
+            toast.remove();
+          }, 300);
+        }
+      }
+
+      function extractMultipleFileNumbers(text) {
+        const cleanText = text.replace(/[_\s]+/g, " ").trim();
+        const fileNumbers = [];
+
+        // Focus only on LEGACY MLS patterns
+        const legacyMlsPatterns = [
+          /(COM\/\d{4}\/\d{2,4})/gi,
+          /(LKN\/COM\/\d{4}\/\d{2,4})/gi,
+          /([A-Z]{2,4}\/[A-Z]{2,4}\/\d{4}\/\d{3,4})/gi,
+          /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*(COM\/[A-Z0-9/\s-]+)/gi,
+          /(?:File\s*No\.?|FILE\s*NUMBER|File\s*Number)\s*:?\s*(LKN\/COM\/[A-Z0-9/\s-]+)/gi,
+          /(?:OLD\s+FILE\s+(?:NUMBER|NO))[:\s]*(COM\/[A-Z0-9/\s-]+)/gi,
+          /(?:OLD\s+FILE\s+(?:NUMBER|NO))[:\s]*(LKN\/COM\/[A-Z0-9/\s-]+)/gi,
+          /(?:NEW\s+FILE\s+(?:NUMBER|NO))[:\s]*(COM\/[A-Z0-9/\s-]+)/gi,
+          /(?:NEW\s+FILE\s+(?:NUMBER|NO))[:\s]*(LKN\/COM\/[A-Z0-9/\s-]+)/gi,
+        ];
+
+        // Extract all matches
+        legacyMlsPatterns.forEach((pattern) => {
+          let match;
+          while ((match = pattern.exec(cleanText)) !== null) {
+            const fileNo = match[1].trim();
+
+            // Avoid duplicates
+            if (!fileNumbers.some((fn) => fn.number === fileNo)) {
+              const parsedFileNumber = parseFileNumber(fileNo, "legacy-mls");
+              if (parsedFileNumber) {
+                fileNumbers.push(parsedFileNumber);
+              }
+            }
+          }
+        });
+
+        return fileNumbers;
+      }
+
+      function parseFileNumber(fileNo, suggestedType = null) {
+        if (!fileNo || fileNo.length < 3) return null;
+
+        const cleanFileNo = fileNo.trim();
+
+        // LEGACY MLS Format: COM/2015/389, LKN/COM/2019/296
+        if (cleanFileNo.match(/^(COM|LKN\/COM)\/\d{4}\/\d{2,4}$/i)) {
+          const parts = cleanFileNo.split("/");
+          let prefix = parts[0];
+          let year = parts[1];
+          let serial = parts[2];
+
+          // Handle LKN/COM format
+          if (parts.length === 4) {
+            prefix = `${parts[0]}/${parts[1]}`;
+            year = parts[2];
+            serial = parts[3];
+          }
+
+          // Convert to new format: COM-2015-389
+          const newFormat = `${prefix.replace("/", "-")}-${year}-${serial}`;
+
+          return {
+            number: cleanFileNo,
+            newFormat: newFormat,
+            type: "legacy-mls",
+            prefix: prefix,
+            year: year,
+            serial: serial,
+            displayName: `MLS: ${cleanFileNo}`,
+          };
+        }
+
+        return null;
+      }
+
+      function displayDetectedFileNumbers(fileNumbers) {
+        const container = document.getElementById("detected-file-numbers");
+
+        if (fileNumbers.length === 0) {
+          container.innerHTML =
+            '<p class="text-sm text-gray-500 italic">No LEGACY MLS file numbers detected in document</p>';
+          return;
+        }
+
+        container.innerHTML = fileNumbers
+          .map(
+            (fileNum, index) => `
+    <div class="bg-white rounded-lg p-4 border border-gray-200">
+      <div class="flex items-center justify-between mb-3">
+        <h6 class="text-sm font-medium text-gray-900">${
+          fileNum.displayName
+        }</h6>
+        <button onclick="removeFileNumber(${index})" class="text-red-500 hover:text-red-700 text-sm">
+          <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      </div>
+      <div class="text-sm text-gray-600 mb-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div><strong>Legacy Format:</strong> ${fileNum.number}</div>
+          <div><strong>New Format:</strong> ${fileNum.newFormat}</div>
+          ${
+            fileNum.prefix
+              ? `<div><strong>Prefix:</strong> ${fileNum.prefix}</div>`
+              : ""
+          }
+          ${
+            fileNum.year
+              ? `<div><strong>Year:</strong> ${fileNum.year}</div>`
+              : ""
+          }
+          ${
+            fileNum.serial
+              ? `<div><strong>Serial:</strong> ${fileNum.serial}</div>`
+              : ""
+          }
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="updateFileNumberFormat(${index})" class="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+          Update to New Format
+        </button>
+        <button onclick="editFileNumber(${index})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300">
+          Edit
+        </button>
+      </div>
+    </div>
+  `
+          )
+          .join("");
+
+        // Re-initialize Lucide icons
+        if (typeof lucide !== "undefined") {
+          lucide.createIcons();
+        }
+      }
+
+      function updateFileNumberFormat(index) {
+        if (index >= 0 && index < detectedFileNumbers.length) {
+          const fileNum = detectedFileNumbers[index];
+
+          // Update the file number to use the new format
+          fileNum.number = fileNum.newFormat;
+          fileNum.type = "mls";
+
+          // Update the display
+          displayDetectedFileNumbers(detectedFileNumbers);
+          showToast("File number updated to new format", "success");
+        }
+      }
+
+      function editFileNumber(index) {
+        if (index >= 0 && index < detectedFileNumbers.length) {
+          const fileNum = detectedFileNumbers[index];
+
+          // Create a modal or inline form for editing
+          const newPrefix = prompt("Edit prefix:", fileNum.prefix);
+          if (newPrefix === null) return; // User cancelled
+
+          const newYear = prompt("Edit year:", fileNum.year);
+          if (newYear === null) return;
+
+          const newSerial = prompt("Edit serial:", fileNum.serial);
+          if (newSerial === null) return;
+
+          // Update the file number
+          fileNum.prefix = newPrefix;
+          fileNum.year = newYear;
+          fileNum.serial = newSerial;
+
+          // Rebuild the formats
+          fileNum.number = `${newPrefix}/${newYear}/${newSerial}`;
+          fileNum.newFormat = `${newPrefix.replace(
+            "/",
+            "-"
+          )}-${newYear}-${newSerial}`;
+
+          // Update the display
+          displayDetectedFileNumbers(detectedFileNumbers);
+          showToast("File number updated", "success");
+        }
+      }
+
+      function removeFileNumber(index) {
+        detectedFileNumbers.splice(index, 1);
+        displayDetectedFileNumbers(detectedFileNumbers);
+      }
+
+      function switchFileType(type) {
+        // Update tab appearance
+        document.querySelectorAll('[id^="tab-"]').forEach((tab) => {
+          tab.className =
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50";
+        });
+        document.getElementById(`tab-${type}`).className =
+          "flex-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-100 text-blue-700 border border-blue-200";
+
+        // Show/hide input sections
+        document.querySelectorAll(".file-type-input").forEach((input) => {
+          input.classList.add("hidden");
+        });
+        document.getElementById(`${type}-input`).classList.remove("hidden");
+      }
+
+      function addManualFileNumber() {
+        const activeTab = document
+          .querySelector('[id^="tab-"][class*="bg-blue-100"]')
+          .id.replace("tab-", "");
+        let fileNumber = null;
+
+        if (activeTab === "mls") {
+          const prefix = document.getElementById("mls-prefix").value;
+          const year = document.getElementById("mls-year").value;
+          const serial = document.getElementById("mls-serial").value;
+
+          if (prefix && year && serial) {
+            const legacyFormat = `${prefix}/${year}/${serial}`;
+            const newFormat = `${prefix.replace("/", "-")}-${year}-${serial}`;
+
+            fileNumber = {
+              number: legacyFormat,
+              newFormat: newFormat,
+              type: "legacy-mls",
+              prefix: prefix,
+              year: year,
+              serial: serial,
+              displayName: `MLS: ${legacyFormat}`,
+            };
+          }
+        } else if (activeTab === "kangis") {
+          const prefix = document.getElementById("kangis-prefix").value;
+          const serial = document.getElementById("kangis-serial").value;
+
+          if (prefix && serial) {
+            const fullNumber = `${prefix} ${serial}`;
+            fileNumber = {
+              number: fullNumber,
+              type: "kangis",
+              prefix: prefix,
+              serial: serial,
+              displayName: `KANGIS: ${fullNumber}`,
+            };
+          }
+        } else if (activeTab === "new-kangis") {
+          const prefix = document.getElementById("new-kangis-prefix").value;
+          const serial = document.getElementById("new-kangis-serial").value;
+
+          if (prefix && serial) {
+            const fullNumber = `${prefix}${serial}`;
+            fileNumber = {
+              number: fullNumber,
+              type: "new-kangis",
+              prefix: prefix,
+              serial: serial,
+              displayName: `New KANGIS: ${fullNumber}`,
+            };
+          }
+        }
+
+        if (
+          fileNumber &&
+          !detectedFileNumbers.some((fn) => fn.number === fileNumber.number)
+        ) {
+          detectedFileNumbers.push(fileNumber);
+          displayDetectedFileNumbers(detectedFileNumbers);
+
+          // Clear input fields
+          document
+            .querySelectorAll(
+              `#${activeTab}-input input, #${activeTab}-input select`
+            )
+            .forEach((field) => {
+              field.value = "";
+            });
+        }
+      }
+
+      function toggleOtherInput(selectId, inputId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(inputId);
+
+        if (select && input) {
+          if (select.value === "Other") {
+            input.classList.remove("hidden");
+            input.focus();
+          } else {
+            input.classList.add("hidden");
+            input.value = "";
+          }
+        }
+      }
+
+      function populateFormFields(data) {
+        console.log("[v0] Populating form fields with data:", data);
+
+        const confidenceElement = document.getElementById(
+          "extraction-confidence"
+        );
+        if (!confidenceElement) {
+          console.log("[v0] Warning: extraction-confidence element not found");
+          return;
+        }
+
+        // Extract multiple file numbers from the text
+        if (data.extractedText) {
+          detectedFileNumbers = extractMultipleFileNumbers(data.extractedText);
+          displayDetectedFileNumbers(detectedFileNumbers);
+        }
+
+        // Set confidence display with additional info about file numbers and property holder
+        let confidenceText = `Review the details extracted by the AI. Add or modify instruments as needed, then save the record. Confidence: ${data.confidence}% (${data.extractionStatus})`;
+
+        if (detectedFileNumbers.length > 0) {
+          confidenceText += ` | Found ${detectedFileNumbers.length} LEGACY MLS file number(s)`;
+        }
+
+        if (data.propertyHolder) {
+          confidenceText += ` | Property Holder: ${data.propertyHolder}`;
+        }
+
+        confidenceElement.textContent = confidenceText;
+
+        const plotNoField = document.getElementById("plot-no");
+        if (plotNoField && data.plotNo) {
+          plotNoField.value = data.plotNo;
+        }
+
+        const lgaCityField = document.getElementById("lga-city");
+        if (lgaCityField && data.lgsaOrCity) {
+          lgaCityField.value = data.lgsaOrCity;
+        }
+
+        const propertyHolderField = document.getElementById("property-holder");
+        if (propertyHolderField && data.propertyHolder) {
+          propertyHolderField.value = data.propertyHolder;
+        }
+
+        const propertyDescField = document.getElementById(
+          "property-description"
+        );
+        if (propertyDescField && data.description) {
+          propertyDescField.value = data.description;
+        }
+
+        console.log("[v0] Completed populateFormFields");
+      }
+    </script>
+  </body>
+</html>
