@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New File Index Dialog</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f3f4f6;
+            padding: 2rem;
+        }
+
+        /* Dialog styles */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .dialog {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dialog-header {
+            background-color: #1f2937;
+            padding: 1.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dialog-description {
+            color: #6b7280;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            padding: 1rem 1.5rem;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dialog-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* Form styles */
+        .form-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .form-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .form-label.required::after {
+            content: "*";
+            color: #ef4444;
+            margin-left: 0.25rem;
+        }
+
+        .form-info {
+            background-color: #ecfdf5;
+            border: 1px solid #d1fae5;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .form-info-icon {
+            color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .form-info-text {
+            font-size: 0.875rem;
+            color: #065f46;
+        }
+
+        .form-help-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .form-radio-group {
+            display: flex;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .form-radio-item {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            background-color: white;
+            cursor: pointer;
+            border-right: 1px solid #e5e7eb;
+            transition: background-color 0.2s;
+        }
+
+        .form-radio-item:last-child {
+            border-right: none;
+        }
+
+        .form-radio-item.active {
+            background-color: #dbeafe;
+            font-weight: 500;
+            color: #1d4ed8;
+        }
+
+        .form-radio-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .form-radio-item input {
+            display: none;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-checkbox input {
+            margin-right: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .form-checkbox label {
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            color: #374151;
+        }
+
+        .btn:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn-blue {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .btn-blue:hover {
+            background-color: #2563eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .text-white {
+            color: white;
+        }
+
+        .h-5 {
+            height: 1.25rem;
+        }
+
+        .w-5 {
+            width: 1.25rem;
+        }
+
+        .h-4 {
+            height: 1rem;
+        }
+
+        .w-4 {
+            width: 1rem;
+        }
+
+        /* Demo button */
+        .demo-btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .demo-btn:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">New File Index Dialog Demo</h1>
+        <button class="demo-btn" onclick="showNewFileDialog()">Open New File Dialog</button>
+    </div>
+
+    <!-- New File Index Dialog -->
+    <div class="dialog-overlay hidden" id="new-file-dialog-overlay">
+        <div class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">
+                    <i data-lucide="file-plus" class="h-5 w-5"></i>
+                    Create New File Index
+                </div>
+                <button id="close-dialog-btn" class="text-white" style="background: none; border: none; cursor: pointer;">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <div class="dialog-description">
+                Enter the details for the new file to be indexed
+            </div>
+            <div class="dialog-content">
+                <form id="new-file-form">
+                    <!-- File Identification Section -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">File Identification</h3>
+                        
+                        <div class="form-group">
+                            <label for="file-number" class="form-label required">File Number</label>
+                            <div class="form-info">
+                                <i data-lucide="file-text" class="h-4 w-4 form-info-icon"></i>
+                                <span class="form-info-text">File Number Information<br>Select file number type and enter the details</span>
+                            </div>
+                            
+                            <div class="form-radio-group">
+                                <label class="form-radio-item active">
+                                    <input type="radio" name="file-number-type" value="mls" checked>
+                                    MLS
+                                </label>
+                                <label class="form-radio-item">
+                                    <input type="radio" name="file-number-type" value="kangis">
+                                    KANGIS
+                                </label>
+                                <label class="form-radio-item">
+                                    <input type="radio" name="file-number-type" value="new-kangis">
+                                    New KANGIS
+                                </label>
+                            </div>
+                            
+                            <div id="mls-fields">
+                                <div class="form-group">
+                                    <label class="form-label">Legacy File Number (MLS)</label>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label">File Prefix</label>
+                                        <select class="input">
+                                            <option value="">Select prefix</option>
+                                            <option value="CON">CON</option>
+                                            <option value="RES">RES</option>
+                                            <option value="COM">COM</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Serial Number</label>
+                                        <input type="text" class="input" placeholder="e.g. 2019-296 or 91-249">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-help-text">Format example: CON-COM-2019-296, RES-2015-4859, COM-91-249</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="file-title" class="form-label required">File Title</label>
+                            <input type="text" id="file-title" class="input" placeholder="e.g. John Doe's Property">
+                        </div>
+                    </div>
+                    
+                    <!-- Property Details Section -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">Property Details</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label">Land Use Type</label>
+                                <select class="input">
+                                    <option value="residential">Residential</option>
+                                    <option value="commercial">Commercial</option>
+                                    <option value="industrial">Industrial</option>
+                                    <option value="agricultural">Agricultural</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Plot Number</label>
+                                <input type="text" class="input" placeholder="e.g. PL-1234">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label">District</label>
+                                <select class="input">
+                                    <option value="nasarawa">Nasarawa</option>
+                                    <option value="fagge">Fagge</option>
+                                    <option value="bompai">Bompai</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">LGA/City</label>
+                                <input type="text" class="input" value="Kano Municipal">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- File Properties Section -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">File Properties</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="has-cofo">
+                                    <label for="has-cofo">Has Certificate of Occupancy</label>
+                                </div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="has-transaction">
+                                    <label for="has-transaction">Has Transaction</label>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="co-owned-plot">
+                                    <label for="co-owned-plot">Co-Owned Plot</label>
+                                </div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="merged-plot">
+                                    <label for="merged-plot">Merged Plot</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- File Archive Details Section -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">File Archive Details</h3>
+                        
+                        <div class="form-group">
+                            <label for="serial-no" class="form-label">Serial No</label>
+                            <input type="text" id="serial-no" class="input" placeholder="Enter serial number">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label for="batch-no" class="form-label">Batch No</label>
+                                <select id="batch-no" class="input">
+                                    <option value="">Select batch number</option>
+                                    <option value="BATCH-001">BATCH-001</option>
+                                    <option value="BATCH-002">BATCH-002</option>
+                                    <option value="BATCH-003">BATCH-003</option>
+                                    <option value="BATCH-004">BATCH-004</option>
+                                    <option value="BATCH-005">BATCH-005</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="shelf-location" class="form-label">Shelf/Rack Location</label>
+                                <select id="shelf-location" class="input">
+                                    <option value="">Select location</option>
+                                    <option value="A1-S1">A1-S1 (Aisle 1, Shelf 1)</option>
+                                    <option value="A1-S2">A1-S2 (Aisle 1, Shelf 2)</option>
+                                    <option value="A1-S3">A1-S3 (Aisle 1, Shelf 3)</option>
+                                    <option value="A2-S1">A2-S1 (Aisle 2, Shelf 1)</option>
+                                    <option value="A2-S2">A2-S2 (Aisle 2, Shelf 2)</option>
+                                    <option value="A2-S3">A2-S3 (Aisle 2, Shelf 3)</option>
+                                    <option value="B1-R1">B1-R1 (Block 1, Rack 1)</option>
+                                    <option value="B1-R2">B1-R2 (Block 1, Rack 2)</option>
+                                    <option value="B2-R1">B2-R1 (Block 2, Rack 1)</option>
+                                    <option value="B2-R2">B2-R2 (Block 2, Rack 2)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-6">
+                        <button type="button" class="btn" id="cancel-btn">Cancel</button>
+                        <button type="button" class="btn btn-blue" id="create-file-btn">Create File Index</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const newFileDialogOverlay = document.getElementById('new-file-dialog-overlay');
+        const closeDialogBtn = document.getElementById('close-dialog-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const createFileBtn = document.getElementById('create-file-btn');
+        const fileNumberTypeRadios = document.querySelectorAll('input[name="file-number-type"]');
+
+        // Show new file dialog
+        function showNewFileDialog() {
+            newFileDialogOverlay.classList.remove('hidden');
+            // Reset form fields
+            document.getElementById('new-file-form').reset();
+            // Reset radio button active state
+            document.querySelectorAll('.form-radio-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector('.form-radio-item').classList.add('active');
+        }
+
+        // Close new file dialog
+        function closeNewFileDialog() {
+            newFileDialogOverlay.classList.add('hidden');
+        }
+
+        // Create new file
+        function createNewFile() {
+            // Get form values
+            const fileTitle = document.getElementById('file-title').value;
+            const fileNumberType = document.querySelector('input[name="file-number-type"]:checked').value;
+            const serialNo = document.getElementById('serial-no').value;
+            const batchNo = document.getElementById('batch-no').value;
+            const shelfLocation = document.getElementById('shelf-location').value;
+            
+            if (!fileTitle.trim()) {
+                alert('Please enter a file title.');
+                return;
+            }
+
+            // Create a new file object (for demo purposes)
+            const newFile = {
+                id: `FILE-${Date.now()}`,
+                fileNumber: fileNumberType === 'mls' ? 'MLS-' + Date.now().toString().slice(-5) : 'KNGP-' + Date.now().toString().slice(-5),
+                name: fileTitle,
+                type: 'Certificate of Occupancy',
+                source: 'Collated',
+                date: new Date().toISOString().split('T')[0],
+                landUseType: document.querySelector('select').value || 'Residential',
+                district: document.querySelectorAll('select')[1].value || 'Nasarawa',
+                hasCofo: document.getElementById('has-cofo').checked,
+                serialNo: serialNo,
+                batchNo: batchNo,
+                shelfLocation: shelfLocation
+            };
+
+            // Close dialog
+            closeNewFileDialog();
+            
+            // Show success message with file details
+            alert(`New file index created successfully!\n\nFile Number: ${newFile.fileNumber}\nTitle: ${newFile.name}\nType: ${newFile.landUseType}\nSerial No: ${newFile.serialNo}\nBatch No: ${newFile.batchNo}\nShelf Location: ${newFile.shelfLocation}`);
+        }
+
+        // Event listeners
+        closeDialogBtn.addEventListener('click', closeNewFileDialog);
+        cancelBtn.addEventListener('click', closeNewFileDialog);
+        createFileBtn.addEventListener('click', createNewFile);
+
+        // File number type radio buttons
+        fileNumberTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.form-radio-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.contains(this)) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Close dialog when clicking outside
+        newFileDialogOverlay.addEventListener('click', function(e) {
+            if (e.target === newFileDialogOverlay) {
+                closeNewFileDialog();
+            }
+        });
+
+        // Handle escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !newFileDialogOverlay.classList.contains('hidden')) {
+                closeNewFileDialog();
+            }
+        });
+    </script>
+</body>
+</html>
