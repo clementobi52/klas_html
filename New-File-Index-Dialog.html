@@ -484,12 +484,16 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label class="form-label">District</label>
-                                <select class="input">
+                                <select class="input" id="district-select">
                                     <option value="nasarawa">Nasarawa</option>
                                     <option value="fagge">Fagge</option>
                                     <option value="bompai">Bompai</option>
                                     <option value="other">Other</option>
                                 </select>
+                                <!-- Added custom district input field that shows when "Other" is selected -->
+                                <div id="custom-district-container" class="hidden" style="margin-top: 0.5rem;">
+                                    <input type="text" id="custom-district-input" class="input" placeholder="Enter district name" style="font-size: 0.875rem;">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">LGA/City</label>
@@ -601,6 +605,9 @@
         const createFileBtn = document.getElementById('create-file-btn');
         const trackingIdInput = document.getElementById('tracking-id');
         const generateTrackingBtn = document.getElementById('generate-tracking-btn');
+        const districtSelect = document.getElementById('district-select');
+        const customDistrictContainer = document.getElementById('custom-district-container');
+        const customDistrictInput = document.getElementById('custom-district-input');
 
         // Tab functionality and file number preview
         const tabTriggers = document.querySelectorAll('.tab-trigger');
@@ -683,6 +690,16 @@
         document.getElementById('new-kangis-prefix').addEventListener('change', updateFileNumberPreview);
         document.getElementById('new-kangis-serial').addEventListener('input', updateFileNumberPreview);
 
+        districtSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                customDistrictContainer.classList.remove('hidden');
+                customDistrictInput.focus();
+            } else {
+                customDistrictContainer.classList.add('hidden');
+                customDistrictInput.value = '';
+            }
+        });
+
         // Show new file dialog
         function showNewFileDialog() {
             newFileDialogOverlay.classList.remove('hidden');
@@ -728,9 +745,16 @@
             const serialNo = document.getElementById('serial-no').value;
             const batchNo = document.getElementById('batch-no').value;
             const shelfLocation = document.getElementById('shelf-location').value;
+            const districtValue = districtSelect.value === 'other' ? customDistrictInput.value : districtSelect.value;
             
             if (!fileTitle.trim()) {
                 alert('Please enter a file title.');
+                return;
+            }
+
+            if (districtSelect.value === 'other' && !customDistrictInput.value.trim()) {
+                alert('Please enter a district name.');
+                customDistrictInput.focus();
                 return;
             }
 
@@ -752,7 +776,7 @@
                 source: 'Collated',
                 date: new Date().toISOString().split('T')[0],
                 landUseType: document.querySelector('select').value || 'Residential',
-                district: document.querySelectorAll('select')[1].value || 'Nasarawa',
+                district: districtValue || 'Nasarawa',
                 hasCofo: document.getElementById('has-cofo').checked,
                 serialNo: serialNo,
                 batchNo: batchNo,
@@ -763,7 +787,7 @@
             closeNewFileDialog();
             
             // Show success message with file details
-            alert(`New file index created successfully!\n\nFile Number: ${newFile.fileNumber}\nTitle: ${newFile.name}\nType: ${newFile.landUseType}\nSerial No: ${newFile.serialNo}\nBatch No: ${newFile.batchNo}\nShelf Location: ${newFile.shelfLocation}`);
+            alert(`New file index created successfully!\n\nFile Number: ${newFile.fileNumber}\nTitle: ${newFile.name}\nType: ${newFile.landUseType}\nDistrict: ${newFile.district}\nSerial No: ${newFile.serialNo}\nBatch No: ${newFile.batchNo}\nShelf Location: ${newFile.shelfLocation}`);
         }
 
         // Event listeners
