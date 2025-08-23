@@ -282,6 +282,22 @@
             width: 1rem;
         }
 
+        .h-3 {
+            height: 0.75rem;
+        }
+
+        .w-3 {
+            width: 0.75rem;
+        }
+
+        .items-start {
+            align-items: flex-start;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
         /* Demo button */
         .demo-btn {
             background-color: #3b82f6;
@@ -325,52 +341,117 @@
                 <form id="new-file-form">
                     <!-- File Identification Section -->
                     <div class="form-section">
-                        <h3 class="form-section-title">File Identification</h3>
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="form-section-title" style="margin-bottom: 0;">File Identification</h3>
+                            <div class="tracking-id-container" style="text-align: right;">
+                                <label class="form-label" style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.25rem;">Tracking ID</label>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="text" id="tracking-id" class="input" readonly style="width: 180px; font-size: 0.75rem; background-color: #f9fafb; font-family: monospace;">
+                                    <button type="button" id="generate-tracking-btn" class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Generate new tracking ID">
+                                        <i data-lucide="refresh-cw" class="h-3 w-3"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="form-group">
                             <label for="file-number" class="form-label required">File Number</label>
-                            <div class="form-info">
-                                <i data-lucide="file-text" class="h-4 w-4 form-info-icon"></i>
-                                <span class="form-info-text">File Number Information<br>Select file number type and enter the details</span>
-                            </div>
                             
-                            <div class="form-radio-group">
-                                <label class="form-radio-item active">
-                                    <input type="radio" name="file-number-type" value="mls" checked>
-                                    MLS
-                                </label>
-                                <label class="form-radio-item">
-                                    <input type="radio" name="file-number-type" value="kangis">
-                                    KANGIS
-                                </label>
-                                <label class="form-radio-item">
-                                    <input type="radio" name="file-number-type" value="new-kangis">
-                                    New KANGIS
-                                </label>
-                            </div>
-                            
-                            <div id="mls-fields">
-                                <div class="form-group">
-                                    <label class="form-label">Legacy File Number (MLS)</label>
+                            <!-- Tabbed interface for file number types -->
+                            <div class="file-number-card" style="border: 1px solid #d1fae5; border-radius: 0.5rem; background-color: #f0fdf4;">
+                                <div class="card-header" style="background-color: #ecfdf5; padding: 0.75rem; border-bottom: 1px solid #d1fae5; border-radius: 0.5rem 0.5rem 0 0;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i data-lucide="file-code" class="h-4 w-4" style="color: #059669;"></i>
+                                        <span style="font-size: 0.875rem; font-weight: 500; color: #065f46;">File Number Information</span>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Select file number type and enter the details</div>
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="form-group">
-                                        <label class="form-label">File Prefix</label>
-                                        <select class="input">
-                                            <option value="">Select prefix</option>
-                                            <option value="CON">CON</option>
-                                            <option value="RES">RES</option>
-                                            <option value="COM">COM</option>
-                                        </select>
+                                <div class="card-content" style="padding: 0.75rem;">
+                                    <!-- Tab Navigation -->
+                                    <div class="tab-list" style="display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #e5e7eb; border-radius: 0.375rem; overflow: hidden; margin-bottom: 1rem;">
+                                        <button type="button" class="tab-trigger active" data-tab="mlsFileNo" style="padding: 0.5rem; background-color: #dbeafe; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 500; color: #1d4ed8; border-right: 1px solid #e5e7eb;">
+                                            MLS
+                                        </button>
+                                        <button type="button" class="tab-trigger" data-tab="kangisFileNo" style="padding: 0.5rem; background-color: white; border: none; cursor: pointer; font-size: 0.75rem; color: #374151; border-right: 1px solid #e5e7eb;">
+                                            KANGIS
+                                        </button>
+                                        <button type="button" class="tab-trigger" data-tab="newKangisFileNo" style="padding: 0.5rem; background-color: white; border: none; cursor: pointer; font-size: 0.75rem; color: #374151;">
+                                            New KANGIS
+                                        </button>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Serial Number</label>
-                                        <input type="text" class="input" placeholder="e.g. 2019-296 or 91-249">
+                                    
+                                    <!-- Tab Content -->
+                                    <div class="tab-content active" id="mlsFileNo">
+                                        <div style="font-size: 0.75rem; font-weight: 500; color: #6b7280; margin-bottom: 0.75rem;">Legacy File Number (MLS)</div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="form-group">
+                                                <label class="form-label" style="font-size: 0.75rem;">File Prefix</label>
+                                                <select class="input" id="mls-prefix" style="height: 2rem; font-size: 0.75rem;">
+                                                    <option value="">Select prefix</option>
+                                                    <option value="CON-COM">CON-COM (Conversion Commercial)</option>
+                                                    <option value="CON-RES">CON-RES (Conversion Residential)</option>
+                                                    <option value="RES">RES (Residential)</option>
+                                                    <option value="COM">COM (Commercial)</option>
+                                                    <option value="IND">IND (Industrial)</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" style="font-size: 0.75rem;">Serial Number</label>
+                                                <input type="text" class="input" id="mls-serial" placeholder="e.g. 2019-296 or 91-249" style="height: 2rem; font-size: 0.75rem;">
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Format example: CON-COM-2019-296, RES-2015-4859, COM-91-249</div>
+                                    </div>
+                                    
+                                    <div class="tab-content" id="kangisFileNo" style="display: none;">
+                                        <div style="font-size: 0.75rem; font-weight: 500; color: #6b7280; margin-bottom: 0.75rem;">KANGIS File Number</div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="form-group">
+                                                <label class="form-label" style="font-size: 0.75rem;">File Prefix</label>
+                                                <select class="input" id="kangis-prefix" style="height: 2rem; font-size: 0.75rem;">
+                                                    <option value="">Select prefix</option>
+                                                    <option value="KNML">KNML (Kano Municipal)</option>
+                                                    <option value="MLKN">MLKN (Municipal Kano)</option>
+                                                    <option value="KNGP">KNGP (Kano Government Property)</option>
+                                                    <option value="KNRS">KNRS (Kano Residential)</option>
+                                                    <option value="KNCO">KNCO (Kano Commercial)</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" style="font-size: 0.75rem;">Serial Number</label>
+                                                <input type="text" class="input" id="kangis-serial" placeholder="e.g. 09846 or 03051" style="height: 2rem; font-size: 0.75rem;">
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Format example: KNML 09846, MLKN 01251, KNGP 00338</div>
+                                    </div>
+                                    
+                                    <div class="tab-content" id="newKangisFileNo" style="display: none;">
+                                        <div style="font-size: 0.75rem; font-weight: 500; color: #6b7280; margin-bottom: 0.75rem;">New KANGIS File Number</div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="form-group">
+                                                <label class="form-label" style="font-size: 0.75rem;">File Prefix</label>
+                                                <select class="input" id="new-kangis-prefix" style="height: 2rem; font-size: 0.75rem;">
+                                                    <option value="">Select prefix</option>
+                                                    <option value="KN">KN (Kano New System)</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" style="font-size: 0.75rem;">Serial Number</label>
+                                                <input type="text" class="input" id="new-kangis-serial" placeholder="e.g. 0001 or 2500" style="height: 2rem; font-size: 0.75rem;">
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Format example: KN0001, KN2500, KN0131</div>
+                                    </div>
+                                    
+                                    <!-- File number preview -->
+                                    <div id="file-number-preview" style="margin-top: 0.75rem; padding: 0.5rem; background-color: #ecfdf5; border: 1px solid #d1fae5; border-radius: 0.375rem; display: none;">
+                                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                                            <label style="font-size: 0.75rem; color: #065f46; font-weight: 500;">Complete File Number:</label>
+                                            <span id="complete-file-number" style="font-size: 0.875rem; font-weight: 600; color: #065f46; font-family: monospace;"></span>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="form-help-text">Format example: CON-COM-2019-296, RES-2015-4859, COM-91-249</div>
                             </div>
                         </div>
                         
@@ -498,23 +579,137 @@
         // Initialize Lucide icons
         lucide.createIcons();
 
+        const generateTrackingId = () => {
+            const timestamp = Date.now().toString(36)
+            const random = Math.random().toString(36).substr(2, 5)
+            return `TRK-${timestamp.toUpperCase()}-${random.toUpperCase()}`
+        }
+
+        const generateLogId = () => {
+            const now = new Date()
+            const timestamp = now.toISOString().replace(/[-:T]/g, "").split(".")[0]
+            const random = Math.floor(Math.random() * 999)
+                .toString()
+                .padStart(3, "0")
+            return `LOG-${timestamp}-${random}`
+        }
+
         // DOM Elements
         const newFileDialogOverlay = document.getElementById('new-file-dialog-overlay');
         const closeDialogBtn = document.getElementById('close-dialog-btn');
         const cancelBtn = document.getElementById('cancel-btn');
         const createFileBtn = document.getElementById('create-file-btn');
-        const fileNumberTypeRadios = document.querySelectorAll('input[name="file-number-type"]');
+        const trackingIdInput = document.getElementById('tracking-id');
+        const generateTrackingBtn = document.getElementById('generate-tracking-btn');
+
+        // Tab functionality and file number preview
+        const tabTriggers = document.querySelectorAll('.tab-trigger');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const fileNumberPreview = document.getElementById('file-number-preview');
+        const completeFileNumber = document.getElementById('complete-file-number');
+
+        // Tab switching functionality
+        tabTriggers.forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+                
+                // Update active tab trigger
+                tabTriggers.forEach(t => {
+                    t.classList.remove('active');
+                    t.style.backgroundColor = 'white';
+                    t.style.color = '#374151';
+                });
+                this.classList.add('active');
+                this.style.backgroundColor = '#dbeafe';
+                this.style.color = '#1d4ed8';
+                
+                // Update active tab content
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                    content.classList.remove('active');
+                });
+                const activeContent = document.getElementById(targetTab);
+                activeContent.style.display = 'block';
+                activeContent.classList.add('active');
+                
+                updateFileNumberPreview();
+            });
+        });
+
+        // Update file number preview
+        function updateFileNumberPreview() {
+            const activeTab = document.querySelector('.tab-content.active');
+            const activeTabId = activeTab.id;
+            
+            let prefix = '';
+            let serial = '';
+            
+            if (activeTabId === 'mlsFileNo') {
+                prefix = document.getElementById('mls-prefix').value;
+                serial = document.getElementById('mls-serial').value;
+            } else if (activeTabId === 'kangisFileNo') {
+                prefix = document.getElementById('kangis-prefix').value;
+                serial = document.getElementById('kangis-serial').value;
+            } else if (activeTabId === 'newKangisFileNo') {
+                prefix = document.getElementById('new-kangis-prefix').value;
+                serial = document.getElementById('new-kangis-serial').value;
+            }
+            
+            if (prefix && serial) {
+                let completeNumber = '';
+                if (activeTabId === 'mlsFileNo') {
+                    // For MLS: prefix-serial (e.g., CON-COM-2019-296)
+                    completeNumber = `${prefix}-${serial}`;
+                } else if (activeTabId === 'kangisFileNo') {
+                    // For KANGIS: prefix serial (e.g., KNML 09846)
+                    completeNumber = `${prefix} ${serial}`;
+                } else if (activeTabId === 'newKangisFileNo') {
+                    // For New KANGIS: prefixserial (e.g., KN0001)
+                    completeNumber = `${prefix}${serial}`;
+                }
+                
+                completeFileNumber.textContent = completeNumber;
+                fileNumberPreview.style.display = 'block';
+            } else {
+                fileNumberPreview.style.display = 'none';
+            }
+        }
+
+        // Add event listeners for file number inputs
+        document.getElementById('mls-prefix').addEventListener('change', updateFileNumberPreview);
+        document.getElementById('mls-serial').addEventListener('input', updateFileNumberPreview);
+        document.getElementById('kangis-prefix').addEventListener('change', updateFileNumberPreview);
+        document.getElementById('kangis-serial').addEventListener('input', updateFileNumberPreview);
+        document.getElementById('new-kangis-prefix').addEventListener('change', updateFileNumberPreview);
+        document.getElementById('new-kangis-serial').addEventListener('input', updateFileNumberPreview);
 
         // Show new file dialog
         function showNewFileDialog() {
             newFileDialogOverlay.classList.remove('hidden');
             // Reset form fields
             document.getElementById('new-file-form').reset();
-            // Reset radio button active state
-            document.querySelectorAll('.form-radio-item').forEach(item => {
-                item.classList.remove('active');
+            // Reset to first tab
+            tabTriggers.forEach(t => {
+                t.classList.remove('active');
+                t.style.backgroundColor = 'white';
+                t.style.color = '#374151';
             });
-            document.querySelector('.form-radio-item').classList.add('active');
+            tabTriggers[0].classList.add('active');
+            tabTriggers[0].style.backgroundColor = '#dbeafe';
+            tabTriggers[0].style.color = '#1d4ed8';
+            
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            tabContents[0].style.display = 'block';
+            tabContents[0].classList.add('active');
+            
+            // Hide file number preview
+            fileNumberPreview.style.display = 'none';
+            
+            // Generate initial tracking ID
+            trackingIdInput.value = generateTrackingId();
         }
 
         // Close new file dialog
@@ -526,7 +721,10 @@
         function createNewFile() {
             // Get form values
             const fileTitle = document.getElementById('file-title').value;
-            const fileNumberType = document.querySelector('input[name="file-number-type"]:checked').value;
+            const activeTab = document.querySelector('.tab-content.active');
+            const activeTabId = activeTab.id;
+            const prefix = document.querySelector(`#${activeTabId} select`).value;
+            const serial = document.querySelector(`#${activeTabId} input`).value;
             const serialNo = document.getElementById('serial-no').value;
             const batchNo = document.getElementById('batch-no').value;
             const shelfLocation = document.getElementById('shelf-location').value;
@@ -537,9 +735,18 @@
             }
 
             // Create a new file object (for demo purposes)
+            let fileNumber = '';
+            if (activeTabId === 'mlsFileNo' && prefix && serial) {
+                fileNumber = `${prefix}-${serial}`;
+            } else if (activeTabId === 'kangisFileNo' && prefix && serial) {
+                fileNumber = `${prefix} ${serial}`;
+            } else if (activeTabId === 'newKangisFileNo' && prefix && serial) {
+                fileNumber = `${prefix}${serial}`;
+            }
+
             const newFile = {
                 id: `FILE-${Date.now()}`,
-                fileNumber: fileNumberType === 'mls' ? 'MLS-' + Date.now().toString().slice(-5) : 'KNGP-' + Date.now().toString().slice(-5),
+                fileNumber: fileNumber,
                 name: fileTitle,
                 type: 'Certificate of Occupancy',
                 source: 'Collated',
@@ -563,17 +770,8 @@
         closeDialogBtn.addEventListener('click', closeNewFileDialog);
         cancelBtn.addEventListener('click', closeNewFileDialog);
         createFileBtn.addEventListener('click', createNewFile);
-
-        // File number type radio buttons
-        fileNumberTypeRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.form-radio-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.contains(this)) {
-                        item.classList.add('active');
-                    }
-                });
-            });
+        generateTrackingBtn.addEventListener('click', function() {
+            trackingIdInput.value = generateTrackingId();
         });
 
         // Close dialog when clicking outside
