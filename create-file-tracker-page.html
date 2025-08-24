@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create File Tracker - KLAS System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+        .dialog-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dialog-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Page Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Create File Tracker</h1>
+                <p class="text-gray-600 mt-1">Register a new file for tracking with office logging system</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="resetBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i data-lucide="refresh-cw" class="h-4 w-4 mr-2"></i>
+                    Reset Form
+                </button>
+                <button id="previewBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i data-lucide="eye" class="h-4 w-4 mr-2"></i>
+                    Preview
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 p-6 gap-6">
+        <!-- Main Content -->
+        <div class="flex-1 space-y-6">
+            <!-- File Details Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="file-text" class="h-5 w-5"></i>
+                        File Details
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Enter the basic file information</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="file-no" class="block text-sm font-medium text-gray-700">File No *</label>
+                            <input type="text" id="file-no" placeholder="e.g. RES-2015-4859" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500">Enter the unique file number</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="tracking-id" class="block text-sm font-medium text-gray-700">File Tracking ID</label>
+                            <input type="text" id="tracking-id" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 font-mono text-sm">
+                            <p class="text-xs text-gray-500">Auto-generated tracking identifier</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="file-name" class="block text-sm font-medium text-gray-700">File Name *</label>
+                        <input type="text" id="file-name" placeholder="e.g. Alhaji Ibrahim Dantata" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Office Details Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="building" class="h-5 w-5"></i>
+                        Office Details
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Select the current office location</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="current-office" class="block text-sm font-medium text-gray-700">Current Office *</label>
+                            <select id="current-office" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select office</option>
+                                <option value="OFF-001">Reception (RCP) • Customer Service</option>
+                                <option value="OFF-002">Customer Care Unit (CCU) • Customer Service</option>
+                                <option value="OFF-003">Document Verification (DVF) • Legal</option>
+                                <option value="OFF-004">Survey Department (SUR) • Technical</option>
+                                <option value="OFF-005">Legal Department (LEG) • Legal</option>
+                                <option value="OFF-006">Planning Department (PLN) • Technical</option>
+                                <option value="OFF-007">Director's Office (DIR) • Management</option>
+                                <option value="OFF-008">Certificate Issuance (CRT) • Operations</option>
+                                <option value="OFF-009">Archive (ARC) • Records</option>
+                                <option value="OFF-010">Finance Department (FIN) • Finance</option>
+                                <option value="OFF-011">IT Department (ITD) • Technical</option>
+                                <option value="OFF-012">Registry (REG) • Records</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="current-office-id" class="block text-sm font-medium text-gray-700">Current Office ID</label>
+                            <input type="text" id="current-office-id" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 font-mono text-sm">
+                            <p class="text-xs text-gray-500">Auto-populated from office selection</p>
+                        </div>
+                    </div>
+                    <div id="office-info" class="hidden p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span id="office-badge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"></span>
+                            <span id="office-code-badge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"></span>
+                        </div>
+                        <p id="office-department" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Log Session Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="hash" class="h-5 w-5"></i>
+                        File Log Session
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Initial log entry details (auto-populated)</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="log-id" class="block text-sm font-medium text-gray-700">Log ID</label>
+                            <input type="text" id="log-id" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 font-mono text-sm">
+                            <p class="text-xs text-gray-500">Auto-generated log identifier</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="log-in-time" class="block text-sm font-medium text-gray-700">Log In Time</label>
+                            <input type="text" id="log-in-time" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50">
+                            <p class="text-xs text-gray-500">Current time (auto-updated)</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="log-in-date" class="block text-sm font-medium text-gray-700">Log In Date</label>
+                            <input type="text" id="log-in-date" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50">
+                            <p class="text-xs text-gray-500">Current date (auto-updated)</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="log-out-time" class="block text-sm font-medium text-gray-700">Log Out Time</label>
+                            <input type="text" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50">
+                            <p class="text-xs text-gray-500">Will be set when file is logged out</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="log-out-date" class="block text-sm font-medium text-gray-700">Log Out Date</label>
+                        <input type="text" readonly class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50">
+                        <p class="text-xs text-gray-500">Will be set when file is logged out</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end gap-2">
+                <button id="resetFormBtn" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Reset
+                </button>
+                <button id="saveFileLogBtn" class="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 min-w-[150px]">
+                    <i data-lucide="save" class="h-4 w-4 mr-2"></i>
+                    Save File Log
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="w-80 space-y-6">
+            <!-- Current Date & Time Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="clock" class="h-5 w-5"></i>
+                        Current Date & Time
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Live timestamp for log entries</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="text-center">
+                        <div id="current-time" class="text-2xl font-mono font-bold">00:00:00</div>
+                        <div id="current-date" class="text-lg text-gray-600">0000-00-00</div>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Tracking ID:</span>
+                            <span id="sidebar-tracking-id" class="font-mono"></span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Log ID:</span>
+                            <span id="sidebar-log-id" class="font-mono"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Features Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="activity" class="h-5 w-5"></i>
+                        System Features
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Automated system capabilities</p>
+                </div>
+                <div class="p-6 space-y-3">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                            <span>Auto-generated Tracking IDs</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                            <span>Real-time timestamp logging</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                            <span>Office dropdown selection</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+                            <span>Automated log ID generation</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                            <span>Session-based file tracking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="file-search" class="h-5 w-5"></i>
+                        Quick Actions
+                    </h3>
+                </div>
+                <div class="p-6 grid grid-cols-2 gap-2">
+                    <button class="h-auto py-3 flex flex-col items-center gap-1 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i data-lucide="file-search" class="h-4 w-4"></i>
+                        <span class="text-xs">Search Files</span>
+                    </button>
+                    <button class="h-auto py-3 flex flex-col items-center gap-1 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i data-lucide="building" class="h-4 w-4"></i>
+                        <span class="text-xs">Office List</span>
+                    </button>
+                    <button class="h-auto py-3 flex flex-col items-center gap-1 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i data-lucide="activity" class="h-4 w-4"></i>
+                        <span class="text-xs">Track Status</span>
+                    </button>
+                    <button class="h-auto py-3 flex flex-col items-center gap-1 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i data-lucide="calendar" class="h-4 w-4"></i>
+                        <span class="text-xs">Log History</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Trackers Table (Initially Hidden) -->
+    <div id="file-trackers-section" class="p-6 pt-0 hidden">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="file-text" class="h-5 w-5"></i>
+                    File Log Table
+                </h3>
+                <p class="text-sm text-gray-600 mt-1">All created file trackers and their log entries</p>
+            </div>
+            <div id="trackers-container" class="p-6">
+                <!-- File trackers will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Dialog -->
+    <div id="preview-dialog" class="dialog-overlay">
+        <div class="dialog-content">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">File Tracker Preview</h2>
+                    <p class="text-sm text-gray-600">Review the file tracker details before saving</p>
+                </div>
+                <button id="close-preview" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div id="preview-content">
+                <!-- Preview content will be dynamically generated -->
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button id="close-preview-btn" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Close
+                </button>
+                <button id="save-tracker-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    <i data-lucide="save" class="h-4 w-4 mr-2"></i>
+                    Save File Tracker
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Office data
+        const officeData = {
+            'OFF-001': { name: 'Reception', code: 'RCP', department: 'Customer Service' },
+            'OFF-002': { name: 'Customer Care Unit', code: 'CCU', department: 'Customer Service' },
+            'OFF-003': { name: 'Document Verification', code: 'DVF', department: 'Legal' },
+            'OFF-004': { name: 'Survey Department', code: 'SUR', department: 'Technical' },
+            'OFF-005': { name: 'Legal Department', code: 'LEG', department: 'Legal' },
+            'OFF-006': { name: 'Planning Department', code: 'PLN', department: 'Technical' },
+            'OFF-007': { name: "Director's Office", code: 'DIR', department: 'Management' },
+            'OFF-008': { name: 'Certificate Issuance', code: 'CRT', department: 'Operations' },
+            'OFF-009': { name: 'Archive', code: 'ARC', department: 'Records' },
+            'OFF-010': { name: 'Finance Department', code: 'FIN', department: 'Finance' },
+            'OFF-011': { name: 'IT Department', code: 'ITD', department: 'Technical' },
+            'OFF-012': { name: 'Registry', code: 'REG', department: 'Records' }
+        };
+
+        let fileTrackers = [];
+        let currentTracker = null;
+
+        // Generate unique IDs
+        function generateTrackingId() {
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substr(2, 5);
+            return `TRK-${timestamp.toUpperCase()}-${random.toUpperCase()}`;
+        }
+
+        function generateLogId() {
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[-:T]/g, '').split('.')[0];
+            const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+            return `LOG-${timestamp}-${random}`;
+        }
+
+        // Update current date and time
+        function updateDateTime() {
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = now.toTimeString().split(' ')[0].substring(0, 8);
+            
+            document.getElementById('current-time').textContent = time;
+            document.getElementById('current-date').textContent = date;
+            document.getElementById('log-in-time').value = time.substring(0, 5);
+            document.getElementById('log-in-date').value = date;
+        }
+
+        // Initialize IDs
+        function initializeIds() {
+            const trackingId = generateTrackingId();
+            const logId = generateLogId();
+            
+            document.getElementById('tracking-id').value = trackingId;
+            document.getElementById('log-id').value = logId;
+            document.getElementById('sidebar-tracking-id').textContent = trackingId;
+            document.getElementById('sidebar-log-id').textContent = logId;
+        }
+
+        // Handle office selection
+        document.getElementById('current-office').addEventListener('change', function() {
+            const officeId = this.value;
+            const officeIdField = document.getElementById('current-office-id');
+            const officeInfo = document.getElementById('office-info');
+            
+            if (officeId && officeData[officeId]) {
+                const office = officeData[officeId];
+                officeIdField.value = officeId;
+                
+                document.getElementById('office-badge').textContent = officeId;
+                document.getElementById('office-code-badge').textContent = office.code;
+                document.getElementById('office-department').textContent = `Department: ${office.department}`;
+                
+                officeInfo.classList.remove('hidden');
+            } else {
+                officeIdField.value = '';
+                officeInfo.classList.add('hidden');
+            }
+        });
+
+        // Create file tracker
+        function createFileTracker() {
+            const fileNo = document.getElementById('file-no').value;
+            const fileName = document.getElementById('file-name').value;
+            const officeId = document.getElementById('current-office').value;
+            
+            if (!fileNo || !fileName || !officeId) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const office = officeData[officeId];
+            const now = new Date();
+            const trackingId = document.getElementById('tracking-id').value;
+            const logId = document.getElementById('log-id').value;
+            
+            currentTracker = {
+                fileNo,
+                fileName,
+                trackingId,
+                currentOffice: office.name,
+                currentOfficeId: officeId,
+                logEntries: [{
+                    logId,
+                    logInTime: document.getElementById('log-in-time').value,
+                    logInDate: document.getElementById('log-in-date').value,
+                    logOutTime: '',
+                    logOutDate: '',
+                    officeId,
+                    officeName: office.name,
+                    status: 'active',
+                    createdAt: now.toISOString()
+                }],
+                createdAt: now.toISOString()
+            };
+            
+            showPreview();
+        }
+
+        // Show preview dialog
+        function showPreview() {
+            if (!currentTracker) return;
+            
+            const previewContent = document.getElementById('preview-content');
+            previewContent.innerHTML = `
+                <div class="py-4">
+                    <div class="grid gap-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h3 class="font-semibold">${currentTracker.fileName}</h3>
+                                <p class="text-sm text-gray-600">File No: ${currentTracker.fileNo}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Active</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">File Information</label>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">File No:</span>
+                                        <span class="font-medium">${currentTracker.fileNo}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Tracking ID:</span>
+                                        <span class="font-mono">${currentTracker.trackingId}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Current Location</label>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Office:</span>
+                                        <span>${currentTracker.currentOffice}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Office ID:</span>
+                                        <span class="font-mono">${currentTracker.currentOfficeId}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="border-gray-200">
+                        
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Initial Log Entry</label>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i data-lucide="log-in" class="h-4 w-4 text-green-600"></i>
+                                    <span class="font-medium">LOG IN</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${currentTracker.logEntries[0].logId}</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <p>Date: ${currentTracker.logEntries[0].logInDate} | Time: ${currentTracker.logEntries[0].logInTime}</p>
+                                    <p>Office: ${currentTracker.logEntries[0].officeName}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('preview-dialog').classList.add('show');
+            lucide.createIcons();
+        }
+
+        // Save file tracker
+        function saveFileTracker() {
+            if (currentTracker) {
+                fileTrackers.push(currentTracker);
+                updateFileTrackersTable();
+                document.getElementById('preview-dialog').classList.remove('show');
+                alert('File tracker created successfully!');
+                resetForm();
+            }
+        }
+
+        // Update file trackers table
+        function updateFileTrackersTable() {
+            const section = document.getElementById('file-trackers-section');
+            const container = document.getElementById('trackers-container');
+            
+            if (fileTrackers.length > 0) {
+                section.classList.remove('hidden');
+                
+                container.innerHTML = fileTrackers.map(tracker => `
+                    <div class="border rounded-lg p-4 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-semibold">${tracker.fileName}</h3>
+                                <p class="text-sm text-gray-600">File No: ${tracker.fileNo} | Tracking ID: ${tracker.trackingId}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${tracker.currentOfficeId}</span>
+                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    <i data-lucide="eye" class="h-4 w-4 mr-2"></i>
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Log ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Log In</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Log Out</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${tracker.logEntries.map(entry => `
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">${entry.logId}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${entry.officeId}</span>
+                                                    <span class="text-sm">${entry.officeName}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <div>${entry.logInDate}</div>
+                                                <div class="text-gray-500">${entry.logInTime}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <div>${entry.logOutDate || '-'}</div>
+                                                <div class="text-gray-500">${entry.logOutTime || '-'}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${entry.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">${entry.status}</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div class="relative inline-block text-left">
+                                                    <button type="button" class="dropdown-trigger inline-flex items-center justify-center w-8 h-8 bg-white rounded-md border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-tracker-id="${tracker.trackingId}" data-log-id="${entry.logId}" data-status="${entry.status}">
+                                                        <i data-lucide="more-horizontal" class="h-4 w-4 text-gray-500"></i>
+                                                    </button>
+                                                    <!-- Changed dropdown positioning to appear above the trigger button -->
+                                                    <div class="dropdown-menu hidden absolute right-0 bottom-full z-50 mb-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                        <div class="py-1">
+                                                            <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="generate-log">
+                                                                <i data-lucide="file-down" class="mr-2 h-4 w-4"></i>
+                                                                <span>Generate Log Sheet</span>
+                                                            </button>
+                                                            <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="print-log">
+                                                                <i data-lucide="printer" class="mr-2 h-4 w-4"></i>
+                                                                <span>Print Log Sheet</span>
+                                                            </button>
+                                                            ${entry.status === 'active' ? `
+                                                                <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="log-out">
+                                                                    <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
+                                                                    <span>Log Out</span>
+                                                                </button>
+                                                            ` : ''}
+                                                            <hr class="my-1 border-gray-200">
+                                                            <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100" data-action="delete-log">
+                                                                <i data-lucide="trash-2" class="mr-2 h-4 w-4"></i>
+                                                                <span>Delete Log Entry</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Added dropdown for adding new log entries to offices -->
+                        <div class="mt-4 flex justify-end">
+                            <div class="relative">
+                                <select class="add-log-select w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" data-tracker-id="${tracker.trackingId}">
+                                    <option value="">Add new log entry to office...</option>
+                                    ${Object.entries(officeData).map(([officeId, office]) => `
+                                        <option value="${officeId}">${office.name} (${office.code})</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                setupDropdownMenus();
+                setupAddLogSelects();
+                lucide.createIcons();
+            }
+        }
+
+        function setupAddLogSelects() {
+            document.querySelectorAll('.add-log-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const trackerId = this.dataset.trackerId;
+                    const officeId = this.value;
+                    
+                    if (officeId) {
+                        handleAddLogEntry(trackerId, officeId);
+                        this.value = ''; // Reset the select
+                    }
+                });
+            });
+        }
+
+        function handleAddLogEntry(trackerId, officeId) {
+            const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+            const office = officeData[officeId];
+            
+            if (tracker && office) {
+                const now = new Date();
+                const newLogId = generateLogId();
+                
+                const newLogEntry = {
+                    logId: newLogId,
+                    logInTime: now.toTimeString().split(' ')[0].substring(0, 5),
+                    logInDate: now.toISOString().split('T')[0],
+                    logOutTime: '',
+                    logOutDate: '',
+                    officeId: officeId,
+                    officeName: office.name,
+                    status: 'active',
+                    createdAt: now.toISOString()
+                };
+                
+                // Mark any existing active entries as completed
+                tracker.logEntries.forEach(entry => {
+                    if (entry.status === 'active') {
+                        entry.status = 'completed';
+                        entry.logOutTime = now.toTimeString().split(' ')[0].substring(0, 5);
+                        entry.logOutDate = now.toISOString().split('T')[0];
+                    }
+                });
+                
+                // Add the new log entry
+                tracker.logEntries.push(newLogEntry);
+                
+                // Update current office info
+                tracker.currentOffice = office.name;
+                tracker.currentOfficeId = officeId;
+                
+                updateFileTrackersTable();
+                alert(`New log entry created: ${newLogId}\nFile moved to ${office.name}`);
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('file-no').value = '';
+            document.getElementById('file-name').value = '';
+            document.getElementById('current-office').value = '';
+            document.getElementById('current-office-id').value = '';
+            document.getElementById('office-info').classList.add('hidden');
+            currentTracker = null;
+            initializeIds();
+        }
+
+        // Event listeners
+        document.getElementById('resetBtn').addEventListener('click', resetForm);
+        document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+        document.getElementById('previewBtn').addEventListener('click', createFileTracker);
+        document.getElementById('saveFileLogBtn').addEventListener('click', createFileTracker);
+        document.getElementById('close-preview').addEventListener('click', () => {
+            document.getElementById('preview-dialog').classList.remove('show');
+        });
+        document.getElementById('close-preview-btn').addEventListener('click', () => {
+            document.getElementById('preview-dialog').classList.remove('show');
+        });
+        document.getElementById('save-tracker-btn').addEventListener('click', saveFileTracker);
+
+        function setupDropdownMenus() {
+            // Handle dropdown toggle
+            document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const menu = this.nextElementSibling;
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.classList.add('hidden');
+                            otherMenu.style.position = '';
+                            otherMenu.style.top = '';
+                            otherMenu.style.left = '';
+                            otherMenu.style.right = '';
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    if (menu.classList.contains('hidden')) {
+                        const rect = this.getBoundingClientRect();
+                        const menuHeight = 200; // Approximate height of dropdown menu
+                        const spaceAbove = rect.top;
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        
+                        // Position the dropdown
+                        menu.style.position = 'fixed';
+                        menu.style.right = (window.innerWidth - rect.right) + 'px';
+                        
+                        // Show above if there's more space above or if there's not enough space below
+                        if (spaceAbove > menuHeight || spaceBelow < menuHeight) {
+                            menu.style.top = (rect.top - menuHeight) + 'px';
+                            menu.style.bottom = 'auto';
+                        } else {
+                            menu.style.top = (rect.bottom + 8) + 'px';
+                            menu.style.bottom = 'auto';
+                        }
+                        
+                        menu.classList.remove('hidden');
+                    } else {
+                        menu.classList.add('hidden');
+                        menu.style.position = '';
+                        menu.style.top = '';
+                        menu.style.left = '';
+                        menu.style.right = '';
+                    }
+                });
+            });
+
+            // Handle dropdown item clicks
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const trigger = this.closest('.relative').querySelector('.dropdown-trigger');
+                    const trackerId = trigger.dataset.trackerId;
+                    const logId = trigger.dataset.logId;
+                    const status = trigger.dataset.status;
+                    
+                    // Close dropdown
+                    this.closest('.dropdown-menu').classList.add('hidden');
+                    
+                    // Handle different actions
+                    switch(action) {
+                        case 'generate-log':
+                            alert(`Generating log sheet for ${logId}`);
+                            break;
+                        case 'print-log':
+                            alert(`Printing log sheet for ${logId}`);
+                            break;
+                        case 'log-out':
+                            handleLogOut(trackerId, logId);
+                            break;
+                        case 'delete-log':
+                            handleDeleteLogEntry(trackerId, logId);
+                            break;
+                    }
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                    menu.style.position = '';
+                    menu.style.top = '';
+                    menu.style.left = '';
+                    menu.style.right = '';
+                });
+            });
+        }
+
+        function handleLogOut(trackerId, logId) {
+            const now = new Date();
+            const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+            
+            if (tracker) {
+                const entry = tracker.logEntries.find(e => e.logId === logId);
+                if (entry && entry.status === 'active') {
+                    entry.logOutTime = now.toTimeString().split(' ')[0].substring(0, 5);
+                    entry.logOutDate = now.toISOString().split('T')[0];
+                    entry.status = 'completed';
+                    
+                    updateFileTrackersTable();
+                    alert('File logged out successfully!');
+                }
+            }
+        }
+
+        function handleDeleteLogEntry(trackerId, logId) {
+            if (confirm('Are you sure you want to delete this log entry?')) {
+                const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+                if (tracker) {
+                    tracker.logEntries = tracker.logEntries.filter(e => e.logId !== logId);
+                    updateFileTrackersTable();
+                    alert('Log entry deleted successfully!');
+                }
+            }
+        }
+
+        // Initialize
+        initializeIds();
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        lucide.createIcons();
+    </script>
+</body>
+</html>
