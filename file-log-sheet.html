@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Log Sheet - Kano State Land Registry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        @media print {
+            .print\:hidden { display: none !important; }
+            .print\:p-0 { padding: 0 !important; }
+            .print\:max-w-none { max-width: none !important; }
+            .print\:shadow-none { box-shadow: none !important; }
+            .print\:border-none { border: none !important; }
+            body { margin: 0; }
+        }
+        .qr-error {
+            color: #e53e3e;
+            font-size: 10px;
+            text-align: center;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1;
+            padding: 0.25rem 0.625rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="relative">
+        <!-- Print Button (Fixed Position) -->
+        <div class="fixed top-2 right-2 z-10 print:hidden">
+            <button onclick="handlePrint()" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i data-lucide="printer" class="h-4 w-4 mr-2"></i>
+                Print
+            </button>
+        </div>
+
+        <!-- Page Header -->
+        <div class="container mx-auto py-6 print:hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">File Log Sheet</h1>
+                    <p class="text-gray-500">Printable tracking sheet for file movement</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracking Sheet Content -->
+        <div id="printRef" class="container mx-auto py-3 max-w-7xl print:p-0 print:max-w-none">
+            <div class="bg-white rounded-lg shadow-lg print:shadow-none print:border-none">
+                <div class="p-4 print:p-0">
+                    <div class="tracking-sheet">
+                        <!-- Header Section -->
+                        <div class="flex justify-between items-start mb-4 pb-2 border-b-2 border-gray-800">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full">
+                                        <i data-lucide="file-text" class="h-5 w-5 text-blue-700"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-bold text-gray-900">KANO STATE LAND REGISTRY</h2>
+                                        <h3 class="text-sm font-semibold text-gray-700">FILE TRACKING SHEET</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="inline-block border border-gray-300 rounded-md px-3 py-1 bg-gray-50">
+                                    <p class="text-sm font-bold text-blue-600">
+                                        Tracking ID: <span id="trackingId">TRK-2023-001</span>
+                                    </p>
+                                    <p class="text-xs text-gray-500">Generated: <span id="generatedDate"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content Grid -->
+                        <div class="grid grid-cols-12 gap-4 mb-4">
+                            <!-- File Details - Left Side -->
+                            <div class="col-span-8">
+                                <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">File Details</div>
+                                <div class="border border-gray-200 rounded-md p-3 bg-gray-50 mb-4">
+                                    <h3 class="text-base font-bold mb-2 text-gray-900" id="fileName">Alhaji Ibrahim Dantata</h3>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span id="statusBadge" class="badge bg-blue-100 text-blue-800">
+                                            Status: In Process
+                                        </span>
+                                        <span id="priorityBadge" class="badge bg-blue-100 text-blue-800">
+                                            Priority: Normal
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- File Information and Current Location in 2 columns -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">
+                                            File Information
+                                        </div>
+                                        <div class="bg-white rounded-md border border-gray-200 p-2">
+                                            <div class="space-y-1 text-xs">
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">File No:</span>
+                                                    <span class="font-medium" id="fileNo">RES-2015-4859</span>
+                                                </div>
+                                                <div class="flex justify-between" id="kangisFileRow">
+                                                    <span class="text-gray-600">KANGIS Number:</span>
+                                                    <span class="font-medium" id="kangisFileNo">KNGP 00338</span>
+                                                </div>
+                                                <div class="flex justify-between" id="newKangisFileRow">
+                                                    <span class="text-gray-600">New KANGIS:</span>
+                                                    <span class="font-medium" id="newKangisFileNo">KN0001</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Date Created:</span>
+                                                    <span class="font-medium" id="dateCreated">2023-06-15</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Due Date:</span>
+                                                    <span class="font-medium" id="dueDate">2023-06-30</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">
+                                            Current Location
+                                        </div>
+                                        <div class="bg-white rounded-md border border-gray-200 p-2">
+                                            <div class="space-y-2 text-xs">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="bg-blue-100 text-blue-700 p-1 rounded">
+                                                        <i data-lucide="map-pin" class="h-3 w-3"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium" id="currentOffice">Customer Care Unit</p>
+                                                        <p class="text-gray-500">
+                                                            Office ID: <span id="currentOfficeId">OFF-002</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <div class="bg-green-100 text-green-700 p-1 rounded">
+                                                        <i data-lucide="user" class="h-3 w-3"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium" id="currentHandler">Aisha Mohammed</p>
+                                                        <p class="text-gray-500">Current handler</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <div class="bg-purple-100 text-purple-700 p-1 rounded">
+                                                        <i data-lucide="clock" class="h-3 w-3"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium" id="lastUpdated">2023-12-15 14:30</p>
+                                                        <p class="text-gray-500">Last updated</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QR Code - Right Side -->
+                            <div class="col-span-4">
+                                <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">QR Code</div>
+                                <div class="border border-gray-200 rounded-md p-3 bg-white">
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="qr-code-canvas" width="100" height="100" class="w-24 h-24 mb-1 border border-gray-200 rounded"></canvas>
+                                        <p class="text-xs font-medium text-center">Contains file details</p>
+                                        <p class="text-xs text-gray-500">
+                                            File No: <span id="qrFileNo">RES-2015-4859</span>
+                                        </p>
+                                        <div class="mt-1 inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 text-xs">
+                                            <i data-lucide="tag" class="h-3 w-3"></i>
+                                            <span class="font-medium" id="qrTrackingId">TRK-2023-001</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movement History -->
+                        <div class="mb-4">
+                            <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">
+                                Movement History
+                            </div>
+                            <div class="bg-white rounded-md border border-gray-200 overflow-hidden">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Log ID</th>
+                                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Date & Time</th>
+                                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Office</th>
+                                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Handler</th>
+                                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Log Out</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="movementHistoryTable" class="bg-white divide-y divide-gray-200">
+                                        <!-- Table rows will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Signature and Notes -->
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                                <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">Signature</div>
+                                <div class="bg-white rounded-md border border-gray-200 p-3">
+                                    <div class="h-12 border-b border-dashed mb-2"></div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-gray-500">Authorized Signature</span>
+                                        <span class="text-gray-500">Date: _____________</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold border-b border-gray-300 pb-1 mb-2 text-gray-800">Notes</div>
+                                <div class="bg-white rounded-md border border-gray-200 p-3 h-[80px]">
+                                    <p class="text-xs text-gray-700" id="notesContent">
+                                        All documents verified and ready for processing
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="pt-2 border-t border-gray-200">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="bg-gray-100 p-1 rounded-full">
+                                        <i data-lucide="qr-code" class="h-3 w-3 text-gray-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-700">KANO STATE LAND REGISTRY</p>
+                                        <p class="text-gray-500">File Tracking System</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-gray-500">This tracking sheet should accompany the file at all times.</p>
+                                    <p class="text-gray-500">For inquiries, contact File Management Office at ext. 2145.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample file tracker data
+        const fileTracker = {
+            trackingId: "TRK-2023-001",
+            fileNo: "RES-2015-4859",
+            fileName: "Alhaji Ibrahim Dantata",
+            currentOffice: "Customer Care Unit",
+            currentOfficeId: "OFF-002",
+            currentHandler: "Aisha Mohammed",
+            status: "In Process",
+            priority: "Normal",
+            dateCreated: "2023-06-15",
+            dueDate: "2023-06-30",
+            kangisFileNo: "KNGP 00338",
+            newKangisFileNo: "KN0001",
+            notes: "All documents verified and ready for processing",
+            logEntries: [
+                {
+                    logId: "LOG-20231215-093801-001",
+                    logInTime: "09:30",
+                    logInDate: "2023-12-15",
+                    logOutTime: "11:45",
+                    logOutDate: "2023-12-15",
+                    officeId: "OFF-001",
+                    officeName: "Reception",
+                    handler: "Fatima Uzman",
+                    status: "completed",
+                    notes: "File received and registered",
+                },
+                {
+                    logId: "LOG-20231215-143801-002",
+                    logInTime: "14:30",
+                    logInDate: "2023-12-15",
+                    logOutTime: "",
+                    logOutDate: "",
+                    officeId: "OFF-002",
+                    officeName: "Customer Care Unit",
+                    handler: "Aisha Mohammed",
+                    status: "active",
+                    notes: "File received for processing",
+                },
+            ],
+        };
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Generate QR Code using QRious (as in your working example)
+        function generateQRCode() {
+            console.log('Starting QR code generation...');
+            
+            const qrData = `TRK:${fileTracker.trackingId}|FILE:${fileTracker.fileNo}|KANGIS:${fileTracker.kangisFileNo}|LOC:${fileTracker.currentOffice}`;
+
+            try {
+                if (typeof QRious === 'undefined') {
+                    throw new Error('QRious library not loaded');
+                }
+
+                const qr = new QRious({
+                    element: document.getElementById('qr-code-canvas'),
+                    value: qrData,
+                    size: 100,
+                    level: 'M',
+                    background: '#ffffff',
+                    foreground: '#000000'
+                });
+
+                console.log('QR Code generated successfully');
+
+            } catch (error) {
+                console.error('QR Code generation error:', error);
+                
+                const ctx = document.getElementById('qr-code-canvas').getContext('2d');
+                ctx.fillStyle = '#f3f4f6';
+                ctx.fillRect(0, 0, 100, 100);
+                ctx.strokeStyle = '#d1d5db';
+                ctx.strokeRect(0, 0, 100, 100);
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('QR Code', 50, 45);
+                ctx.fillText('Placeholder', 50, 58);
+            }
+        }
+
+        // Get badge class based on status or priority
+        function getBadgeClass(value, type) {
+            if (type === "status") {
+                switch (value) {
+                    case "Completed":
+                        return "bg-green-100 text-green-800";
+                    case "In Process":
+                        return "bg-blue-100 text-blue-800";
+                    case "Pending":
+                        return "bg-yellow-100 text-yellow-800";
+                    case "On Hold":
+                        return "bg-red-100 text-red-800";
+                    case "Awaiting Approval":
+                        return "bg-purple-100 text-purple-800";
+                    default:
+                        return "bg-gray-100 text-gray-800";
+                }
+            } else {
+                switch (value) {
+                    case "Urgent":
+                        return "bg-red-100 text-red-800";
+                    case "High":
+                        return "bg-yellow-100 text-yellow-800";
+                    case "Low":
+                        return "bg-gray-100 text-gray-800";
+                    default:
+                        return "bg-blue-100 text-blue-800";
+                }
+            }
+        }
+
+        // Populate movement history table
+        function populateMovementHistory() {
+            const tableBody = document.getElementById('movementHistoryTable');
+            tableBody.innerHTML = '';
+
+            fileTracker.logEntries.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.className = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                
+                row.innerHTML = `
+                    <td class="py-1 px-2 text-xs font-mono">${entry.logId}</td>
+                    <td class="py-1 px-2 text-xs">
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="calendar" class="h-3 w-3 text-gray-400"></i>
+                            <span>${entry.logInDate} ${entry.logInTime}</span>
+                        </div>
+                    </td>
+                    <td class="py-1 px-2 text-xs">
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="map-pin" class="h-3 w-3 text-gray-400"></i>
+                            <span>${entry.officeName} (${entry.officeId})</span>
+                        </div>
+                    </td>
+                    <td class="py-1 px-2 text-xs">
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="user" class="h-3 w-3 text-gray-400"></i>
+                            <span>${entry.handler}</span>
+                        </div>
+                    </td>
+                    <td class="py-1 px-2 text-xs">
+                        <span class="badge ${entry.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                            ${entry.status === 'active' ? 'Active' : 'Completed'}
+                        </span>
+                    </td>
+                    <td class="py-1 px-2 text-xs">
+                        ${entry.logOutDate ? `${entry.logOutDate} ${entry.logOutTime}` : '<span class="text-gray-400">-</span>'}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Re-initialize Lucide icons for the new content
+            lucide.createIcons();
+        }
+
+        // Handle print functionality
+        function handlePrint() {
+            window.print();
+        }
+
+        // Initialize the page
+        function initializePage() {
+            // Set generated date
+            document.getElementById('generatedDate').textContent = new Date().toLocaleString();
+            
+            // Set file tracker data
+            document.getElementById('trackingId').textContent = fileTracker.trackingId;
+            document.getElementById('fileName').textContent = fileTracker.fileName;
+            document.getElementById('fileNo').textContent = fileTracker.fileNo;
+            document.getElementById('dateCreated').textContent = fileTracker.dateCreated;
+            document.getElementById('dueDate').textContent = fileTracker.dueDate;
+            document.getElementById('currentOffice').textContent = fileTracker.currentOffice;
+            document.getElementById('currentOfficeId').textContent = fileTracker.currentOfficeId;
+            document.getElementById('currentHandler').textContent = fileTracker.currentHandler;
+            document.getElementById('qrFileNo').textContent = fileTracker.fileNo;
+            document.getElementById('qrTrackingId').textContent = fileTracker.trackingId;
+            document.getElementById('notesContent').textContent = fileTracker.notes;
+
+            // Set KANGIS file numbers (hide if not available)
+            if (fileTracker.kangisFileNo) {
+                document.getElementById('kangisFileNo').textContent = fileTracker.kangisFileNo;
+            } else {
+                document.getElementById('kangisFileRow').style.display = 'none';
+            }
+
+            if (fileTracker.newKangisFileNo) {
+                document.getElementById('newKangisFileNo').textContent = fileTracker.newKangisFileNo;
+            } else {
+                document.getElementById('newKangisFileRow').style.display = 'none';
+            }
+
+            // Set last updated time
+            const lastEntry = fileTracker.logEntries[fileTracker.logEntries.length - 1];
+            if (lastEntry) {
+                document.getElementById('lastUpdated').textContent = `${lastEntry.logInDate} ${lastEntry.logInTime}`;
+            }
+
+            // Set badges with appropriate colors
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.className = `badge ${getBadgeClass(fileTracker.status, 'status')}`;
+            statusBadge.textContent = `Status: ${fileTracker.status}`;
+
+            const priorityBadge = document.getElementById('priorityBadge');
+            priorityBadge.className = `badge ${getBadgeClass(fileTracker.priority, 'priority')}`;
+            priorityBadge.textContent = `Priority: ${fileTracker.priority}`;
+
+            // Populate movement history
+            populateMovementHistory();
+
+            // Generate QR code
+            setTimeout(() => {
+                generateQRCode();
+            }, 100);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, initializing tracking sheet...');
+            initializePage();
+            console.log('Tracking sheet initialization complete');
+        });
+    </script>
+</body>
+</html>
