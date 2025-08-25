@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Search System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 1200px;
+            overflow: hidden;
+        }
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header i {
+            font-size: 24px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        .search-section {
+            padding: 25px 30px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .filter-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        .filter-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .results-count {
+            font-size: 16px;
+            font-weight: 500;
+            color: #374151;
+        }
+        .clear-btn {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .clear-btn:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .table-container {
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f8fafc;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #334155;
+        }
+        tr:hover {
+            background: #f8fafc;
+        }
+        .file-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .file-name {
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        .file-number {
+            color: #64748b;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .location-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .office {
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        .handler {
+            color: #64748b;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-completed {
+            background: #e0f2fe;
+            color: #1e40af;
+        }
+        .status-on-hold {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .due-date {
+            color: #64748b;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .action-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .action-btn:hover {
+            background: #1d4ed8;
+        }
+        .footer {
+            padding: 20px 30px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #e2e8f0;
+        }
+        .close-btn {
+            background: #64748b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: #475569;
+        }
+        .tracking-id {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #2563eb;
+            font-weight: 500;
+        }
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+        .no-results i {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+        @media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <i class="fas fa-search"></i>
+            <div>
+                <h1>Search Files</h1>
+                <p>Search and filter files by tracking ID, file number, name, or handler</p>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Enter tracking ID, file number, name, or handler...">
+            </div>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="all">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                        <option value="on-hold">On Hold</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority">
+                        <option value="all">All Priorities</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="high">High</option>
+                        <option value="normal">Normal</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="office">Office</label>
+                    <select id="office">
+                        <option value="all">All Offices</option>
+                        <!-- Office options will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-header">
+            <div class="results-count">Search Results (<span id="results-count">7</span> found)</div>
+            <button class="clear-btn" id="clear-filters">Clear Filters</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>TRACKING ID</th>
+                        <th>FILE DETAILS</th>
+                        <th>CURRENT LOCATION</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="files-table-body">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <button class="close-btn" id="close-dialog">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Office data from the Excel file
+        const offices = [
+            { id: "COM-001", name: "Commissioner’s Office" },
+            { id: "COM-SEC-01", name: "Commissioner’s Secretary 1 Office" },
+            { id: "COM-SEC-02", name: "Commissioner’s Secretary 2 Office" },
+            { id: "PS-001", name: "Permanent Secretary’s Office" },
+            { id: "PS-SEC-01", name: "Permanent Secretary’s Secretary’s Office" },
+            { id: "DG-001", name: "KANGIS Director General’s Office" },
+            { id: "DIR-ICT", name: "ICT Department Director’s Office" },
+            { id: "DD-ICT", name: "ICT Department Deputy Director’s Office" },
+            { id: "REG-ICT", name: "ICT Department Registry" },
+            { id: "DIR-ST", name: "Sectional Titling Department Director’s Office" },
+            { id: "DD-ST", name: "Sectional Titling Department Deputy Director’s Office" },
+            { id: "REG-ST", name: "Sectional Titling Registry" },
+            { id: "DIR-SLTR", name: "SLTR Department Director’s Office" },
+            { id: "DD-SLTR", name: "SLTR Department Deputy Director’s Office" },
+            { id: "REG-SLTR", name: "SLTR Registry" },
+            { id: "DIR-PP", name: "Physical Planning Director’s Office" },
+            { id: "DD-PP", name: "Physical Planning Deputy Director’s Office" },
+            { id: "REG-PP", name: "Physical Planning Registry" },
+            { id: "DIR-LANDS", name: "Lands Director’s Office" },
+            { id: "DD-LANDS", name: "Lands Deputy Director’s Office" },
+            { id: "REG-LANDS", name: "Lands Registry" },
+            { id: "DIR-ACC", name: "Accounts Department Director’s Office" },
+            { id: "DD-ACC", name: "Accounts Department Deputy Director’s Office" },
+            { id: "REG-ACC", name: "Accounts Registry" },
+            { id: "DIR-DEEDS", name: "Deeds Director’s Office" },
+            { id: "DD-DEEDS", name: "Deeds Deputy Director’s Office" },
+            { id: "REG-DEEDS", name: "Deeds Registry" },
+            { id: "DIR-GIS", name: "GIS Director’s Office" },
+            { id: "DD-GIS", name: "GIS Deputy Director’s Office" },
+            { id: "REG-GIS", name: "GIS Registry" },
+            { id: "DIR-CAD", name: "Cadastral Director’s Office" },
+            { id: "DD-CAD", name: "Cadastral Deputy Director’s Office" },
+            { id: "REG-CAD", name: "Cadastral Registry" },
+            { id: "DIR-SUR", name: "Survey Director’s Office" },
+            { id: "DD-SUR", name: "Survey Deputy Director’s Office" },
+            { id: "REG-SUR", name: "Survey Registry" },
+            { id: "DIR-LEG", name: "Legal Department Director’s Office" },
+            { id: "DD-LEG", name: "Legal Department Deputy Director’s Office" },
+            { id: "REG-LEG", name: "Legal Registry" },
+            { id: "DIR-DCIV", name: "DCIV Director’s Office" },
+            { id: "DD-DCIV", name: "DCIV Deputy Director’s Office" },
+            { id: "REG-DCIV", name: "DCIV Registry" },
+            { id: "DIR-ADMIN", name: "Admin & General Services Director’s Office" },
+            { id: "DD-ADMIN", name: "Admin & General Services Deputy Director’s Office" },
+            { id: "REG-ADMIN", name: "Admin & General Services Registry" },
+            { id: "DIR-PRS", name: "Planning, Research & Statistics Director’s Office" },
+            { id: "DD-PRS", name: "PRS Deputy Director’s Office" },
+            { id: "REG-PRS", name: "PRS Registry" },
+            { id: "DIR-KNUPDA", name: "KNUPDA Director’s Office" },
+            { id: "DD-KNUPDA", name: "KNUPDA Deputy Director’s Office" },
+            { id: "REG-KNUPDA", name: "KNUPDA Registry" },
+            { id: "DIR-KANGIS", name: "KANGIS Director’s Office" },
+            { id: "DD-KANGIS", name: "KANGIS Deputy Director’s Office" },
+            { id: "REG-KANGIS", name: "KANGIS Registry" },
+            { id: "CSD-001", name: "Customer Service Center" }
+        ];
+
+        // File data with office IDs that match the office list
+        const filesData = [
+            {
+                trackingId: "TRK-1HQXM2K-A7B9C",
+                fileNo: "RES: 2015-4839",
+                fileName: " Alhaji Ibrahim Dantata",
+                currentOffice: "CSD-001",
+                currentHandler: "Aisha Mohammed",
+                status: "active",
+                priority: "normal",
+                dueDate: "2023-12-30"
+            },
+            {
+                trackingId: "TRK-2ABXM3L-B8C0D",
+                fileNo: "RES: 2023-1567",
+                fileName: "Hajia Fatima Bello",
+                currentOffice: "REG-LANDS",
+                currentHandler: "Ibrahim Musa",
+                status: "active",
+                priority: "high",
+                dueDate: "2023-11-15"
+            },
+            {
+                trackingId: "TRK-3CDXM4M-C9D1E",
+                fileNo: "COM: 2023-1156",
+                fileName: " Kano Business Center",
+                currentOffice: "DIR-PP",
+                currentHandler: "Maryam Sani",
+                status: "completed",
+                priority: "normal",
+                dueDate: "2023-12-05"
+            },
+            {
+                trackingId: "TRK-4DEXM5N-D0E2F",
+                fileNo: "RES: 2023-9876",
+                fileName: "Alhaji Suleiman Ahmed",
+                currentOffice: "DIR-LEG",
+                currentHandler: "Fatima Abdullahi",
+                status: "on-hold",
+                priority: "urgent",
+                dueDate: "2023-12-20"
+            },
+            {
+                trackingId: "TRK-5EFXM6O-E1F3G",
+                fileNo: "RES: 92-5567",
+                fileName: " Hajiya Zainab Mohammed",
+                currentOffice: "REG-DEEDS",
+                currentHandler: "Amina Lawal",
+                status: "active",
+                priority: "normal",
+                dueDate: "2023-12-16"
+            },
+            {
+                trackingId: "TRK-6FGXM7P-F2G4H",
+                fileNo: "COM: 2023-3345",
+                fileName: " Kano Metro Line Project",
+                currentOffice: "REG-SUR",
+                currentHandler: "Hassan Bello",
+                status: "active",
+                priority: "high",
+                dueDate: "2023-12-15"
+            },
+            {
+                trackingId: "TRK-7GHXM8Q-G3H5I",
+                fileNo: "COM: 2023-7788",
+                fileName: "Kano Mall",
+                currentOffice: "DIR-PP",
+                currentHandler: "Abdullahi Sani",
+                status: "completed",
+                priority: "normal",
+                dueDate: "2023-12-10"
+            }
+        ];
+
+        // DOM elements
+        const searchInput = document.getElementById('search-input');
+        const statusFilter = document.getElementById('status');
+        const priorityFilter = document.getElementById('priority');
+        const officeFilter = document.getElementById('office');
+        const clearFiltersBtn = document.getElementById('clear-filters');
+        const closeDialogBtn = document.getElementById('close-dialog');
+        const resultsCount = document.getElementById('results-count');
+        const filesTableBody = document.getElementById('files-table-body');
+
+        // Function to populate office dropdown
+        function populateOfficeDropdown() {
+            offices.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.id;
+                option.textContent = office.name;
+                officeFilter.appendChild(option);
+            });
+        }
+
+        // Function to get office name by ID
+        function getOfficeNameById(officeId) {
+            const office = offices.find(office => office.id === officeId);
+            return office ? office.name : officeId;
+        }
+
+        // Function to render files based on filters
+        function renderFiles() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const priorityValue = priorityFilter.value;
+            const officeValue = officeFilter.value;
+
+            // Filter files based on criteria
+            const filteredFiles = filesData.filter(file => {
+                const matchesSearch = 
+                    file.trackingId.toLowerCase().includes(searchTerm) ||
+                    file.fileNo.toLowerCase().includes(searchTerm) ||
+                    file.fileName.toLowerCase().includes(searchTerm) ||
+                    file.currentHandler.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = statusValue === 'all' || file.status === statusValue;
+                const matchesPriority = priorityValue === 'all' || file.priority === priorityValue;
+                const matchesOffice = officeValue === 'all' || file.currentOffice === officeValue;
+
+                return matchesSearch && matchesStatus && matchesPriority && matchesOffice;
+            });
+
+            // Update results count
+            resultsCount.textContent = filteredFiles.length;
+
+            // Clear table
+            filesTableBody.innerHTML = '';
+
+            // Render filtered files
+            if (filteredFiles.length === 0) {
+                filesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="no-results">
+                            <i class="fas fa-search"></i>
+                            <h3>No files found</h3>
+                            <p>Try adjusting your search criteria</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredFiles.forEach(file => {
+                const row = document.createElement('tr');
+                
+                // Determine status badge class
+                let statusClass = '';
+                let statusText = '';
+                switch(file.status) {
+                    case 'active':
+                        statusClass = 'status-active';
+                        statusText = 'Active';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = 'Completed';
+                        break;
+                    case 'on-hold':
+                        statusClass = 'status-on-hold';
+                        statusText = 'On Hold';
+                        break;
+                }
+                
+                // Get office name
+                const officeName = getOfficeNameById(file.currentOffice);
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="tracking-id">
+                            <i class="fas fa-barcode"></i>
+                            <span>${file.trackingId}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="file-details">
+                            <div class="file-name">${file.fileName}</div>
+                            <div class="file-number">
+                                <i class="far fa-file-alt"></i>
+                                <span>${file.fileNo}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="location-details">
+                            <div class="office">${officeName}</div>
+                            <div class="handler">
+                                <i class="fas fa-user"></i>
+                                <span>${file.currentHandler}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="status-details">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            <div class="due-date">
+                                <i class="far fa-calendar-alt"></i>
+                                <span>${file.dueDate}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="action-btn" data-tracking-id="${file.trackingId}">
+                            <i class="fas fa-eye"></i>
+                            <span>View</span>
+                        </button>
+                    </td>
+                `;
+                
+                filesTableBody.appendChild(row);
+            });
+
+            // Add event listeners to view buttons
+            document.querySelectorAll('.action-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const trackingId = this.getAttribute('data-tracking-id');
+                    alert(`Viewing file: ${trackingId}`);
+                });
+            });
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', renderFiles);
+        statusFilter.addEventListener('change', renderFiles);
+        priorityFilter.addEventListener('change', renderFiles);
+        officeFilter.addEventListener('change', renderFiles);
+
+        clearFiltersBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            statusFilter.value = 'all';
+            priorityFilter.value = 'all';
+            officeFilter.value = 'all';
+            renderFiles();
+        });
+
+        closeDialogBtn.addEventListener('click', function() {
+            alert('Dialog closed. In a real application, this would close the modal/dialog.');
+        });
+
+        // Initialize the page
+        populateOfficeDropdown();
+        renderFiles();
+    </script>
+</body>
+</html>
