@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLAES Caveat Sub Module</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .command-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .file-number-popover {
+            width: 100%;
+            max-width: 400px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            font-weight: 500;
+        }
+        .status-badge i {
+            margin-right: 0.25rem;
+            font-size: 0.75rem;
+        }
+        .badge-active {
+            background-color: #DCFCE7;
+            color: #166534;
+            border: 1px solid #BBF7D0;
+        }
+        .badge-released {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+            border: 1px solid #BFDBFE;
+        }
+        .badge-lifted {
+            background-color: #EDE9FE;
+            color: #5B21B6;
+            border: 1px solid #DDD6FE;
+        }
+        .badge-expired {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+        .badge-draft {
+            background-color: #F3F4F6;
+            color: #374151;
+            border: 1px solid #E5E7EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 space-y-6">
+        <!-- Page Header -->
+        <div class="space-y-2">
+            <h1 class="text-3xl font-bold text-gray-900">KLAES Caveat Sub Module</h1>
+            <p class="text-gray-600">Data Capture Form for Caveat Placement and Lifting</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Caveats</p>
+                        <p class="text-2xl font-bold" id="total-caveats">5</p>
+                    </div>
+                    <i class="fa-regular fa-file-lines text-blue-600 text-2xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Active Caveats</p>
+                        <p class="text-2xl font-bold" id="active-caveats">3</p>
+                    </div>
+                    <i class="fa-regular fa-circle-check text-green-600 text-2xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Released Caveats</p>
+                        <p class="text-2xl font-bold" id="released-caveats">1</p>
+                    </div>
+                    <i class="fa-regular fa-file-check text-blue-600 text-2xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Draft Caveats</p>
+                        <p class="text-2xl font-bold" id="draft-caveats">0</p>
+                    </div>
+                    <i class="fa-regular fa-floppy-disk text-gray-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="space-y-6">
+            <div class="grid grid-cols-3 gap-2 bg-gray-100 p-1 rounded-lg">
+                <button class="tab-trigger py-2 px-4 text-sm font-medium rounded-md text-center transition-colors" data-tab="place">Place New Caveat</button>
+                <button class="tab-trigger py-2 px-4 text-sm font-medium rounded-md text-center transition-colors" data-tab="lift">Lift Existing Caveat</button>
+                <button class="tab-trigger py-2 px-4 text-sm font-medium rounded-md text-center transition-colors" data-tab="log">Existing Caveats Log</button>
+            </div>
+
+            <!-- Place New Caveat Tab -->
+            <div id="tab-place" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Panel - Search Existing Caveats -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <h2 class="text-lg font-semibold">Search Existing Caveats</h2>
+                            <p class="text-sm text-gray-600">Search by File Number or Petitioner</p>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Search</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" id="search-input" placeholder="File Number, Petitioner, Grantee..." class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Filter by Status</label>
+                                <select id="status-filter" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="released">Released</option>
+                                    <option value="lifted">Lifted</option>
+                                    <option value="expired">Expired</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                            </div>
+
+                            <!-- Search Results -->
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Search Results (<span id="search-results-count">5</span>)</label>
+                                <div class="space-y-2 max-h-96 overflow-y-auto" id="search-results">
+                                    <!-- Results will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Data Capture Form -->
+                    <div class="bg-white rounded-lg shadow lg:col-span-2">
+                        <div class="p-6 border-b">
+                            <h2 class="text-lg font-semibold">Place New Caveat Form</h2>
+                            <p class="text-sm text-gray-600">Fill in the form below to place a new caveat on a property</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-plus text-green-600"></i>
+                                        <h4 class="font-semibold text-green-800">Place New Caveat Mode</h4>
+                                    </div>
+                                    <p class="text-sm text-green-700 mt-2">
+                                        You are in place new caveat mode. Fill in the form below to place a new caveat on a property.
+                                    </p>
+                                </div>
+
+                                <!-- Section A: Caveat Information -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold border-b pb-2">Section A: Caveat Information</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Encumbrance Type *</label>
+                                            <select id="encumbrance-type" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">Select encumbrance type</option>
+                                                <option value="mortgage">Mortgage</option>
+                                                <option value="court-order">Court Order</option>
+                                                <option value="litigation">Litigation</option>
+                                                <option value="lien">Lien</option>
+                                                <option value="charge">Charge</option>
+                                                <option value="easement">Easement</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Type of Deed *</label>
+                                            <select id="deed-type" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">Select deed type</option>
+                                                <option value="assignment">Assignment</option>
+                                                <option value="sublease">Sublease</option>
+                                                <option value="gift">Gift</option>
+                                                <option value="mortgage">Mortgage</option>
+                                                <option value="lease">Lease</option>
+                                                <option value="power-of-attorney">Power of Attorney</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">File Number *</label>
+                                            <div class="relative">
+                                                <button id="file-number-trigger" class="w-full flex justify-between items-center p-2 border rounded-md bg-white">
+                                                    <span id="file-number-value">Search and select file number...</span>
+                                                    <i class="fa-solid fa-chevron-up-down ml-2 text-gray-400"></i>
+                                                </button>
+                                                <div id="file-number-popover" class="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg hidden">
+                                                    <div class="p-2 border-b">
+                                                        <input type="text" placeholder="Search file numbers..." class="w-full p-1 border rounded">
+                                                    </div>
+                                                    <div class="command-list">
+                                                        <div class="p-2 text-sm text-gray-500">No file number found.</div>
+                                                        <div class="file-options">
+                                                            <!-- File options will be populated here -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-gray-500">Format: CON-COM-2019-296, RES-2015-4859, COM-91-249</p>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Location *</label>
+                                            <div class="relative">
+                                                <input type="text" id="location" placeholder="Text/Map integration" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <i class="fa-solid fa-location-dot absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section B: Parties Involved -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold border-b pb-2">Section B: Parties Involved</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Petitioner *</label>
+                                            <input type="text" id="petitioner" placeholder="Name of person/organization entering caveat" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Grantee *</label>
+                                            <input type="text" id="grantee" placeholder="Name of person/organization caveat is against" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section C: Registration & Tracking -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold border-b pb-2">Section C: Registration & Tracking</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Reg Particulars</label>
+                                            <div class="text-sm font-mono bg-gray-50 p-2 rounded border" id="reg-particulars">
+                                                Select file number
+                                            </div>
+                                            <p class="text-xs text-gray-500">Auto-generated based on file number</p>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Start Date *</label>
+                                            <input type="date" id="start-date" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Release Date</label>
+                                            <input type="date" id="release-date" placeholder="Optional - for future release" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <p class="text-xs text-gray-500">Optional, for future release</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section D: Administrative Details -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold border-b pb-2">Section D: Administrative Details</h3>
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Instructions</label>
+                                            <textarea id="instructions" placeholder="Enter detailed instructions..." rows="3" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Remarks</label>
+                                            <textarea id="remarks" placeholder="Enter any additional remarks..." rows="3" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- System Metadata (Display Only) -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold border-b pb-2">System Metadata (Auto-Generated)</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Caveat Number</label>
+                                            <input type="text" id="caveat-number" disabled class="w-full p-2 border rounded-md bg-gray-100">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Created By</label>
+                                            <input type="text" value="Current User (Auto-filled)" disabled class="w-full p-2 border rounded-md bg-gray-100">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Date Created</label>
+                                            <input type="text" id="date-created" disabled class="w-full p-2 border rounded-md bg-gray-100">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="flex flex-wrap gap-3 pt-6 border-t">
+                                    <button id="save-draft" class="px-4 py-2 border rounded-md flex items-center">
+                                        <i class="fa-regular fa-floppy-disk mr-2"></i>
+                                        Save Draft
+                                    </button>
+                                    <button id="place-caveat" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center">
+                                        <i class="fa-regular fa-paper-plane mr-2"></i>
+                                        Place Caveat
+                                    </button>
+                                    <button id="generate-acknowledgement" class="px-4 py-2 border rounded-md flex items-center">
+                                        <i class="fa-solid fa-download mr-2"></i>
+                                        Generate Acknowledgement Sheet
+                                    </button>
+                                    <button id="reset-form" class="px-4 py-2 border rounded-md flex items-center">
+                                        <i class="fa-solid fa-rotate-left mr-2"></i>
+                                        Cancel / Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lift Existing Caveat Tab -->
+            <div id="tab-lift" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Panel - Active Caveats to Lift -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <h2 class="text-lg font-semibold">Active Caveats to Lift</h2>
+                            <p class="text-sm text-gray-600">Select an active caveat to lift</p>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Search</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" id="lift-search-input" placeholder="Search active caveats..." class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+
+                            <!-- Search Results -->
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Active Caveats (<span id="active-caveats-count">3</span>)</label>
+                                <div class="space-y-2 max-h-96 overflow-y-auto" id="active-caveats-list">
+                                    <!-- Active caveats will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Lift Caveat Form -->
+                    <div class="bg-white rounded-lg shadow lg:col-span-2">
+                        <div class="p-6 border-b">
+                            <h2 class="text-lg font-semibold">Lift Existing Caveat</h2>
+                            <p class="text-sm text-gray-600">Select an active caveat to lift from the left panel</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-triangle-exclamation text-yellow-600"></i>
+                                        <h4 class="font-semibold text-yellow-800">Lift Caveat Mode</h4>
+                                    </div>
+                                    <p class="text-sm text-yellow-700 mt-2">
+                                        You are in lift caveat mode. Select an existing active caveat from the left panel to lift it. The
+                                        release date field will be automatically populated with today's date.
+                                    </p>
+                                </div>
+
+                                <div id="selected-caveat-info">
+                                    <!-- Selected caveat info will be shown here -->
+                                </div>
+
+                                <div id="no-caveat-selected" class="text-center py-12">
+                                    <i class="fa-solid fa-triangle-exclamation text-gray-400 text-4xl mb-4"></i>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Caveat Selected</h3>
+                                    <p class="text-gray-600">
+                                        Please select an active caveat from the left panel to proceed with lifting.
+                                    </p>
+                                </div>
+
+                                <!-- Lifting Details (shown when caveat is selected) -->
+                                <div id="lifting-details" class="space-y-4 hidden">
+                                    <h3 class="text-lg font-semibold border-b pb-2">Lifting Details</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Release Date (Auto-filled)</label>
+                                            <input type="date" id="lift-release-date" class="w-full p-2 border rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <p class="text-xs text-yellow-600">Auto-filled with today's date for lifting</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Lifting Instructions</label>
+                                            <textarea id="lift-instructions" placeholder="Enter detailed instructions for lifting this caveat..." rows="3" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium">Lifting Remarks</label>
+                                            <textarea id="lift-remarks" placeholder="Enter any additional remarks for lifting this caveat..." rows="3" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Actions -->
+                                    <div class="flex flex-wrap gap-3 pt-6 border-t">
+                                        <button id="save-lift-draft" class="px-4 py-2 border rounded-md flex items-center">
+                                            <i class="fa-regular fa-floppy-disk mr-2"></i>
+                                            Save Draft
+                                        </button>
+                                        <button id="lift-caveat" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center">
+                                            <i class="fa-regular fa-paper-plane mr-2"></i>
+                                            Lift Caveat
+                                        </button>
+                                        <button id="generate-lift-acknowledgement" class="px-4 py-2 border rounded-md flex items-center">
+                                            <i class="fa-solid fa-download mr-2"></i>
+                                            Generate Acknowledgement Sheet
+                                        </button>
+                                        <button id="reset-lift-form" class="px-4 py-2 border rounded-md flex items-center">
+                                            <i class="fa-solid fa-rotate-left mr-2"></i>
+                                            Cancel / Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing Caveats Log Tab -->
+            <div id="tab-log" class="tab-content">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fa-regular fa-file-lines"></i>
+                            Existing Caveats Log
+                        </h2>
+                        <p class="text-sm text-gray-600">Complete log of all caveats in the system</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <!-- Search and Filter Controls -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="flex-1">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="text" id="log-search-input" placeholder="Search caveats by number, file number, petitioner, grantee..." class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div class="w-full sm:w-48">
+                                    <select id="log-status-filter" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="all">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="released">Released</option>
+                                        <option value="lifted">Lifted</option>
+                                        <option value="expired">Expired</option>
+                                        <option value="draft">Draft</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Results Summary -->
+                            <div class="text-sm text-gray-600">
+                                Showing <span id="log-results-count">5</span> of <span id="total-caveats-count">5</span> caveats
+                            </div>
+
+                            <!-- Caveats Table -->
+                            <div class="border rounded-lg overflow-hidden">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="p-3 text-left text-sm font-medium">Caveat Number</th>
+                                            <th class="p-3 text-left text-sm font-medium">File Number</th>
+                                            <th class="p-3 text-left text-sm font-medium">Petitioner</th>
+                                            <th class="p-3 text-left text-sm font-medium">Grantee</th>
+                                            <th class="p-3 text-left text-sm font-medium">Encumbrance Type</th>
+                                            <th class="p-3 text-left text-sm font-medium">Status</th>
+                                            <th class="p-3 text-left text-sm font-medium">Start Date</th>
+                                            <th class="p-3 text-left text-sm font-medium">Release Date</th>
+                                            <th class="p-3 text-left text-sm font-medium">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="caveats-table-body">
+                                        <!-- Table rows will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="no-caveats-found" class="text-center py-12 hidden">
+                                <i class="fa-regular fa-file-lines text-gray-400 text-4xl mb-4"></i>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No Caveats Found</h3>
+                                <p class="text-gray-600">No caveats match your current search criteria.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Caveat Modal -->
+    <div id="view-caveat-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-semibold">Caveat Details</h2>
+                <p class="text-sm text-gray-600">View detailed information about this caveat</p>
+            </div>
+            <div class="p-6 space-y-6" id="caveat-details">
+                <!-- Caveat details will be populated here -->
+            </div>
+            <div class="p-6 border-t flex justify-end space-x-2">
+                <button id="close-modal" class="px-4 py-2 border rounded-md">Close</button>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-md">Edit Caveat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg bg-white border hidden transition-opacity duration-300">
+        <div class="flex items-center">
+            <i id="toast-icon" class="mr-3"></i>
+            <div>
+                <h4 id="toast-title" class="font-semibold"></h4>
+                <p id="toast-description" class="text-sm text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const mockFileNumbers = [
+            {
+                value: "CON-COM-2024-001",
+                label: "CON-COM-2024-001",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "2" },
+            },
+            {
+                value: "CON-COM-2024-002",
+                label: "CON-COM-2024-002",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "3" },
+            },
+            {
+                value: "CON-COM-2019-296",
+                label: "CON-COM-2019-296",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "4" },
+            },
+            {
+                value: "RES-2024-001",
+                label: "RES-2024-001",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "5" },
+            },
+            {
+                value: "RES-2024-002",
+                label: "RES-2024-002",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "6" },
+            },
+            {
+                value: "RES-2015-4859",
+                label: "RES-2015-4859",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "7" },
+            },
+            {
+                value: "COM-2024-001",
+                label: "COM-2024-001",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "8" },
+            },
+            {
+                value: "COM-2024-002",
+                label: "COM-2024-002",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "9" },
+            },
+            {
+                value: "COM-91-249",
+                label: "COM-91-249",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "10" },
+            },
+            {
+                value: "IND-2024-001",
+                label: "IND-2024-001",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "11" },
+            },
+            {
+                value: "IND-2024-002",
+                label: "IND-2024-002",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "12" },
+            },
+            {
+                value: "AGR-2024-001",
+                label: "AGR-2024-001",
+                regParticulars: { serialNo: "1", pageNo: "1", volumeNo: "13" },
+            },
+        ];
+
+        let mockCaveats = [
+            {
+                id: "1",
+                caveatNumber: "CAV-2024-001",
+                encumbranceType: "Mortgage",
+                typeOfDeed: "Assignment",
+                fileNumber: "RES-2024-001",
+                location: "Plot 123, Block A, Kano Layout",
+                petitioner: "First Bank Nigeria Ltd",
+                grantee: "John Doe",
+                regParticulars: {
+                    serialNo: "1",
+                    pageNo: "1",
+                    volumeNo: "2",
+                },
+                startDate: "2024-01-15",
+                instructions: "Mortgage security for loan facility",
+                remarks: "Standard mortgage caveat",
+                status: "active",
+                createdBy: "Officer A",
+                dateCreated: "2024-01-15T10:30:00Z",
+            },
+            {
+                id: "2",
+                caveatNumber: "CAV-2024-002",
+                encumbranceType: "Court Order",
+                typeOfDeed: "Sublease",
+                fileNumber: "COM-2024-001",
+                location: "Plot 456, Block B, Kano Layout",
+                petitioner: "Kano State High Court",
+                grantee: "Jane Smith",
+                regParticulars: {
+                    serialNo: "1",
+                    pageNo: "1",
+                    volumeNo: "6",
+                },
+                startDate: "2024-02-10",
+                releaseDate: "2024-03-15",
+                instructions: "Court injunction pending litigation",
+                remarks: "Released after court settlement",
+                status: "released",
+                createdBy: "Officer B",
+                dateCreated: "2024-02-10T14:20:00Z",
+            },
+            {
+                id: "3",
+                caveatNumber: "CAV-2024-003",
+                encumbranceType: "Litigation",
+                typeOfDeed: "Gift",
+                fileNumber: "CON-COM-2019-296",
+                location: "Plot 789, Block C, Kano Layout",
+                petitioner: "ABC Legal Chambers",
+                grantee: "Michael Johnson",
+                regParticulars: {
+                    serialNo: "1",
+                    pageNo: "1",
+                    volumeNo: "9",
+                },
+                startDate: "2024-03-05",
+                instructions: "Property dispute litigation",
+                remarks: "Pending court resolution",
+                status: "active",
+                createdBy: "Officer C",
+                dateCreated: "2024-03-05T09:15:00Z",
+            },
+            {
+                id: "4",
+                caveatNumber: "CAV-2024-004",
+                encumbranceType: "Charge",
+                typeOfDeed: "Lease",
+                fileNumber: "RES-2024-002",
+                location: "Plot 321, Block D, Kano Layout",
+                petitioner: "Unity Bank Plc",
+                grantee: "Sarah Williams",
+                regParticulars: {
+                    serialNo: "1",
+                    pageNo: "1",
+                    volumeNo: "12",
+                },
+                startDate: "2024-03-20",
+                instructions: "Bank charge for overdraft facility",
+                remarks: "Active charge on property",
+                status: "active",
+                createdBy: "Officer D",
+                dateCreated: "2024-03-20T11:45:00Z",
+            },
+            {
+                id: "5",
+                caveatNumber: "CAV-2024-005",
+                encumbranceType: "Lien",
+                typeOfDeed: "Power of Attorney",
+                fileNumber: "COM-2024-002",
+                location: "Plot 654, Block E, Kano Layout",
+                petitioner: "Construction Company Ltd",
+                grantee: "David Brown",
+                regParticulars: {
+                    serialNo: "1",
+                    pageNo: "1",
+                    volumeNo: "15",
+                },
+                startDate: "2024-04-01",
+                releaseDate: "2024-04-20",
+                instructions: "Contractor's lien for unpaid work",
+                remarks: "Lifted after payment settlement",
+                status: "lifted",
+                createdBy: "Officer E",
+                dateCreated: "2024-04-01T08:30:00Z",
+            }
+        ];
+
+        // State variables
+        let caveats = [...mockCaveats];
+        let searchTerm = "";
+        let statusFilter = "all";
+        let selectedCaveat = null;
+        let activeTab = "place";
+        let isLoading = false;
+        let selectedFileNumber = "";
+
+        // Form data
+        const formData = {
+            encumbranceType: "",
+            typeOfDeed: "",
+            fileNumber: "",
+            location: "",
+            petitioner: "",
+            grantee: "",
+            startDate: "",
+            releaseDate: "",
+            instructions: "",
+            remarks: "",
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            initializeFileNumberSelector();
+            initializeEventListeners();
+            updateStats();
+            renderCaveatsList();
+            renderActiveCaveatsList();
+            renderCaveatsTable();
+            updateCaveatNumber();
+            updateDateCreated();
+        });
+
+        // Initialize tab functionality
+        function initializeTabs() {
+            const tabTriggers = document.querySelectorAll('.tab-trigger');
+            tabTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    setActiveTab(tab);
+                });
+            });
+        }
+
+        // Set active tab
+        function setActiveTab(tab) {
+            activeTab = tab;
+            
+            // Update UI
+            document.querySelectorAll('.tab-trigger').forEach(trigger => {
+                if (trigger.getAttribute('data-tab') === tab) {
+                    trigger.classList.add('bg-white', 'text-blue-600');
+                    trigger.classList.remove('text-gray-600');
+                } else {
+                    trigger.classList.remove('bg-white', 'text-blue-600');
+                    trigger.classList.add('text-gray-600');
+                }
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            // Update content based on tab
+            if (tab === 'place') {
+                updateCaveatNumber();
+                updateDateCreated();
+            }
+        }
+
+        // Initialize file number selector
+        function initializeFileNumberSelector() {
+            const trigger = document.getElementById('file-number-trigger');
+            const popover = document.getElementById('file-number-popover');
+            
+            trigger.addEventListener('click', function() {
+                popover.classList.toggle('hidden');
+                renderFileNumberOptions();
+            });
+            
+            // Close popover when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!trigger.contains(event.target) && !popover.contains(event.target)) {
+                    popover.classList.add('hidden');
+                }
+            });
+        }
+
+        // Render file number options
+        function renderFileNumberOptions() {
+            const container = document.querySelector('.file-options');
+            container.innerHTML = '';
+            
+            mockFileNumbers.forEach(file => {
+                const option = document.createElement('div');
+                option.className = 'p-2 text-sm cursor-pointer hover:bg-gray-100';
+                option.textContent = file.label;
+                option.addEventListener('click', function() {
+                    selectedFileNumber = file.value;
+                    document.getElementById('file-number-value').textContent = file.label;
+                    document.getElementById('file-number-popover').classList.add('hidden');
+                    
+                    // Update reg particulars
+                    const regParticulars = getRegParticularsForFile(file.value);
+                    document.getElementById('reg-particulars').textContent = 
+                        `${regParticulars.serialNo}/${regParticulars.pageNo}/${regParticulars.volumeNo}`;
+                });
+                
+                container.appendChild(option);
+            });
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Search input
+            document.getElementById('search-input').addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                renderCaveatsList();
+            });
+            
+            document.getElementById('lift-search-input').addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                renderActiveCaveatsList();
+            });
+            
+            document.getElementById('log-search-input').addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                renderCaveatsTable();
+            });
+            
+            // Status filter
+            document.getElementById('status-filter').addEventListener('change', function(e) {
+                statusFilter = e.target.value;
+                renderCaveatsList();
+            });
+            
+            document.getElementById('log-status-filter').addEventListener('change', function(e) {
+                statusFilter = e.target.value;
+                renderCaveatsTable();
+            });
+            
+            // Form inputs
+            document.getElementById('encumbrance-type').addEventListener('change', function(e) {
+                formData.encumbranceType = e.target.value;
+            });
+            
+            document.getElementById('deed-type').addEventListener('change', function(e) {
+                formData.typeOfDeed = e.target.value;
+            });
+            
+            document.getElementById('location').addEventListener('input', function(e) {
+                formData.location = e.target.value;
+            });
+            
+            document.getElementById('petitioner').addEventListener('input', function(e) {
+                formData.petitioner = e.target.value;
+            });
+            
+            document.getElementById('grantee').addEventListener('input', function(e) {
+                formData.grantee = e.target.value;
+            });
+            
+            document.getElementById('start-date').addEventListener('change', function(e) {
+                formData.startDate = e.target.value;
+            });
+            
+            document.getElementById('release-date').addEventListener('change', function(e) {
+                formData.releaseDate = e.target.value;
+            });
+            
+            document.getElementById('instructions').addEventListener('input', function(e) {
+                formData.instructions = e.target.value;
+            });
+            
+            document.getElementById('remarks').addEventListener('input', function(e) {
+                formData.remarks = e.target.value;
+            });
+            
+            // Lift form inputs
+            document.getElementById('lift-release-date').addEventListener('change', function(e) {
+                formData.releaseDate = e.target.value;
+            });
+            
+            document.getElementById('lift-instructions').addEventListener('input', function(e) {
+                formData.instructions = e.target.value;
+            });
+            
+            document.getElementById('lift-remarks').addEventListener('input', function(e) {
+                formData.remarks = e.target.value;
+            });
+            
+            // Buttons
+            document.getElementById('save-draft').addEventListener('click', function() {
+                handleFormSubmit('draft');
+            });
+            
+            document.getElementById('place-caveat').addEventListener('click', function() {
+                handleFormSubmit('submit');
+            });
+            
+            document.getElementById('generate-acknowledgement').addEventListener('click', function() {
+                handleGenerateAcknowledgement();
+            });
+            
+            document.getElementById('reset-form').addEventListener('click', function() {
+                handleFormReset();
+            });
+            
+            document.getElementById('save-lift-draft').addEventListener('click', function() {
+                handleFormSubmit('draft');
+            });
+            
+            document.getElementById('lift-caveat').addEventListener('click', function() {
+                handleFormSubmit('submit');
+            });
+            
+            document.getElementById('generate-lift-acknowledgement').addEventListener('click', function() {
+                handleGenerateAcknowledgement();
+            });
+            
+            document.getElementById('reset-lift-form').addEventListener('click', function() {
+                handleFormReset();
+            });
+            
+            // Modal
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('view-caveat-modal').classList.add('hidden');
+            });
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = caveats.length;
+            const active = caveats.filter(c => c.status === 'active').length;
+            const released = caveats.filter(c => c.status === 'released').length;
+            const draft = caveats.filter(c => c.status === 'draft').length;
+            
+            document.getElementById('total-caveats').textContent = total;
+            document.getElementById('active-caveats').textContent = active;
+            document.getElementById('released-caveats').textContent = released;
+            document.getElementById('draft-caveats').textContent = draft;
+        }
+
+        // Render caveats list for search
+        function renderCaveatsList() {
+            const container = document.getElementById('search-results');
+            const countElement = document.getElementById('search-results-count');
+            
+            const filteredCaveats = filterCaveats();
+            
+            countElement.textContent = filteredCaveats.length;
+            container.innerHTML = '';
+            
+            filteredCaveats.forEach(caveat => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors';
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium">${caveat.caveatNumber}</span>
+                            ${getStatusBadge(caveat.status)}
+                        </div>
+                        <p class="text-xs text-gray-600">${caveat.fileNumber}</p>
+                        <p class="text-xs text-gray-600">${caveat.petitioner}</p>
+                    </div>
+                `;
+                
+                card.addEventListener('click', function() {
+                    populateFormFromCaveat(caveat);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Render active caveats list for lifting
+        function renderActiveCaveatsList() {
+            const container = document.getElementById('active-caveats-list');
+            const countElement = document.getElementById('active-caveats-count');
+            
+            const activeCaveats = caveats.filter(c => c.status === 'active');
+            const filteredCaveats = activeCaveats.filter(caveat => {
+                return caveat.caveatNumber.toLowerCase().includes(searchTerm) ||
+                       caveat.fileNumber.toLowerCase().includes(searchTerm) ||
+                       caveat.petitioner.toLowerCase().includes(searchTerm) ||
+                       caveat.grantee.toLowerCase().includes(searchTerm) ||
+                       caveat.location.toLowerCase().includes(searchTerm) ||
+                       caveat.encumbranceType.toLowerCase().includes(searchTerm) ||
+                       caveat.typeOfDeed.toLowerCase().includes(searchTerm);
+            });
+            
+            countElement.textContent = filteredCaveats.length;
+            container.innerHTML = '';
+            
+            filteredCaveats.forEach(caveat => {
+                const isSelected = selectedCaveat && selectedCaveat.id === caveat.id;
+                
+                const card = document.createElement('div');
+                card.className = `bg-white border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`;
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium">${caveat.caveatNumber}</span>
+                            ${getStatusBadge(caveat.status)}
+                        </div>
+                        <p class="text-xs text-gray-600">${caveat.fileNumber}</p>
+                        <p class="text-xs text-gray-600">${caveat.petitioner}</p>
+                    </div>
+                `;
+                
+                card.addEventListener('click', function() {
+                    selectedCaveat = caveat;
+                    renderActiveCaveatsList();
+                    showSelectedCaveatInfo(caveat);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Render caveats table
+        function renderCaveatsTable() {
+            const container = document.getElementById('caveats-table-body');
+            const countElement = document.getElementById('log-results-count');
+            const totalElement = document.getElementById('total-caveats-count');
+            const noResultsElement = document.getElementById('no-caveats-found');
+            
+            const filteredCaveats = filterCaveats();
+            
+            countElement.textContent = filteredCaveats.length;
+            totalElement.textContent = caveats.length;
+            container.innerHTML = '';
+            
+            if (filteredCaveats.length === 0) {
+                noResultsElement.classList.remove('hidden');
+                return;
+            }
+            
+            noResultsElement.classList.add('hidden');
+            
+            filteredCaveats.forEach(caveat => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 border-b';
+                row.innerHTML = `
+                    <td class="p-3 font-medium">${caveat.caveatNumber}</td>
+                    <td class="p-3">${caveat.fileNumber}</td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-user text-gray-400"></i>
+                            <span class="truncate max-w-32" title="${caveat.petitioner}">${caveat.petitioner}</span>
+                        </div>
+                    </td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-building text-gray-400"></i>
+                            <span class="truncate max-w-32" title="${caveat.grantee}">${caveat.grantee}</span>
+                        </div>
+                    </td>
+                    <td class="p-3">${caveat.encumbranceType}</td>
+                    <td class="p-3">${getStatusBadge(caveat.status)}</td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-calendar text-gray-400"></i>
+                            ${caveat.startDate}
+                        </div>
+                    </td>
+                    <td class="p-3">
+                        ${caveat.releaseDate ? `
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-calendar text-gray-400"></i>
+                                ${caveat.releaseDate}
+                            </div>
+                        ` : '<span class="text-gray-400">-</span>'}
+                    </td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <button class="view-caveat p-1 text-gray-600 hover:text-blue-600" data-id="${caveat.id}">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                            <button class="p-1 text-gray-600 hover:text-blue-600">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                container.appendChild(row);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-caveat').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const caveat = caveats.find(c => c.id === id);
+                    if (caveat) {
+                        showCaveatDetails(caveat);
+                    }
+                });
+            });
+        }
+
+        // Filter caveats based on search term and status
+        function filterCaveats() {
+            return caveats.filter(caveat => {
+                const matchesSearch = 
+                    caveat.caveatNumber.toLowerCase().includes(searchTerm) ||
+                    caveat.fileNumber.toLowerCase().includes(searchTerm) ||
+                    caveat.petitioner.toLowerCase().includes(searchTerm) ||
+                    caveat.grantee.toLowerCase().includes(searchTerm) ||
+                    caveat.location.toLowerCase().includes(searchTerm) ||
+                    caveat.encumbranceType.toLowerCase().includes(searchTerm) ||
+                    caveat.typeOfDeed.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = statusFilter === "all" || caveat.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+        }
+
+        // Get status badge HTML
+        function getStatusBadge(status) {
+            switch (status) {
+                case "active":
+                    return `<span class="status-badge badge-active"><i class="fa-regular fa-circle-check"></i>Active</span>`;
+                case "released":
+                    return `<span class="status-badge badge-released"><i class="fa-regular fa-file-check"></i>Released</span>`;
+                case "lifted":
+                    return `<span class="status-badge badge-lifted"><i class="fa-solid fa-rotate-left"></i>Lifted</span>`;
+                case "expired":
+                    return `<span class="status-badge badge-expired"><i class="fa-regular fa-circle-xmark"></i>Expired</span>`;
+                case "draft":
+                    return `<span class="status-badge badge-draft"><i class="fa-regular fa-file-lines"></i>Draft</span>`;
+                default:
+                    return `<span class="status-badge badge-draft">${status}</span>`;
+            }
+        }
+
+        // Populate form from caveat data
+        function populateFormFromCaveat(caveat) {
+            document.getElementById('encumbrance-type').value = caveat.encumbranceType.toLowerCase().replace(' ', '-');
+            document.getElementById('deed-type').value = caveat.typeOfDeed.toLowerCase().replace(' ', '-');
+            document.getElementById('file-number-value').textContent = caveat.fileNumber;
+            document.getElementById('location').value = caveat.location;
+            document.getElementById('petitioner').value = caveat.petitioner;
+            document.getElementById('grantee').value = caveat.grantee;
+            document.getElementById('start-date').value = caveat.startDate;
+            document.getElementById('release-date').value = caveat.releaseDate || '';
+            document.getElementById('instructions').value = caveat.instructions;
+            document.getElementById('remarks').value = caveat.remarks;
+            
+            // Update reg particulars
+            const regParticulars = getRegParticularsForFile(caveat.fileNumber);
+            document.getElementById('reg-particulars').textContent = 
+                `${regParticulars.serialNo}/${regParticulars.pageNo}/${regParticulars.volumeNo}`;
+            
+            // Update form data object
+            formData.encumbranceType = caveat.encumbranceType;
+            formData.typeOfDeed = caveat.typeOfDeed;
+            formData.fileNumber = caveat.fileNumber;
+            formData.location = caveat.location;
+            formData.petitioner = caveat.petitioner;
+            formData.grantee = caveat.grantee;
+            formData.startDate = caveat.startDate;
+            formData.releaseDate = caveat.releaseDate || '';
+            formData.instructions = caveat.instructions;
+            formData.remarks = caveat.remarks;
+        }
+
+        // Show selected caveat info for lifting
+        function showSelectedCaveatInfo(caveat) {
+            const container = document.getElementById('selected-caveat-info');
+            const noCaveatElement = document.getElementById('no-caveat-selected');
+            const liftingDetails = document.getElementById('lifting-details');
+            
+            noCaveatElement.classList.add('hidden');
+            container.classList.remove('hidden');
+            liftingDetails.classList.remove('hidden');
+            
+            container.innerHTML = `
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">Selected Caveat for Lifting</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><span class="font-medium">Caveat Number:</span> ${caveat.caveatNumber}</div>
+                        <div><span class="font-medium">File Number:</span> ${caveat.fileNumber}</div>
+                        <div><span class="font-medium">Petitioner:</span> ${caveat.petitioner}</div>
+                        <div><span class="font-medium">Grantee:</span> ${caveat.grantee}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Set today's date as release date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('lift-release-date').value = today;
+            formData.releaseDate = today;
+        }
+
+        // Show caveat details in modal
+        function showCaveatDetails(caveat) {
+            const container = document.getElementById('caveat-details');
+            const modal = document.getElementById('view-caveat-modal');
+            
+            container.innerHTML = `
+                <!-- Section A: Caveat Information -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">Section A: Caveat Information</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Caveat Number</label>
+                            <p class="text-sm font-semibold">${caveat.caveatNumber}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Status</label>
+                            <div class="mt-1">${getStatusBadge(caveat.status)}</div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Encumbrance Type</label>
+                            <p class="text-sm">${caveat.encumbranceType}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Type of Deed</label>
+                            <p class="text-sm">${caveat.typeOfDeed}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">File Number</label>
+                            <p class="text-sm">${caveat.fileNumber}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Location</label>
+                            <p class="text-sm">${caveat.location}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section B: Parties Involved -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">Section B: Parties Involved</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Petitioner</label>
+                            <p class="text-sm">${caveat.petitioner}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Grantee</label>
+                            <p class="text-sm">${caveat.grantee}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section C: Registration & Tracking -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">Section C: Registration & Tracking</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Registration Particulars</label>
+                            <div class="text-sm space-y-1">
+                                <p class="font-mono">${caveat.regParticulars.serialNo}/${caveat.regParticulars.pageNo}/${caveat.regParticulars.volumeNo}</p>
+                                <div class="text-xs text-gray-500">
+                                    <p>Serial No: ${caveat.regParticulars.serialNo}</p>
+                                    <p>Page No: ${caveat.regParticulars.pageNo}</p>
+                                    <p>Volume No: ${caveat.regParticulars.volumeNo}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Start Date</label>
+                            <p class="text-sm">${caveat.startDate}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Release Date</label>
+                            <p class="text-sm">${caveat.releaseDate || "Not released"}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section D: Administrative Details -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">Section D: Administrative Details</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Instructions</label>
+                            <p class="text-sm">${caveat.instructions}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Remarks</label>
+                            <p class="text-sm">${caveat.remarks}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Metadata -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">System Metadata</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Created By</label>
+                            <p class="text-sm">${caveat.createdBy}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Date Created</label>
+                            <p class="text-sm">${new Date(caveat.dateCreated).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Handle form submission
+        function handleFormSubmit(action) {
+            setIsLoading(true);
+
+            try {
+                if (activeTab === "place") {
+                    // Place new caveat
+                    if (action === "submit") {
+                        const requiredFields = [
+                            "encumbranceType",
+                            "typeOfDeed",
+                            "fileNumber",
+                            "location",
+                            "petitioner",
+                            "grantee",
+                            "startDate",
+                        ];
+                        const missingFields = requiredFields.filter(field => !formData[field]);
+
+                        if (missingFields.length > 0) {
+                            showToast("Validation Error", `Please fill in all required fields: ${missingFields.join(", ")}`, "error");
+                            setIsLoading(false);
+                            return;
+                        }
+                    }
+
+                    // Get reg particulars based on selected file number
+                    const selectedFile = mockFileNumbers.find(file => file.value === formData.fileNumber);
+                    const regParticulars = selectedFile?.regParticulars || generateRegParticulars();
+
+                    // Create new caveat
+                    const newCaveat = {
+                        id: (caveats.length + 1).toString(),
+                        caveatNumber: generateNextCaveatNumber(),
+                        encumbranceType: formData.encumbranceType,
+                        typeOfDeed: formData.typeOfDeed,
+                        fileNumber: formData.fileNumber,
+                        location: formData.location,
+                        petitioner: formData.petitioner,
+                        grantee: formData.grantee,
+                        regParticulars,
+                        startDate: formData.startDate,
+                        instructions: formData.instructions,
+                        remarks: formData.remarks,
+                        status: action === "draft" ? "draft" : "active",
+                        createdBy: "Current User",
+                        dateCreated: new Date().toISOString(),
+                    };
+
+                    // Simulate API call
+                    setTimeout(() => {
+                        // Update caveats list
+                        caveats.push(newCaveat);
+
+                        showToast(
+                            action === "draft" ? "Draft Saved" : "Caveat Placed",
+                            `Caveat ${newCaveat.caveatNumber} has been ${action === "draft" ? "saved as draft" : "successfully placed"}.`,
+                            "success"
+                        );
+
+                        // Reset form if submitted
+                        if (action === "submit") {
+                            handleFormReset();
+                        }
+
+                        // Update UI
+                        updateStats();
+                        renderCaveatsList();
+                        renderActiveCaveatsList();
+                        renderCaveatsTable();
+                        updateCaveatNumber();
+                        
+                        setIsLoading(false);
+                    }, 2000);
+                } else {
+                    // Lift existing caveat
+                    if (!selectedCaveat) {
+                        showToast("No Caveat Selected", "Please select an active caveat from the left panel to lift.", "error");
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    // Update the selected caveat status to lifted
+                    const updatedCaveats = caveats.map(caveat => 
+                        caveat.id === selectedCaveat.id
+                            ? {
+                                ...caveat,
+                                status: "lifted",
+                                releaseDate: new Date().toISOString().split("T")[0],
+                                remarks: formData.remarks || caveat.remarks,
+                                instructions: formData.instructions || caveat.instructions,
+                            }
+                            : caveat
+                    );
+
+                    // Simulate API call
+                    setTimeout(() => {
+                        caveats = updatedCaveats;
+
+                        showToast(
+                            "Caveat Lifted",
+                            `Caveat ${selectedCaveat.caveatNumber} has been successfully lifted.`,
+                            "success"
+                        );
+
+                        handleFormReset();
+
+                        // Update UI
+                        updateStats();
+                        renderCaveatsList();
+                        renderActiveCaveatsList();
+                        renderCaveatsTable();
+                        
+                        setIsLoading(false);
+                    }, 2000);
+                }
+            } catch (error) {
+                showToast("Error", "An error occurred while processing the caveat. Please try again.", "error");
+                setIsLoading(false);
+            }
+        }
+
+        // Handle generate acknowledgement
+        function handleGenerateAcknowledgement() {
+            setIsLoading(true);
+
+            try {
+                // Validate that we have enough data to generate acknowledgement
+                if (activeTab === "place") {
+                    if (!formData.fileNumber || !formData.petitioner || !formData.grantee) {
+                        showToast("Missing Information", "Please fill in File Number, Petitioner, and Grantee to generate acknowledgement sheet.", "error");
+                        setIsLoading(false);
+                        return;
+                    }
+                } else {
+                    if (!selectedCaveat) {
+                        showToast("No Caveat Selected", "Please select a caveat to generate acknowledgement sheet.", "error");
+                        setIsLoading(false);
+                        return;
+                    }
+                }
+
+                // Simulate acknowledgement generation
+                setTimeout(() => {
+                    // Create acknowledgement data
+                    const acknowledgementData =
+                        activeTab === "place"
+                            ? {
+                                caveatNumber: generateNextCaveatNumber(),
+                                fileNumber: formData.fileNumber,
+                                petitioner: formData.petitioner,
+                                grantee: formData.grantee,
+                                encumbranceType: formData.encumbranceType,
+                                typeOfDeed: formData.typeOfDeed,
+                                location: formData.location,
+                                regParticulars:
+                                    mockFileNumbers.find(file => file.value === formData.fileNumber)?.regParticulars ||
+                                    generateRegParticulars(),
+                                dateGenerated: new Date().toLocaleDateString(),
+                                generatedBy: "Current User",
+                                action: "Placement",
+                            }
+                            : {
+                                caveatNumber: selectedCaveat.caveatNumber,
+                                fileNumber: selectedCaveat.fileNumber,
+                                petitioner: selectedCaveat.petitioner,
+                                grantee: selectedCaveat.grantee,
+                                encumbranceType: selectedCaveat.encumbranceType,
+                                typeOfDeed: selectedCaveat.typeOfDeed,
+                                location: selectedCaveat.location,
+                                regParticulars: selectedCaveat.regParticulars,
+                                dateGenerated: new Date().toLocaleDateString(),
+                                generatedBy: "Current User",
+                                action: "Lifting",
+                            };
+
+                    // Generate PDF
+                    const doc = new jspdf.jsPDF();
+
+                    // Header
+                    doc.setFontSize(20);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`CAVEAT ${acknowledgementData.action.toUpperCase()} ACKNOWLEDGEMENT SHEET`, 105, 30, { align: "center" });
+
+                    // Subheader
+                    doc.setFontSize(14);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("Kano Land Administration and Enterprise System (KLAES)", 105, 45, { align: "center" });
+
+                    // Line separator
+                    doc.line(20, 55, 190, 55);
+
+                    // Content
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+
+                    let yPosition = 75;
+                    const lineHeight = 8;
+
+                    // Caveat Information
+                    doc.text("CAVEAT INFORMATION", 20, yPosition);
+                    yPosition += lineHeight + 5;
+
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Action: ${acknowledgementData.action}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Caveat Number: ${acknowledgementData.caveatNumber}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`File Number: ${acknowledgementData.fileNumber}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Encumbrance Type: ${acknowledgementData.encumbranceType}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Type of Deed: ${acknowledgementData.typeOfDeed}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Location: ${acknowledgementData.location}`, 25, yPosition);
+                    yPosition += lineHeight + 10;
+
+                    // Parties Information
+                    doc.setFont("helvetica", "bold");
+                    doc.text("PARTIES INVOLVED", 20, yPosition);
+                    yPosition += lineHeight + 5;
+
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Petitioner: ${acknowledgementData.petitioner}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Grantee: ${acknowledgementData.grantee}`, 25, yPosition);
+                    yPosition += lineHeight + 10;
+
+                    // Registration Particulars
+                    doc.setFont("helvetica", "bold");
+                    doc.text("REGISTRATION PARTICULARS", 20, yPosition);
+                    yPosition += lineHeight + 5;
+
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Serial No: ${acknowledgementData.regParticulars.serialNo}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Page No: ${acknowledgementData.regParticulars.pageNo}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Volume No: ${acknowledgementData.regParticulars.volumeNo}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(
+                        `Format: ${acknowledgementData.regParticulars.serialNo}/${acknowledgementData.regParticulars.pageNo}/${acknowledgementData.regParticulars.volumeNo}`,
+                        25,
+                        yPosition
+                    );
+                    yPosition += lineHeight + 15;
+
+                    // System Information
+                    doc.setFont("helvetica", "bold");
+                    doc.text("SYSTEM INFORMATION", 20, yPosition);
+                    yPosition += lineHeight + 5;
+
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Date Generated: ${acknowledgementData.dateGenerated}`, 25, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Generated By: ${acknowledgementData.generatedBy}`, 25, yPosition);
+                    yPosition += lineHeight + 20;
+
+                    // Footer
+                    doc.line(20, yPosition, 190, yPosition);
+                    yPosition += 10;
+                    doc.setFontSize(10);
+                    doc.text(`This is a caveat ${acknowledgementData.action.toLowerCase()} acknowledgement sheet.`, 105, yPosition, {
+                        align: "center",
+                    });
+                    yPosition += 5;
+                    doc.text("No signature is required.", 105, yPosition, { align: "center" });
+
+                    // Save the PDF
+                    doc.save(
+                        `caveat-${acknowledgementData.action.toLowerCase()}-acknowledgement-${acknowledgementData.caveatNumber}.pdf`
+                    );
+
+                    showToast(
+                        "Acknowledgement Generated",
+                        `Acknowledgement sheet for caveat ${acknowledgementData.action.toLowerCase()} ${acknowledgementData.caveatNumber} has been generated and downloaded as PDF.`,
+                        "success"
+                    );
+                    
+                    setIsLoading(false);
+                }, 1500);
+            } catch (error) {
+                showToast("Error", "An error occurred while generating the acknowledgement sheet. Please try again.", "error");
+                setIsLoading(false);
+            }
+        }
+
+        // Handle form reset
+        function handleFormReset() {
+            // Reset form data
+            formData.encumbranceType = "";
+            formData.typeOfDeed = "";
+            formData.fileNumber = "";
+            formData.location = "";
+            formData.petitioner = "";
+            formData.grantee = "";
+            formData.startDate = "";
+            formData.releaseDate = "";
+            formData.instructions = "";
+            formData.remarks = "";
+            
+            // Reset form fields
+            document.getElementById('encumbrance-type').value = "";
+            document.getElementById('deed-type').value = "";
+            document.getElementById('file-number-value').textContent = "Search and select file number...";
+            document.getElementById('location').value = "";
+            document.getElementById('petitioner').value = "";
+            document.getElementById('grantee').value = "";
+            document.getElementById('start-date').value = "";
+            document.getElementById('release-date').value = "";
+            document.getElementById('instructions').value = "";
+            document.getElementById('remarks').value = "";
+            document.getElementById('reg-particulars').textContent = "Select file number";
+            
+            // Reset lift form
+            document.getElementById('lift-release-date').value = "";
+            document.getElementById('lift-instructions').value = "";
+            document.getElementById('lift-remarks').value = "";
+            
+            // Reset selected caveat
+            selectedCaveat = null;
+            
+            // Update UI for lift tab
+            document.getElementById('no-caveat-selected').classList.remove('hidden');
+            document.getElementById('selected-caveat-info').classList.add('hidden');
+            document.getElementById('lifting-details').classList.add('hidden');
+            
+            showToast("Form Reset", "All form fields have been cleared.", "success");
+        }
+
+        // Generate next caveat number
+        function generateNextCaveatNumber() {
+            const year = new Date().getFullYear();
+            const nextNumber = (caveats.length + 1).toString().padStart(3, "0");
+            return `CAV-${year}-${nextNumber}`;
+        }
+
+        // Update caveat number field
+        function updateCaveatNumber() {
+            document.getElementById('caveat-number').value = generateNextCaveatNumber();
+        }
+
+        // Update date created field
+        function updateDateCreated() {
+            document.getElementById('date-created').value = new Date().toLocaleDateString();
+        }
+
+        // Generate next reg particulars based on file number
+        function generateRegParticulars() {
+            const nextSerial = caveats.length + 1;
+            return {
+                serialNo: "1",
+                pageNo: "1",
+                volumeNo: (nextSerial + 1).toString(),
+            };
+        }
+
+        // Get reg particulars for selected file number
+        function getRegParticularsForFile(fileNumber) {
+            const selectedFile = mockFileNumbers.find(file => file.value === fileNumber);
+            return selectedFile?.regParticulars || generateRegParticulars();
+        }
+
+        // Set loading state
+        function setIsLoading(loading) {
+            isLoading = loading;
+            
+            // Update button states
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (button.id !== 'close-modal') {
+                    button.disabled = loading;
+                }
+            });
+            
+            // Show/hide loading indicators
+            const loadingIcons = document.querySelectorAll('.loading-icon');
+            loadingIcons.forEach(icon => {
+                icon.classList.toggle('hidden', !loading);
+            });
+            
+            const normalIcons = document.querySelectorAll('.normal-icon');
+            normalIcons.forEach(icon => {
+                icon.classList.toggle('hidden', loading);
+            });
+        }
+
+        // Show toast notification
+        function showToast(title, description, variant = "default") {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastTitle = document.getElementById('toast-title');
+            const toastDescription = document.getElementById('toast-description');
+            
+            // Set content
+            toastTitle.textContent = title;
+            toastDescription.textContent = description;
+            
+            // Set style based on variant
+            if (variant === "error") {
+                toast.classList.add('border-red-200', 'bg-red-50');
+                toastIcon.className = 'fa-solid fa-circle-exclamation text-red-600';
+            } else {
+                toast.classList.add('border-green-200', 'bg-green-50');
+                toastIcon.className = 'fa-solid fa-circle-check text-green-600';
+            }
+            
+            // Show toast
+            toast.classList.remove('hidden');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('border-red-200', 'bg-red-50', 'border-green-200', 'bg-green-50');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
