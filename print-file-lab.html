@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Print File Labels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+      
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .label-format-option.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .orientation-option.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            /* make the print section printable */
+            #printSection, #printSection * {
+                visibility: visible;
+            }
+            #printSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                display: block !important;
+            }
+            .label-container {
+                page-break-inside: avoid;
+            }
+            .no-print {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            /* One A4 page with small margins */
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+            /* Ensure the print section actually shows and clamps to one page */
+            #printSection {
+                display: block !important;
+                width: 210mm; /* page width */
+                max-width: 210mm;
+                overflow: hidden; /* hide overflow to keep one page */
+            }
+            /* The page frame (content gets scaled inside this) */
+            .print-page {
+                width: calc(210mm - 16mm); /* page width - 2*margins */
+                height: calc(297mm - 16mm); /* page height - 2*margins */
+                overflow: hidden;
+                position: relative;
+                margin: 0 auto;
+            }
+            .label-container canvas {
+                width: 60px !important;
+                height: 60px !important;
+            }
+            /* Specific styles for 30-in-1 template */
+            .print-30-in-1 {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(10, 1fr);
+                gap: 1mm;
+                width: 100%;
+                height: 100%;
+            }
+            .print-label {
+                border: 0.5px solid #ccc;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 1mm;
+                font-size: 10pt;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            .print-label canvas {
+                width: 60px !important;
+                height: 50px !important;
+                margin-bottom: 1mm;
+            }
+            .print-label p {
+                margin: 0;
+                line-height: 1.1;
+            }
+            .file-number {
+                font-weight: bold;
+            }
+            /* Added styles for standard print layout */
+            .print-standard {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4mm;
+                width: 100%;
+                height: 100%;
+            }
+            .print-standard-label {
+                border: 1px solid #ccc;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 4mm;
+                font-size: 12pt;
+                text-align: center;
+                box-sizing: border-box;
+                min-height: 80mm;
+            }
+            .print-standard-label canvas {
+                width: 120px !important;
+                height: 60px !important;
+                margin-bottom: 2mm;
+            }
+            .print-standard-label p {
+                margin: 2px 0;
+                line-height: 1.2;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto py-6 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold">Print File Labels</h1>
+                <p class="text-gray-600 mt-1">
+                    Generate and print labels for physical files
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button
+                    id="historyBtn"
+                    class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                    <i data-lucide="history" class="h-4 w-4"></i>
+                </button>
+                <button
+                    id="resetBtn"
+                    class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                    <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                </button>
+                <button
+                    id="printBtn"
+                    class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                    Print Labels
+                </button>
+            </div>
+        </div>
+
+         <!-- Stats Cards  -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg border p-6">
+                <div class="pb-2">
+                    <h3 class="text-sm font-medium text-gray-700">Available Files</h3>
+                </div>
+                <div class="text-2xl font-bold" id="availableFilesCount">5</div>
+                <p class="text-xs text-gray-500 mt-1">
+                    Files available for label printing
+                </p>
+            </div>
+            <div class="bg-white rounded-lg border p-6">
+                <div class="pb-2">
+                    <h3 class="text-sm font-medium text-gray-700">Selected Files</h3>
+                </div>
+                <div class="text-2xl font-bold" id="selectedFilesCount">0</div>
+                <p class="text-xs text-gray-500 mt-1">
+                    Files selected for label printing
+                </p>
+            </div>
+            <div class="bg-white rounded-lg border p-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-semibold">Printer Status</h3>
+                        <p class="text-sm text-gray-600">Label printer status</p>
+                    </div>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                        >Online</span
+                    >
+                </div>
+                <div class="text-2xl font-bold flex items-center mt-2">Ready</div>
+            </div>
+        </div>
+
+         <!-- Print History (Hidden by default)  -->
+        <div
+            id="printHistory"
+            class="bg-white rounded-lg border mb-6"
+            style="display: none"
+        >
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-semibold">Print History</h3>
+                        <p class="text-sm text-gray-600">
+                            Recent label printing activity
+                        </p>
+                    </div>
+                    <button
+                        id="closeHistoryBtn"
+                        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="rounded-md border">
+                    <div class="p-3 bg-gray-50 grid grid-cols-5 gap-4">
+                        <div class="text-sm font-medium">ID</div>
+                        <div class="text-sm font-medium">Date</div>
+                        <div class="text-sm font-medium">Files</div>
+                        <div class="text-sm font-medium">Template</div>
+                        <div class="text-sm font-medium">User</div>
+                    </div>
+                    <div class="divide-y">
+                        <div class="p-3 grid grid-cols-5 gap-4">
+                            <div class="text-sm">PRINT-001</div>
+                            <div class="text-sm">2023-06-15</div>
+                            <div class="text-sm">5</div>
+                            <div class="text-sm">Standard</div>
+                            <div class="text-sm">Admin</div>
+                        </div>
+                        <div class="p-3 grid grid-cols-5 gap-4">
+                            <div class="text-sm">PRINT-002</div>
+                            <div class="text-sm">2023-06-14</div>
+                            <div class="text-sm">3</div>
+                            <div class="text-sm">Compact</div>
+                            <div class="text-sm">Admin</div>
+                        </div>
+                        <div class="p-3 grid grid-cols-5 gap-4">
+                            <div class="text-sm">PRINT-003</div>
+                            <div class="text-sm">2023-06-12</div>
+                            <div class="text-sm">10</div>
+                            <div class="text-sm">QR Code</div>
+                            <div class="text-sm">Supervisor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Tabs  -->
+        <div class="w-full">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8">
+                    <button
+                        class="tab-btn active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600"
+                        data-tab="files"
+                    >
+                        Select Files
+                    </button>
+                    <button
+                        class="tab-btn border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="settings"
+                    >
+                        Label Settings
+                    </button>
+                    <button
+                        class="tab-btn border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="preview"
+                    >
+                        Preview & Print
+                    </button>
+                </nav>
+            </div>
+
+             <!-- Files Tab  -->
+            <div id="files-tab" class="tab-content active mt-6">
+                <div class="bg-white rounded-lg border">
+                    <div class="p-6 border-b">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-lg font-semibold">Select Files for Labels</h3>
+                                <p class="text-sm text-gray-600">
+                                    Choose files to generate and print labels
+                                </p>
+                            </div>
+                            <div class="relative w-full md:w-64">
+                                <i
+                                    data-lucide="search"
+                                    class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"
+                                ></i>
+                                <input
+                                    type="search"
+                                    id="searchInput"
+                                    placeholder="Search files..."
+                                    class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                         Batch Mode Controls 
+                        <div class="mb-4 flex items-center gap-4 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="batchMode"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <label for="batchMode" class="text-sm font-medium"
+                                    >Batch Mode</label
+                                >
+                            </div>
+                            <div
+                                id="batchControls"
+                                class="flex items-center gap-2 flex-wrap"
+                                style="display: none"
+                            >
+                                <label class="text-sm whitespace-nowrap">Prefix:</label>
+                                <select
+                                    id="batchPrefix"
+                                    class="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                                >
+                                    <option value="RES">RES - Residential</option>
+                                    <option value="COM">COM - Commercial</option>
+                                    <option value="IND">IND - Industrial</option>
+                                    <option value="CON">CON - Construction</option>
+                                    <option value="AGR">AGR - Agricultural</option>
+                                    <option value="GOV">GOV - Government</option>
+                                </select>
+                                <label class="text-sm whitespace-nowrap">Year:</label>
+                                <input
+                                    type="number"
+                                    id="batchYear"
+                                    min="2000"
+                                    max="2099"
+                                    class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm"
+                                />
+                                <label class="text-sm whitespace-nowrap">Start:</label>
+                                <input
+                                    type="number"
+                                    id="batchStart"
+                                    min="1"
+                                    class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm"
+                                    value="1"
+                                />
+                                <label class="text-sm whitespace-nowrap">Count:</label>
+                                <input
+                                    type="number"
+                                    id="batchCount"
+                                    min="1"
+                                    class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm"
+                                    value="30"
+                                />
+                                <button
+                                    id="generateBatchBtn"
+                                    class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                >
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+
+                         <!-- File List  -->
+                        <div id="fileList" class="rounded-md border">
+                            <div class="p-3 bg-gray-50 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="selectAll"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <label for="selectAll" class="text-sm font-medium"
+                                        >Select All</label
+                                    >
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-gray-500" id="selectionStatus"
+                                        >0 of 5 selected</span
+                                    >
+                                </div>
+                            </div>
+                            <div class="divide-y max-h-96 overflow-y-auto" id="fileListContent">
+                                 Files will be populated by JavaScript 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t flex justify-between">
+                        <button
+                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            Back to Indexing
+                        </button>
+                        <div class="flex gap-2">
+                            <button
+                                id="duplicateBtn"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 gap-2 inline-flex items-center"
+                            >
+                                <i data-lucide="copy" class="h-4 w-4"></i>
+                                Duplicate
+                            </button>
+                            <button
+                                id="continueToSettingsBtn"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 gap-2 inline-flex items-center"
+                            >
+                                <i data-lucide="settings" class="h-4 w-4"></i>
+                                Continue to Label Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Settings Tab  -->
+            <div id="settings-tab" class="tab-content mt-6">
+                <div class="bg-white rounded-lg border">
+                    <div class="p-6 border-b">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-semibold">Label Settings</h3>
+                                <p class="text-sm text-gray-600">
+                                    Configure label printing options
+                                </p>
+                            </div>
+                            <button
+                                id="advancedToggle"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            >
+                                Show Advanced
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label
+                                        for="labelTemplate"
+                                        class="block text-sm font-medium text-gray-700"
+                                        >Label Template</label
+                                    >
+                                    <select
+                                        id="labelTemplate"
+                                        class="mt-1.5 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="30-in-1">
+                                            Labels with File No and Shelf/rack
+                                        </option>
+                                         <!-- CHANGE> Disabled all other label template options -->
+                                        <!-- <option value="standard" disabled>
+                                            Standard - Standard label with barcode and text
+                                        </option>
+                                        <option value="compact" disabled>
+                                            Compact - Compact label with minimal information
+                                        </option>
+                                        <option value="detailed" disabled>
+                                            Detailed - Detailed label with all file information
+                                        </option>
+                                        <option value="qrcode" disabled>
+                                            QR Code - Label with QR code for scanning
+                                        </option>
+                                        <option value="custom" disabled>
+                                            Custom - Custom label template
+                                        </option> -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        for="labelSize"
+                                        class="block text-sm font-medium text-gray-700"
+                                        >Label Size</label
+                                    >
+                                    <select
+                                        id="labelSize"
+                                        class="mt-1.5 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="30-in-1">
+                                            A4 Template (1" x 0.8")
+                                        </option>
+                                         <!-- CHANGE> Disabled all other label size options -->
+                                        <!-- <option value="small" disabled>Small (2.5" x 1")</option>
+                                        <option value="standard" disabled>Standard (3" x 2")</option>
+                                        <option value="large" disabled>Large (4" x 3")</option>
+                                        <option value="custom" disabled>Custom Size</option> -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                                        >Label Format</label
+                                    >
+                                    <div class="grid grid-cols-2 gap-4">
+                                         <!-- CHANGE> Disabled barcode option by adding opacity and pointer-events-none -->
+                                        <div
+                                            class="label-format-option border rounded-md p-3 flex flex-col items-center      cursor-pointer"
+                                            data-format="barcode"
+                                        >
+                                            <i data-lucide="bar-chart-4" class="h-8 w-8 mb-2"></i>
+                                            <span class="text-sm font-medium">Barcode</span>
+                                        </div>
+                                         <!-- CHANGE> Disabled QR code option by adding opacity and pointer-events-none -->
+                                        <div
+                                            class="label-format-option border rounded-md p-3 flex flex-col items-center   cursor-pointer"
+                                            data-format="qrcode"
+                                        >
+                                            <i data-lucide="qr-code" class="h-8 w-8 mb-2"></i>
+                                            <span class="text-sm font-medium">QR Code</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                                        >Orientation</label
+                                    >
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div
+                                            class="orientation-option selected border rounded-md p-3 flex items-center cursor-pointer"
+                                            data-orientation="portrait"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="orientation"
+                                                value="portrait"
+                                                checked
+                                                class="mr-2"
+                                            />
+                                            <label class="cursor-pointer">Portrait</label>
+                                        </div>
+                                        <div
+                                            class="orientation-option border rounded-md p-3 flex items-center cursor-pointer"
+                                            data-orientation="landscape"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="orientation"
+                                                value="landscape"
+                                                class="mr-2"
+                                            />
+                                            <label class="cursor-pointer">Landscape</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="advancedOptions" class="space-y-4" style="display: none">
+                                <div>
+                                    <label
+                                        for="margin"
+                                        class="block text-sm font-medium text-gray-700"
+                                        >Margin (inches)</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="margin"
+                                        value="0.25"
+                                        step="0.01"
+                                        class="mt-1.5 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label for="dpi" class="block text-sm font-medium text-gray-700"
+                                        >DPI</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="dpi"
+                                        value="300"
+                                        class="mt-1.5 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    for="copies"
+                                    class="block text-sm font-medium text-gray-700"
+                                    >Number of Copies</label
+                                >
+                                <input
+                                    type="number"
+                                    id="copies"
+                                    min="1"
+                                    value="1"
+                                    class="mt-1.5 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t flex justify-between">
+                        <button
+                            id="backToFilesBtn"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            Back to File Selection
+                        </button>
+                        <button
+                            id="continueToPreviewBtn"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 gap-2 inline-flex items-center"
+                        >
+                            <i data-lucide="download" class="h-4 w-4"></i>
+                            Continue to Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Preview Tab  -->
+            <div id="preview-tab" class="tab-content mt-6">
+                <div class="bg-white rounded-lg border">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold">Preview and Print</h3>
+                        <p class="text-sm text-gray-600">
+                            Preview labels before printing
+                        </p>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <p id="previewDescription">
+                                You have selected 0 files to print labels for. Please review the
+                                label previews below before printing.
+                            </p>
+                        </div>
+                        <div class="space-y-6">
+                             Preview Area 
+                            <div
+                                id="previewArea"
+                                class="border rounded-md p-4 bg-white min-h-96"
+                            >
+                                <h3 class="text-sm font-medium mb-4 text-center">
+                                    Label Preview
+                                </h3>
+                                 Added flex centering container for proper alignment 
+                                <div class="flex justify-center items-start">
+                                    <div
+                                        id="previewContent"
+                                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                                    >
+                                         Preview content will be generated by JavaScript 
+                                    </div>
+                                </div>
+                            </div>
+
+                             Print Summary 
+                            <div class="border rounded-md p-4">
+                                <h3 class="text-sm font-medium mb-2">Print Summary</h3>
+                                <div class="space-y-2" id="printSummary">
+                                     Summary will be populated by JavaScript 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-4">
+                            <button
+                                id="exportPdfBtn"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 gap-2 inline-flex items-center"
+                            >
+                                <i data-lucide="upload" class="h-4 w-4"></i>
+                                Export as PDF
+                            </button>
+                            <button
+                                id="saveTemplateBtn"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 gap-2 inline-flex items-center"
+                            >
+                                <i data-lucide="save" class="h-4 w-4"></i>
+                                Save as Template
+                            </button>
+                            <button
+                                id="importTemplateBtn"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 gap-2 inline-flex items-center"
+                            >
+                                <i data-lucide="file-text" class="h-4 w-4"></i>
+                                Import Template
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t flex justify-between">
+                        <button
+                            id="backToSettingsBtn"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            Back to Settings
+                        </button>
+                        <button
+                            id="finalPrintBtn"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                        >
+                            Print Labels
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Hidden print section  -->
+    <div id="printSection" style="display: none"></div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Application state
+        let state = {
+            selectedFiles: [],
+            labelSize: "30-in-1",
+            labelFormat: "barcode",
+            activeTab: "files",
+            copies: 1,
+            selectedTemplate: "30-in-1",
+            showHistory: false,
+            searchTerm: "",
+            orientation: "portrait",
+            showAdvancedOptions: false,
+            batchMode: false,
+            batchStartNumber: 1,
+            batchCount: 30,
+            batchPrefix: "RES",
+            batchYear: new Date().getFullYear(),
+        };
+
+        // Sample data
+        const indexedFiles = [
+            {
+                id: "FILE-2023-001",
+                name: "Certificate of Occupancy - Alhaji Ibrahim Dantata",
+                fileNumber: "RES-2015-4859",
+                kangisFileNo: "KNGP 00338",
+                newKangisFileNo: "KNO001",
+                type: "Certificate of Occupancy",
+                location: "Shelf/Rack-A-12",
+                date: "2023-06-15",
+                status: "Indexed",
+            },
+            {
+                id: "FILE-2023-002",
+                name: "Site Plan - Hajiya Amina Yusuf",
+                fileNumber: "RES-86-2244",
+                kangisFileNo: "RES-86-2244",
+                newKangisFileNo: "KNO069",
+                type: "Site Plan",
+                location: "Shelf/Rack-B-05",
+                date: "2023-06-14",
+                status: "Indexed",
+            },
+            {
+                id: "FILE-2023-003",
+                name: "Letter of Administration - Kano Traders Association",
+                fileNumber: "COM-91-249",
+                kangisFileNo: "MLKN 03051",
+                newKangisFileNo: "KNO082",
+                type: "Letter of Administration",
+                location: "Shelf/Rack-C-08",
+                date: "2023-06-13",
+                status: "Indexed",
+            },
+            {
+                id: "FILE-2023-004",
+                name: "Right of Occupancy - Musa Usman Bayero",
+                fileNumber: "RES-2000-1904",
+                kangisFileNo: "KNML 08146",
+                newKangisFileNo: "KNO131",
+                type: "Right of Occupancy",
+                location: "Shelf/Rack-A-08",
+                date: "2023-06-12",
+                status: "Indexed",
+            },
+            {
+                id: "FILE-2023-005",
+                name: "Deed of Assignment - Hajiya Fatima Mohammed",
+                fileNumber: "CON-IND-2021-37",
+                type: "Deed of Assignment",
+                location: "Shelf/Rack-B-12",
+                date: "2023-06-10",
+                status: "Indexed",
+            },
+        ];
+
+        // Utility functions
+        function generateBatchFileNumber(index) {
+            const fileNumber = (state.batchStartNumber + index)
+                .toString()
+                .padStart(4, "0");
+            return `${state.batchPrefix}-${state.batchYear}-${fileNumber}`;
+        }
+
+        function updateCounts() {
+            document.getElementById("availableFilesCount").textContent = indexedFiles.length;
+            document.getElementById("selectedFilesCount").textContent = state.selectedFiles.length;
+            document.getElementById(
+                "selectionStatus"
+            ).textContent = `${state.selectedFiles.length} of ${indexedFiles.length} selected`;
+        }
+
+        function filterFiles() {
+            return indexedFiles.filter(
+                (file) =>
+                    file.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                    file.fileNumber
+                        .toLowerCase()
+                        .includes(state.searchTerm.toLowerCase()) ||
+                    file.type.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                    file.location.toLowerCase().includes(state.searchTerm.toLowerCase())
+            );
+        }
+
+        function renderFileList() {
+            const filteredFiles = filterFiles();
+            const fileListContent = document.getElementById("fileListContent");
+            fileListContent.innerHTML = filteredFiles
+                .map(
+                    (file) => `
+                <div class="flex items-center p-4">
+                    <input type="checkbox" id="${
+                        file.id
+                    }" class="file-checkbox mr-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${
+                        state.selectedFiles.includes(file.id) ? "checked" : ""
+                    }>
+                    <div class="flex flex-1 items-center gap-3">
+                        <i data-lucide="file-text" class="h-8 w-8 text-blue-500"></i>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <p class="font-medium text-blue-600">${
+                                    file.fileNumber
+                                }</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${
+                                    file.type
+                                }</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">${
+                                file.name
+                            }</p>
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${
+                                    file.location
+                                }</span>
+                                <span class="text-xs text-gray-500">${
+                                    file.date
+                                }</span>
+                                ${
+                                    file.kangisFileNo
+                                        ? `<span class="text-xs text-gray-500">KANGIS: ${file.kangisFileNo}</span>`
+                                        : ""
+                                }
+                                ${
+                                    file.newKangisFileNo
+                                        ? `<span class="text-xs text-gray-500">New KANGIS: ${file.newKangisFileNo}</span>`
+                                        : ""
+                                }
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i data-lucide="check-circle" class="h-3 w-3 mr-1"></i>
+                            Indexed
+                        </span>
+                    </div>
+                </div>
+            `
+                )
+                .join("");
+
+            // Re-initialize icons
+            lucide.createIcons();
+
+            // Add event listeners to checkboxes
+            document.querySelectorAll(".file-checkbox").forEach((checkbox) => {
+                checkbox.addEventListener("change", function () {
+                    const fileId = this.id;
+                    if (this.checked) {
+                        if (!state.selectedFiles.includes(fileId)) {
+                            state.selectedFiles.push(fileId);
+                        }
+                    } else {
+                        state.selectedFiles = state.selectedFiles.filter(
+                            (id) => id !== fileId
+                        );
+                    }
+                    updateCounts();
+                    updateSelectAllCheckbox();
+                });
+            });
+        }
+
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById("selectAll");
+            const filteredFiles = filterFiles();
+            selectAllCheckbox.checked =
+                state.selectedFiles.length === filteredFiles.length &&
+                filteredFiles.length > 0;
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll(".tab-btn").forEach((btn) => {
+                btn.classList.remove("active", "border-blue-500", "text-blue-600");
+                btn.classList.add("border-transparent", "text-gray-500");
+            });
+            document
+                .querySelector(`[data-tab="${tabName}"]`)
+                .classList.add("active", "border-blue-500", "text-blue-600");
+            document
+                .querySelector(`[data-tab="${tabName}"]`)
+                .classList.remove("border-transparent", "text-gray-500");
+
+            // Update tab content
+            document.querySelectorAll(".tab-content").forEach((content) => {
+                content.classList.remove("active");
+            });
+            document.getElementById(`${tabName}-tab`).classList.add("active");
+
+            state.activeTab = tabName;
+            if (tabName === "preview") {
+                updatePreview();
+            }
+        }
+
+        function updatePreview() {
+            const previewDescription = document.getElementById("previewDescription");
+            const previewContent = document.getElementById("previewContent");
+            const printSummary = document.getElementById("printSummary");
+
+            if (state.batchMode) {
+                previewDescription.textContent = `You are generating ${
+                    state.batchCount
+                } batch labels with file numbers from ${generateBatchFileNumber(
+                    0
+                )} to ${generateBatchFileNumber(
+                    state.batchCount - 1
+                )}. Please review the label previews below before printing.`;
+            } else {
+                previewDescription.textContent = `You have selected ${state.selectedFiles.length} files to print labels for. Please review the label previews below before printing.`;
+            }
+
+            let previewHTML = "";
+
+            // Check if using 30-in-1 template and batch mode
+            if (
+                state.selectedTemplate === "30-in-1" &&
+                state.batchMode &&
+                state.batchCount === 30
+            ) {
+                previewContent.className = "w-full flex justify-center";
+                previewHTML = `
+                <div class="bg-white border-2 border-gray-300 p-4 shadow-lg mx-auto" style="aspect-ratio: 210/297; min-height: 800px; width: 600px;">
+                    <h3 class="text-xs font-medium mb-2 text-center text-gray-600">A4 Page - 30 Labels Layout</h3>
+                    <div class="grid grid-cols-3 gap-1 h-full">
+            `;
+
+                // Generate all 30 labels
+                for (let i = 0; i < 30; i++) {
+                    const fileNumber = generateBatchFileNumber(i);
+                    const location = `Shelf/Rack-${String.fromCharCode(
+                        65 + Math.floor(i / 10)
+                    )}${((i % 10) + 1).toString().padStart(2, "0")}`;
+
+                    previewHTML += `
+                    <div class="border border-gray-200 p-1 flex flex-col items-center justify-center bg-white text-center" style="min-height: 75px;">
+                        <div class="mb-1">
+                            ${
+                                state.labelFormat === "barcode"
+                                    ? `<canvas id="barcode-${i}" width="120" height="40" style="width:120px;height:40px;"></canvas>`
+                                    : `<canvas id="qrcode-${i}" width="70" height="70" style="width:70px;height:70px;"></canvas>`
+                            }
+                        </div>
+                        <div class="text-xs">
+                            <p class="font-bold text-xs leading-tight">${fileNumber}</p>
+                            <p class="text-gray-600 text-xs leading-tight">${location}</p>
+                        </div>
+                    </div>
+                `;
+                }
+
+                previewHTML += `
+                    </div>
+                </div>
+            `;
+            } else {
+                previewContent.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+                // Original preview for non-batch or different templates
+                const itemsToShow = state.batchMode
+                    ? Math.min(state.batchCount, 6)
+                    : Math.min(state.selectedFiles.length, 6);
+
+                for (let i = 0; i < itemsToShow; i++) {
+                    let fileNumber, location;
+                    if (state.batchMode) {
+                        fileNumber = generateBatchFileNumber(i);
+                        location = `Shelf/Rack-${String.fromCharCode(
+                            65 + Math.floor(i / 10)
+                        )}${((i % 10) + 1).toString().padStart(2, "0")}`;
+                    } else {
+                        const file = indexedFiles.find(
+                            (f) => f.id === state.selectedFiles[i]
+                        );
+                        if (!file) continue;
+                        fileNumber = file.fileNumber;
+                        location = file.location;
+                    }
+
+                    previewHTML += `
+                    <div class="border p-6 rounded-md flex flex-col items-center">
+                        <div class="mb-4 w-full flex justify-center">
+                            ${
+                                state.labelFormat === "barcode"
+                                    ? `<canvas id="barcode-${i}" width="320" height="120" class="border" style="width:320px;height:120px;"></canvas>`
+                                    : `<canvas id="qrcode-${i}" width="160" height="160" class="border" style="width:160px;height:160px;"></canvas>`
+                            }
+                        </div>
+                        <div class="text-center text-sm mt-2">
+                            <p class="font-bold">${fileNumber}</p>
+                            <p class="text-gray-500">${location}</p>
+                        </div>
+                    </div>
+                `;
+                }
+            }
+
+            previewContent.innerHTML = previewHTML;
+
+            // Generate codes for preview
+            setTimeout(() => {
+                const itemsToGenerate =
+                    state.selectedTemplate === "30-in-1" &&
+                    state.batchMode &&
+                    state.batchCount === 30
+                        ? 30
+                        : state.batchMode
+                        ? Math.min(state.batchCount, 6)
+                        : Math.min(state.selectedFiles.length, 6);
+
+                for (let i = 0; i < itemsToGenerate; i++) {
+                    let fileNumber, location;
+                    if (state.batchMode) {
+                        fileNumber = generateBatchFileNumber(i);
+                        location = `Shelf/Rack: ${String.fromCharCode(
+                            65 + Math.floor(i / 10)
+                        )}${((i % 10) + 1).toString().padStart(2, "0")}`;
+                    } else {
+                        const file = indexedFiles.find(
+                            (f) => f.id === state.selectedFiles[i]
+                        );
+                        if (!file) continue;
+                        fileNumber = file.fileNumber;
+                        location = `Shelf/Rack: ${file.location}`;
+                    }
+
+                    if (state.labelFormat === "barcode") {
+                        const canvas = document.getElementById(`barcode-${i}`);
+                        if (canvas && typeof JsBarcode === "function") {
+                            const isCompact =
+                                state.selectedTemplate === "30-in-1" &&
+                                state.batchMode &&
+                                state.batchCount === 30;
+                            JsBarcode(canvas, fileNumber, {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                background: "#fff",
+                                margin: isCompact ? 0 : 2,
+                                width: isCompact ? 1.5 : 2,
+                                height: isCompact ? 40 : 60,
+                                displayValue: false,
+                            });
+                        } else {
+                            console.error("Barcode canvas not found or JsBarcode missing");
+                        }
+                    } else {
+                        const canvas = document.getElementById(`qrcode-${i}`);
+                        if (canvas && typeof QRious !== "undefined") {
+                            const isCompact =
+                                state.selectedTemplate === "30-in-1" &&
+                                state.batchMode &&
+                                state.batchCount === 30;
+                            const size = isCompact ? 70 : 160;
+                            try {
+                                // Get the tracking ID (using kangisFileNo or newKangisFileNo if available)
+                                let trackingId = "";
+                                if (!state.batchMode) {
+                                    const file = indexedFiles.find(
+                                        (f) => f.id === state.selectedFiles[i]
+                                    );
+                                    trackingId =
+                                        file.newKangisFileNo || file.kangisFileNo || file.id;
+                                } else {
+                                    trackingId = `TRK-${fileNumber}`;
+                                }
+
+                                // Create a structured data format for the QR code
+                                const qrData = JSON.stringify({
+                                    fileNumber: fileNumber,
+                                    shelf: location.replace("Shelf/Rack: ", ""),
+                                    trackingId: trackingId,
+                                    timestamp: new Date().toISOString().split("T")[0],
+                                });
+
+                                // Generate QR code using QRious
+                                const qr = new QRious({
+                                    element: canvas,
+                                    value: qrData,
+                                    size: 120,
+                                    level: "M",
+                                    background: "#ffffff",
+                                    foreground: "#000000",
+                                });
+                            } catch (error) {
+                                console.error("QR Code generation error:", error);
+                                // Draw error message on canvas
+                                const ctx = canvas.getContext("2d");
+                                ctx.fillStyle = "#f3f4f6";
+                                ctx.fillRect(0, 0, size, size);
+                                ctx.strokeStyle = "#d1d5db";
+                                ctx.strokeRect(0, 0, size, size);
+                                ctx.fillStyle = "#6b7280";
+                                ctx.font = "10px Arial";
+                                ctx.textAlign = "center";
+                                ctx.fillText("QR Error", size / 2, size / 2 - 5);
+                                ctx.fillText("Load Failed", size / 2, size / 2 + 5);
+                            }
+                        }
+                    }
+                }
+            }, 120);
+
+            // Update print summary
+            const totalLabels = state.batchMode ? state.batchCount : state.selectedFiles.length;
+            const templateName = document
+                .getElementById("labelTemplate")
+                .selectedOptions[0].text.split(" - ")[0];
+            const sizeName = document.getElementById("labelSize").selectedOptions[0].text;
+
+            printSummary.innerHTML = `
+            <div class="flex justify-between">
+                <span class="text-sm">Labels:</span>
+                <span class="text-sm font-medium">${totalLabels}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm">Copies per label:</span>
+                <span class="text-sm font-medium">${state.copies}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm">Total labels to print:</span>
+                <span class="text-sm font-medium">${totalLabels * state.copies}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm">Template:</span>
+                <span class="text-sm font-medium">${templateName}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm">Size:</span>
+                <span class="text-sm font-medium">${sizeName}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm">Format:</span>
+                <span class="text-sm font-medium">${
+                    state.labelFormat === "barcode" ? "Barcode" : "QR Code"
+                }</span>
+            </div>
+            ${
+                state.batchMode
+                    ? `
+            <div class="flex justify-between">
+                <span class="text-sm">File Number Range:</span>
+                <span class="text-sm font-medium">${generateBatchFileNumber(
+                    0
+                )} - ${generateBatchFileNumber(state.batchCount - 1)}</span>
+            </div>
+            `
+                    : ""
+            }
+        `;
+        }
+
+        function printLabels() {
+            // Check if we have something to print
+            if (state.selectedFiles.length === 0 && !state.batchMode) {
+                alert("Please select files or enable batch mode to print labels");
+                return;
+            }
+
+            // Create print section content
+            const printSection = document.getElementById("printSection");
+            printSection.innerHTML = "";
+
+            // Create a container for the print content
+            const printContainer = document.createElement("div");
+            printContainer.className = "print-page";
+
+            // Determine what we're printing
+            const itemsToPrint = state.batchMode ? state.batchCount : state.selectedFiles.length;
+            
+            // Check if we're using the 30-in-1 template with exactly 30 items
+            if (state.selectedTemplate === "30-in-1" && itemsToPrint === 30) {
+                // Create the 30-in-1 grid layout
+                const gridContainer = document.createElement("div");
+                gridContainer.className = "print-30-in-1";
+
+                for (let i = 0; i < itemsToPrint; i++) {
+                    let fileNumber, location, trackingId;
+            
+                    if (state.batchMode) {
+                        fileNumber = generateBatchFileNumber(i);
+                        location = `Shelf/Rack-${String.fromCharCode(65 + Math.floor(i / 10))}${((i % 10) + 1).toString().padStart(2, "0")}`;
+                        trackingId = `TRK-${fileNumber}`;
+                    } else {
+                        const file = indexedFiles.find(f => f.id === state.selectedFiles[i]);
+                        if (!file) continue;
+                        fileNumber = file.fileNumber;
+                        location = file.location.startsWith('Shelf/Rack-') ? file.location : `Shelf/Rack-${file.location}`;
+                        trackingId = file.newKangisFileNo || file.kangisFileNo || file.id;
+                    }
+
+                    const labelDiv = document.createElement("div");
+                    labelDiv.className = "print-label";
+
+                    // Create canvas for barcode/QR code - Fixed canvas sizing for better QR code rendering
+                    const canvas = document.createElement("canvas");
+                    canvas.id = `print-barcode-${i}`;
+                    if (state.labelFormat === "qrcode") {
+                        canvas.width = 100;
+                        canvas.height = 100;
+                    } else {
+                        canvas.width = 120;
+                        canvas.height = 120;
+                    }
+                    labelDiv.appendChild(canvas);
+
+                    // Add text content
+                    const fileNumberPara = document.createElement("p");
+                    fileNumberPara.className = "file-number";
+                    fileNumberPara.textContent = fileNumber;
+                    const locationPara = document.createElement("p");
+                    locationPara.textContent = location;
+
+                    labelDiv.appendChild(fileNumberPara);
+                    labelDiv.appendChild(locationPara);
+                    gridContainer.appendChild(labelDiv);
+
+                    // Generate barcode/QR code after adding to DOM
+                    setTimeout(() => {
+                        console.log(`[v0] Generating ${state.labelFormat} for ${fileNumber}`);
+                        
+                        if (state.labelFormat === "barcode") {
+                            if (typeof JsBarcode === "function") {
+                                JsBarcode(canvas, fileNumber, {
+                                    format: "CODE128",
+                                    width: 1.5,
+                                    height: 20,
+                                    displayValue: false,
+                                    fontSize: 8,
+                                    margin: 0,
+                                });
+                            }
+                        } else {
+                            if (typeof QRious !== "undefined") {
+                                try {
+                                    const qrData = JSON.stringify({
+                                        fileNumber: fileNumber,
+                                        shelf: location.replace("Shelf/Rack-", ""),
+                                        trackingId: trackingId,
+                                        timestamp: new Date().toISOString().split("T")[0],
+                                    });
+
+                                    console.log(`[v0] QR Data for ${fileNumber}:`, qrData);
+
+                                    const qr = new QRious({
+                                        element: canvas,
+                                        value: qrData,
+                                        size:  120, //Increased from 35 to 80 for better scanning
+                                        level: "H", // Changed from "M" to "H" for higher error correction
+                                        background: "#ffffff",
+                                        foreground: "#000000",
+                                    });
+                                    
+                                    console.log(`[v0] QR code generated successfully for ${fileNumber}`);
+                                } catch (error) {
+                                    console.error(`[v0] QR Code generation error for ${fileNumber}:`, error);
+                                    const ctx = canvas.getContext("2d");
+                                    ctx.fillStyle = "#f3f4f6";
+                                    ctx.fillRect(0, 0, 80, 80);
+                                    ctx.strokeStyle = "#d1d5db";
+                                    ctx.strokeRect(0, 0, 80, 80);
+                                    ctx.fillStyle = "#6b7280";
+                                    ctx.font = "8px Arial";
+                                    ctx.textAlign = "center";
+                                    ctx.fillText("QR Error", 40, 35);
+                                    ctx.fillText(fileNumber, 40, 45);
+                                }
+                            } else {
+                                console.error("[v0] QRious library not loaded");
+                            }
+                        }
+                    }, 100 + (i * 10)); // Staggered timing to prevent canvas conflicts
+                }
+
+                printContainer.appendChild(gridContainer);
+            } else {
+                // Standard layout for other templates or different quantities
+                const gridContainer = document.createElement("div");
+                gridContainer.className = "print-standard";
+
+                for (let i = 0; i < itemsToPrint; i++) {
+                    let fileNumber, location, trackingId;
+            
+                    if (state.batchMode) {
+                        fileNumber = generateBatchFileNumber(i);
+                        location = `Shelf/Rack-${String.fromCharCode(65 + Math.floor(i / 10))}${((i % 10) + 1).toString().padStart(2, "0")}`;
+                        trackingId = `TRK-${fileNumber}`;
+                    } else {
+                        const file = indexedFiles.find(f => f.id === state.selectedFiles[i]);
+                        if (!file) continue;
+                        fileNumber = file.fileNumber;
+                        location = file.location.startsWith('Shelf/Rack-') ? file.location : `Shelf/Rack-${file.location}`;
+                        trackingId = file.newKangisFileNo || file.kangisFileNo || file.id;
+                    }
+
+                    const labelDiv = document.createElement("div");
+                    labelDiv.className = "print-standard-label";
+
+                    // Create canvas for barcode/QR code
+                    const canvasContainer = document.createElement("div");
+                    canvasContainer.className = "mb-2 w-full flex justify-center";
+                    const canvas = document.createElement("canvas");
+                    canvas.id = `print-barcode-${i}`;
+                    
+                    if (state.labelFormat === "qrcode") {
+                        canvas.style.width = "120px";
+                        canvas.style.height = "120px";
+                        canvas.width = 120;
+                        canvas.height = 120;
+                    } else {
+                        canvas.style.width = "120px";
+                        canvas.style.height = "120px";
+                        canvas.width = 120;
+                        canvas.height = 120;
+                    }
+                    
+                    canvasContainer.appendChild(canvas);
+                    labelDiv.appendChild(canvasContainer);
+
+                    // Add text content
+                    const textDiv = document.createElement("div");
+                    textDiv.className = "text-center text-sm mt-2";
+                    const fileNumberPara = document.createElement("p");
+                    fileNumberPara.className = "font-bold";
+                    fileNumberPara.textContent = fileNumber;
+                    const locationPara = document.createElement("p");
+                    locationPara.className = "text-gray-500";
+                    locationPara.textContent = location;
+
+                    textDiv.appendChild(fileNumberPara);
+                    textDiv.appendChild(locationPara);
+                    labelDiv.appendChild(textDiv);
+                    gridContainer.appendChild(labelDiv);
+
+                    // Generate barcode/QR code after adding to DOM
+                    setTimeout(() => {
+                        if (state.labelFormat === "barcode") {
+                            if (typeof JsBarcode === "function") {
+                                JsBarcode(canvas, fileNumber, {
+                                    format: "CODE128",
+                                    width: 2,
+                                    height: 40,
+                                    displayValue: false,
+                                    fontSize: 10,
+                                });
+                            }
+                        } else {
+                            if (typeof QRious !== "undefined") {
+                                try {
+                                    const qrData = JSON.stringify({
+                                        fileNumber: fileNumber,
+                                        shelf: location.replace("Shelf/Rack-", ""),
+                                        trackingId: trackingId,
+                                        timestamp: new Date().toISOString().split("T")[0],
+                                    });
+
+                                    console.log(`[v0] QR Data for single file ${fileNumber}:`, qrData);
+
+                                    const qr = new QRious({
+                                        element: canvas,
+                                        value: qrData,
+                                        size: 120,
+                                        level: "H", // Higher error correction for better scanning
+                                        background: "#ffffff",
+                                        foreground: "#000000",
+                                    });
+                                    
+                                    console.log(`[v0] Single file QR code generated successfully for ${fileNumber}`);
+                                } catch (error) {
+                                    console.error("QR Code generation error:", error);
+                                    const ctx = canvas.getContext("2d");
+                                    ctx.fillStyle = "#f3f4f6";
+                                    ctx.fillRect(0, 0, 120, 120);
+                                    ctx.strokeStyle = "#d1d5db";
+                                    ctx.strokeRect(0, 0, 120, 120);
+                                }
+                            }
+                        }
+                    }, 100 + (i * 10)); // Staggered timing
+                }
+
+                printContainer.appendChild(gridContainer);
+            }
+
+            printSection.appendChild(printContainer);
+
+            // Add print summary (hidden during actual printing)
+            const summaryDiv = document.createElement("div");
+            summaryDiv.className = "mt-6 p-4 border-t no-print";
+            const summaryTitle = document.createElement("h3");
+            summaryTitle.className = "text-sm font-medium mb-2";
+            summaryTitle.textContent = "Print Summary";
+
+            const totalLabels = state.batchMode ? state.batchCount : state.selectedFiles.length;
+            const templateName = document
+                .getElementById("labelTemplate")
+                .selectedOptions[0].text.split(" - ")[0];
+            const sizeName = document.getElementById("labelSize").selectedOptions[0].text;
+
+            const summaryContent = document.createElement("div");
+            summaryContent.className = "space-y-2 text-sm";
+            summaryContent.innerHTML = `
+            <div class="flex justify-between">
+                <span>Labels:</span>
+                <span class="font-medium">${totalLabels}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Copies per label:</span>
+                <span class="font-medium">${state.copies}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Total labels printed:</span>
+                <span class="font-medium">${totalLabels * state.copies}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Template:</span>
+                <span class="font-medium">${templateName}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Size:</span>
+                <span class="font-medium">${sizeName}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Format:</span>
+                <span class="font-medium">${
+                    state.labelFormat === "barcode" ? "Barcode" : "QR Code"
+                }</span>
+            </div>
+            ${
+                state.batchMode
+                    ? `
+            <div class="flex justify-between">
+                <span>File Number Range:</span>
+                <span class="font-medium">${generateBatchFileNumber(0)} - ${generateBatchFileNumber(state.batchCount - 1)}</span>
+            </div>
+            `
+                    : ""
+            }
+            <div class="flex justify-between">
+                <span>Printed on:</span>
+                <span class="font-medium">${new Date().toLocaleString()}</span>
+            </div>
+        `;
+
+            summaryDiv.appendChild(summaryTitle);
+            summaryDiv.appendChild(summaryContent);
+            printContainer.appendChild(summaryDiv);
+
+            // Trigger print dialog
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        // Event listeners
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize year input
+            document.getElementById("batchYear").value = state.batchYear;
+
+            // Tab switching
+            document.querySelectorAll(".tab-btn").forEach((btn) => {
+                btn.addEventListener("click", function () {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // History toggle
+            document
+                .getElementById("historyBtn")
+                .addEventListener("click", function () {
+                    state.showHistory = !state.showHistory;
+                    document.getElementById("printHistory").style.display =
+                        state.showHistory ? "block" : "none";
+                });
+
+            document
+                .getElementById("closeHistoryBtn")
+                .addEventListener("click", function () {
+                    state.showHistory = false;
+                    document.getElementById("printHistory").style.display = "none";
+                });
+
+            // Reset form
+            document
+                .getElementById("resetBtn")
+                .addEventListener("click", function () {
+                    state.selectedFiles = [];
+                    state.labelSize = "30-in-1";
+                    state.labelFormat = "barcode";
+                    state.copies = 1;
+                    state.selectedTemplate = "30-in-1";
+                    state.orientation = "portrait";
+                    state.showAdvancedOptions = false;
+                    state.batchMode = false;
+                    state.batchStartNumber = 1;
+                    state.batchCount = 30;
+                    state.batchPrefix = "RES";
+                    state.batchYear = new Date().getFullYear();
+
+                    // Reset UI
+                    document.getElementById("copies").value = 1;
+                    document.getElementById("batchMode").checked = false;
+                    document.getElementById("batchControls").style.display = "none";
+                    document.getElementById("batchYear").value = state.batchYear;
+                    document.getElementById("batchStart").value = 1;
+                    document.getElementById("batchCount").value = 30;
+                    document.getElementById("batchPrefix").value = "RES";
+
+                    renderFileList();
+                    updateCounts();
+                });
+
+            // Search functionality
+            document
+                .getElementById("searchInput")
+                .addEventListener("input", function () {
+                    state.searchTerm = this.value;
+                    renderFileList();
+                });
+
+            // Select all functionality
+            document
+                .getElementById("selectAll")
+                .addEventListener("change", function () {
+                    const filteredFiles = filterFiles();
+                    if (this.checked) {
+                        state.selectedFiles = [
+                            ...new Set([
+                                ...state.selectedFiles,
+                                ...filteredFiles.map((f) => f.id),
+                            ]),
+                        ];
+                    } else {
+                        const filteredIds = filteredFiles.map((f) => f.id);
+                        state.selectedFiles = state.selectedFiles.filter(
+                            (id) => !filteredIds.includes(id)
+                        );
+                    }
+                    renderFileList();
+                    updateCounts();
+                });
+
+            // Batch mode toggle
+            document
+                .getElementById("batchMode")
+                .addEventListener("change", function () {
+                    state.batchMode = this.checked;
+                    document.getElementById("batchControls").style.display = this
+                        .checked
+                        ? "flex"
+                        : "none";
+                });
+
+            // Batch controls
+            document
+                .getElementById("batchPrefix")
+                .addEventListener("change", function () {
+                    state.batchPrefix = this.value;
+                });
+
+            document
+                .getElementById("batchYear")
+                .addEventListener("change", function () {
+                    state.batchYear = parseInt(this.value);
+                });
+
+            document
+                .getElementById("batchStart")
+                .addEventListener("change", function () {
+                    state.batchStartNumber = parseInt(this.value);
+                });
+
+            document
+                .getElementById("batchCount")
+                .addEventListener("change", function () {
+                    state.batchCount = parseInt(this.value);
+                });
+
+            document
+                .getElementById("generateBatchBtn")
+                .addEventListener("click", function () {
+                    const startFileNumber = generateBatchFileNumber(0);
+                    const endFileNumber = generateBatchFileNumber(state.batchCount - 1);
+                    alert(
+                        `Generated ${state.batchCount} batch labels from ${startFileNumber} to ${endFileNumber}`
+                    );
+                });
+
+            // Label format selection
+            document.querySelectorAll(".label-format-option").forEach((option) => {
+                option.addEventListener("click", function () {
+                    document
+                        .querySelectorAll(".label-format-option")
+                        .forEach((opt) => opt.classList.remove("selected"));
+                    this.classList.add("selected");
+                    state.labelFormat = this.dataset.format;
+                });
+            });
+
+            // Orientation selection
+            document.querySelectorAll(".orientation-option").forEach((option) => {
+                option.addEventListener("click", function () {
+                    document
+                        .querySelectorAll(".orientation-option")
+                        .forEach((opt) => opt.classList.remove("selected"));
+                    this.classList.add("selected");
+                    state.orientation = this.dataset.orientation;
+                    document.querySelector(
+                        `input[value="${this.dataset.orientation}"]`
+                    ).checked = true;
+                });
+            });
+
+            // Advanced options toggle
+            document
+                .getElementById("advancedToggle")
+                .addEventListener("click", function () {
+                    state.showAdvancedOptions = !state.showAdvancedOptions;
+                    document.getElementById("advancedOptions").style.display =
+                        state.showAdvancedOptions ? "block" : "none";
+                    this.textContent = state.showAdvancedOptions
+                        ? "Hide Advanced"
+                        : "Show Advanced";
+                });
+
+            // Copies input
+            document
+                .getElementById("copies")
+                .addEventListener("change", function () {
+                    state.copies = parseInt(this.value);
+                });
+
+            // Template and size selection
+            document
+                .getElementById("labelTemplate")
+                .addEventListener("change", function () {
+                    state.selectedTemplate = this.value;
+                });
+
+            document
+                .getElementById("labelSize")
+                .addEventListener("change", function () {
+                    state.labelSize = this.value;
+                });
+
+            // Navigation buttons
+            document
+                .getElementById("continueToSettingsBtn")
+                .addEventListener("click", function () {
+                    if (state.selectedFiles.length === 0 && !state.batchMode) {
+                        alert("Please select files or enable batch mode to continue");
+                        return;
+                    }
+                    switchTab("settings");
+                });
+
+            document
+                .getElementById("backToFilesBtn")
+                .addEventListener("click", function () {
+                    switchTab("files");
+                });
+
+            document
+                .getElementById("continueToPreviewBtn")
+                .addEventListener("click", function () {
+                    switchTab("preview");
+                });
+
+            document
+                .getElementById("backToSettingsBtn")
+                .addEventListener("click", function () {
+                    switchTab("settings");
+                });
+
+            // Action buttons
+            document
+                .getElementById("duplicateBtn")
+                .addEventListener("click", function () {
+                    state.copies = state.copies + 1;
+                    document.getElementById("copies").value = state.copies;
+                    alert(
+                        `Duplicated selected labels. Now printing ${state.copies} copies of each.`
+                    );
+                });
+
+            document
+                .getElementById("exportPdfBtn")
+                .addEventListener("click", function () {
+                    alert("Exporting labels as PDF...");
+                });
+
+            document
+                .getElementById("saveTemplateBtn")
+                .addEventListener("click", function () {
+                    const templateName = prompt("Enter a name for this template:");
+                    if (templateName) {
+                        alert(`Template "${templateName}" saved successfully!`);
+                    }
+                });
+
+            document
+                .getElementById("importTemplateBtn")
+                .addEventListener("click", function () {
+                    alert(
+                        "Import template functionality would open a file dialog here"
+                    );
+                });
+
+            // Print buttons
+            document
+                .getElementById("printBtn")
+                .addEventListener("click", function () {
+                    if (state.selectedFiles.length === 0 && !state.batchMode) {
+                        alert("Please select files to print labels for");
+                        return;
+                    }
+                    if (state.batchMode) {
+                        alert(
+                            `Printing ${
+                                state.batchCount
+                            } batch labels starting from ${generateBatchFileNumber(0)}`
+                        );
+                    } else {
+                        alert(
+                            `Printing ${state.selectedFiles.length} labels with size: ${state.labelSize}, format: ${state.labelFormat}, and ${state.copies} copies`
+                        );
+                    }
+                });
+
+            // Final print button - now calls the printLabels function
+            document
+                .getElementById("finalPrintBtn")
+                .addEventListener("click", printLabels);
+
+            // Initialize the page
+            renderFileList();
+            updateCounts();
+        });
+    </script>
+</body>
+</html>
