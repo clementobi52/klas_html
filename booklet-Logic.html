@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booklet Management Implementation</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #2563eb;
+    }
+    .code-block {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 15px;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+    .note {
+      background-color: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .integration-step {
+      background-color: #f0f9ff;
+      border-left: 4px solid #0ea5e9;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .state-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    .state-table th, .state-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      text-align: left;
+    }
+    .state-table th {
+      background-color: #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Booklet Management Implementation Guide</h1>
+  
+  <div class="note">
+    <strong>Note to Developer:</strong> This document contains the extracted booklet management logic from the page typing application. Follow the integration steps to implement this feature.
+  </div>
+  
+  <h2>Booklet Management Overview</h2>
+  <p>The booklet feature allows grouping multiple pages under a single document (like Power of Attorney) with sequential alphabetic suffixes (a, b, c, etc.) instead of numeric serial numbers.</p>
+  
+  <h2>State Variables Required</h2>
+  <p>Add these properties to your application state:</p>
+  
+  <table class="state-table">
+    <thead>
+      <tr>
+        <th>Variable</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Initial Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bookletMode</td>
+        <td>Boolean</td>
+        <td>Whether booklet mode is currently active</td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>currentBooklet</td>
+        <td>String | null</td>
+        <td>ID of the current booklet (null if no active booklet)</td>
+        <td>null</td>
+      </tr>
+      <tr>
+        <td>bookletStartPage</td>
+        <td>String | null</td>
+        <td>The starting serial number for the booklet (e.g., "01")</td>
+        <td>null</td>
+      </tr>
+      <tr>
+        <td>bookletPages</td>
+        <td>Object</td>
+        <td>Mapping of booklet IDs to their pages</td>
+        <td>{}</td>
+      </tr>
+      <tr>
+        <td>bookletCounter</td>
+        <td>String</td>
+        <td>Current alphabetic counter (a, b, c, etc.)</td>
+        <td>'a'</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <h2>Core Booklet Functions</h2>
+  
+  <h3>1. Start Booklet Function</h3>
+  <div class="code-block">
+    <pre><code>/**
+ * Starts a new booklet for grouping related pages
+ * This should be called when the user clicks "Start Booklet" button
+ */
+function startBooklet() {
+  // Ensure we have a selected file and page
+  if (!state.selectedFile || state.selectedPageInFolder === null) return;
+  
+  // Enable booklet mode
+  state.bookletMode = true;
+  
+  // Create a unique ID for this booklet
+  state.currentBooklet = `booklet_${Date.now()}`;
+  
+  // Use the current serial number as the booklet start
+  state.bookletStartPage = state.serialNo;
+  
+  // Reset the alphabetic counter
+  state.bookletCounter = 'a';
+  
+  // Update UI to reflect booklet mode
+  updateUI();
+}</code></pre>
+  </div>
+  
+  <h3>2. End Booklet Function</h3>
+  <div class="code-block">
+    <pre><code>/**
+ * Ends the current booklet and returns to normal mode
+ * This should be called when the user clicks "End Booklet" button
+ */
+function endBooklet() {
+  // Disable booklet mode
+  state.bookletMode = false;
+  
+  // Clear current booklet reference
+  state.currentBooklet = null;
+  state.bookletStartPage = null;
+  
+  // Reset the alphabetic counter for next time
+  state.bookletCounter = 'a';
+  
+  // Increment the main serial number for the next non-booklet page
+  const nextSerialNo = parseInt(state.serialNo) + 1;
+  state.serialNo = nextSerialNo.toString().padStart(2, '0');
+  
+  // Update UI to reflect normal mode
+  updateUI();
+}</code></pre>
+  </div>
+  
+  <h3>3. Process Page with Booklet Support</h3>
+  <div class="code-block">
+    <pre><code>/**
+ * Processes the current page with booklet support
+ * This function should replace your existing processPage function
+ */
+function processPage() {
+  if (!state.selectedFile || state.selectedPageInFolder === null) return;
+
+  const file = getFileById(state.selectedFile);
+  if (!file) return;
+
+  // Generate the page code with the new format including serial number
+  const pageTypeObj = getPageTypeById(state.pageType);
+  const pageSubTypeObj = getPageSubTypeById(state.pageType, state.pageSubType);
+  
+  let pageCode;
+  let serialNumber = state.serialNo;
+  
+  // BOOKLET LOGIC: Handle booklet pages differently
+  if (state.bookletMode && state.currentBooklet) {
+    // For booklet pages, use the booklet start page number with alphabetic suffix
+    serialNumber = `${state.bookletStartPage}${state.bookletCounter}`;
+    pageCode = `${file.fileNumber}-${pageTypeObj?.code}-${pageSubTypeObj?.code}-${serialNumber}`;
+    
+    // Store booklet page information for tracking
+    if (!state.bookletPages[state.currentBooklet]) {
+      state.bookletPages[state.currentBooklet] = [];
+    }
+    state.bookletPages[state.currentBooklet].push({
+      pageIndex: state.selectedPageInFolder,
+      serialNumber: serialNumber,
+      pageCode: pageCode
+    });
+    
+    // Increment booklet counter (a -> b -> c, etc.)
+    state.bookletCounter = String.fromCharCode(state.bookletCounter.charCodeAt(0) + 1);
+  } else {
+    // Normal page processing
+    pageCode = `${file.fileNumber}-${pageTypeObj?.code}-${pageSubTypeObj?.code}-${state.serialNo}`;
+  }
+
+  // [Rest of your existing processPage logic continues here...]
+  // This would include adding to batchTypedPages or processedPages
+  // and handling the UI updates
+  
+  // For normal pages (not in booklet mode), increment serial number
+  if (!state.bookletMode) {
+    const nextSerialNo = parseInt(state.serialNo) + 1;
+    state.serialNo = nextSerialNo.toString().padStart(2, '0');
+  }
+  
+  // Return to folder view
+  state.selectedPageInFolder = null;
+  
+  updateUI();
+}</code></pre>
+  </div>
+  
+  <h2>UI Components</h2>
+  
+  <h3>Booklet Management Section UI</h3>
+  <div class="code-block">
+    <pre><code>// Add this UI section to your page categorization view
+const bookletSection = `
+  &lt;div class="p-4 bg-purple-50 rounded-lg border border-purple-200"&gt;
+    &lt;h4 class="text-sm font-semibold text-purple-900 mb-3"&gt;Booklet Management&lt;/h4&gt;
+    &lt;div class="flex items-center space-x-4"&gt;
+      ${state.bookletMode ? `
+        &lt;div class="flex items-center space-x-2"&gt;
+          &lt;span class="text-sm text-purple-700"&gt;
+            &lt;strong&gt;Active Booklet:&lt;/strong&gt; Pages ${state.bookletStartPage}a, ${state.bookletStartPage}b, ${state.bookletStartPage}c...
+          &lt;/span&gt;
+          &lt;button class="btn btn-outline btn-sm end-booklet"&gt;
+            &lt;i data-lucide="x-circle" class="h-3 w-3 mr-1"&gt;&lt;/i&gt;
+            End Booklet
+          &lt;/button&gt;
+        &lt;/div&gt;
+      ` : `
+        &lt;button class="btn btn-outline btn-sm start-booklet"&gt;
+          &lt;i data-lucide="book-open" class="h-3 w-3 mr-1"&gt;&lt;/i&gt;
+          Start Booklet (e.g., PoA)
+        &lt;/button&gt;
+        &lt;span class="text-xs text-gray-600"&gt;
+          Use this when multiple pages belong to the same document (Power of Attorney, etc.)
+        &lt;/span&gt;
+      `}
+    &lt;/div&gt;
+    ${state.bookletMode ? `
+      &lt;div class="mt-2 text-xs text-purple-600"&gt;
+        Next page will be numbered: &lt;strong&gt;${state.bookletStartPage}${state.bookletCounter}&lt;/strong&gt;
+      &lt;/div&gt;
+    ` : ''}
+  &lt;/div&gt;
+`;</code></pre>
+  </div>
+  
+  <h3>Serial Number Input with Booklet Support</h3>
+  <div class="code-block">
+    <pre><code>// Replace your serial number input with this version
+const serialInput = `
+  &lt;div&gt;
+    &lt;label for="serial-no" class="block text-sm font-medium mb-1.5"&gt;Serial Number&lt;/label&gt;
+    &lt;input id="serial-no" value="${state.bookletMode ? state.bookletStartPage + state.bookletCounter : state.serialNo}" 
+           class="input" maxlength="3" ${state.bookletMode ? 'readonly' : ''}&gt;
+    &lt;p class="text-xs text-muted-foreground mt-1"&gt;
+      ${state.bookletMode 
+        ? `Booklet mode: Serial number is auto-generated as ${state.bookletStartPage}${state.bookletCounter}`
+        : 'Two-digit serial number (e.g., 01, 02, etc.)'
+      }
+    &lt;/p&gt;
+  &lt;/div&gt;
+`;</code></pre>
+  </div>
+  
+  <h2>Event Listeners</h2>
+  <div class="code-block">
+    <pre><code>// Add these event listeners in your renderTypingView function
+document.querySelector('.start-booklet')?.addEventListener('click', startBooklet);
+document.querySelector('.end-booklet')?.addEventListener('click', endBooklet);</code></pre>
+  </div>
+  
+  <h2>Integration Steps</h2>
+  
+  <div class="integration-step">
+    <h3>Step 1: Add State Variables</h3>
+    <p>Add the booklet-related state variables to your application state object.</p>
+  </div>
+  
+  <div class="integration-step">
+    <h3>Step 2: Implement Booklet Functions</h3>
+    <p>Copy the <code>startBooklet</code>, <code>endBooklet</code>, and updated <code>processPage</code> functions into your code.</p>
+  </div>
+  
+  <div class="integration-step">
+    <h3>Step 3: Update UI Components</h3>
+    <p>Add the booklet management section and updated serial number input to your page categorization view.</p>
+  </div>
+  
+  <div class="integration-step">
+    <h3>Step 4: Add Event Listeners</h3>
+    <p>Connect the UI buttons to the booklet functions with event listeners.</p>
+  </div>
+  
+  <div class="integration-step">
+    <h3>Step 5: Test Thoroughly</h3>
+    <p>Test the booklet functionality with various scenarios:</p>
+    <ul>
+      <li>Starting and ending booklets</li>
+      <li>Processing multiple pages in a booklet</li>
+      <li>Mixing booklet and non-booklet pages</li>
+      <li>Verifying serial number generation</li>
+    </ul>
+  </div>
+  
+  <h2>Example Usage Flow</h2>
+  <ol>
+    <li>User selects a page to categorize</li>
+    <li>User clicks "Start Booklet" for a multi-page document like Power of Attorney</li>
+    <li>System automatically generates serial numbers with alphabetic suffixes (01a, 01b, 01c)</li>
+    <li>User processes each page of the booklet</li>
+    <li>User clicks "End Booklet" when finished</li>
+    <li>System returns to normal numbering mode</li>
+  </ol>
+  
+  <div class="note">
+    <strong>Note:</strong> The booklet feature is designed to work with both single-page processing and batch mode. The implementation automatically handles the different serial number formats and tracking of booklet pages.
+  </div>
+</body>
+</html>
