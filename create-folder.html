@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Create Folder on C Drive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font: 16px/1.4 system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    .row { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+    input, button { font: inherit; padding: 10px 12px; }
+    input { flex: 1 1 260px; }
+    button { cursor: pointer; }
+    #log { padding: 12px; background: #f6f8fa; border: 1px solid #e5e7eb; border-radius: 8px; min-height: 80px; white-space: pre-wrap; }
+    small { color: #6b7280; }
+  </style>
+</head>
+<body>
+  <h1>Create a Folder on C:\ via Browser (with permission)</h1>
+
+  <p>
+    Click <b>Pick a location</b> and choose <b>Local Disk (C:)</b> (or any folder inside it). Then enter the name of the folder to create.
+  </p>
+
+  <div class="row">
+    <button id="pick">Pick a location</button>
+    <span id="picked" aria-live="polite"><small>No folder picked yet.</small></span>
+  </div>
+
+  <div class="row">
+    <input id="folderName" type="text" placeholder="Folder name, e.g. MyNewFolder" />
+    <button id="create">Create Folder</button>
+  </div>
+
+  <details>
+    <summary>Advanced: create nested folder or a test file</summary>
+    <div class="row">
+      <input id="nestedPath" type="text" placeholder="Nested path (optional), e.g. Parent\Child\Grandchild" />
+      <button id="createNested">Create Nested</button>
+    </div>
+    <div class="row">
+      <input id="fileName" type="text" placeholder="Create a file (optional), e.g. MyNewFolder/readme.txt" />
+      <button id="createFile">Create File</button>
+    </div>
+  </details>
+
+  <h3>Status</h3>
+  <div id="log" aria-live="polite"></div>
+
+  <p><small>
+    Note: This uses the File System Access API. You must allow the browser prompt. You can only write inside the folder you pick.
+  </small></p>
+
+  <script>
+    const log = (...args) => {
+      const box = document.getElementById('log');
+      box.textContent += args.join(' ') + "\n";
+      box.scrollTop = box.scrollHeight;
+    };
+
+    let rootHandle = null;
+
+    function supported() {
+      const ok = 'showDirectoryPicker' in window;
+      if (!ok) {
+        log("❌ This browser doesn't support the File System Access API.");
+      }
+      return ok;
+    }
+
+    // Ask user to pick a directory (you can pick C:\ or a folder in it)
+    document.getElementById('pick').onclick = async () => {
+      if (!supported()) return;
+      try {
+        rootHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        document.getElementById('picked').innerHTML = `<small>Picked: <b>${rootHandle.name}</b> (you granted access here)</small>`;
+        log("✅ Directory picked. You can now create folders/files inside it.");
+      } catch (e) {
+        log("⚠️ Picker canceled or blocked:", e.message || e);
+      }
+    };
+
+    // Create a single folder directly under picked directory
+    document.getElementById('create').onclick = async () => {
+      if (!rootHandle) return log("⚠️ Pick a location first.");
+      const name = document.getElementById('folderName').value.trim();
+      if (!name) return log("⚠️ Enter a folder name.");
+      try {
+        const dir = await rootHandle.getDirectoryHandle(name, { create: true });
+        log(`✅ Created (or already exists): ${dir.name}`);
+      } catch (e) {
+        log("❌ Failed to create folder:", e.message || e);
+      }
+    };
+
+    // Create nested folders like Parent\Child\Grandchild
+    document.getElementById('createNested').onclick = async () => {
+      if (!rootHandle) return log("⚠️ Pick a location first.");
+      const nested = document.getElementById('nestedPath').value.trim();
+      if (!nested) return log("⚠️ Enter a nested path.");
+      try {
+        const parts = nested.split(/[\\/]+/).filter(Boolean);
+        let current = rootHandle;
+        for (const part of parts) {
+          current = await current.getDirectoryHandle(part, { create: true });
+        }
+        log(`✅ Created nested path: ${nested}`);
+      } catch (e) {
+        log("❌ Failed to create nested path:", e.message || e);
+      }
+    };
+
+    // Create a text file (optional helper)
+    document.getElementById('createFile').onclick = async () => {
+      if (!rootHandle) return log("⚠️ Pick a location first.");
+      const path = document.getElementById('fileName').value.trim();
+      if (!path) return log("⚠️ Enter a file path like MyNewFolder/readme.txt");
+      try {
+        const parts = path.split(/[\\/]+/).filter(Boolean);
+        const fileName = parts.pop();
+        let current = rootHandle;
+        for (const part of parts) {
+          current = await current.getDirectoryHandle(part, { create: true });
+        }
+        const fileHandle = await current.getFileHandle(fileName, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(`Created by browser at ${new Date().toISOString()}\n`);
+        await writable.close();
+        log(`✅ File created: ${path}`);
+      } catch (e) {
+        log("❌ Failed to create file:", e.message || e);
+      }
+    };
+  </script>
+</body>
+</html>
