@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joint Site Inspection Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        
+        .a4-container {
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5cm;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 0.6cm;
+            border-bottom: 2px solid #2c5282;
+            padding-bottom: 0.3cm;
+        }
+        
+        .main-title {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.1cm;
+            color: #2c5282;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .from-to {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5cm;
+        }
+        
+        .applicant-info {
+            margin-bottom: 0.5cm;
+        }
+        
+        .applicant-info p {
+            margin-bottom: 0.1cm;
+        }
+        
+        .property-address {
+            margin-bottom: 0.5cm;
+        }
+        
+        .property-details {
+            margin-left: 0.5cm;
+        }
+        
+        .dotted-line {
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+            min-width: 3.5cm;
+            margin: 0 0.1cm;
+            vertical-align: bottom;
+            height: 1em;
+        }
+        
+        .subject-matter {
+            margin-bottom: 0.5cm;
+            line-height: 1.4;
+            text-align: justify;
+        }
+        
+        .measurements {
+            margin-bottom: 0.5cm;
+        }
+        
+        .measurements ul {
+            list-style-type: none;
+        }
+        
+        .measurements li {
+            margin-bottom: 0.2cm;
+        }
+        
+        .compact-dotted-lines {
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .compact-dotted {
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+            width: 0.7cm;
+            margin: 0 0.05cm;
+            vertical-align: bottom;
+            height: 1em;
+        }
+        
+        .conditions {
+            margin-bottom: 0.5cm;
+        }
+        
+        .conditions-title {
+            font-weight: 700;
+            margin-bottom: 0.2cm;
+            font-size: 12px;
+        }
+        
+        .conditions ul {
+            list-style-type: none;
+            margin-left: 0.5cm;
+        }
+        
+        .conditions li {
+            margin-bottom: 0.1cm;
+        }
+        
+        .shared-facilities {
+            font-style: italic;
+            margin-left: 0.5cm;
+            margin-top: 0.1cm;
+        }
+        
+        .observations {
+            margin-bottom: 0.8cm;
+        }
+        
+        .observations-title {
+            font-weight: 700;
+            margin-bottom: 0.2cm;
+            font-size: 12px;
+        }
+        
+        .observation-box {
+            border: 1px solid #ccc;
+            height: 1.2cm;
+            padding: 0.2cm;
+        }
+        
+        .signature-area {
+            margin-top: 0.8cm;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            width: 5cm;
+            margin: 0 0.2cm;
+            vertical-align: bottom;
+            height: 1em;
+        }
+        
+        .signature-names {
+            margin-top: 0.3cm;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .signature-left, .signature-right {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .signature-right {
+            text-align: right;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 0.5cm;
+            width: calc(100% - 3cm);
+            text-align: center;
+            font-size: 9px;
+            color: #666;
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #2c5282;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s;
+        }
+        
+        .print-btn:hover {
+            background: #1a365d;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                width: 21cm;
+                height: 29.7cm;
+            }
+            
+            .a4-container {
+                width: 100%;
+                height: 100%;
+                box-shadow: none;
+                padding: 1.5cm;
+                margin: 0;
+            }
+            
+            .print-btn {
+                display: none;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn" onclick="window.print()">Print Report</button>
+
+    <div class="a4-container">
+        <div class="header">
+            <h1 class="main-title">ONE STOP SHOP (SECTIONAL TITLING)</h1>
+            <h2 class="subtitle">JOINT SITE INSPECTION REPORT</h2>
+        </div>
+        
+        <div class="from-to">
+            <div><strong>FROM:</strong> INSPECTION OFFICER</div>
+            <div><strong>TO:</strong> CO-ORDINATOR OSS</div>
+        </div>
+        
+        <div class="applicant-info">
+            <p><strong>APPLICANT NAME:</strong> ALI ISAH</p>
+            <p><strong>FILE NO.:</strong> N/A</p>
+        </div>
+        
+        <div class="property-address">
+            <p><strong>PROPERTY ADDRESS (LOCATION):</strong></p>
+            <div class="property-details">
+                <p><strong>PLOT NO:</strong> <span class="dotted-line"></span></p>
+                <p><strong>BLOCK NO:</strong> <span class="dotted-line"></span></p>
+                <p><strong>LGA:</strong> <span class="dotted-line"></span></p>
+            </div>
+        </div>
+        
+        <div class="subject-matter">
+            <p>The above subject matter refers, Following the submission of an application for Planning Recommendation. The site has been inspected and found to be; <strong>available on the Ground and bounded to the North, </strong><span class="dotted-line"></span><strong> respectively. the property is sectioned into </strong><span class="dotted-line"></span><strong> sections, all sections are obtainable, accessible and conform with the existing land use.</strong></p>
+        </div>
+        
+        <div class="measurements">
+            <ul>
+                <li>
+                    <strong>Existing site measurements and Area:</strong> 
+                    <span class="dotted-line"></span> x 
+                    <span class="dotted-line"></span> x 
+                    <span class="dotted-line"></span> x 
+                    <span class="dotted-line"></span> x 
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    <span class="dotted-line"></span> x
+                    (<span class="dotted-line"></span> Ha) respectively.
+                </li>
+                <li><strong>Existing Road reservation:</strong> <span class="dotted-line"></span></li>
+                <li><strong>Prevailing Land use:</strong> <span class="dotted-line"></span></li>
+                <li><strong>Applied Land use:</strong> <span class="dotted-line"></span></li>
+            </ul>
+        </div>
+        
+        <div class="conditions">
+            <h3 class="conditions-title">CONDITION FOR APPROVAL</h3>
+            <p>The analysis conducted to asses compliance with statutory requirement and Planning standards. Below is comprehensive report detailing the findings base on the key criteria for evaluation:</p>
+            
+            <ul>
+                <li>Obtainability</li>
+                <li>Shared Facilities
+                    <div class="shared-facilities">
+                        > List of all shared areas
+                    </div>
+                </li>
+                <li>Conformity with existing land use</li>
+                <li>Approve site plan dimension (table 1)</li>
+            </ul>
+        </div>
+        
+        <div class="observations">
+            <h3 class="observations-title">ADDITIONAL OBSERVATION (IF ANY);</h3>
+            <div class="observation-box"></div>
+        </div>
+        
+        <div class="signature-area">
+            <p>SIGN................................</p>
+            <p>NAME................................</p>
+            
+            <div class="signature-names">
+                <div class="signature-left">
+                    <strong>INSPECTION OFFICER</strong>
+                </div>
+                <div class="signature-right">
+                    <strong>TPL. AUWALU RABIU (DDPP)</strong>
+                    <strong>CO-ORDINATOR OSS</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Generated on: <span id="current-date"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Add current date to the document
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+    </script>
+</body>
+</html>
