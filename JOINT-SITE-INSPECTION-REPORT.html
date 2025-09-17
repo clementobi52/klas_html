@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspection Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        
+        .heading {
+            font-family: 'Libre Baskerville', serif;
+        }
+        
+        .report-container {
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            margin: 0 auto;
+            padding: 1cm;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-line {
+            height: 2px;
+            background: linear-gradient(90deg, #1a56db, #1e3a8a);
+        }
+        
+        .underline {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+            margin: 8px 0;
+        }
+        
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .dotted-line {
+            border-bottom: 1px dotted #94a3b8;
+            display: inline-block;
+            min-width: 80px;
+            height: 12px;
+            vertical-align: bottom;
+            margin: 0 2px;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #cbd5e1;
+            display: inline-block;
+            width: 180px;
+            margin: 12px 0 3px 0;
+        }
+        
+        .checkbox {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #94a3b8;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        
+        .radio-option {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 12px;
+        }
+        
+        .radio-circle {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #94a3b8;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        
+        .form-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .form-label {
+            min-width: 140px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 11px;
+        }
+        
+        .form-input {
+            flex: 1;
+            border-bottom: 1px dotted #94a3b8;
+            padding: 1px 0;
+            min-height: 16px;
+            font-size: 11px;
+        }
+        
+        /* Hide print button when printing */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                width: 21cm;
+                height: 29.7cm;
+            }
+            
+            .report-container {
+                width: 100%;
+                height: 100%;
+                padding: 1cm;
+                margin: 0;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body class="py-2">
+    <div class="no-print flex justify-center mb-2">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-4 rounded shadow transition duration-200 flex items-center text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m4 4h6a2 2 0 002-2v-4a2 2 0 00-2-2h-6a2 2 0 00-2 2v4a2 2 0 002 2z" />
+            </svg>
+            Print Document
+        </button>
+    </div>
+
+    <!-- Report Container -->
+    <div class="report-container">
+        <!-- Header Line -->
+        <div class="header-line rounded-t-lg mb-2"></div>
+        
+        <!-- Header Section -->
+        <div class="text-center mb-3">
+            <h1 class="heading text-base font-bold text-gray-800 mb-1 underline">SECTIONAL TITLING ONE STOP SHOP</h1>
+            <h2 class="heading text-sm font-bold text-gray-800 mt-1 underline">JOINT SITE INSPECTION REPORT</h2>
+            <p class="text-sm font-semibold text-gray-700 mt-2">THE COORDINATOR OSS</p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="mb-3 text-gray-700">
+            <p class="mb-2">Below is a joint site inspection report conducted on <span class="dotted-line"></span> (CURDATE) of an application made for fragmentation of property with LKN no <span class="dotted-line"></span> (DD) in the name of <span class="dotted-line"></span> (DD) located at <span class="dotted-line"></span> (DD) with plot no <span class="dotted-line"></span> (DD) and Scheme no <span class="dotted-line"></span> (DD).</p>
+        </div>
+
+        <!-- Inspection Findings -->
+        <div class="mb-3 text-gray-700">
+            <p class="mb-2">The site has been inspected and found to be; <span class="checkbox"></span> <strong>available on the ground (check box on form)</strong> and <strong>bounded to the North, (<span class="dotted-line"></span>)</strong> respectively, the property is fragmented into <span class="dotted-line"></span> sections, all sections are obtainable, accessible and conform with the existing land use. As described below.</p>
+        </div>
+
+        <!-- Measurements -->
+        <div class="mb-3">
+            <p class="font-semibold text-gray-700 mb-1 text-xs">Existing site measurement and Area:</p>
+            <ol class="list-decimal pl-4 text-xs">
+                <li class="mb-1">A-B <span class="dotted-line ml-1" style="width: 60px;"></span></li>
+                <li class="mb-1">B-C <span class="dotted-line ml-1" style="width: 60px;"></span></li>
+                <li class="mb-1">C-D <span class="dotted-line ml-1" style="width: 60px;"></span></li>
+                <li class="mb-1">n<sup>th</sup> <span class="dotted-line ml-1" style="width: 60px;"></span></li>
+            </ol>
+        </div>
+
+        <!-- Improved Form Fields Section -->
+        <div class="mb-3 border border-gray-200 rounded p-2 bg-gray-50">
+            <div class="form-field">
+                <span class="form-label">Existing Road reservation:</span>
+                <div class="form-input">(drop down to select integer)</div>
+            </div>
+            
+            <div class="form-field">
+                <span class="form-label">Prevailing Land use:</span>
+                <div class="form-input">(domain of main land uses drop down)</div>
+            </div>
+            
+            <div class="form-field">
+                <span class="form-label">Applied land use:</span>
+                <div class="form-input">(DD from form)</div>
+            </div>
+            
+            <div class="form-field">
+                <span class="form-label">Shared utilities of:</span>
+                <div class="form-input">(list of selected shared utilities from the form should appear here)</div>
+            </div>
+        </div>
+
+        <!-- Analysis -->
+        <div class="mb-3 text-gray-700">
+            <p class="mb-2">Based on the analysis conducted to asses compliance with statutory requirements and planning standards, the proposed scheme is <strong><span class="dotted-line" style="width: 100px;"></span> (OBTAINABLE OR NOT OBTAINABLE DD)</strong> based on the existing dimensions listed above also consist of Shared Facilities and is in conformity with existing land use in the area. See dimensions of fragmented units as describe by recommended site plan in the table overleaf.</p>
+        </div>
+
+        <!-- Additional Observations -->
+        <div class="mb-4">
+            <p class="font-semibold text-gray-700 mb-1 text-xs">ADDITIONAL OBSERVATION (IF ANY);</p>
+            <div class="radio-option text-xs">
+                <span class="radio-circle"></span> Yes
+            </div>
+            <div class="radio-option text-xs">
+                <span class="radio-circle"></span> No
+            </div>
+            <div class="mt-1 border border-dotted border-gray-400 h-16 p-1 text-xs"></div>
+            <div class="mt-1 border border-dotted border-gray-400 h-16 p-1 text-xs"></div>
+        </div>
+
+        <!-- Signature -->
+        <div class="mb-4">
+            <div class="signature-line"></div>
+            <p class="text-xs text-gray-600 mt-1">INSPECTION OFFICER / RANK</p>
+        </div>
+
+        <!-- Table -->
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SN</th>
+                        <th>UNIT NO</th>
+                        <th>Dimension in M²</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                        <td><span class="dotted-line" style="width: 100%;"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-500">
+            <p>Generated on: <span id="current-date"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Add current date to the document
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
