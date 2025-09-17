@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Stop Shop - Sectional Titling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 16px;
+            line-height: 1.15;
+        }
+        
+        .heading {
+            font-family: 'Libre Baskerville', serif;
+        }
+        
+        .letter-container {
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            margin: 0 auto;
+            padding: 1cm;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-line {
+            height: 3px;
+            background: linear-gradient(90deg, #1a56db, #1e3a8a);
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #cbd5e1;
+            display: inline-block;
+            width: 180px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+        }
+        
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .dotted-line {
+            border-bottom: 1px dotted #94a3b8;
+            display: inline-block;
+            width: 100%;
+            height: 12px;
+            vertical-align: bottom;
+        }
+        
+        /* Hide print button when printing */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                width: 21cm;
+                height: 29.7cm;
+            }
+            
+            .letter-container {
+                width: 100%;
+                height: 100%;
+                padding: 1cm;
+                margin: 0;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body class="py-2">
+    <div class="no-print flex justify-center mb-2">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-4 rounded shadow transition duration-200 flex items-center text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m4 4h6a2 2 0 002-2v-4a2 2 0 00-2-2h-6a2 2 0 00-2 2v4a2 2 0 002 2z" />
+            </svg>
+            Print Document
+        </button>
+    </div>
+
+    <!-- Document Container -->
+    <div class="letter-container">
+        <!-- Header Line -->
+        <div class="header-line rounded-t-lg mb-2"></div>
+        
+        <!-- Header Section -->
+        <div class="text-center mb-3">
+            <h1 class="heading text-lg font-bold text-gray-800">ONE STOP SHOP (SECTIONAL TITLING)</h1>
+        </div>
+
+        <!-- Reference Section -->
+        <div class="mb-3 bg-blue-50 p-2 rounded border-l-4 border-blue-500">
+            <p class="font-semibold text-blue-700 text-xs">RE: APPLICATION FOR SECTIONAL TITLING PLANING RECOMMENDATION</p>
+            <p class="font-semibold text-blue-700 text-xs">APPROVAL IN RESPECT OF</p>
+            <p class="text-blue-700">RES<span class="dotted-line ml-1"></span></p>
+        </div>
+
+        <!-- From/To Section -->
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+                <p class="font-semibold text-gray-700">FROM: CHAIRMAN OSS AG PS</p>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-700">TO: DIRECTOR SECTIONAL TITLING</p>
+            </div>
+        </div>
+
+        <!-- Property Address -->
+        <div class="mb-3">
+            <p class="font-semibold text-gray-700">PROPERTY ADDRESS (LOCATION):</p>
+            <div class="ml-3 mt-1 space-y-1">
+                <p class="text-gray-700 flex items-center">PLOT NO: <span class="dotted-line ml-1 flex-1"></span></p>
+                <p class="text-gray-700 flex items-center">BLOCK NO: <span class="dotted-line ml-1 flex-1"></span></p>
+                <p class="text-gray-700 flex items-center">L.E.A: <span class="dotted-line ml-1 flex-1"></span></p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="mb-4 text-gray-700 leading-tight">
+            <p class="mb-2">Kindly refer to your submission dated 2025:09:09 12:07 related to above subject. I am directed to convey the approval for fragmentation of LKN N/A in multiple units/sections as describe in table A. all section /unit have meet physical planning requirement for statutory right of occupancy with approved shared compound of conference, cafeteria hallways, gardens, parking lots, swimming pool, gym/fitness Centre, rooftop, storage areas, conference room, playground, security, post and utilizes describe in table B.</p>
+        </div>
+
+        <!-- Tables Section -->
+        <div class="mb-4">
+            <div class="mb-3">
+                <h3 class="font-semibold text-gray-800 mb-1 border-b pb-1 text-sm">TABLE A</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Section/Unit</th>
+                            <th>Dimensions</th>
+                            <th>Area</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                <h3 class="font-semibold text-gray-800 mb-1 border-b pb-1 text-sm">TABLE B</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Facility</th>
+                            <th>Location</th>
+                            <th>Capacity</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Conference Room</td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Parking Lots</td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Swimming Pool</td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Gym/Fitness Centre</td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Security Post</td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                            <td><span class="dotted-line"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="mb-4 text-gray-700 leading-tight">
+            <p>In view of the above and section seven (7) of kano state sectional and systematic land titling registration law 2024(1446AH) scheme and its fragmentation (Approved site plan dimension) are suitable for approval if you have no objection.</p>
+        </div>
+
+        <!-- Signatures -->
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="text-center">
+                <div class="signature-line mb-1"></div>
+                <p class="font-semibold text-gray-700 text-xs">Tpl. Auwal Rabiu</p>
+                <p class="text-xs text-gray-600">Co-Ordinator OSS (DDPP)</p>
+            </div>
+            <div class="text-center">
+                <div class="signature-line mb-1"></div>
+                <p class="font-semibold text-gray-700 text-xs">Tpl. Muhammad M Yahuza</p>
+                <p class="text-xs text-gray-600">Chairman OSS (Ag PS MOLPP)</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-3 left-0 right-0 text-center text-xs text-gray-500">
+            <p>Generated on: <span id="current-date"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Add current date to the document
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
