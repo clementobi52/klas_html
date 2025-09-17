@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Recommendation Memo to DST</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .heading {
+            font-family: 'Libre Baskerville', serif;
+        }
+        
+        .memo-container {
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            margin: 0 auto;
+            padding: 1.2cm;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-line {
+            height: 3px;
+            background: linear-gradient(90deg, #1a56db, #1e3a8a);
+        }
+        
+        .underline {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .dotted-line {
+            border-bottom: 1px dotted #94a3b8;
+            display: inline-block;
+            min-width: 100px;
+            height: 14px;
+            vertical-align: bottom;
+            margin: 0 4px;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #cbd5e1;
+            display: inline-block;
+            width: 200px;
+            margin: 15px 0 5px 0;
+        }
+        
+        /* Hide print button when printing */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                width: 21cm;
+                height: 29.7cm;
+            }
+            
+            .memo-container {
+                width: 100%;
+                height: 100%;
+                padding: 1.2cm;
+                margin: 0;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body class="py-2">
+    <div class="no-print flex justify-center mb-2">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-4 rounded shadow transition duration-200 flex items-center text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m4 4h6a2 2 0 002-2v-4a2 2 0 00-2-2h-6a2 2 0 00-2 2v4a2 2 0 002 2z" />
+            </svg>
+            Print Document
+        </button>
+    </div>
+
+    <!-- Memo Container -->
+    <div class="memo-container">
+        <!-- Header Line -->
+        <div class="header-line rounded-t-lg mb-3"></div>
+        
+        <!-- Header Section -->
+        <div class="text-center mb-4">
+            <h1 class="heading text-lg font-bold text-gray-800 mb-1 underline">SECTIONAL TITLING ONE STOP SHOP</h1>
+            <p class="text-md font-semibold text-gray-700 mt-3">Director Sectional Titling</p>
+        </div>
+
+        <!-- Reference Section -->
+        <div class="mb-4">
+            <p class="font-semibold text-gray-800 underline text-center">RE: APPLICATION FOR SECTIONAL TITLING PLANNING RECOMMENDATION APPROVAL<br>IN RESPECT OF FILE NO <span class="dotted-line"></span>(DD)<span class="dotted-line"></span></p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="mb-4 text-gray-700">
+            <p class="mb-3">Kindly refer to application dated <span class="dotted-line"></span> (DD date of application) in relation to the above subject. I am directed to convey the approval for fragmentation of (FILE NO DD) with plot no (<strong>DD</strong>) and ST scheme no (DD) located at <span class="dotted-line"></span> (location of application DD) into multiple units/ sections as described in table A. All sections / units have met physical planning requirement for statutory right of occupancy with approved shared utilities and compounds as described in table B overleaf</p>
+            
+            <p class="mb-3">In view of the above and section seven (7) of kano state sectional and systematic land titling registration law 2024 (1446 AH) scheme and its fragmentation (based on approved Site plan dimensions) are suitable for approval if you have no objection.</p>
+        </div>
+
+        <!-- Signature Lines - Fixed Layout -->
+        <div class="mb-6">
+            <div class="flex justify-between">
+                <div class="text-center w-1/2 pr-4">
+                    <div class="signature-line"></div>
+                    <p class="text-xs text-gray-600 mt-1">Counter sign: Coordinator <strong>OSS</strong></p>
+                </div>
+                <div class="text-center w-1/2 pl-4">
+                    <div class="signature-line"></div>
+                    <p class="text-xs text-gray-600 mt-1">Chairman OSS</p>
+                </div>
+            </div>
+            <!-- <p class="text-xs text-gray-600 text-center mt-2">Counter sign</p> -->
+        </div>
+
+        <!-- Table A -->
+        <div class="mb-6">
+            <h3 class="font-bold text-gray-800 mb-2 text-md">1. Table A dimensions of fragmented units</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SN</th>
+                        <th>UNIT / SECTION NO</th>
+                        <th>DIMENSIONS IN M²</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td><strong>230</strong></td>
+                        <td><strong>6</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td><strong>231</strong></td>
+                        <td><strong>5.8</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td><strong>232</strong></td>
+                        <td><strong>15</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table B -->
+        <div>
+            <h3 class="font-bold text-gray-800 mb-2 text-md">2. Table B UTILITY AND SHARED COMPOUND DESCRIPTION</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SN</th>
+                        <th>SHARED UTILITY TYPE</th>
+                        <th>DIMENSION IN M²</th>
+                        <th>COUNT WITHIN SCHEME</th>
+                        <th>BLOCK</th>
+                        <th>SECTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td><strong>TOILET</strong></td>
+                        <td><strong>2</strong></td>
+                        <td><strong>3</strong></td>
+                        <td><strong>2</strong></td>
+                        <td><strong>1</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td><strong>TOILET</strong></td>
+                        <td><strong>1.5</strong></td>
+                        <td><strong>1</strong></td>
+                        <td><strong>2</strong></td>
+                        <td><strong>2</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td><strong>Garden</strong></td>
+                        <td><strong>40</strong></td>
+                        <td><strong>1</strong></td>
+                        <td><strong>SCA</strong></td>
+                        <td><strong>SCA</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>4</strong></td>
+                        <td><strong>Laundry</strong></td>
+                        <td><strong>3</strong></td>
+                        <td><strong>1</strong></td>
+                        <td><strong>2</strong></td>
+                        <td><strong>1</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-3 left-0 right-0 text-center text-xs text-gray-500">
+            <p>Generated on: <span id="current-date"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Add current date to the document
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
