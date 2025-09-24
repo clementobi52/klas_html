@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sectional Titling Memo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .memo-container {
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            margin: 0 auto;
+            padding: 1.5cm;
+            position: relative;
+        }
+        
+        .header-line {
+            height: 2px;
+            background: linear-gradient(90deg, #1a56db, #1e3a8a);
+            margin-bottom: 15px;
+        }
+        
+        .memo-header {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #cbd5e1;
+            display: inline-block;
+            width: 200px;
+            margin: 0 5px;
+        }
+        
+        .short-line {
+            width: 120px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .signature-section {
+            margin: 20px 0;
+        }
+        
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .signature-item {
+            margin-bottom: 15px;
+        }
+        
+        .approval-section {
+            margin: 25px 0;
+        }
+        
+        .title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .permanent-secretary-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 10px;
+            gap: 5px;
+        }
+        
+        /* Hide print button when printing */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                width: 21cm;
+                height: 29.7cm;
+            }
+            
+            .memo-container {
+                width: 100%;
+                height: 100%;
+                padding: 1.5cm;
+                margin: 0;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body class="py-4">
+    <div class="no-print flex justify-center mb-4">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m4 4h6a2 2 0 002-2v-4a2 2 0 00-2-2h-6a2 2 0 00-2 2v4a2 2 0 002 2z" />
+            </svg>
+            Print Document
+        </button>
+    </div>
+
+    <!-- Memo Container -->
+    <div class="memo-container">
+        <!-- Header -->
+        <div class="memo-header">
+            <p class="font-bold">Memo/2025/01</p>
+            <p class="font-bold">PERMANENT SECRETARY</p>
+        </div>
+        
+        <div class="header-line"></div>
+
+        <!-- Main Content -->
+        <div class="text-gray-700 mb-6">
+            <p class="mb-4">Kindly find page 66 is an application for sectional titling in respect of a property (plaza) covered by Certificate of Occupancy No. COM/2025/0001 situated at Nasarawa Heights, Fagge, Fagge in the name of Mr. Abubakar Musa.</p>
+            
+            <p class="mb-4">As well as change of name to various shop owners as per attached on the application.</p>
+            
+            <p class="mb-4">The application was referred to One stop shop for planning, engineering as well as architectural views. The planners recommended the application because it is feasible, and the shops meet the minimum requirements for commercial titles. Moreover, the proposal is accessible and conforms with the existing commercial development in the area.</p>
+            
+            <p class="mb-4">However, this recommendation is based on recommended site plan at page 66 and architectural design at page 33 with measurements of approved dimensions contained Therein respectively.</p>
+            
+            <p class="mb-4">Meanwhile, the title was granted for commercial purposes for a term of 40 years commencing from 21/04/2025 and has a residual term of 40 years to expire.</p>
+            
+            <p class="mb-4 font-semibold">In view of the above, you may kindly wish to recommend the following for approval of the Honourable Commissioner.</p>
+            
+            <ol class="list-decimal pl-5 mb-4">
+                <li class="mb-2">Consider and approve the application for Sectional Titling over plot 49 situated at Nasarawa Heights, Fagge, Fagge covered by Certificate of Occupancy No. COM/2025/0001 in Favour of Mr. Abubakar Musa.</li>
+                <li class="mb-2">Consider and approve the change of name to various shop owners as per provisions of the Bill.</li>
+                <li class="mb-2">Consider and approve the Cancellation of old Certificate of Occupancy COM/2025/0001 to pave way for new Sectional Titles to the new owners as per buyers list attached overleaf.</li>
+            </ol>
+        </div>
+
+        <!-- Corrected Signatures Section -->
+        <div class="signature-grid">
+            <div>
+                <div class="signature-item">
+                    <p>Name: - <span class="signature-line"></span></p>
+                </div>
+                <div class="signature-item">
+                    <p>Rank: <span class="signature-line"></span></p>
+                </div>
+                <div class="signature-item">
+                    <p>Sign: <span class="signature-line"></span></p>
+                </div>
+                <div class="signature-item">
+                    <p>Date: <span class="signature-line short-line"></span></p>
+                </div>
+            </div>
+            <div>
+                <div class="signature-item">
+                    <p>Counter Sign: - <span class="signature-line"></span></p>
+                </div>
+                <div class="signature-item">
+                    <p>Director Sectional Titling</p>
+                </div>
+                <div class="signature-item">
+                    <p>Date: <span class="signature-line short-line"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permanent Secretary Section - Corrected -->
+        <div class="approval-section">
+            <div class="title">PERMANENT SECRETARY</div>
+            <div class="permanent-secretary-line">
+                <p>The application is hereby recommended for your kind approval, please. </p>
+                <span class="signature-line"></span>
+            </div>
+            <div class="permanent-secretary-line">
+                <p>Date: <span class="signature-line short-line"></span> 2025.</p>
+
+                <span class="font-semibold">Permanent Secretary</span>
+            </div>
+        </div>
+                <!-- Honourable Commissioner Section  -->
+
+ <div class="approval-section">
+            <div class="title">HONOURABLE COMMISSIONER</div>
+            <div class="permanent-secretary-line">
+                <p>The application is hereby APPROVED/NOT APPROVED. </p>
+                <span class="signature-line"></span>
+            </div>
+            <div class="permanent-secretary-line">
+                <p>Date: <span class="signature-line short-line"></span> 2025.</p>
+
+                <span class="font-semibold">Honourable Commissioner</span>
+            </div>
+        </div>
+        
+
+        <!-- Page Break for Second Page -->
+        <div style="page-break-before: always;"></div>
+
+        <!-- Buyer List Table -->
+        <div class="mt-8">
+            <h3 class="font-bold text-lg mb-4">Buyers List</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>BUYER NAME</th>
+                        <th>UNIT NUMBER</th>
+                        <th>MEASUREMENT (SQM)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1.</td>
+                        <td>Northern Investments Group</td>
+                        <td>9</td>
+                        <td>638.4</td>
+                    </tr>
+                    <tr>
+                        <td>2.</td>
+                        <td>Zenith Developers Ltd</td>
+                        <td>7</td>
+                        <td>348.43</td>
+                    </tr>
+                    <tr>
+                        <td>3.</td>
+                        <td>DR. Stefanie Kator</td>
+                        <td>5</td>
+                        <td>56</td>
+                    </tr>
+                    <tr>
+                        <td>4.</td>
+                        <td>MR. Ibrahim Hassan</td>
+                        <td>6</td>
+                        <td>567.5</td>
+                    </tr>
+                    <tr>
+                        <td>5.</td>
+                        <td>Mr. Mrs. Amina Mohammed</td>
+                        <td>8</td>
+                        <td>46.34</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-gray-500">
+            <!-- <p>Generated on: <span id="current-date"></span></p> -->
+        </div>
+    </div>
+
+    <script>
+        // Add current date to the document
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
