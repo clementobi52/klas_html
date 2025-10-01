@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fragmentation Acknowledgment Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0.5cm;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Ensure print button is hidden when printing */
+            .print-button, .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white p-4 font-sans">
+    <!-- Added no-print class to ensure button is hidden during printing -->
+    <button onclick="window.print()" class="print-button no-print fixed top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        <span class="font-semibold">Print</span>
+    </button>
+
+    <div class="max-w-[1200px] mx-auto relative">
+        <!-- Reduced header margin and padding to save space -->
+        <div class="flex items-start justify-between mb-3 pb-3 border-b-2 border-black">
+            <!-- Left Logo -->
+            <div class="w-16 h-16 flex-shrink-0">
+                <img src="/placeholder.svg?height=64&width=64" alt="Kano State Logo" class="w-full h-full object-contain">
+            </div>
+            
+            <!-- Center Text -->
+            <div class="text-center flex-1 px-4">
+                <h1 class="text-xl font-bold text-black mb-1">MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+                <h2 class="text-base font-semibold text-black mb-1">SECTIONAL TITLING DEPARTMENT</h2>
+                <h3 class="text-base font-bold text-black uppercase">FRAGMENTATION ACKNOWLEDGMENT SHEET</h3>
+            </div>
+            
+            <!-- Right QR Code and Seal -->
+            <div class="flex items-start gap-2 flex-shrink-0">
+                <div class="w-16 h-16">
+                    <img src="/placeholder.svg?height=64&width=64" alt="QR Code" class="w-full h-full object-contain">
+                </div>
+                <div class="w-16 h-16">
+                    <img src="/placeholder.svg?height=64&width=64" alt="Ministry Seal" class="w-full h-full object-contain">
+                </div>
+            </div>
+        </div>
+
+        <!-- Reduced watermark size to prevent page overflow -->
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none z-0">
+            <div class="relative w-[400px] h-[400px]">
+                <!-- <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/960px-Coat_of_arms_of_Nigeria.svg.png?20240918191804" alt="Nigerian Coat of Arms Watermark" class="w-full h-full object-contain"> -->
+                <div class="absolute inset-0 flex items-center justify-center">
+<span class="text-5xl font-bold text-black tracking-[0.1em] transform -rotate-45 whitespace-nowrap" style="text-shadow: 0 0 20px rgba(231, 227, 227, 0.3);">COPY OF ORIGINAL</span>                </div>
+            </div>
+        </div>
+
+        <!-- Updated content layout to two-column format -->
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-2 gap-6 mb-4 relative z-10">
+            <!-- Left Column -->
+            <div>
+                <!-- Applicant Information -->
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold text-black mb-3">Applicant Information</h4>
+                    <div class="space-y-1.5 text-sm">
+                        <div class="flex"><span class="font-semibold text-black w-20">Type:</span> <span class="text-black">individual</span></div>
+                        <div class="flex"><span class="font-semibold text-black w-20">Name:</span> <span class="text-black">Senator Olakunle Olafemi Olaniyan</span></div>
+                        <div class="flex"><span class="font-semibold text-black w-20">Phone:</span> <span class="text-black">07012254427</span></div>
+                        <div class="flex"><span class="font-semibold text-black w-20">Address:</span> <span class="text-black">80, Chukwunwike Edozie Avenue, Abaji, F.c.t</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Property Details -->
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold text-black mb-3">Property Details</h4>
+                    <div class="space-y-1.5 text-sm">
+                        <div class="flex"><span class="font-semibold text-black w-32">Units:</span> <span class="text-black">2</span></div>
+                        <div class="flex"><span class="font-semibold text-black w-32">Blocks:</span> <span class="text-black">22</span></div>
+                        <div class="flex"><span class="font-semibold text-black w-32">Sections:</span> <span class="text-black">88</span></div>
+                        <div class="flex"><span class="font-semibold text-black w-32">File Number(s):</span> <span class="text-black">ST-IND-2025-1 | IND-2025-6</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Address (Full Width) -->
+        <div class="mb-4 relative z-10">
+            <div class="text-sm">
+                <span class="font-semibold text-black">Property Address:</span> <span class="text-black">80 Chukwunwike Edozie Avenue, Fagge, Kano</span>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="mb-4 relative z-10">
+            <h4 class="text-sm font-bold text-black mb-3">Payment Information</h4>
+            <div class="grid grid-cols-2 gap-x-8 gap-y-1.5 text-sm">
+                <div class="flex"><span class="font-semibold text-black w-32">Application Fee:</span> <span class="text-green-600 font-semibold">Paid</span></div>
+                <div class="flex"><span class="font-semibold text-black w-32">ST Invoice No:</span> <span class="text-black">1234465</span></div>
+                <div class="flex"><span class="font-semibold text-black w-32">Processing Fee:</span> <span class="text-green-600 font-semibold">Paid</span></div>
+                <div class="flex"><span class="font-semibold text-black w-32">Payment Date:</span> <span class="text-black">2025-09-27</span></div>
+                <div class="flex"><span class="font-semibold text-black w-32">Site Plan Fee:</span> <span class="text-green-600 font-semibold">Paid</span></div>
+            </div>
+        </div>
+
+        <!-- Required Documents -->
+        <div class="mb-6 relative z-10">
+            <h4 class="text-sm font-bold text-black mb-3">Required Documents</h4>
+            <div class="grid grid-cols-2 gap-x-8 gap-y-1.5 text-sm">
+                <div class="flex"><span class="font-semibold text-black w-40">Application Letter:</span> <span class="text-green-600 font-semibold">Submitted</span></div>
+                <div class="flex"><span class="font-semibold text-black w-40">Building Plan:</span> <span class="text-green-600 font-semibold">Submitted</span></div>
+                <div class="flex"><span class="font-semibold text-black w-40">Architectural Design:</span> <span class="text-green-600 font-semibold">Submitted</span></div>
+                <div class="flex"><span class="font-semibold text-black w-40">Ownership Document:</span> <span class="text-green-600 font-semibold">Submitted</span></div>
+                <div class="flex"><span class="font-semibold text-black w-40">Site Plan (Survey):</span> <span class="text-green-600 font-semibold">Submitted</span></div>
+            </div>
+        </div>
+
+        <!-- Updated signature section and footer with proper layout and Klaes logo -->
+        <!-- Signature Section -->
+        <div class="mt-8 mb-4 relative z-10">
+            <div class="grid grid-cols-3 gap-8 items-end">
+                <div>
+<div class="border-b border-black mb-4 w-48"></div>
+
+                    <div class="text-xs text-black ">Applicant's Signature & Date</div>
+                </div>
+                <div class="text-center text-xs text-gray-600">
+                    Generated by Klaes Admin on 30/09/2025
+                </div>
+                <div >
+                    <div class="border-b border-black mb-4 w-48 ml-auto "></div>
+
+                    <div class="text-xs text-black  text-right">Director, Sectional Titling</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Updated footer to include bottom right seal/logo -->
+        <div class="mt-2 relative z-10 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <img src="/placeholder.svg?height=48&width=48" alt="Official Seal" class="w-full h-full object-contain">
+                <span class="text-sm font-bold text-black">KLAES</span>
+            </div>
+            <div class="w-12 h-12">
+                <img src="/placeholder.svg?height=48&width=48" alt="Official Seal" class="w-full h-full object-contain">
+            </div>
+        </div>
+    </div>
+</body>
+</html>
