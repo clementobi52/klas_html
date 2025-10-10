@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructions Panel with Sequential Automatic Slide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .slide-container {
+            overflow: hidden;
+            position: relative;
+            height: 280px;
+        }
+        
+        .slide-track {
+            display: flex;
+            transition: transform 0.8s ease-in-out;
+            height: 100%;
+        }
+        
+        .slide {
+            flex: 0 0 100%;
+            padding-right: 20px;
+            box-sizing: border-box;
+        }
+        
+        .slide-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 8px;
+        }
+        
+        .slide-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .slide-indicator.active {
+            background: #3b82f6;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Instructions Panel -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-blue-200 bg-blue-100">
+                <div class="flex items-center gap-3">
+                    <div class="flex-shrink-0">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-900">📌 Instructions for Users Before Filling the Sectional Titling Application Form</h3>
+                </div>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+                <p class="text-sm text-blue-800 font-medium">Please ensure the following steps are completed before attempting to fill the Sectional Titling Application Form:</p>
+                
+                <!-- Slider Container -->
+                <div class="slide-container">
+                    <div class="slide-track">
+                        <!-- Slide 1 - Step 1 -->
+                        <div class="slide fade-in">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900">Initial Bill Settlement</h4>
+                                    <ul class="mt-1 text-sm text-blue-800 space-y-1">
+                                        <li>• Confirm that the Initial Bill has been fully paid.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Slide 2 - Step 2 -->
+                        <div class="slide">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900">Mother File Scanning</h4>
+                                    <ul class="mt-1 text-sm text-blue-800 space-y-1">
+                                        <li>• Ensure that the Mother File has been completely scanned.</li>
+                                        <li>• Save all scanned documents in the A4 subfolder of the folder named strictly with the MLSFileNo (e.g., COM-1987-234).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Slide 3 - Step 3 -->
+                        <div class="slide">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900">Buyers' List Capture</h4>
+                                    <ul class="mt-1 text-sm text-blue-800 space-y-1">
+                                        <li>• Confirm that all buyers have been pre-captured.</li>
+                                        <li>• Use the official Buyers' List Template (CSV format) and save the file appropriately.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Slide 4 - Step 4 -->
+                        <div class="slide">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900">Passport Photograph</h4>
+                                    <ul class="mt-1 text-sm text-blue-800 space-y-1">
+                                        <li>• Scan and save the passport photograph of each buyer.</li>
+                                        <li>• Use the naming format: MLSFileNo_PP (example: COM-1987-234_PP).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Slide 5 - Step 5 -->
+                        <div class="slide">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">5</div>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900">Means of Identification</h4>
+                                    <ul class="mt-1 text-sm text-blue-800 space-y-1">
+                                        <li>• Scan and save the approved identification document(s).</li>
+                                        <li>• Use the naming format: MLSFileNo_ID (example: COM-1987-234_ID).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide indicators -->
+                    <div class="slide-indicators">
+                        <div class="slide-indicator active" data-slide="0"></div>
+                        <div class="slide-indicator" data-slide="1"></div>
+                        <div class="slide-indicator" data-slide="2"></div>
+                        <div class="slide-indicator" data-slide="3"></div>
+                        <div class="slide-indicator" data-slide="4"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <p class="text-sm font-medium text-amber-800">
+                            <strong>⚠️ Note:</strong> Failure to complete these preparatory steps will result in delays of the application processing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const track = document.querySelector('.slide-track');
+            const slides = document.querySelectorAll('.slide');
+            const indicators = document.querySelectorAll('.slide-indicator');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+            
+            // Function to update slide position
+            function updateSlide() {
+                // Move the track to show the current slide
+                track.style.transform = `translateX(-${currentSlide * 100}%)`;
+                
+                // Remove fade-in class from all slides
+                slides.forEach(slide => {
+                    slide.classList.remove('fade-in');
+                });
+                
+                // Add fade-in class to current slide
+                setTimeout(() => {
+                    slides[currentSlide].classList.add('fade-in');
+                }, 50);
+                
+                // Update indicators
+                indicators.forEach((indicator, index) => {
+                    if (index === currentSlide) {
+                        indicator.classList.add('active');
+                    } else {
+                        indicator.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Auto slide function - moves to next slide sequentially
+            function autoSlide() {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlide();
+            }
+            
+            // Start auto sliding (change slide every 4 seconds)
+            let slideInterval = setInterval(autoSlide, 4000);
+            
+            // Pause auto sliding on hover
+            const slideContainer = document.querySelector('.slide-container');
+            slideContainer.addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+            });
+            
+            // Resume auto sliding when mouse leaves
+            slideContainer.addEventListener('mouseleave', () => {
+                slideInterval = setInterval(autoSlide, 4000);
+            });
+            
+            // Indicator click
+            indicators.forEach(indicator => {
+                indicator.addEventListener('click', function() {
+                    currentSlide = parseInt(this.getAttribute('data-slide'));
+                    updateSlide();
+                    
+                    // Reset the auto slide interval
+                    clearInterval(slideInterval);
+                    slideInterval = setInterval(autoSlide, 4000);
+                });
+            });
+            
+            // Initialize first slide
+            updateSlide();
+        });
+    </script>
+</body>
+</html>
