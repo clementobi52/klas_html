@@ -961,35 +961,343 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       }
     }
 
-    function createCropOverlay() {
-      const container = currentImageState.element.parentElement;
-      const rect = currentImageState.element.getBoundingClientRect();
+function createCropOverlay() {
+  const container = currentImageState.element.parentElement;
+  const img = currentImageState.element;
+  const imgRect = img.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  
+  // Calculate the actual displayed image area (accounting for object-fit: contain)
+  const containerAspect = containerRect.width / containerRect.height;
+  const imageAspect = img.naturalWidth / img.naturalHeight;
+  
+  let displayedWidth, displayedHeight, displayedLeft, displayedTop;
+  
+  if (imageAspect > containerAspect) {
+    // Image is wider than container - fit to width
+    displayedWidth = containerRect.width;
+    displayedHeight = containerRect.width / imageAspect;
+    displayedLeft = 0;
+    displayedTop = (containerRect.height - displayedHeight) / 2;
+  } else {
+    // Image is taller than container - fit to height
+    displayedHeight = containerRect.height;
+    displayedWidth = containerRect.height * imageAspect;
+    displayedLeft = (containerRect.width - displayedWidth) / 2;
+    displayedTop = 0;
+  }
+  
+  // Store the actual displayed image area for later use
+  currentImageState.displayedImageArea = {
+    width: displayedWidth,
+    height: displayedHeight,
+    left: displayedLeft,
+    top: displayedTop
+  };
+  
+  currentImageState.cropOverlay = document.createElement('div');
+  currentImageState.cropOverlay.className = 'crop-overlay';
+  
+  // Set initial crop area (80% of actual displayed image area)
+  currentImageState.cropWidth = displayedWidth * 0.8;
+  currentImageState.cropHeight = displayedHeight * 0.8;
+  currentImageState.cropStartX = displayedLeft + (displayedWidth - currentImageState.cropWidth) / 2;
+  currentImageState.cropStartY = displayedTop + (displayedHeight - currentImageState.cropHeight) / 2;
+  
+  currentImageState.cropOverlay.style.left = currentImageState.cropStartX + 'px';
+  currentImageState.cropOverlay.style.top = currentImageState.cropStartY + 'px';
+  currentImageState.cropOverlay.style.width = currentImageState.cropWidth + 'px';
+  currentImageState.cropOverlay.style.height = currentImageState.cropHeight + 'px';
+  
+  // Add resize handles
+  const handles = ['nw', 'ne', 'sw', 'se'];
+  handles.forEach(handle => {
+    const handleEl = document.createElement('div');
+    handleEl.className = `crop-handle crop-handle-${handle}`;
+    currentImageState.cropOverlay.appendChild(handleEl);
+  });
+  
+  setupCropInteractions();
+  container.appendChild(currentImageState.cropOverlay);
+}
+
+function setupCropInteractions() {
+  let isDragging = false;
+  let isResizing = false;
+  let resizeDirection = '';
+  let startX, startY;
+  
+  const container = currentImageState.element.parentElement;
+  const containerRect = container.getBoundingClientRect();
+  
+  currentImageState.cropOverlay.addEventListener('mousedown', startDrag);
+  
+  function startDrag(e) {
+    if (e.target.classList.contains('crop-handle')) {
+      isResizing = true;
+      resizeDirection = e.target.classList[1].split('-')[2];
+    } else {
+      isDragging = true;
+    }
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    e.preventDefault();
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', stopDrag);
+  }
+  
+  function handleMove(e) {
+    if (!isDragging && !isResizing) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    const area = currentImageState.displayedImageArea;
+    
+    if (isDragging) {
+      currentImageState.cropStartX = Math.max(area.left, currentImageState.cropStartX + dx);
+      currentImageState.cropStartY = Math.max(area.top, currentImageState.cropStartY + dy);
+      currentImageState.cropStartX = Math.min(area.left + area.width - currentImageState.cropWidth, currentImageState.cropStartX);
+      currentImageState.cropStartY = Math.min(area.top + area.height - currentImageState.cropHeight, currentImageState.cropStartY);
+    } else if (isResizing) {
+      if (resizeDirection.includes('e')) {
+        currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth + dx);
+        currentImageState.cropWidth = Math.min(area.left + area.width - currentImageState.cropStartX, currentImageState.cropWidth);
+      }
+      if (resizeDirection.includes('w')) {
+        currentImageState.cropStartX = Math.max(area.left, currentImageState.cropStartX + dx);
+        currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth - dx);
+      }
+      if (resizeDirection.includes('s')) {
+        currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight + dy);
+        currentImageState.cropHeight = Math.min(area.top + area.height - currentImageState.cropStartY, currentImageState.cropHeight);
+      }
+      if (resizeDirection.includes('n')) {
+        currentImageState.cropStartY = Math.max(area.top, currentImageState.cropStartY + dy);
+        currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight - dy);
+      }
+    }
+    
+    updateCropOverlay();
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+  
+  function stopDrag() {
+    isDragging = false;
+    isResizing = false;
+    document.removeEventListener('mousemove', handleMove);
+    document.removeEventListener('mouseup', stopDrag);
+  }
+}
+
+function getEditedImageBlob() {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = currentImageState.element;
+    
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+    
+    if (currentImageState.isCropping && currentImageState.cropWidth > 0 && currentImageState.cropHeight > 0) {
+      const area = currentImageState.displayedImageArea;
       
-      currentImageState.cropOverlay = document.createElement('div');
-      currentImageState.cropOverlay.className = 'crop-overlay';
+      // Calculate the scale factors between displayed area and natural image
+      const scaleX = naturalWidth / area.width;
+      const scaleY = naturalHeight / area.height;
       
-      // Set initial crop area (80% of image)
-      currentImageState.cropWidth = rect.width * 0.8;
-      currentImageState.cropHeight = rect.height * 0.8;
-      currentImageState.cropStartX = (rect.width - currentImageState.cropWidth) / 2;
-      currentImageState.cropStartY = (rect.height - currentImageState.cropHeight) / 2;
+      // Convert crop coordinates from displayed pixels to natural pixels
+      // Subtract the image offset within the container to get coordinates relative to the actual image
+      const srcX = (currentImageState.cropStartX - area.left) * scaleX;
+      const srcY = (currentImageState.cropStartY - area.top) * scaleY;
+      const srcWidth = currentImageState.cropWidth * scaleX;
+      const srcHeight = currentImageState.cropHeight * scaleY;
       
-      currentImageState.cropOverlay.style.left = currentImageState.cropStartX + 'px';
-      currentImageState.cropOverlay.style.top = currentImageState.cropStartY + 'px';
-      currentImageState.cropOverlay.style.width = currentImageState.cropWidth + 'px';
-      currentImageState.cropOverlay.style.height = currentImageState.cropHeight + 'px';
+      // Ensure we don't go beyond image boundaries
+      const safeSrcX = Math.max(0, Math.min(srcX, naturalWidth - 1));
+      const safeSrcY = Math.max(0, Math.min(srcY, naturalHeight - 1));
+      const safeSrcWidth = Math.max(1, Math.min(srcWidth, naturalWidth - safeSrcX));
+      const safeSrcHeight = Math.max(1, Math.min(srcHeight, naturalHeight - safeSrcY));
       
-      // Add resize handles
-      const handles = ['nw', 'ne', 'sw', 'se'];
-      handles.forEach(handle => {
-        const handleEl = document.createElement('div');
-        handleEl.className = `crop-handle crop-handle-${handle}`;
-        currentImageState.cropOverlay.appendChild(handleEl);
+      console.log('Crop Debug:', {
+        cropStartX: currentImageState.cropStartX,
+        cropStartY: currentImageState.cropStartY,
+        cropWidth: currentImageState.cropWidth,
+        cropHeight: currentImageState.cropHeight,
+        areaLeft: area.left,
+        areaTop: area.top,
+        srcX: srcX,
+        srcY: srcY,
+        srcWidth: srcWidth,
+        srcHeight: srcHeight,
+        safeSrcX: safeSrcX,
+        safeSrcY: safeSrcY,
+        safeSrcWidth: safeSrcWidth,
+        safeSrcHeight: safeSrcHeight
       });
       
-      setupCropInteractions();
-      container.appendChild(currentImageState.cropOverlay);
+      // Set canvas to the exact crop dimensions
+      canvas.width = Math.round(safeSrcWidth);
+      canvas.height = Math.round(safeSrcHeight);
+      
+      // Draw only the cropped portion
+      ctx.drawImage(
+        img, // source image
+        safeSrcX, safeSrcY, safeSrcWidth, safeSrcHeight, // source rectangle (crop area)
+        0, 0, safeSrcWidth, safeSrcHeight // destination rectangle (full canvas)
+      );
+    } else {
+      // For non-crop: use full image with transformations
+      canvas.width = naturalWidth;
+      canvas.height = naturalHeight;
+      
+      // Apply transformations
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(currentImageState.rotation * Math.PI / 180);
+      ctx.scale(currentImageState.scale, currentImageState.scale);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      
+      // Draw the full image
+      ctx.drawImage(img, 0, 0, naturalWidth, naturalHeight);
     }
+    
+    // Convert to blob
+    canvas.toBlob(resolve);
+  });
+}
+
+function setupCropInteractions() {
+  let isDragging = false;
+  let isResizing = false;
+  let resizeDirection = '';
+  let startX, startY;
+  
+  const container = currentImageState.element.parentElement;
+  
+  currentImageState.cropOverlay.addEventListener('mousedown', startDrag);
+  
+  function startDrag(e) {
+    if (e.target.classList.contains('crop-handle')) {
+      isResizing = true;
+      resizeDirection = e.target.classList[1].split('-')[2];
+    } else {
+      isDragging = true;
+    }
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    e.preventDefault();
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', stopDrag);
+  }
+  
+  function handleMove(e) {
+    if (!isDragging && !isResizing) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    const area = currentImageState.displayedImageArea;
+    
+    if (isDragging) {
+      currentImageState.cropStartX = Math.max(area.left, currentImageState.cropStartX + dx);
+      currentImageState.cropStartY = Math.max(area.top, currentImageState.cropStartY + dy);
+      currentImageState.cropStartX = Math.min(area.left + area.width - currentImageState.cropWidth, currentImageState.cropStartX);
+      currentImageState.cropStartY = Math.min(area.top + area.height - currentImageState.cropHeight, currentImageState.cropStartY);
+    } else if (isResizing) {
+      if (resizeDirection.includes('e')) {
+        currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth + dx);
+        currentImageState.cropWidth = Math.min(area.left + area.width - currentImageState.cropStartX, currentImageState.cropWidth);
+      }
+      if (resizeDirection.includes('w')) {
+        currentImageState.cropStartX = Math.max(area.left, currentImageState.cropStartX + dx);
+        currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth - dx);
+      }
+      if (resizeDirection.includes('s')) {
+        currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight + dy);
+        currentImageState.cropHeight = Math.min(area.top + area.height - currentImageState.cropStartY, currentImageState.cropHeight);
+      }
+      if (resizeDirection.includes('n')) {
+        currentImageState.cropStartY = Math.max(area.top, currentImageState.cropStartY + dy);
+        currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight - dy);
+      }
+    }
+    
+    updateCropOverlay();
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+  
+  function stopDrag() {
+    isDragging = false;
+    isResizing = false;
+    document.removeEventListener('mousemove', handleMove);
+    document.removeEventListener('mouseup', stopDrag);
+  }
+}
+
+function getEditedImageBlob() {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = currentImageState.element;
+    
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+    
+    if (currentImageState.isCropping && currentImageState.cropWidth > 0 && currentImageState.cropHeight > 0) {
+      const area = currentImageState.displayedImageArea;
+      
+      // Calculate the scale factors between displayed area and natural image
+      const scaleX = naturalWidth / area.width;
+      const scaleY = naturalHeight / area.height;
+      
+      // Convert crop coordinates from displayed pixels to natural pixels
+      // Subtract the image offset within the container to get coordinates relative to the actual image
+      const srcX = (currentImageState.cropStartX - area.left) * scaleX;
+      const srcY = (currentImageState.cropStartY - area.top) * scaleY;
+      const srcWidth = currentImageState.cropWidth * scaleX;
+      const srcHeight = currentImageState.cropHeight * scaleY;
+      
+      // Ensure we don't go beyond image boundaries
+      const safeSrcX = Math.max(0, Math.min(srcX, naturalWidth - 1));
+      const safeSrcY = Math.max(0, Math.min(srcY, naturalHeight - 1));
+      const safeSrcWidth = Math.max(1, Math.min(srcWidth, naturalWidth - safeSrcX));
+      const safeSrcHeight = Math.max(1, Math.min(srcHeight, naturalHeight - safeSrcY));
+      
+      // Set canvas to the exact crop dimensions
+      canvas.width = Math.round(safeSrcWidth);
+      canvas.height = Math.round(safeSrcHeight);
+      
+      // Draw only the cropped portion
+      ctx.drawImage(
+        img, // source image
+        safeSrcX, safeSrcY, safeSrcWidth, safeSrcHeight, // source rectangle (crop area)
+        0, 0, safeSrcWidth, safeSrcHeight // destination rectangle (full canvas)
+      );
+    } else {
+      // For non-crop: use full image with transformations
+      canvas.width = naturalWidth;
+      canvas.height = naturalHeight;
+      
+      // Apply transformations
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(currentImageState.rotation * Math.PI / 180);
+      ctx.scale(currentImageState.scale, currentImageState.scale);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      
+      // Draw the full image
+      ctx.drawImage(img, 0, 0, naturalWidth, naturalHeight);
+    }
+    
+    // Convert to blob
+    canvas.toBlob(resolve);
+  });
+}
 
     function removeCropOverlay() {
       if (currentImageState.cropOverlay) {
@@ -998,68 +1306,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       }
     }
 
-    function setupCropInteractions() {
-      let isDragging = false;
-      let isResizing = false;
-      let resizeDirection = '';
-      let startX, startY;
-      
-      currentImageState.cropOverlay.addEventListener('mousedown', startDrag);
-      
-      function startDrag(e) {
-        if (e.target.classList.contains('crop-handle')) {
-          isResizing = true;
-          resizeDirection = e.target.classList[1].split('-')[2];
-        } else {
-          isDragging = true;
-        }
-        
-        startX = e.clientX;
-        startY = e.clientY;
-        
-        e.preventDefault();
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('mouseup', stopDrag);
+function setupCropInteractions() {
+  let isDragging = false;
+  let isResizing = false;
+  let resizeDirection = '';
+  let startX, startY;
+  
+  const container = currentImageState.element.parentElement;
+  const containerRect = container.getBoundingClientRect();
+  
+  currentImageState.cropOverlay.addEventListener('mousedown', startDrag);
+  
+  function startDrag(e) {
+    if (e.target.classList.contains('crop-handle')) {
+      isResizing = true;
+      resizeDirection = e.target.classList[1].split('-')[2];
+    } else {
+      isDragging = true;
+    }
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    e.preventDefault();
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', stopDrag);
+  }
+  
+  function handleMove(e) {
+    if (!isDragging && !isResizing) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    const imageRect = currentImageState.element.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const imageLeft = imageRect.left - containerRect.left;
+    const imageTop = imageRect.top - containerRect.top;
+    
+    if (isDragging) {
+      currentImageState.cropStartX = Math.max(imageLeft, currentImageState.cropStartX + dx);
+      currentImageState.cropStartY = Math.max(imageTop, currentImageState.cropStartY + dy);
+      currentImageState.cropStartX = Math.min(imageLeft + imageRect.width - currentImageState.cropWidth, currentImageState.cropStartX);
+      currentImageState.cropStartY = Math.min(imageTop + imageRect.height - currentImageState.cropHeight, currentImageState.cropStartY);
+    } else if (isResizing) {
+      if (resizeDirection.includes('e')) {
+        currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth + dx);
+        currentImageState.cropWidth = Math.min(imageLeft + imageRect.width - currentImageState.cropStartX, currentImageState.cropWidth);
       }
-      
-      function handleMove(e) {
-        if (!isDragging && !isResizing) return;
-        
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        
-        if (isDragging) {
-          currentImageState.cropStartX = Math.max(0, currentImageState.cropStartX + dx);
-          currentImageState.cropStartY = Math.max(0, currentImageState.cropStartY + dy);
-        } else if (isResizing) {
-          if (resizeDirection.includes('e')) {
-            currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth + dx);
-          }
-          if (resizeDirection.includes('w')) {
-            currentImageState.cropStartX = Math.max(0, currentImageState.cropStartX + dx);
-            currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth - dx);
-          }
-          if (resizeDirection.includes('s')) {
-            currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight + dy);
-          }
-          if (resizeDirection.includes('n')) {
-            currentImageState.cropStartY = Math.max(0, currentImageState.cropStartY + dy);
-            currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight - dy);
-          }
-        }
-        
-        updateCropOverlay();
-        startX = e.clientX;
-        startY = e.clientY;
+      if (resizeDirection.includes('w')) {
+        currentImageState.cropStartX = Math.max(imageLeft, currentImageState.cropStartX + dx);
+        currentImageState.cropWidth = Math.max(50, currentImageState.cropWidth - dx);
       }
-      
-      function stopDrag() {
-        isDragging = false;
-        isResizing = false;
-        document.removeEventListener('mousemove', handleMove);
-        document.removeEventListener('mouseup', stopDrag);
+      if (resizeDirection.includes('s')) {
+        currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight + dy);
+        currentImageState.cropHeight = Math.min(imageTop + imageRect.height - currentImageState.cropStartY, currentImageState.cropHeight);
+      }
+      if (resizeDirection.includes('n')) {
+        currentImageState.cropStartY = Math.max(imageTop, currentImageState.cropStartY + dy);
+        currentImageState.cropHeight = Math.max(50, currentImageState.cropHeight - dy);
       }
     }
+    
+    updateCropOverlay();
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+  
+  function stopDrag() {
+    isDragging = false;
+    isResizing = false;
+    document.removeEventListener('mousemove', handleMove);
+    document.removeEventListener('mouseup', stopDrag);
+  }
+}
     
     function updateCropOverlay() {
       if (currentImageState.cropOverlay) {
@@ -1070,58 +1390,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       }
     }
 
-    function getEditedImageBlob() {
-      return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = currentImageState.element;
-        
-        // Set canvas dimensions based on whether we're cropping
-        if (currentImageState.isCropping && currentImageState.cropWidth > 0 && currentImageState.cropHeight > 0) {
-          // For crop: use the crop dimensions
-          const scaleX = img.naturalWidth / img.width;
-          const scaleY = img.naturalHeight / img.height;
-          
-          canvas.width = currentImageState.cropWidth * scaleX;
-          canvas.height = currentImageState.cropHeight * scaleY;
-          
-          // Calculate the source crop coordinates in natural image dimensions
-          const srcX = currentImageState.cropStartX * scaleX;
-          const srcY = currentImageState.cropStartY * scaleY;
-          const srcWidth = currentImageState.cropWidth * scaleX;
-          const srcHeight = currentImageState.cropHeight * scaleY;
-          
-          // Apply transformations to the context before drawing
-          ctx.translate(canvas.width / 2, canvas.height / 2);
-          ctx.rotate(currentImageState.rotation * Math.PI / 180);
-          ctx.scale(currentImageState.scale, currentImageState.scale);
-          ctx.translate(-canvas.width / 2, -canvas.height / 2);
-          
-          // Draw the cropped portion
-          ctx.drawImage(
-            img,
-            srcX, srcY, srcWidth, srcHeight,  // source rectangle (crop area)
-            0, 0, canvas.width, canvas.height // destination rectangle (full canvas)
-          );
-        } else {
-          // For non-crop: use full image dimensions
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
-          
-          // Apply transformations
-          ctx.translate(canvas.width / 2, canvas.height / 2);
-          ctx.rotate(currentImageState.rotation * Math.PI / 180);
-          ctx.scale(currentImageState.scale, currentImageState.scale);
-          ctx.translate(-canvas.width / 2, -canvas.height / 2);
-          
-          // Draw the full image
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        }
-        
-        // Convert to blob
-        canvas.toBlob(resolve);
-      });
+function getEditedImageBlob() {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = currentImageState.element;
+    
+    // Get the actual displayed dimensions of the image
+    const displayedRect = img.getBoundingClientRect();
+    const displayedWidth = displayedRect.width;
+    const displayedHeight = displayedRect.height;
+    
+    // Get the natural/original dimensions
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+    
+    // Calculate scaling factors
+    const scaleX = naturalWidth / displayedWidth;
+    const scaleY = naturalHeight / displayedHeight;
+    
+    if (currentImageState.isCropping && currentImageState.cropWidth > 0 && currentImageState.cropHeight > 0) {
+      // Convert crop coordinates from displayed pixels to natural pixels
+      const srcX = currentImageState.cropStartX * scaleX;
+      const srcY = currentImageState.cropStartY * scaleY;
+      const srcWidth = currentImageState.cropWidth * scaleX;
+      const srcHeight = currentImageState.cropHeight * scaleY;
+      
+      // Ensure we don't go beyond image boundaries
+      const safeSrcX = Math.max(0, Math.min(srcX, naturalWidth - 1));
+      const safeSrcY = Math.max(0, Math.min(srcY, naturalHeight - 1));
+      const safeSrcWidth = Math.max(1, Math.min(srcWidth, naturalWidth - safeSrcX));
+      const safeSrcHeight = Math.max(1, Math.min(srcHeight, naturalHeight - safeSrcY));
+      
+      // Set canvas to the exact crop dimensions
+      canvas.width = Math.round(safeSrcWidth);
+      canvas.height = Math.round(safeSrcHeight);
+      
+      // Draw only the cropped portion
+      ctx.drawImage(
+        img, // source image
+        safeSrcX, safeSrcY, safeSrcWidth, safeSrcHeight, // source rectangle (crop area)
+        0, 0, safeSrcWidth, safeSrcHeight // destination rectangle (full canvas)
+      );
+    } else {
+      // For non-crop: use full image with transformations
+      canvas.width = naturalWidth;
+      canvas.height = naturalHeight;
+      
+      // Apply transformations
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(currentImageState.rotation * Math.PI / 180);
+      ctx.scale(currentImageState.scale, currentImageState.scale);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      
+      // Draw the full image
+      ctx.drawImage(img, 0, 0, naturalWidth, naturalHeight);
     }
+    
+    // Convert to blob
+    canvas.toBlob(resolve);
+  });
+}
 
     async function saveEditedImage() {
       if (!currentImageState.element || !previewState.currentFilePath) {
@@ -1164,6 +1493,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
           const timestamp = result.cacheBuster || Date.now();
           currentImageState.element.src = currentImageState.originalSrc.split('?')[0] + '?t=' + timestamp;
           currentImageState.originalSrc = currentImageState.element.src;
+                // CRITICAL FIX: Deactivate cropping mode after successful save
+      if (currentImageState.isCropping) {
+        toggleCropMode(); // This will remove the crop overlay and set isCropping to false
+      }
           
           // Show success message
           showNotification('Image saved successfully!', 'success');
