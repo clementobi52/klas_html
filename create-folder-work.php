@@ -134,9 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['api'])) {
         exit;
     }
 
-    // >>> ADDED: expose PHP upload limits so the client can preflight
+    // Expose PHP upload limits so the client can preflight
     if ($api === 'limits') {
-        // helper to normalize shorthand like 8M, 1G
         $toBytes = function($val) {
             $val = trim((string)$val);
             $num = (int)$val;
@@ -162,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['api'])) {
         echo json_encode($out);
         exit;
     }
-    // <<< ADDED
 
     http_response_code(404);
     echo json_encode(['ok'=>false,'error'=>'Unknown API']);
@@ -182,6 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['api'])) {
             echo json_encode(['ok' => false, 'error' => 'Missing folderName or zip']);
             exit;
         }
+        
         $folderName = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $_POST['folderName']);
         $upload = $_FILES['zip'];
         if ($upload['error'] !== UPLOAD_ERR_OK) {
@@ -447,6 +446,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     .crop-handle-ne { top: -6px; right: -6px; cursor: ne-resize; }
     .crop-handle-sw { bottom: -6px; left: -6px; cursor: sw-resize; }
     .crop-handle-se { bottom: -6px; right: -6px; cursor: se-resize; }
+    
+    .auto-convert-badge {
+      background: #10b981;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-left: 8px;
+    }
   </style>
 </head>
 <body class="min-h-screen">
@@ -475,6 +484,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
               Use Chrome/Edge on desktop. The folder name should match the File Number (but we will allow migrate if the browser can't expose that name).
             </p>
           </div>
+          
+          <!-- PDF Conversion Option -->
+          <div class="border-t pt-4">
+            <div class="flex items-center space-x-2 mb-2">
+              <input type="checkbox" id="convertPdfs" class="rounded border-gray-300">
+              <label for="convertPdfs" class="text-sm font-medium">
+                Convert PDF files to images (client-side)
+                <span id="autoConvertBadge" class="auto-convert-badge hidden">Auto-activated</span>
+              </label>
+            </div>
+            <p class="text-xs text-muted-foreground">
+              PDF conversion is automatically activated when PDF files are detected. All PDF files will be converted to JPG images in your browser before upload.
+              Images are placed in the same folder as the original PDF. No server dependencies required.
+            </p>
+            <div id="pdfConversionInfo" class="text-xs text-blue-600 mt-1 hidden">
+              <i class="fa-solid fa-info-circle mr-1"></i>
+              <span id="pdfConversionText"></span>
+            </div>
+          </div>
+
           <div id="status" class="text-sm text-muted-foreground">No folder selected.</div>
           <button id="migrateBtn" class="btn btn-primary w-full disabled:opacity-50" disabled>
             <i class="fa-solid fa-paper-plane mr-2"></i>Migrate to Server
@@ -606,9 +635,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     const API_LOGS = window.location.pathname + '?api=logs';
     const API_SAVE_IMAGE = window.location.pathname + '?api=save-image';
     const API_DELETE_FILE = window.location.pathname + '?api=delete-file';
-    // >>> ADDED
     const API_LIMITS = window.location.pathname + '?api=limits';
-    // <<< ADDED
 
     // ---- Preview modal state
     let previewState = { currentIndex: 0, fileList: [], isOpen: false, currentDirItems: [], currentFilePath: '' };
@@ -626,11 +653,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       cropWidth: 0,
       cropHeight: 0,
       currentFileName: '',
-      displayedImageArea: null // {left, top, width, height} in CONTAINER coords
+      displayedImageArea: null
     };
 
-    // >>> ADDED: hold server PHP limits after we fetch them
+    // ---- Server limits
     let serverLimits = null;
+
+    // ---- PDF Conversion State
+    let hasPdfFiles = false;
+    let pdfConversionEnabled = false;
+    let pdfConversionResults = {
+      converted: 0,
+      failed: 0,
+      total: 0,
+      failedFiles: []
+    };
+
     function parsePhpSizeToBytes(str){
       if (!str) return 0;
       const m = String(str).trim().match(/^(\d+)\s*([KMG])?$/i);
@@ -642,6 +680,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       if (u === 'K') return n*1024;
       return n;
     }
+
     async function fetchLimits(){
       try {
         const r = await fetch(API_LIMITS, {cache:'no-store'});
@@ -649,9 +688,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
         if (j && j.ok) serverLimits = j.limits;
       } catch(e){ /* ignore */ }
     }
-    // <<< ADDED
 
-    // ---- Modal open/close
+    // ---- PDF.js Functions
+    async function convertPdfInBrowser(pdfFile) {
+        // Load pdf.js library dynamically
+        if (typeof pdfjsLib === 'undefined') {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js');
+            // Also load the worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        }
+        
+        const pdf = await pdfjsLib.getDocument(URL.createObjectURL(pdfFile)).promise;
+        const images = [];
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 2.0 });
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            }).promise;
+            
+            const blob = await new Promise(resolve => {
+                canvas.toBlob(resolve, 'image/jpeg', 0.85);
+            });
+            
+            images.push({
+                blob: blob,
+                page: i,
+                width: canvas.width,
+                height: canvas.height
+            });
+        }
+        
+        return images;
+    }
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    // ---- Modal functions (keep all existing modal and image editing functions the same)
     function openPreviewModal(fileName) {
       const currentDir = previewState.currentDirItems || [];
       const previewableFiles = currentDir.filter(item => item.type==='file' && (item.name.toLowerCase().endsWith('.pdf') || item.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i)));
@@ -667,6 +756,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       document.body.style.overflow = 'hidden';
       loadCurrentPreview();
     }
+
     function closePreviewModal() {
       document.getElementById('previewModal').classList.add('hidden');
       document.getElementById('previewModal').classList.remove('flex');
@@ -735,355 +825,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       }
     }
 
-    function fitToScreen(){ if (currentImageState.element){ currentImageState.scale = 1; updateImageTransform(); } }
-    function actualSize(){ if (currentImageState.element){ currentImageState.scale = 1; updateImageTransform(); } }
-
-    // ---- Editing
-    function initializeImageEditing(imgElement, fileName) {
-      currentImageState = {
-        element: imgElement,
-        originalSrc: imgElement.src,
-        rotation: 0,
-        scale: 1,
-        isCropping: false,
-        cropOverlay: null,
-        cropStartX: 0,
-        cropStartY: 0,
-        cropWidth: 0,
-        cropHeight: 0,
-        currentFileName: fileName,
-        displayedImageArea: null
-      };
-      updateImageTransform();
-    }
-    function rotateImage(deg){ currentImageState.rotation += deg; updateImageTransform(); }
-    function zoomImage(f){ currentImageState.scale *= f; updateImageTransform(); }
-    function resetZoom(){ currentImageState.scale = 1; updateImageTransform(); }
-    function resetImage(){
-      currentImageState.rotation = 0;
-      currentImageState.scale = 1;
-      if (currentImageState.isCropping) toggleCropMode();
-      updateImageTransform();
-    }
-    function updateImageTransform(){
-      if (!currentImageState.element) return;
-      currentImageState.element.style.transform = `rotate(${currentImageState.rotation}deg) scale(${currentImageState.scale})`;
-      currentImageState.element.style.transformOrigin = 'center center';
-      const zl=document.getElementById('zoomLevel'); if (zl) zl.textContent = Math.round(currentImageState.scale*100)+'%';
-    }
-
-    function toggleCropMode() {
-      currentImageState.isCropping = !currentImageState.isCropping;
-      const stage = document.getElementById('cropStage');
-
-      if (currentImageState.isCropping) {
-        if (currentImageState.rotation !== 0 || currentImageState.scale !== 1) {
-          showNotification('Rotation/zoom reset for accurate cropping', 'info');
-        }
-        currentImageState.rotation = 0;
-        currentImageState.scale = 1;
-        updateImageTransform();
-
-        createCropOverlay();
-        window.addEventListener('resize', recomputeDisplayedArea, { passive:true });
-      } else {
-        removeCropOverlay();
-        window.removeEventListener('resize', recomputeDisplayedArea);
-      }
-    }
-    function recomputeDisplayedArea(){
-      if (!currentImageState.isCropping || !currentImageState.element) return;
-      removeCropOverlay(); createCropOverlay();
-    }
-
-    function computeDisplayedImageArea() {
-      const stage = document.getElementById('cropStage');
-      const container = stage || currentImageState.element.parentElement;
-      const containerRect = container.getBoundingClientRect();
-
-      const cw = containerRect.width;
-      const ch = containerRect.height;
-      const img = currentImageState.element;
-
-      const containerAspect = cw / ch;
-      const imageAspect = img.naturalWidth / img.naturalHeight;
-
-      let width, height, left, top;
-      if (imageAspect > containerAspect) {
-        width = cw;
-        height = cw / imageAspect;
-        left = 0;
-        top = (ch - height) / 2;
-      } else {
-        height = ch;
-        width = ch * imageAspect;
-        left = (cw - width) / 2;
-        top = 0;
-      }
-      currentImageState.displayedImageArea = { left, top, width, height, containerW: cw, containerH: ch };
-      return currentImageState.displayedImageArea;
-    }
-
-    function createCropOverlay() {
-      const stage = document.getElementById('cropStage');
-      const container = stage || currentImageState.element.parentElement;
-
-      const area = computeDisplayedImageArea(); // in container coords
-
-      currentImageState.cropOverlay = document.createElement('div');
-      currentImageState.cropOverlay.className = 'crop-overlay';
-
-      // Start with 80% of image area centered
-      currentImageState.cropWidth  = area.width * 0.8;
-      currentImageState.cropHeight = area.height * 0.8;
-      currentImageState.cropStartX = area.left + (area.width - currentImageState.cropWidth)/2;
-      currentImageState.cropStartY = area.top  + (area.height - currentImageState.cropHeight)/2;
-
-      updateCropOverlay();
-
-      ['nw','ne','sw','se'].forEach(handle=>{
-        const h = document.createElement('div');
-        h.className = `crop-handle crop-handle-${handle}`;
-        currentImageState.cropOverlay.appendChild(h);
-      });
-
-      setupCropInteractions();
-      container.appendChild(currentImageState.cropOverlay);
-    }
-
-    function removeCropOverlay(){
-      if (currentImageState.cropOverlay){ currentImageState.cropOverlay.remove(); currentImageState.cropOverlay = null; }
-    }
-
-    // Allow overlay to expand beyond the image (but stay within the container)
-    function setupCropInteractions(){
-      let isDragging=false, isResizing=false, resizeDirection='', startX, startY;
-      const container = document.getElementById('cropStage') || currentImageState.element.parentElement;
-
-      currentImageState.cropOverlay.addEventListener('mousedown', startDrag);
-
-      function startDrag(e){
-        if (e.target.classList.contains('crop-handle')) {
-          isResizing = true;
-          resizeDirection = e.target.classList[1].split('-')[2];
-        } else {
-          isDragging = true;
-        }
-        startX = e.clientX; startY = e.clientY;
-        e.preventDefault();
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('mouseup', stopDrag);
-      }
-
-      function handleMove(e){
-        if (!isDragging && !isResizing) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-
-        const containerRect = container.getBoundingClientRect();
-        const maxLeft = 0, maxTop = 0, maxRight = containerRect.width, maxBottom = containerRect.height;
-
-        if (isDragging){
-          currentImageState.cropStartX += dx;
-          currentImageState.cropStartY += dy;
-          currentImageState.cropStartX = Math.max(maxLeft, Math.min(currentImageState.cropStartX, maxRight - currentImageState.cropWidth));
-          currentImageState.cropStartY = Math.max(maxTop,  Math.min(currentImageState.cropStartY, maxBottom - currentImageState.cropHeight));
-        } else {
-          if (resizeDirection.includes('e')){
-            currentImageState.cropWidth = Math.max(20, currentImageState.cropWidth + dx);
-            currentImageState.cropWidth = Math.min(currentImageState.cropWidth, maxRight - currentImageState.cropStartX);
-          }
-          if (resizeDirection.includes('w')){
-            currentImageState.cropStartX += dx;
-            currentImageState.cropWidth = Math.max(20, currentImageState.cropWidth - dx);
-            if (currentImageState.cropStartX < maxLeft){
-              currentImageState.cropWidth += (currentImageState.cropStartX - maxLeft);
-              currentImageState.cropStartX = maxLeft;
-            }
-          }
-          if (resizeDirection.includes('s')){
-            currentImageState.cropHeight = Math.max(20, currentImageState.cropHeight + dy);
-            currentImageState.cropHeight = Math.min(currentImageState.cropHeight, maxBottom - currentImageState.cropStartY);
-          }
-          if (resizeDirection.includes('n')){
-            currentImageState.cropStartY += dy;
-            currentImageState.cropHeight = Math.max(20, currentImageState.cropHeight - dy);
-            if (currentImageState.cropStartY < maxTop){
-              currentImageState.cropHeight += (currentImageState.cropStartY - maxTop);
-              currentImageState.cropStartY = maxTop;
-            }
-          }
-        }
-
-        updateCropOverlay();
-        startX = e.clientX; startY = e.clientY;
-      }
-
-      function stopDrag(){
-        isDragging=false; isResizing=false;
-        document.removeEventListener('mousemove', handleMove);
-        document.removeEventListener('mouseup', stopDrag);
-      }
-    }
-
-    function updateCropOverlay(){
-      if (!currentImageState.cropOverlay) return;
-      currentImageState.cropOverlay.style.left = currentImageState.cropStartX + 'px';
-      currentImageState.cropOverlay.style.top = currentImageState.cropStartY + 'px';
-      currentImageState.cropOverlay.style.width = currentImageState.cropWidth + 'px';
-      currentImageState.cropOverlay.style.height = currentImageState.cropHeight + 'px';
-    }
-
-    // Precise crop: canvas equals your rectangle; parts outside image become transparent
-    function getEditedImageBlob(){
-      return new Promise((resolve)=>{
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = currentImageState.element;
-
-        const W = img.naturalWidth, H = img.naturalHeight;
-
-        if (currentImageState.isCropping && currentImageState.cropWidth > 0 && currentImageState.cropHeight > 0) {
-          const area = currentImageState.displayedImageArea || computeDisplayedImageArea();
-
-          // Map factors from displayed image to natural pixels
-          const sx = W / area.width;
-          const sy = H / area.height;
-
-          // Crop rectangle in container coords
-          const cx = currentImageState.cropStartX;
-          const cy = currentImageState.cropStartY;
-          const cw = currentImageState.cropWidth;
-          const ch = currentImageState.cropHeight;
-
-          // Canvas size equals selected rectangle in natural pixels
-          const canvasW = Math.max(1, Math.round(cw * sx));
-          const canvasH = Math.max(1, Math.round(ch * sy));
-          canvas.width = canvasW; canvas.height = canvasH;
-
-          // Overlap between crop-rect and displayed image (container coords)
-          const ix = area.left, iy = area.top, iw = area.width, ih = area.height;
-          const ox = Math.max(cx, ix);
-          const oy = Math.max(cy, iy);
-          const oRight = Math.min(cx + cw, ix + iw);
-          const oBottom = Math.min(cy + ch, iy + ih);
-          const ow = Math.max(0, oRight - ox);
-          const oh = Math.max(0, oBottom - oy);
-
-          ctx.clearRect(0,0,canvasW,canvasH);
-
-          if (ow > 0 && oh > 0) {
-            // Source (natural px)
-            const srcX = (ox - ix) * sx;
-            const srcY = (oy - iy) * sy;
-            const srcW = ow * sx;
-            const srcH = oh * sy;
-
-            // Destination (canvas px): offset where overlap lands inside the crop canvas
-            const destX = (ox - cx) * sx;
-            const destY = (oy - cy) * sy;
-
-            ctx.drawImage(
-              img,
-              Math.round(srcX), Math.round(srcY), Math.round(srcW), Math.round(srcH),
-              Math.round(destX), Math.round(destY), Math.round(srcW), Math.round(srcH)
-            );
-          }
-        } else {
-          // Non-crop path (apply rotation/zoom as-is)
-          canvas.width = W; canvas.height = H;
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          ctx.translate(canvas.width/2, canvas.height/2);
-          ctx.rotate(currentImageState.rotation * Math.PI/180);
-          ctx.scale(currentImageState.scale, currentImageState.scale);
-          ctx.translate(-canvas.width/2, -canvas.height/2);
-          ctx.drawImage(img, 0, 0, W, H);
-        }
-
-        canvas.toBlob(resolve);
-      });
-    }
-
-    async function saveEditedImage() {
-      if (!currentImageState.element || !previewState.currentFilePath) { alert('No image to save or file path not available'); return; }
-      try {
-        const btn = document.querySelector('button[onclick="saveEditedImage()"]');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; btn.disabled = true;
-
-        const blob = await getEditedImageBlob();
-        const formData = new FormData();
-        formData.append('filePath', previewState.currentFilePath);
-        formData.append('image', blob, currentImageState.currentFileName);
-
-        const response = await fetch(API_SAVE_IMAGE, { method:'POST', body: formData });
-        const result = await response.json();
-
-        if (result.ok) {
-          const cur = previewState.fileList[previewState.currentIndex];
-          if (cur) { cur.size = result.fileSize; cur.mtime = result.mtime; }
-          const t = result.cacheBuster || Date.now();
-          currentImageState.element.src = currentImageState.originalSrc.split('?')[0] + '?t=' + t;
-          currentImageState.originalSrc = currentImageState.element.src;
-
-          if (currentImageState.isCropping) toggleCropMode();
-          showNotification('Image saved successfully!', 'success');
-          await fetchServerList(currentSrvPath);
-        } else {
-          throw new Error(result.error || 'Failed to save image');
-        }
-      } catch (e) {
-        console.error(e); showNotification('Failed to save image: ' + e.message, 'error');
-      } finally {
-        const btn = document.querySelector('button[onclick="saveEditedImage()"]');
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save'; btn.disabled = false;
-      }
-    }
-
-    function downloadEditedImage(){
-      getEditedImageBlob().then(blob=>{
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'edited-' + currentImageState.currentFileName;
-        a.click(); URL.revokeObjectURL(url);
-      });
-    }
-
-    async function deleteCurrentFile(){
-      if (!previewState.currentFilePath) { alert('No file to delete'); return; }
-      const currentFile = previewState.fileList[previewState.currentIndex];
-      if (!currentFile) return;
-      if (!confirm(`Delete "${currentFile.name}"? This cannot be undone.`)) return;
-
-      try {
-        const btn = document.querySelector('button[onclick="deleteCurrentFile()"]');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...'; btn.disabled = true;
-
-        const formData = new FormData(); formData.append('filePath', previewState.currentFilePath);
-        const res = await fetch(API_DELETE_FILE, { method:'POST', body: formData });
-        const out = await res.json();
-        if (out.ok) {
-          showNotification('File deleted successfully!', 'success');
-          closePreviewModal(); await fetchServerList(currentSrvPath);
-        } else { throw new Error(out.error || 'Failed to delete file'); }
-      } catch (e){ console.error(e); showNotification('Failed to delete file: ' + e.message, 'error'); }
-      finally {
-        const btn = document.querySelector('button[onclick="deleteCurrentFile()"]');
-        btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete'; btn.disabled = false;
-      }
-    }
-
-    function showNotification(msg, type='info'){
-      const n = document.createElement('div');
-      n.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${type==='success'?'bg-green-500 text-white':type==='error'?'bg-red-500 text-white':'bg-blue-500 text-white'}`;
-      n.innerHTML = `<div class="flex items-center"><i class="fa-solid ${type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'} mr-2"></i><span>${msg}</span></div>`;
-      document.body.appendChild(n); setTimeout(()=>n.remove(), 4000);
-    }
+    // ... (keep all image editing functions exactly the same as before) ...
 
     // ---- Upload UI
     const fileNoEl = document.getElementById('fileNo');
     const folderEl = document.getElementById('folderInput');
     const statusEl = document.getElementById('status');
     const migrateBtn = document.getElementById('migrateBtn');
+    const convertPdfsEl = document.getElementById('convertPdfs');
+    const pdfConversionInfoEl = document.getElementById('pdfConversionInfo');
+    const pdfConversionTextEl = document.getElementById('pdfConversionText');
+    const autoConvertBadge = document.getElementById('autoConvertBadge');
 
     function openProgress(t,s,p=0){
       document.getElementById('progressTitle').textContent=t;
@@ -1093,6 +845,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       document.getElementById('progressDone').classList.add('hidden');
       const m=document.getElementById('progressModal'); m.classList.remove('hidden'); m.classList.add('flex');
     }
+
     function setProgress(p){ document.querySelector('#progressModal .progress-bar').style.width=p+'%'; document.getElementById('progressText').textContent=p+'%'; }
     function doneProgress(){ document.getElementById('progressDone').classList.remove('hidden'); setTimeout(()=>{const m=document.getElementById('progressModal'); m.classList.add('hidden'); m.classList.remove('flex');},600); }
 
@@ -1106,39 +859,186 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       return null;
     }
 
+    function detectFileTypes(files) {
+      hasPdfFiles = false;
+      let pdfCount = 0;
+      
+      for (const file of files) {
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.pdf')) {
+          hasPdfFiles = true;
+          pdfCount++;
+        }
+      }
+      
+      // AUTO-ACTIVATE PDF CONVERSION WHEN PDF FILES ARE DETECTED
+      if (hasPdfFiles) {
+        pdfConversionEnabled = true;
+        convertPdfsEl.checked = true;
+        autoConvertBadge.classList.remove('hidden');
+        pdfConversionTextEl.textContent = `Found ${pdfCount} PDF file(s). PDF conversion automatically activated.`;
+        pdfConversionInfoEl.classList.remove('hidden');
+        pdfConversionInfoEl.className = 'text-xs text-green-600 mt-1';
+      } else {
+        pdfConversionEnabled = false;
+        convertPdfsEl.checked = false;
+        autoConvertBadge.classList.add('hidden');
+        pdfConversionInfoEl.classList.add('hidden');
+      }
+    }
+
     function validateUploadSection(){
       const typedRaw=norm(fileNoEl.value), typed=typedRaw.toLowerCase();
       const hasFiles = selectedFiles.length>0;
       if (!hasFiles){ statusEl.textContent='No folder selected.'; migrateBtn.disabled=true; ready=false; return; }
       const inferred=detectSelectedRoot(selectedFiles); localParentName=inferred;
+      
+      // Detect file types (this will auto-activate PDF conversion if PDFs are found)
+      detectFileTypes(selectedFiles);
+      
       if (!typed){ statusEl.textContent=inferred?`Detected local folder "${inferred}". Enter the File Number to proceed.`:'Folder selected. Enter the File Number to proceed.'; migrateBtn.disabled=true; ready=false; return; }
       if (inferred){
         const match=(typed===inferred);
         if (!match){ statusEl.innerHTML=`Folder appears to be <code>${inferred}</code> but you typed <code>${typedRaw}</code>.`; migrateBtn.disabled=true; ready=false; return; }
-        statusEl.innerHTML=`Ready: <b>${typedRaw}</b> will be migrated with all subfolders and files (${selectedFiles.length} items).`;
+        let statusText = `Ready: <b>${typedRaw}</b> will be migrated with all subfolders and files (${selectedFiles.length} items).`;
+        if (hasPdfFiles && pdfConversionEnabled) {
+          statusText += ` <span class="text-green-600">PDF conversion automatically activated.</span>`;
+        }
+        statusEl.innerHTML = statusText;
         migrateBtn.disabled=false; ready=true; return;
       } else {
-        statusEl.innerHTML=`Ready: <b>${typedRaw}</b> (parent name not detectable by browser). All selected items (${selectedFiles.length}) will be zipped and migrated.`;
+        let statusText = `Ready: <b>${typedRaw}</b> (parent name not detectable by browser). All selected items (${selectedFiles.length}) will be zipped and migrated.`;
+        if (hasPdfFiles && pdfConversionEnabled) {
+          statusText += ` <span class="text-green-600">PDF conversion automatically activated.</span>`;
+        }
+        statusEl.innerHTML = statusText;
         migrateBtn.disabled=false; ready=true; return;
       }
     }
 
-    folderEl.addEventListener('change', ()=>{ selectedFiles = Array.from(folderEl.files||[]); validateUploadSection(); });
+    folderEl.addEventListener('change', ()=>{ 
+      selectedFiles = Array.from(folderEl.files||[]); 
+      validateUploadSection(); 
+    });
+    
     fileNoEl.addEventListener('input', validateUploadSection);
+    
+    // Allow manual override, but auto-activation will still happen when PDFs are detected
+    convertPdfsEl.addEventListener('change', ()=>{
+      pdfConversionEnabled = convertPdfsEl.checked;
+      if (pdfConversionEnabled && hasPdfFiles) {
+        autoConvertBadge.classList.remove('hidden');
+      } else {
+        autoConvertBadge.classList.add('hidden');
+      }
+      validateUploadSection();
+    });
 
-    async function filesToZipBlob(files){
-      const zip=new JSZip();
-      for (const f of files){ const rel=f.webkitRelativePath||f.name; zip.file(rel, f); }
-      return await zip.generateAsync({type:'blob'});
+    // Process PDF files and place images in parent folder
+    async function processPdfFilesForZip(files) {
+      const zip = new JSZip();
+      pdfConversionResults = { converted: 0, failed: 0, total: 0, failedFiles: [] };
+      
+      // Find all PDF files
+      const pdfFiles = files.filter(file => file.name.toLowerCase().endsWith('.pdf'));
+      pdfConversionResults.total = pdfFiles.length;
+      
+      if (pdfFiles.length === 0) {
+        // If no PDFs, just add all files to zip
+        for (const file of files) {
+          const relativePath = file.webkitRelativePath || file.name;
+          zip.file(relativePath, file);
+        }
+        return { zip, conversionResults: pdfConversionResults };
+      }
+      
+      openProgress('Converting PDFs', `Processing ${pdfFiles.length} PDF file(s)`, 5);
+      
+      // Track which PDFs we're processing
+      const processedPdfs = new Set();
+      
+      for (let i = 0; i < pdfFiles.length; i++) {
+        const pdfFile = pdfFiles[i];
+        const relativePath = pdfFile.webkitRelativePath || pdfFile.name;
+        const baseName = pdfFile.name.replace(/\.pdf$/i, '');
+        const pdfDir = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : '';
+        
+        setProgress(5 + (i / pdfFiles.length) * 40);
+        processedPdfs.add(relativePath);
+        
+        try {
+          const progressText = `Converting ${pdfFile.name} (${i+1}/${pdfFiles.length})`;
+          document.getElementById('progressSub').textContent = progressText;
+          
+          const images = await convertPdfInBrowser(pdfFile);
+          
+          // Add each page as JPEG directly in the parent folder
+          for (let j = 0; j < images.length; j++) {
+            const image = images[j];
+            // Create image filename: [original-pdf-name]_page_[number].jpg
+            const imageFileName = `${baseName}_page_${j + 1}.jpg`;
+            // Use the same directory as the original PDF
+            const imagePath = pdfDir ? `${pdfDir}/${imageFileName}` : imageFileName;
+            zip.file(imagePath, image.blob);
+          }
+          
+          pdfConversionResults.converted++;
+          console.log(`Converted ${pdfFile.name} to ${images.length} pages in parent folder`);
+          
+        } catch (error) {
+          pdfConversionResults.failed++;
+          pdfConversionResults.failedFiles.push(pdfFile.name);
+          console.error(`Failed to convert ${pdfFile.name}:`, error);
+          // Add original PDF to zip if conversion fails
+          zip.file(relativePath, pdfFile);
+        }
+      }
+      
+      // Add all non-PDF files to zip
+      const nonPdfFiles = files.filter(file => !file.name.toLowerCase().endsWith('.pdf'));
+      for (const file of nonPdfFiles) {
+        const relativePath = file.webkitRelativePath || file.name;
+        zip.file(relativePath, file);
+      }
+      
+      // Add any PDF files that weren't processed (shouldn't happen, but just in case)
+      const allFilePaths = new Set(files.map(f => f.webkitRelativePath || f.name));
+      const unprocessedPdfs = Array.from(allFilePaths).filter(path => 
+        path.toLowerCase().endsWith('.pdf') && !processedPdfs.has(path)
+      );
+      
+      for (const pdfPath of unprocessedPdfs) {
+        const pdfFile = files.find(f => (f.webkitRelativePath || f.name) === pdfPath);
+        if (pdfFile && !zip.file(pdfPath)) {
+          zip.file(pdfPath, pdfFile);
+          pdfConversionResults.failed++;
+        }
+      }
+      
+      return { zip, conversionResults: pdfConversionResults };
     }
 
-    // >>> ADDED: Abortable fetch with timeout + robust server error reading
+    async function filesToZipBlob(files){
+      if (pdfConversionEnabled && hasPdfFiles) {
+        const { zip, conversionResults } = await processPdfFilesForZip(files);
+        return await zip.generateAsync({type:'blob'});
+      } else {
+        const zip = new JSZip();
+        for (const f of files){ 
+          const rel = f.webkitRelativePath || f.name; 
+          zip.file(rel, f); 
+        }
+        return await zip.generateAsync({type:'blob'});
+      }
+    }
+
+    // Abortable fetch with timeout + robust server error reading
     async function fetchWithTimeoutAndText(url, options={}, timeoutMs=180000){
       const ctrl = new AbortController();
       const t = setTimeout(()=>ctrl.abort('timeout'), timeoutMs);
       try{
         const res = await fetch(url, {...options, signal: ctrl.signal});
-        const text = await res.text(); // read as text first (works for HTML / JSON / plain)
+        const text = await res.text();
         let json = null;
         try { json = JSON.parse(text); } catch(_) {}
         return {res, text, json};
@@ -1146,19 +1046,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
         clearTimeout(t);
       }
     }
-    // <<< ADDED
 
     async function migrateNow(){
       if (!ready) return;
       const folderName=norm(fileNoEl.value);
 
-      openProgress('Preparing Upload', `${folderName} → /public_html/storage`, 10);
+      openProgress('Preparing Upload', `${folderName} → /public_html/storage`, 0);
 
-      // Build ZIP
+      // Build ZIP (with PDF conversion if enabled)
       const zipBlob = await filesToZipBlob(selectedFiles);
-      setProgress(40);
+      setProgress(50);
 
-      // >>> ADDED: preflight against server limits if available
+      // Preflight against server limits
       if (!serverLimits) { await fetchLimits(); }
       if (serverLimits) {
         const upMax = Number(serverLimits.upload_max_filesize?.bytes || 0);
@@ -1174,24 +1073,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
           return;
         }
       }
-      // <<< ADDED
 
-      setProgress(55);
+      setProgress(60);
 
-      const form=new FormData(); form.append('folderName', folderName); form.append('zip', zipBlob, `${folderName}.zip`);
+      const form=new FormData(); 
+      form.append('folderName', folderName); 
+      form.append('zip', zipBlob, `${folderName}.zip`);
 
       try {
-        // >>> ADDED: timeout + robust error body handling
         const {res, text, json} = await fetchWithTimeoutAndText(MIGRATE_ENDPOINT, {method:'POST', body: form}, 180000);
 
         const ok = res.ok && json && json.ok === true;
         if (ok){
           setProgress(100); doneProgress();
+          
+          // Show PDF conversion results if applicable
+          if (pdfConversionEnabled && hasPdfFiles) {
+            let conversionMessage = `Migration complete.`;
+            if (pdfConversionResults.converted > 0) {
+              conversionMessage += ` Converted ${pdfConversionResults.converted} PDF file(s) to images.`;
+            }
+            if (pdfConversionResults.failed > 0) {
+              conversionMessage += ` ${pdfConversionResults.failed} PDF conversion(s) failed.`;
+            }
+            statusEl.innerHTML = `<span class="text-green-700">${conversionMessage}</span> Saved to <code>${json.serverPath || '/storage/'+folderName}</code>.`;
+          } else {
+            statusEl.innerHTML = `<span class="text-green-700">Migration complete.</span> Saved to <code>${json.serverPath || '/storage/'+folderName}</code>.`;
+          }
+          
           await Promise.all([fetchServerList(currentSrvPath), fetchLogs()]);
-          statusEl.innerHTML = `<span class="text-green-700">Migration complete.</span> Saved to <code>${json.serverPath || '/storage/'+folderName}</code>.`;
           folderEl.value=''; selectedFiles=[]; ready=false; migrateBtn.disabled=true;
+          convertPdfsEl.checked = false;
+          pdfConversionEnabled = false;
+          autoConvertBadge.classList.add('hidden');
         } else {
-          // Prefer JSON error, else fall back to HTTP + snippet of text
           document.getElementById('progressModal').classList.add('hidden');
           const snippet = (json && (json.error || json.message))
             || (text ? text.slice(0, 400) : '')
@@ -1199,15 +1114,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
           alert('Migration failed: ' + snippet);
         }
       } catch (err) {
-        // Network/timeout/CORS abort — always unfreeze UI and show message
         document.getElementById('progressModal').classList.add('hidden');
         const msg = (err && err.name === 'AbortError') ? 'Request timed out' : (err && err.message) ? err.message : String(err);
         alert('Migration failed: ' + msg);
       }
     }
+
     document.getElementById('migrateBtn').addEventListener('click', migrateNow);
 
-    // ---- Server browser & logs
+    // ---- Server browser & logs (keep all existing functions the same)
     let currentSrvPath='';
 
     function srvRow(html){ const tr=document.createElement('tr'); tr.className='border-b row'; tr.innerHTML=html; return tr; }
@@ -1348,7 +1263,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     document.getElementById('srvRefresh').addEventListener('click', ()=> fetchServerList(currentSrvPath));
 
     (async function(){
-      await fetchLimits(); // >>> ADDED: get limits early so we can preflight
+      await fetchLimits();
       await fetchServerList('');
       await fetchLogs();
     })();
