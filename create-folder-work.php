@@ -740,7 +740,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
         });
     }
 
-    // ---- Modal functions (keep all existing modal and image editing functions the same)
+    // ---- Modal open/close
     function openPreviewModal(fileName) {
       const currentDir = previewState.currentDirItems || [];
       const previewableFiles = currentDir.filter(item => item.type==='file' && (item.name.toLowerCase().endsWith('.pdf') || item.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i)));
@@ -825,7 +825,364 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
       }
     }
 
-    // ... (keep all image editing functions exactly the same as before) ...
+    function fitToScreen(){ if (currentImageState.element){ currentImageState.scale = 1; updateImageTransform(); } }
+    function actualSize(){ if (currentImageState.element){ currentImageState.scale = 1; updateImageTransform(); } }
+
+    // ---- Image Editing Functions (RESTORED)
+    function initializeImageEditing(imgElement, fileName) {
+      currentImageState = {
+        element: imgElement,
+        originalSrc: imgElement.src,
+        rotation: 0,
+        scale: 1,
+        isCropping: false,
+        cropOverlay: null,
+        cropStartX: 0,
+        cropStartY: 0,
+        cropWidth: 0,
+        cropHeight: 0,
+        currentFileName: fileName,
+        displayedImageArea: null
+      };
+      updateImageTransform();
+    }
+
+    function rotateImage(deg){ 
+      currentImageState.rotation += deg; 
+      updateImageTransform(); 
+    }
+
+    function zoomImage(factor){ 
+      currentImageState.scale *= factor; 
+      updateImageTransform(); 
+    }
+
+    function resetImage(){
+      currentImageState.rotation = 0;
+      currentImageState.scale = 1;
+      if (currentImageState.isCropping) toggleCropMode();
+      updateImageTransform();
+    }
+
+    function updateImageTransform(){
+      if (!currentImageState.element) return;
+      currentImageState.element.style.transform = `rotate(${currentImageState.rotation}deg) scale(${currentImageState.scale})`;
+      currentImageState.element.style.transformOrigin = 'center center';
+      const zl = document.getElementById('zoomLevel'); 
+      if (zl) zl.textContent = Math.round(currentImageState.scale * 100) + '%';
+    }
+
+    function toggleCropMode() {
+      currentImageState.isCropping = !currentImageState.isCropping;
+      const stage = document.getElementById('cropStage');
+
+      if (currentImageState.isCropping) {
+        if (currentImageState.rotation !== 0 || currentImageState.scale !== 1) {
+          showNotification('Rotation/zoom reset for accurate cropping', 'info');
+        }
+        currentImageState.rotation = 0;
+        currentImageState.scale = 1;
+        updateImageTransform();
+
+        createCropOverlay();
+        window.addEventListener('resize', recomputeDisplayedArea, { passive:true });
+      } else {
+        removeCropOverlay();
+        window.removeEventListener('resize', recomputeDisplayedArea);
+      }
+    }
+
+    function recomputeDisplayedArea(){
+      if (!currentImageState.isCropping || !currentImageState.element) return;
+      removeCropOverlay(); 
+      createCropOverlay();
+    }
+
+    function computeDisplayedImageArea() {
+      const stage = document.getElementById('cropStage');
+      const container = stage || currentImageState.element.parentElement;
+      const containerRect = container.getBoundingClientRect();
+
+      const cw = containerRect.width;
+      const ch = containerRect.height;
+      const img = currentImageState.element;
+
+      const containerAspect = cw / ch;
+      const imageAspect = img.naturalWidth / img.naturalHeight;
+
+      let width, height, left, top;
+      if (imageAspect > containerAspect) {
+        width = cw;
+        height = cw / imageAspect;
+        left = 0;
+        top = (ch - height) / 2;
+      } else {
+        height = ch;
+        width = ch * imageAspect;
+        left = (cw - width) / 2;
+        top = 0;
+      }
+      currentImageState.displayedImageArea = { left, top, width, height, containerW: cw, containerH: ch };
+      return currentImageState.displayedImageArea;
+    }
+
+    function createCropOverlay() {
+      const stage = document.getElementById('cropStage');
+      const container = stage || currentImageState.element.parentElement;
+
+      const area = computeDisplayedImageArea();
+
+      currentImageState.cropOverlay = document.createElement('div');
+      currentImageState.cropOverlay.className = 'crop-overlay';
+
+      // Start with 80% of image area centered
+      currentImageState.cropWidth  = area.width * 0.8;
+      currentImageState.cropHeight = area.height * 0.8;
+      currentImageState.cropStartX = area.left + (area.width - currentImageState.cropWidth)/2;
+      currentImageState.cropStartY = area.top  + (area.height - currentImageState.cropHeight)/2;
+
+      updateCropOverlay();
+
+      ['nw','ne','sw','se'].forEach(handle=>{
+        const h = document.createElement('div');
+        h.className = `crop-handle crop-handle-${handle}`;
+        currentImageState.cropOverlay.appendChild(h);
+      });
+
+      setupCropInteractions();
+      container.appendChild(currentImageState.cropOverlay);
+    }
+
+    function removeCropOverlay(){
+      if (currentImageState.cropOverlay){ 
+        currentImageState.cropOverlay.remove(); 
+        currentImageState.cropOverlay = null; 
+      }
+    }
+
+    function setupCropInteractions(){
+      let isDragging=false, isResizing=false, resizeDirection='', startX, startY;
+      const container = document.getElementById('cropStage') || currentImageState.element.parentElement;
+
+      currentImageState.cropOverlay.addEventListener('mousedown', startDrag);
+
+      function startDrag(e){
+        if (e.target.classList.contains('crop-handle')) {
+          isResizing = true;
+          resizeDirection = e.target.classList[1].split('-')[2];
+        } else {
+          isDragging = true;
+        }
+        startX = e.clientX; 
+        startY = e.clientY;
+        e.preventDefault();
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', stopDrag);
+      }
+
+      function handleMove(e){
+        if (!isDragging && !isResizing) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        const containerRect = container.getBoundingClientRect();
+        const maxLeft = 0, maxTop = 0, maxRight = containerRect.width, maxBottom = containerRect.height;
+
+        if (isDragging){
+          currentImageState.cropStartX += dx;
+          currentImageState.cropStartY += dy;
+          currentImageState.cropStartX = Math.max(maxLeft, Math.min(currentImageState.cropStartX, maxRight - currentImageState.cropWidth));
+          currentImageState.cropStartY = Math.max(maxTop,  Math.min(currentImageState.cropStartY, maxBottom - currentImageState.cropHeight));
+        } else {
+          if (resizeDirection.includes('e')){
+            currentImageState.cropWidth = Math.max(20, currentImageState.cropWidth + dx);
+            currentImageState.cropWidth = Math.min(currentImageState.cropWidth, maxRight - currentImageState.cropStartX);
+          }
+          if (resizeDirection.includes('w')){
+            currentImageState.cropStartX += dx;
+            currentImageState.cropWidth = Math.max(20, currentImageState.cropWidth - dx);
+            if (currentImageState.cropStartX < maxLeft){
+              currentImageState.cropWidth += (currentImageState.cropStartX - maxLeft);
+              currentImageState.cropStartX = maxLeft;
+            }
+          }
+          if (resizeDirection.includes('s')){
+            currentImageState.cropHeight = Math.max(20, currentImageState.cropHeight + dy);
+            currentImageState.cropHeight = Math.min(currentImageState.cropHeight, maxBottom - currentImageState.cropStartY);
+          }
+          if (resizeDirection.includes('n')){
+            currentImageState.cropStartY += dy;
+            currentImageState.cropHeight = Math.max(20, currentImageState.cropHeight - dy);
+            if (currentImageState.cropStartY < maxTop){
+              currentImageState.cropHeight += (currentImageState.cropStartY - maxTop);
+              currentImageState.cropStartY = maxTop;
+            }
+          }
+        }
+
+        updateCropOverlay();
+        startX = e.clientX; startY = e.clientY;
+      }
+
+      function stopDrag(){
+        isDragging=false; 
+        isResizing=false;
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', stopDrag);
+      }
+    }
+
+    function updateCropOverlay(){
+      if (!currentImageState.cropOverlay) return;
+      currentImageState.cropOverlay.style.left = currentImageState.cropStartX + 'px';
+      currentImageState.cropOverlay.style.top = currentImageState.cropStartY + 'px';
+      currentImageState.cropOverlay.style.width = currentImageState.cropWidth + 'px';
+      currentImageState.cropOverlay.style.height = currentImageState.cropHeight + 'px';
+    }
+
+    function getEditedImageBlob(){
+      return new Promise((resolve)=>{
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = currentImageState.element;
+
+        const W = img.naturalWidth, H = img.naturalHeight;
+
+        if (currentImageState.isCropping && currentImageState.cropWidth > 0 && currentImageState.cropHeight > 0) {
+          const area = currentImageState.displayedImageArea || computeDisplayedImageArea();
+
+          // Map factors from displayed image to natural pixels
+          const sx = W / area.width;
+          const sy = H / area.height;
+
+          // Crop rectangle in container coords
+          const cx = currentImageState.cropStartX;
+          const cy = currentImageState.cropStartY;
+          const cw = currentImageState.cropWidth;
+          const ch = currentImageState.cropHeight;
+
+          // Canvas size equals selected rectangle in natural pixels
+          const canvasW = Math.max(1, Math.round(cw * sx));
+          const canvasH = Math.max(1, Math.round(ch * sy));
+          canvas.width = canvasW; canvas.height = canvasH;
+
+          // Overlap between crop-rect and displayed image (container coords)
+          const ix = area.left, iy = area.top, iw = area.width, ih = area.height;
+          const ox = Math.max(cx, ix);
+          const oy = Math.max(cy, iy);
+          const oRight = Math.min(cx + cw, ix + iw);
+          const oBottom = Math.min(cy + ch, iy + ih);
+          const ow = Math.max(0, oRight - ox);
+          const oh = Math.max(0, oBottom - oy);
+
+          ctx.clearRect(0,0,canvasW,canvasH);
+
+          if (ow > 0 && oh > 0) {
+            // Source (natural px)
+            const srcX = (ox - ix) * sx;
+            const srcY = (oy - iy) * sy;
+            const srcW = ow * sx;
+            const srcH = oh * sy;
+
+            // Destination (canvas px): offset where overlap lands inside the crop canvas
+            const destX = (ox - cx) * sx;
+            const destY = (oy - cy) * sy;
+
+            ctx.drawImage(
+              img,
+              Math.round(srcX), Math.round(srcY), Math.round(srcW), Math.round(srcH),
+              Math.round(destX), Math.round(destY), Math.round(srcW), Math.round(srcH)
+            );
+          }
+        } else {
+          // Non-crop path (apply rotation/zoom as-is)
+          canvas.width = W; canvas.height = H;
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          ctx.translate(canvas.width/2, canvas.height/2);
+          ctx.rotate(currentImageState.rotation * Math.PI/180);
+          ctx.scale(currentImageState.scale, currentImageState.scale);
+          ctx.translate(-canvas.width/2, -canvas.height/2);
+          ctx.drawImage(img, 0, 0, W, H);
+        }
+
+        canvas.toBlob(resolve);
+      });
+    }
+
+    async function saveEditedImage() {
+      if (!currentImageState.element || !previewState.currentFilePath) { alert('No image to save or file path not available'); return; }
+      try {
+        const btn = document.querySelector('button[onclick="saveEditedImage()"]');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; btn.disabled = true;
+
+        const blob = await getEditedImageBlob();
+        const formData = new FormData();
+        formData.append('filePath', previewState.currentFilePath);
+        formData.append('image', blob, currentImageState.currentFileName);
+
+        const response = await fetch(API_SAVE_IMAGE, { method:'POST', body: formData });
+        const result = await response.json();
+
+        if (result.ok) {
+          const cur = previewState.fileList[previewState.currentIndex];
+          if (cur) { cur.size = result.fileSize; cur.mtime = result.mtime; }
+          const t = result.cacheBuster || Date.now();
+          currentImageState.element.src = currentImageState.originalSrc.split('?')[0] + '?t=' + t;
+          currentImageState.originalSrc = currentImageState.element.src;
+
+          if (currentImageState.isCropping) toggleCropMode();
+          showNotification('Image saved successfully!', 'success');
+          await fetchServerList(currentSrvPath);
+        } else {
+          throw new Error(result.error || 'Failed to save image');
+        }
+      } catch (e) {
+        console.error(e); showNotification('Failed to save image: ' + e.message, 'error');
+      } finally {
+        const btn = document.querySelector('button[onclick="saveEditedImage()"]');
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save'; btn.disabled = false;
+      }
+    }
+
+    function downloadEditedImage(){
+      getEditedImageBlob().then(blob=>{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'edited-' + currentImageState.currentFileName;
+        a.click(); URL.revokeObjectURL(url);
+      });
+    }
+
+    async function deleteCurrentFile(){
+      if (!previewState.currentFilePath) { alert('No file to delete'); return; }
+      const currentFile = previewState.fileList[previewState.currentIndex];
+      if (!currentFile) return;
+      if (!confirm(`Delete "${currentFile.name}"? This cannot be undone.`)) return;
+
+      try {
+        const btn = document.querySelector('button[onclick="deleteCurrentFile()"]');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...'; btn.disabled = true;
+
+        const formData = new FormData(); formData.append('filePath', previewState.currentFilePath);
+        const res = await fetch(API_DELETE_FILE, { method:'POST', body: formData });
+        const out = await res.json();
+        if (out.ok) {
+          showNotification('File deleted successfully!', 'success');
+          closePreviewModal(); await fetchServerList(currentSrvPath);
+        } else { throw new Error(out.error || 'Failed to delete file'); }
+      } catch (e){ console.error(e); showNotification('Failed to delete file: ' + e.message, 'error'); }
+      finally {
+        const btn = document.querySelector('button[onclick="deleteCurrentFile()"]');
+        btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete'; btn.disabled = false;
+      }
+    }
+
+    function showNotification(msg, type='info'){
+      const n = document.createElement('div');
+      n.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${type==='success'?'bg-green-500 text-white':type==='error'?'bg-red-500 text-white':'bg-blue-500 text-white'}`;
+      n.innerHTML = `<div class="flex items-center"><i class="fa-solid ${type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'} mr-2"></i><span>${msg}</span></div>`;
+      document.body.appendChild(n); setTimeout(()=>n.remove(), 4000);
+    }
 
     // ---- Upload UI
     const fileNoEl = document.getElementById('fileNo');
@@ -1122,7 +1479,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
 
     document.getElementById('migrateBtn').addEventListener('click', migrateNow);
 
-    // ---- Server browser & logs (keep all existing functions the same)
+    // ---- Server browser & logs
     let currentSrvPath='';
 
     function srvRow(html){ const tr=document.createElement('tr'); tr.className='border-b row'; tr.innerHTML=html; return tr; }
