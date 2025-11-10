@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File History Modal</title>
+    <style>
+        /* Base styles */
+        :root {
+            --primary: #111827;
+            --primary-foreground: #ffffff;
+            --muted: #f9fafb;
+            --muted-foreground: #6b7280;
+            --border: #e5e7eb;
+            --destructive: #ef4444;
+            --destructive-foreground: #ffffff;
+            --secondary: #f3f4f6;
+            --secondary-foreground: #111827;
+            
+            /* Color palette for light theme */
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6b7280;
+            
+            /* Gray shades */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Accent colors */
+            --amber-600: #d97706;
+            --green-50: #f0fdf4;
+            --green-600: #10b981;
+            --emerald-50: #ecfdf5;
+            --emerald-950: #022c22;
+            --white: #ffffff;
+            --black: #000000;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.5;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 56rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-description {
+            color: var(--text-muted);
+        }
+
+        /* Card styles */
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .gradient-card {
+            background: linear-gradient(to right, var(--gray-50), var(--gray-100));
+            border-color: var(--gray-200);
+        }
+
+        .green-gradient-card {
+            background: linear-gradient(to right, var(--green-50), var(--emerald-50));
+        }
+
+        /* Badge styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .badge-outline {
+            background-color: transparent;
+            border-color: var(--gray-300);
+            color: var(--gray-700);
+        }
+
+        .badge-default {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .badge-secondary {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        /* Button styles */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            gap: 0.5rem;
+        }
+
+        .button:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+
+        .button-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .button-primary:hover {
+            background-color: var(--gray-800);
+        }
+
+        .button-outline {
+            background-color: transparent;
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        .button-outline:hover {
+            background-color: var(--muted);
+        }
+
+        /* Tabs styles */
+        .tabs {
+            width: 100%;
+        }
+
+        .tabs-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            width: 100%;
+            background-color: var(--muted);
+            border-radius: 0.375rem;
+            padding: 0.25rem;
+        }
+
+        .tabs-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .tabs-trigger.active {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabs-content {
+            margin-top: 1.5rem;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Timeline styles */
+        .timeline-container {
+            position: relative;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--gray-400), var(--gray-600));
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .timeline-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .timeline-node-circle {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: linear-gradient(to bottom right, var(--gray-600), var(--gray-800));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .timeline-node-number {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .timeline-arrow {
+            position: absolute;
+            left: 4rem;
+            margin-top: 3rem;
+            transform: translateX(-50%);
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        /* Utility classes */
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+
+        .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+
+        .space-y-1 > * + * {
+            margin-top: 0.25rem;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, 1fr);
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .gap-3 {
+            gap: 0.75rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .items-start {
+            align-items: flex-start;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-end {
+            justify-content: flex-end;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .flex-shrink-0 {
+            flex-shrink: 0;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+
+        .ml-6 {
+            margin-left: 1.5rem;
+        }
+
+        .ml-7 {
+            margin-left: 1.75rem;
+        }
+
+        .pt-6 {
+            padding-top: 1.5rem;
+        }
+
+        .pt-3 {
+            padding-top: 0.75rem;
+        }
+
+        .pt-4 {
+            padding-top: 1rem;
+        }
+
+        .pb-3 {
+            padding-bottom: 0.75rem;
+        }
+
+        .p-3 {
+            padding: 0.75rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-base {
+            font-size: 1rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .text-gray-500 {
+            color: var(--gray-500);
+        }
+
+        .text-gray-600 {
+            color: var(--gray-600);
+        }
+
+        .text-gray-700 {
+            color: var(--gray-700);
+        }
+
+        .text-gray-900 {
+            color: var(--gray-900);
+        }
+
+        .text-amber-600 {
+            color: var(--amber-600);
+        }
+
+        .text-green-600 {
+            color: var(--green-600);
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .capitalize {
+            text-transform: capitalize;
+        }
+
+        .tracking-wide {
+            letter-spacing: 0.025em;
+        }
+
+        .rounded {
+            border-radius: 0.25rem;
+        }
+
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        .bg-gray-50 {
+            background-color: var(--gray-50);
+        }
+
+        .bg-green-50 {
+            background-color: var(--green-50);
+        }
+
+        .border-t {
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .hover\\:shadow-lg:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .transition-shadow {
+            transition: box-shadow 0.2s;
+        }
+
+        /* Icon styles */
+        .icon {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .icon-sm {
+            width: 0.875rem;
+            height: 0.875rem;
+        }
+
+        .icon-md {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* Responsive styles for the header grid */
+        .header-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .md\\:grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .modal-content {
+                padding: 1rem;
+            }
+            
+            .modal-title {
+                font-size: 1.25rem;
+            }
+            
+            .tabs-list {
+                grid-template-columns: 1fr;
+                gap: 0.25rem;
+            }
+            
+            .tabs-trigger {
+                padding: 0.75rem;
+            }
+            
+            .timeline-item {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .timeline-line {
+                left: 1.5rem;
+            }
+            
+            .timeline-node-circle {
+                width: 3rem;
+                height: 3rem;
+            }
+            
+            .timeline-arrow {
+                left: 1.5rem;
+                margin-top: 2rem;
+                transform: rotate(90deg);
+            }
+            
+            .button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .flex.justify-end {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-overlay {
+                padding: 0.5rem;
+            }
+            
+            .modal-content {
+                padding: 0.75rem;
+            }
+            
+            .card-content {
+                padding: 1rem;
+            }
+            
+            .grid.grid-cols-2, .grid.grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal Trigger Button (for demo purposes) -->
+    <div style="padding: 2rem; display: flex; justify-content: center;">
+        <button id="openModal" class="button button-primary">Open File History Modal</button>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">File History & Transaction Timeline</h2>
+                <p class="modal-description">Property ownership and transaction history for <span id="fileNumber"></span></p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Header Info Card -->
+                <div class="card gradient-card">
+                    <div class="card-content">
+                        <div class="header-grid">
+                            <div>
+                                <p class="text-sm text-gray-600">File Number</p>
+                                <p class="text-lg font-semibold text-gray-900" id="fileNumberDisplay"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Total Transactions</p>
+                                <p class="text-lg font-semibold text-gray-900" id="totalTransactions"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Land Use</p>
+                                <p class="text-lg font-semibold text-gray-900" id="landUse"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <div class="tabs-list">
+                        <button class="tabs-trigger active" data-tab="timeline">Timeline View</button>
+                        <button class="tabs-trigger" data-tab="details">Transaction Details</button>
+                        <button class="tabs-trigger" data-tab="summary">Summary</button>
+                    </div>
+
+                    <!-- Timeline View Tab -->
+                    <div class="tabs-content">
+                        <div id="timeline-tab" class="tab-panel active">
+                            <div class="timeline-container">
+                                <div class="timeline-line"></div>
+                                <div class="space-y-8 relative z-10" id="timeline-items"></div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Details Tab -->
+                        <div id="details-tab" class="tab-panel">
+                            <div class="grid gap-4" id="transaction-details"></div>
+                        </div>
+
+                        <!-- Summary Tab -->
+                        <div id="summary-tab" class="tab-panel">
+                            <div class="card green-gradient-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Summary</h3>
+                                </div>
+                                <div class="card-content space-y-4">
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="summary-grid"></div>
+                                    <div class="border-t pt-4">
+                                        <p class="text-sm font-semibold mb-3 text-gray-900">All Transactions</p>
+                                        <ul class="space-y-2" id="transactions-list"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 justify-end border-t pt-6">
+                    <button class="button button-outline">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Report
+                    </button>
+                    <button class="button button-outline">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                        Share History
+                    </button>
+                    <button id="closeModal" class="button button-primary">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data from CSV
+        const csvData = [
+            {
+                fileNumber: "CON-COM-1987-128",
+                relatedFileNumber: "",
+                transactionType: "ASSIGNMENT",
+                originalHolder: "DANGUZA NIGERIA LIMITED",
+                currentHolder: "AMSHARIFF NIG.LTD",
+                landuse: "COMMERCIAL",
+                location: "DARKI VILLAGE",
+                transactionDate: "",
+                serialNo: "87",
+                pageNo: "87",
+                volNo: "13",
+                regTime: "",
+                regDate: "23-1-1996"
+            },
+            {
+                fileNumber: "CON-COM-1987-128",
+                relatedFileNumber: "",
+                transactionType: "ASSIGNMENT",
+                originalHolder: "AMSHARIFF NIG. LTD",
+                currentHolder: "SANI BROTHERS TRANSPORT",
+                landuse: "COMMERCIAL",
+                location: "DARKI VILLAGE",
+                transactionDate: "",
+                serialNo: "195",
+                pageNo: "195",
+                volNo: "19",
+                regTime: "",
+                regDate: "7-2-2001"
+            },
+            {
+                fileNumber: "CON-COM-1987-128",
+                relatedFileNumber: "",
+                transactionType: "ASSIGNMENT",
+                originalHolder: "SANI BROTHERS TRANSPORT",
+                currentHolder: "DANTSOHO PETROL MKT LTD",
+                landuse: "COMMERCIAL",
+                location: "DARKI VILLAGE",
+                transactionDate: "",
+                serialNo: "68",
+                pageNo: "68",
+                volNo: "42",
+                regTime: "",
+                regDate: "17-12-2014"
+            }
+        ];
+
+        // Process CSV data into property history format
+        const propertyHistory = {
+            fileNumber: csvData[0].fileNumber,
+            landuse: csvData[0].landuse,
+            location: csvData[0].location,
+            originalOwner: csvData[0].originalHolder,
+            currentOwner: csvData[csvData.length - 1].currentHolder,
+            totalTransactions: csvData.length,
+            transactions: csvData.map((row, index) => ({
+                date: row.regDate,
+                owner: row.currentHolder,
+                originalHolder: row.originalHolder,
+                transactionType: row.transactionType,
+                description: `${row.transactionType} from ${row.originalHolder} to ${row.currentHolder}`,
+                serialNo: row.serialNo,
+                pageNo: row.pageNo,
+                volNo: row.volNo,
+                propertyDetails: {
+                    area: row.landuse,
+                    location: row.location
+                }
+            }))
+        };
+
+        // Modal state
+        let activeTab = "timeline";
+
+        // DOM elements
+        const modal = document.getElementById('modal');
+        const openModalBtn = document.getElementById('openModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const tabTriggers = document.querySelectorAll('.tabs-trigger');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+
+        // Initialize modal with data
+        function initializeModal() {
+            document.getElementById('fileNumber').textContent = propertyHistory.fileNumber;
+            document.getElementById('fileNumberDisplay').textContent = propertyHistory.fileNumber;
+            document.getElementById('totalTransactions').textContent = propertyHistory.totalTransactions;
+            document.getElementById('landUse').textContent = propertyHistory.landuse;
+            
+            renderTimeline();
+            renderTransactionDetails();
+            renderSummary();
+        }
+
+        // Render timeline view
+        function renderTimeline() {
+            const timelineContainer = document.getElementById('timeline-items');
+            timelineContainer.innerHTML = '';
+            
+            propertyHistory.transactions.forEach((transaction, index) => {
+                const transactionElement = document.createElement('div');
+                transactionElement.className = 'timeline-item';
+                
+                transactionElement.innerHTML = `
+                    <div class="timeline-node">
+                        <div class="timeline-node-circle">
+                            <div class="timeline-node-number">${index + 1}</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 mt-2">
+                        <div class="card hover:shadow-lg transition-shadow">
+                            <div class="card-content">
+                                <div class="space-y-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="icon-md text-gray-600 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            <div>
+                                                <p class="text-xs text-gray-500 uppercase tracking-wide">
+                                                    ${index === 0 ? "Original Holder" : "Current Holder"}
+                                                </p>
+                                                <p class="text-lg font-bold text-gray-900">
+                                                    ${transaction.owner}
+                                                </p>
+                                                <div class="badge badge-outline mt-1 text-xs capitalize">
+                                                    ${transaction.transactionType}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        ${index < propertyHistory.transactions.length - 1 ? 
+                                            `<div class="timeline-arrow">
+                                                <svg class="icon-md text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg>
+                                            </div>` : ''}
+                                    </div>
+                                    <div class="flex items-center gap-3 text-sm">
+                                        <svg class="icon-sm text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <span class="text-gray-700">
+                                            ${formatDate(transaction.date)}
+                                        </span>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="icon-sm text-amber-600 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                            <div>
+                                                <p class="text-xs text-gray-600 uppercase tracking-wide">
+                                                    Transaction Details
+                                                </p>
+                                                <p class="font-semibold text-gray-900">
+                                                    ${transaction.transactionType}
+                                                </p>
+                                                <p class="text-xs text-gray-600 mt-1">
+                                                    From: ${transaction.originalHolder}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        ${transaction.description ? `
+                                            <p class="text-sm text-gray-700 ml-7">
+                                                ${transaction.description}
+                                            </p>
+                                        ` : ''}
+                                    </div>
+                                    <div class="bg-green-50 rounded-lg p-3 space-y-2">
+                                        <p class="text-xs font-semibold text-gray-900 uppercase tracking-wide">
+                                            Property Details
+                                        </p>
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-2 text-sm">
+                                                <svg class="icon-sm text-gray-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                                    <circle cx="12" cy="10" r="3"></circle>
+                                                </svg>
+                                                <span class="text-gray-700">
+                                                    ${transaction.propertyDetails.location}
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-gray-700 ml-6">
+                                                Land Use: ${transaction.propertyDetails.area}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm border-t pt-3">
+                                        <p class="text-xs text-gray-600 uppercase tracking-wide mb-2">
+                                            Registration Details
+                                        </p>
+                                        <div class="grid grid-cols-3 gap-2 text-xs">
+                                            <div>
+                                                <p class="text-gray-600">Serial No:</p>
+                                                <p class="font-semibold text-gray-900">${transaction.serialNo}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-600">Page No:</p>
+                                                <p class="font-semibold text-gray-900">${transaction.pageNo}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-600">Vol No:</p>
+                                                <p class="font-semibold text-gray-900">${transaction.volNo}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                timelineContainer.appendChild(transactionElement);
+            });
+        }
+
+        // Render transaction details
+        function renderTransactionDetails() {
+            const detailsContainer = document.getElementById('transaction-details');
+            detailsContainer.innerHTML = '';
+            
+            propertyHistory.transactions.forEach((transaction, index) => {
+                const transactionElement = document.createElement('div');
+                transactionElement.className = 'card';
+                
+                transactionElement.innerHTML = `
+                    <div class="card-header pb-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="card-title">
+                                    Transaction ${index + 1}: ${transaction.transactionType}
+                                </h3>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    ${formatDate(transaction.date)}
+                                </p>
+                            </div>
+                            <div class="badge ${index === propertyHistory.transactions.length - 1 ? 'badge-default' : 'badge-secondary'}">
+                                ${index === propertyHistory.transactions.length - 1 ? 'Current' : 'Historical'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content space-y-3">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Original Holder</p>
+                                <p class="font-semibold text-gray-900">${transaction.originalHolder}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Current Holder</p>
+                                <p class="font-semibold text-gray-900">${transaction.owner}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Transaction Type</p>
+                                <p class="font-semibold text-gray-900">${transaction.transactionType}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Land Use</p>
+                                <p class="font-semibold text-gray-900">${transaction.propertyDetails.area}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Serial No</p>
+                                <p class="font-semibold text-gray-900">${transaction.serialNo}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Page No</p>
+                                <p class="font-semibold text-gray-900">${transaction.pageNo}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase">Vol No</p>
+                                <p class="font-semibold text-gray-900">${transaction.volNo}</p>
+                            </div>
+                        </div>
+                        ${transaction.description ? `
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase mb-1">Description</p>
+                                <p class="text-sm text-gray-700">${transaction.description}</p>
+                            </div>
+                        ` : ''}
+                        <div class="bg-gray-50 rounded p-3 text-sm">
+                            <p class="text-xs text-gray-600 uppercase mb-2">Property Location</p>
+                            <p class="font-semibold text-gray-900">${transaction.propertyDetails.location}</p>
+                        </div>
+                    </div>
+                `;
+                
+                detailsContainer.appendChild(transactionElement);
+            });
+        }
+
+        // Render summary
+        function renderSummary() {
+            const summaryGrid = document.getElementById('summary-grid');
+            const transactionsList = document.getElementById('transactions-list');
+            
+            // Calculate period in years
+            const lastTransactionDate = parseDate(propertyHistory.transactions[propertyHistory.transactions.length - 1].date);
+            const originalDate = parseDate(propertyHistory.transactions[0].date);
+            const periodYears = lastTransactionDate.getFullYear() - originalDate.getFullYear();
+            
+            summaryGrid.innerHTML = `
+                <div>
+                    <p class="text-xs text-gray-600 uppercase">Original Holder</p>
+                    <p class="font-bold text-lg text-gray-900">${propertyHistory.originalOwner}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600 uppercase">Current Holder</p>
+                    <p class="font-bold text-lg text-gray-900">${propertyHistory.currentOwner}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600 uppercase">Total Transactions</p>
+                    <p class="font-bold text-lg text-gray-900">${propertyHistory.totalTransactions}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600 uppercase">Original Date</p>
+                    <p class="font-bold text-gray-900">${formatDate(propertyHistory.transactions[0].date)}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600 uppercase">Last Updated</p>
+                    <p class="font-bold text-gray-900">${formatDate(propertyHistory.transactions[propertyHistory.transactions.length - 1].date)}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600 uppercase">Period (Years)</p>
+                    <p class="font-bold text-gray-900">${periodYears}</p>
+                </div>
+            `;
+            
+            transactionsList.innerHTML = propertyHistory.transactions.map((transaction, index) => `
+                <li class="text-sm flex items-start gap-2">
+                    <span class="text-gray-600 font-bold">${index + 1}.</span>
+                    <span class="text-gray-700">
+                        ${transaction.transactionType}: ${transaction.originalHolder} → ${transaction.owner}
+                        <span class="text-xs text-gray-500 ml-2">
+                            (${parseDate(transaction.date).getFullYear()})
+                        </span>
+                    </span>
+                </li>
+            `).join('');
+        }
+
+        // Helper function to parse date from DD-MM-YYYY format
+        function parseDate(dateString) {
+            const parts = dateString.split('-');
+            // Note: months are 0-indexed in JavaScript Date
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            const date = parseDate(dateString);
+            return date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            });
+        }
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Update active tab
+            activeTab = tabName;
+            
+            // Update tab triggers
+            tabTriggers.forEach(trigger => {
+                if (trigger.getAttribute('data-tab') === tabName) {
+                    trigger.classList.add('active');
+                } else {
+                    trigger.classList.remove('active');
+                }
+            });
+            
+            // Update tab panels
+            tabPanels.forEach(panel => {
+                if (panel.id === `${tabName}-tab`) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            });
+        }
+
+        // Event listeners
+        openModalBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            initializeModal();
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Tab switching
+        tabTriggers.forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const tabName = trigger.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        // Initialize with first tab active
+        switchTab('timeline');
+    </script>
+</body>
+</html>
