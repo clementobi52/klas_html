@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Land Registry Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'courier': ['Courier New', 'monospace'],
+                    },
+                    colors: {
+                        'parchment': {
+                            light: '#f9f9f0',
+                            DEFAULT: '#f5f5e6',
+                            dark: '#e8e8d0',
+                        }
+                    },
+                    borderColor: {
+                        'form': '#333333',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        input:focus {
+            background-color: #fffacd !important;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-parchment-dark font-courier p-5">
+    <div class="max-w-[1000px] mx-auto bg-parchment border-[3px] border-form shadow-lg relative">
+        
+
+        <!-- Header -->
+        <div class="grid grid-cols-2 gap-10 p-5 border-b-2 border-form text-center">
+            <h1 class="col-span-2 text-2xl font-normal tracking-wider mb-5">
+                R. of O/G-Item No. 
+                <input type="text" id="itemNo" class="border-b border-dashed border-form bg-transparent p-1 w-24">
+            </h1>
+        </div>
+
+        <div class="flex min-h-[500px]">
+            <!-- Sidebar -->
+            <div class="w-[150px] border-r-2 border-form bg-parchment-light">
+                <!-- Final Area -->
+                <div class="border-b-2 border-form p-4 text-center min-h-[100px] flex flex-col justify-center text-sm font-bold tracking-wider bg-parchment">
+                    <div>FINAL AREA</div>
+                    <input type="text" id="finalAreaNo" placeholder="no" class="w-4/5 mx-auto my-1 border-none border-b border-form bg-transparent text-center">
+                    <input type="text" id="finalAreaAcres" placeholder="acres" class="w-4/5 mx-auto my-1 border-none border-b border-form bg-transparent text-center">
+                    <div class="text-xs mt-1">(1 he = 2.471 acres)</div>
+                </div>
+                
+                <!-- Lands File -->
+                <div class="border-b-2 border-form p-4 text-center min-h-[100px] flex flex-col justify-center text-sm font-bold tracking-wider">
+                    <div>LANDS FILE</div>
+                </div>
+                
+                <!-- Comp No -->
+                <div class="border-b-2 border-form p-4 text-center min-h-[100px] flex flex-col justify-center text-sm font-bold tracking-wider">
+                    <div>COMP. No.</div>
+                    <input type="text" id="compNo" class="w-4/5 mx-auto my-1 border-none border-b border-form bg-transparent text-center">
+                </div>
+                
+                <!-- Plan No -->
+                <div class="border-b-2 border-form p-4 text-center min-h-[100px] flex flex-col justify-center text-sm font-bold tracking-wider">
+                    <div>PLAN. No.</div>
+                    <input type="text" id="planNo" class="w-4/5 mx-auto my-1 border-none border-b border-form bg-transparent text-center">
+                </div>
+                
+                <!-- Racing No -->
+                <div class="border-b-2 border-form p-4 text-center min-h-[100px] flex flex-col justify-center text-sm font-bold tracking-wider">
+                    <div>RACING. No.</div>
+                    <input type="text" id="racingNo" class="w-4/5 mx-auto my-1 border-none border-b border-form bg-transparent text-center">
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 grid grid-cols-2 gap-5 p-5">
+                <!-- Left Column -->
+                <div>
+                    <!-- For -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">For</label>
+                        <input type="text" id="for" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- Locality -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">Locality</label>
+                        <input type="text" id="locality" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- District -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">District</label>
+                        <input type="text" id="district" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- Admin Area -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">Admin. Area</label>
+                        <input type="text" id="adminArea" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- Approx Area -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">Approx. Area</label>
+                        <div class="flex gap-2.5 items-center">
+                            <input type="text" id="approxAreaHectares" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs flex-1">
+                            <span class="text-xs">hectares</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Acres -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider"></label>
+                        <input type="text" id="approxAreaAcres" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs" placeholder="acres">
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <!-- Plot No -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">Plot No.</label>
+                        <input type="text" id="plotNo" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- Map Sheet -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">Map Sheet</label>
+                        <input type="text" id="mapSheet" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- Scale -->
+                    <div class="grid grid-cols-[150px_1fr] gap-2.5 items-center mb-3 border-b border-gray-400 pb-2">
+                        <label class="font-bold text-xs tracking-wider">Scale</label>
+                        <input type="text" id="scale" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                    </div>
+                    
+                    <!-- Coordinates Section Title -->
+                    <div class="col-span-2 font-bold text-sm tracking-wider mt-2.5 mb-2.5 border-b-2 border-form pb-1">
+                        Coordinates of :
+                    </div>
+                    
+                    <!-- Coordinates Grid -->
+                    <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+                        <!-- N -->
+                        <div class="text-center">
+                            <label class="block text-xs font-bold mb-1">N</label>
+                            <input type="text" id="coordinateN" class="w-full border-none border-b border-dashed border-form p-1 text-center">
+                        </div>
+                        
+                        <!-- E -->
+                        <div class="text-center">
+                            <label class="block text-xs font-bold mb-1">E</label>
+                            <input type="text" id="coordinateE" class="w-full border-none border-b border-dashed border-form p-1 text-center">
+                        </div>
+                        
+                        <!-- Lat -->
+                        <div class="text-center">
+                            <label class="block text-xs font-bold mb-1">Lat.</label>
+                            <input type="text" id="coordinateLat" class="w-full border-none border-b border-dashed border-form p-1 text-center">
+                        </div>
+                        
+                        <!-- Long -->
+                        <div class="text-center">
+                            <label class="block text-xs font-bold mb-1">Long.</label>
+                            <input type="text" id="coordinateLong" class="w-full border-none border-b border-dashed border-form p-1 text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Files -->
+                <div class="col-span-2 p-2.5 border border-dashed border-gray-500 bg-parchment-light mb-4">
+                    <div class="font-bold text-xs mb-2 tracking-wider">RELATED FILES</div>
+                    <input type="text" id="relatedFiles" class="w-full border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                </div>
+
+                <!-- Bottom Section -->
+                <div class="col-span-2 grid grid-cols-2 gap-7.5 mt-4 pt-4 border-t-2 border-form">
+                    <!-- Left Bottom Group -->
+                    <div class="grid gap-3">
+                        <!-- Recommended -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Recommended</label>
+                            <input type="text" id="recommended" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Lease begins -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Lease begins</label>
+                            <input type="text" id="leaseBegins" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Surrendered / Revoked -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Surrendered / Revoked</label>
+                            <input type="text" id="surrenderedRevoked" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Assigned to -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Assigned to</label>
+                            <input type="text" id="assignedTo1" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Assigned to -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Assigned to</label>
+                            <input type="text" id="assignedTo2" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Regranted from -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Regranted from</label>
+                            <input type="text" id="regrantedFrom" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                    </div>
+
+                    <!-- Right Bottom Group -->
+                    <div class="grid gap-3">
+                        <!-- Approved -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Approved</label>
+                            <input type="text" id="approved" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Expires -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Expires</label>
+                            <input type="text" id="expires1" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- w.e.f. -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">w.e.f.</label>
+                            <input type="text" id="wef1" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- w.e.f. -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">w.e.f.</label>
+                            <input type="text" id="wef2" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                        
+                        <!-- Expires -->
+                        <div class="grid grid-cols-[120px_1fr] gap-2.5 items-center">
+                            <label class="text-xs font-bold">Expires</label>
+                            <input type="text" id="expires2" class="border-none border-b border-dashed border-form bg-transparent p-1 text-xs">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample JSON data structure
+        const sampleFormData = {
+            itemNo: "ICM 5473",
+            finalAreaNo: "",
+            finalAreaAcres: "",
+            compNo: "",
+            planNo: "",
+            racingNo: "",
+            for: "Jalanala Trading Co Ltd.",
+            locality: "Ais Kari Ldl.",
+            district: "Waze",
+            adminArea: "Lone Municipal",
+            approxAreaHectares: "",
+            approxAreaAcres: "",
+            plotNo: "1700",
+            mapSheet: "37",
+            scale: "½ inch",
+            coordinateN: "",
+            coordinateE: "",
+            coordinateLat: "",
+            coordinateLong: "",
+            relatedFiles: "C.om/Re/62/63 file Com/95/58-64 - kc358/24 273-286",
+            recommended: "",
+            leaseBegins: "",
+            surrenderedRevoked: "",
+            assignedTo1: "R.H. Verity Hunseley",
+            assignedTo2: "",
+            regrantedFrom: "",
+            approved: "",
+            expires1: "",
+            wef1: "27-10-95",
+            wef2: "",
+            expires2: ""
+        };
+
+        // Function to populate form with data
+        function populateForm(data) {
+            for (const key in data) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = data[key];
+                }
+            }
+        }
+
+        // Populate form when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            populateForm(sampleFormData);
+        });
+    </script>
+</body>
+</html>
