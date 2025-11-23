@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Tracker Dashboard - KLAS System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+        .dialog-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dialog-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .priority-LOW { background-color: #10B981; color: white; }
+        .priority-MEDIUM { background-color: #F59E0B; color: white; }
+        .priority-HIGH { background-color: #EF4444; color: white; }
+        .details-dialog {
+            max-width: 800px;
+            width: 95%;
+        }
+        .log-entry {
+            border-left: 3px solid #3B82F6;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .log-entry-active {
+            border-left-color: #10B981;
+            background-color: #F0F9FF;
+        }
+        .log-entry-completed {
+            border-left-color: #6B7280;
+        }
+        .dashboard-card {
+            transition: all 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .file-status-active {
+            background: linear-gradient(90deg, #10B981, #059669);
+        }
+        .file-status-completed {
+            background: linear-gradient(90deg, #6B7280, #4B5563);
+        }
+        .file-status-pending {
+            background: linear-gradient(90deg, #F59E0B, #D97706);
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .8; }
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .file-row {
+            transition: all 0.3s ease;
+        }
+        .file-row:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), transparent);
+            transform: translateY(-2px);
+        }
+        #charts-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        #charts-section.show {
+            max-height: 1000px;
+        }
+        .toggle-charts-btn {
+            transition: all 0.3s ease;
+        }
+        .toggle-charts-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Page Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">File Tracker Dashboard</h1>
+                <p class="text-gray-600 mt-1">Monitor all files in transit across the organization</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="createFileBtn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
+                    Create File Tracker
+                </button>
+                <button id="refreshBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i data-lucide="refresh-cw" class="h-4 w-4 mr-2"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="p-6">
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="dashboard-card bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                        <i data-lucide="file-text" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Files</p>
+                        <h3 class="text-2xl font-bold text-gray-900" id="total-files">0</h3>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="trending-up" class="h-4 w-4 text-green-500 mr-1"></i>
+                    <span>12% increase from last week</span>
+                </div>
+            </div>
+
+            <div class="dashboard-card bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                        <i data-lucide="activity" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Active Files</p>
+                        <h3 class="text-2xl font-bold text-gray-900" id="active-files">0</h3>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="clock" class="h-4 w-4 text-blue-500 mr-1"></i>
+                    <span>Currently being processed</span>
+                </div>
+            </div>
+
+            <div class="dashboard-card bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
+                        <i data-lucide="alert-triangle" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">High Priority</p>
+                        <h3 class="text-2xl font-bold text-gray-900" id="high-priority">0</h3>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="alert-circle" class="h-4 w-4 text-red-500 mr-1"></i>
+                    <span>Requires immediate attention</span>
+                </div>
+            </div>
+
+            <div class="dashboard-card bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                        <i data-lucide="building" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Offices Involved</p>
+                        <h3 class="text-2xl font-bold text-gray-900" id="offices-involved">0</h3>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i data-lucide="map-pin" class="h-4 w-4 text-purple-500 mr-1"></i>
+                        <span>Across all departments</span>
+                    </div>
+                    <button id="toggleChartsBtn" class="toggle-charts-btn inline-flex items-center px-3 py-1.5 border border-purple-300 rounded-md text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100">
+                        <i data-lucide="bar-chart-3" class="h-4 w-4 mr-1"></i>
+                        <span>Show Charts</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section (Hidden by Default) -->
+        <div id="charts-section" class="mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Priority Distribution Chart -->
+                <div class="dashboard-card bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Priority Distribution</h3>
+                        <div class="flex items-center space-x-2">
+                            <button class="priority-filter-btn px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700" data-priority="ALL">All</button>
+                            <button class="priority-filter-btn px-3 py-1 text-xs font-medium rounded-full text-gray-500 hover:bg-gray-100" data-priority="HIGH">High</button>
+                            <button class="priority-filter-btn px-3 py-1 text-xs font-medium rounded-full text-gray-500 hover:bg-gray-100" data-priority="MEDIUM">Medium</button>
+                            <button class="priority-filter-btn px-3 py-1 text-xs font-medium rounded-full text-gray-500 hover:bg-gray-100" data-priority="LOW">Low</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="priority-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Office Distribution Chart -->
+                <div class="dashboard-card bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Office Distribution</h3>
+                        <div class="flex items-center space-x-2">
+                            <button class="office-filter-btn px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700" data-office="ALL">All</button>
+                            <button class="office-filter-btn px-3 py-1 text-xs font-medium rounded-full text-gray-500 hover:bg-gray-100" data-office="TOP5">Top 5</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="office-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-input" placeholder="Search files by name, number, or tracking ID..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <select id="priority-filter" class="block w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="ALL">All Priorities</option>
+                        <option value="HIGH">High Priority</option>
+                        <option value="MEDIUM">Medium Priority</option>
+                        <option value="LOW">Low Priority</option>
+                    </select>
+                    <select id="office-filter" class="block w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="ALL">All Offices</option>
+                        <option value="OFF-001">Reception (RCP)</option>
+                        <option value="OFF-002">Customer Care (CCU)</option>
+                        <option value="OFF-003">Document Verification (DVF)</option>
+                        <option value="OFF-004">Survey Department (SUR)</option>
+                        <option value="OFF-005">Legal Department (LEG)</option>
+                        <option value="OFF-006">Planning Department (PLN)</option>
+                        <option value="OFF-007">Director's Office (DIR)</option>
+                        <option value="OFF-008">Certificate Issuance (CRT)</option>
+                        <option value="OFF-009">Archive (ARC)</option>
+                        <option value="OFF-010">Finance Department (FIN)</option>
+                        <option value="OFF-011">IT Department (ITD)</option>
+                        <option value="OFF-012">Registry (REG)</option>
+                    </select>
+                    <button id="clear-filters" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        <i data-lucide="x" class="h-4 w-4 mr-1"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Files Table -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="files" class="h-5 w-5"></i>
+                    Files in Transit
+                </h3>
+                <p class="text-sm text-gray-600 mt-1">All files currently being tracked across offices</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Details</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Office</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time in Office</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Files will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-results" class="hidden p-12 text-center">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="file-x" class="h-12 w-12 text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No files found</h3>
+                <p class="text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Dialog -->
+    <div id="details-dialog" class="dialog-overlay">
+        <div class="dialog-content details-dialog">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">File Tracker Details</h2>
+                <button id="close-details" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div id="details-content">
+                <!-- Details content will be dynamically generated -->
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button id="close-details-btn" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Close
+                </button>
+                <button id="print-details-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    <i data-lucide="printer" class="h-4 w-4 mr-2"></i>
+                    Print Details
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        const fileTrackers = [
+            {
+                fileNo: "RES-2023-4859",
+                fileName: "Alhaji Ibrahim Dantata",
+                trackingId: "TRK-A7X9B2C3D4",
+                priority: "HIGH",
+                currentOffice: "Legal Department",
+                currentOfficeId: "OFF-005",
+                logEntries: [
+                    {
+                        logId: "LOG-202306151430-123",
+                        logInTime: "14:30",
+                        logInDate: "2023-06-15",
+                        logOutTime: "16:45",
+                        logOutDate: "2023-06-15",
+                        officeId: "OFF-001",
+                        officeName: "Reception",
+                        notes: "Initial file registration",
+                        status: "completed",
+                        createdAt: "2023-06-15T14:30:00Z"
+                    },
+                    {
+                        logId: "LOG-202306160930-456",
+                        logInTime: "09:30",
+                        logInDate: "2023-06-16",
+                        logOutTime: "11:15",
+                        logOutDate: "2023-06-16",
+                        officeId: "OFF-003",
+                        officeName: "Document Verification",
+                        notes: "Documents verified and approved",
+                        status: "completed",
+                        createdAt: "2023-06-16T09:30:00Z"
+                    },
+                    {
+                        logId: "LOG-202306181030-789",
+                        logInTime: "10:30",
+                        logInDate: "2023-06-18",
+                        logOutTime: "",
+                        logOutDate: "",
+                        officeId: "OFF-005",
+                        officeName: "Legal Department",
+                        notes: "Under legal review for compliance",
+                        status: "active",
+                        createdAt: "2023-06-18T10:30:00Z"
+                    }
+                ],
+                createdAt: "2023-06-15T14:30:00Z"
+            },
+            {
+                fileNo: "COM-2023-1276",
+                fileName: "Kano State Urban Development",
+                trackingId: "TRK-B5Y8C1D2E3",
+                priority: "MEDIUM",
+                currentOffice: "Planning Department",
+                currentOfficeId: "OFF-006",
+                logEntries: [
+                    {
+                        logId: "LOG-202306201015-234",
+                        logInTime: "10:15",
+                        logInDate: "2023-06-20",
+                        logOutTime: "14:20",
+                        logOutDate: "2023-06-20",
+                        officeId: "OFF-001",
+                        officeName: "Reception",
+                        notes: "Urban development project submission",
+                        status: "completed",
+                        createdAt: "2023-06-20T10:15:00Z"
+                    },
+                    {
+                        logId: "LOG-202306210845-567",
+                        logInTime: "08:45",
+                        logInDate: "2023-06-21",
+                        logOutTime: "",
+                        logOutDate: "",
+                        officeId: "OFF-006",
+                        officeName: "Planning Department",
+                        notes: "Technical assessment in progress",
+                        status: "active",
+                        createdAt: "2023-06-21T08:45:00Z"
+                    }
+                ],
+                createdAt: "2023-06-20T10:15:00Z"
+            },
+            {
+                fileNo: "COM-2023-3382",
+                fileName: "Lagos State Budget Allocation",
+                trackingId: "TRK-C3D4E5F6G7",
+                priority: "HIGH",
+                currentOffice: "Finance Department",
+                currentOfficeId: "OFF-010",
+                logEntries: [
+                    {
+                        logId: "LOG-202306221130-345",
+                        logInTime: "11:30",
+                        logInDate: "2023-06-22",
+                        logOutTime: "13:45",
+                        logOutDate: "2023-06-22",
+                        officeId: "OFF-001",
+                        officeName: "Reception",
+                        notes: "Budget allocation request",
+                        status: "completed",
+                        createdAt: "2023-06-22T11:30:00Z"
+                    },
+                    {
+                        logId: "LOG-202306250930-678",
+                        logInTime: "09:30",
+                        logInDate: "2023-06-25",
+                        logOutTime: "11:15",
+                        logOutDate: "2023-06-25",
+                        officeId: "OFF-007",
+                        officeName: "Director's Office",
+                        notes: "Approval from director pending",
+                        status: "completed",
+                        createdAt: "2023-06-25T09:30:00Z"
+                    },
+                    {
+                        logId: "LOG-202306261400-901",
+                        logInTime: "14:00",
+                        logInDate: "2023-06-26",
+                        logOutTime: "",
+                        logOutDate: "",
+                        officeId: "OFF-010",
+                        officeName: "Finance Department",
+                        notes: "Final budget review and allocation",
+                        status: "active",
+                        createdAt: "2023-06-26T14:00:00Z"
+                    }
+                ],
+                createdAt: "2023-06-22T11:30:00Z"
+            },
+            {
+                fileNo: "COM-2023-5521",
+                fileName: "Abuja Land Survey Project",
+                trackingId: "TRK-D2E3F4G5H6",
+                priority: "LOW",
+                currentOffice: "Survey Department",
+                currentOfficeId: "OFF-004",
+                logEntries: [
+                    {
+                        logId: "LOG-202306180930-112",
+                        logInTime: "09:30",
+                        logInDate: "2023-06-18",
+                        logOutTime: "12:15",
+                        logOutDate: "2023-06-18",
+                        officeId: "OFF-001",
+                        officeName: "Reception",
+                        notes: "Land survey project submission",
+                        status: "completed",
+                        createdAt: "2023-06-18T09:30:00Z"
+                    },
+                    {
+                        logId: "LOG-202306191030-223",
+                        logInTime: "10:30",
+                        logInDate: "2023-06-19",
+                        logOutTime: "",
+                        logOutDate: "",
+                        officeId: "OFF-004",
+                        officeName: "Survey Department",
+                        notes: "Field survey in progress",
+                        status: "active",
+                        createdAt: "2023-06-19T10:30:00Z"
+                    }
+                ],
+                createdAt: "2023-06-18T09:30:00Z"
+            },
+            {
+                fileNo: "COM-2023-7743",
+                fileName: "Obiajuru Clem",
+                trackingId: "TRK-E1F2G3H4I5",
+                priority: "MEDIUM",
+                currentOffice: "Certificate Issuance",
+                currentOfficeId: "OFF-008",
+                logEntries: [
+                    {
+                        logId: "LOG-202306171130-334",
+                        logInTime: "11:30",
+                        logInDate: "2023-06-17",
+                        logOutTime: "14:45",
+                        logOutDate: "2023-06-17",
+                        officeId: "OFF-001",
+                        officeName: "Reception",
+                        notes: "Certificate application submission",
+                        status: "completed",
+                        createdAt: "2023-06-17T11:30:00Z"
+                    },
+                    {
+                        logId: "LOG-202306201015-445",
+                        logInTime: "10:15",
+                        logInDate: "2023-06-20",
+                        logOutTime: "12:30",
+                        logOutDate: "2023-06-20",
+                        officeId: "OFF-003",
+                        officeName: "Document Verification",
+                        notes: "Documents verified successfully",
+                        status: "completed",
+                        createdAt: "2023-06-20T10:15:00Z"
+                    },
+                    {
+                        logId: "LOG-202306221030-556",
+                        logInTime: "10:30",
+                        logInDate: "2023-06-22",
+                        logOutTime: "",
+                        logOutDate: "",
+                        officeId: "OFF-008",
+                        officeName: "Certificate Issuance",
+                        notes: "Certificate printing in progress",
+                        status: "active",
+                        createdAt: "2023-06-22T10:30:00Z"
+                    }
+                ],
+                createdAt: "2023-06-17T11:30:00Z"
+            }
+        ];
+
+        // Office data
+        const officeData = {
+            'OFF-001': { name: 'Reception', code: 'RCP', department: 'Customer Service' },
+            'OFF-002': { name: 'Customer Care Unit', code: 'CCU', department: 'Customer Service' },
+            'OFF-003': { name: 'Document Verification', code: 'DVF', department: 'Legal' },
+            'OFF-004': { name: 'Survey Department', code: 'SUR', department: 'Technical' },
+            'OFF-005': { name: 'Legal Department', code: 'LEG', department: 'Legal' },
+            'OFF-006': { name: 'Planning Department', code: 'PLN', department: 'Technical' },
+            'OFF-007': { name: "Director's Office", code: 'DIR', department: 'Management' },
+            'OFF-008': { name: 'Certificate Issuance', code: 'CRT', department: 'Operations' },
+            'OFF-009': { name: 'Archive', code: 'ARC', department: 'Records' },
+            'OFF-010': { name: 'Finance Department', code: 'FIN', department: 'Finance' },
+            'OFF-011': { name: 'IT Department', code: 'ITD', department: 'Technical' },
+            'OFF-012': { name: 'Registry', code: 'REG', department: 'Records' }
+        };
+
+        let currentDetailsTracker = null;
+        let filteredTrackers = [...fileTrackers];
+        let priorityChart = null;
+        let officeChart = null;
+        let chartsVisible = false;
+
+        // Update dashboard stats
+        function updateDashboardStats() {
+            const totalFiles = fileTrackers.length;
+            const activeFiles = fileTrackers.filter(tracker => 
+                tracker.logEntries.some(entry => entry.status === 'active')
+            ).length;
+            const highPriority = fileTrackers.filter(tracker => tracker.priority === 'HIGH').length;
+            
+            // Count unique offices involved
+            const officesInvolved = new Set();
+            fileTrackers.forEach(tracker => {
+                tracker.logEntries.forEach(entry => {
+                    officesInvolved.add(entry.officeId);
+                });
+            });
+            
+            document.getElementById('total-files').textContent = totalFiles;
+            document.getElementById('active-files').textContent = activeFiles;
+            document.getElementById('high-priority').textContent = highPriority;
+            document.getElementById('offices-involved').textContent = officesInvolved.size;
+        }
+
+        // Format time difference
+        function formatTimeDifference(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (diffDays > 0) {
+                return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            } else if (diffHours > 0) {
+                return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            } else {
+                return 'Less than an hour ago';
+            }
+        }
+
+        // Update files table
+        function updateFilesTable() {
+            const tableBody = document.getElementById('files-table-body');
+            const noResults = document.getElementById('no-results');
+            
+            if (filteredTrackers.length === 0) {
+                tableBody.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+            
+            tableBody.innerHTML = filteredTrackers.map(tracker => {
+                const activeEntry = tracker.logEntries.find(entry => entry.status === 'active');
+                if (!activeEntry) return '';
+                
+                const priorityClass = `priority-${tracker.priority}`;
+                const priorityText = tracker.priority.charAt(0) + tracker.priority.slice(1).toLowerCase();
+                const office = officeData[tracker.currentOfficeId];
+                
+                return `
+                <tr class="file-row fade-in">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="file-text" class="h-5 w-5 text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${tracker.fileName}</div>
+                                <div class="text-sm text-gray-500">
+                                    <span class="font-mono">${tracker.fileNo}</span> • 
+                                    <span class="font-mono text-xs">${tracker.trackingId}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="building" class="h-4 w-4 text-gray-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">${office.name}</div>
+                                <div class="text-xs text-gray-500">${office.department}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${formatTimeDifference(activeEntry.createdAt)}</div>
+                        <div class="text-xs text-gray-500">Since ${activeEntry.logInDate}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">${priorityText}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2 animate-pulse-slow"></div>
+                            <span class="text-sm text-gray-900">In Progress</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button class="view-details-btn inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" data-tracking-id="${tracker.trackingId}">
+                            <i data-lucide="eye" class="h-4 w-4 mr-1"></i>
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+            
+            setupViewDetailsButtons();
+            lucide.createIcons();
+        }
+
+        // Setup view details buttons
+        function setupViewDetailsButtons() {
+            document.querySelectorAll('.view-details-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const trackingId = this.dataset.trackingId;
+                    showTrackerDetails(trackingId);
+                });
+            });
+        }
+
+        // Show tracker details
+        function showTrackerDetails(trackingId) {
+            const tracker = fileTrackers.find(t => t.trackingId === trackingId);
+            if (!tracker) return;
+            
+            currentDetailsTracker = tracker;
+            
+            const priorityClass = `priority-${tracker.priority}`;
+            const priorityText = tracker.priority.charAt(0) + tracker.priority.slice(1).toLowerCase();
+            const activeEntry = tracker.logEntries.find(entry => entry.status === 'active');
+            
+            const detailsContent = document.getElementById('details-content');
+            detailsContent.innerHTML = `
+                <div class="py-4 space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <h3 class="text-xl font-semibold">${tracker.fileName}</h3>
+                            <p class="text-sm text-gray-600">File No: ${tracker.fileNo} | Tracking ID: ${tracker.trackingId}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">${priorityText}</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${tracker.currentOfficeId}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">File Information</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">File Name:</span>
+                                        <span class="font-medium">${tracker.fileName}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">File No:</span>
+                                        <span class="font-medium">${tracker.fileNo}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Tracking ID:</span>
+                                        <span class="font-mono">${tracker.trackingId}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Priority:</span>
+                                        <span class="font-medium ${priorityClass} px-2 py-0.5 rounded text-xs">${priorityText}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Created:</span>
+                                        <span>${new Date(tracker.createdAt).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Current Location</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Office:</span>
+                                        <span>${tracker.currentOffice}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Office ID:</span>
+                                        <span class="font-mono">${tracker.currentOfficeId}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Department:</span>
+                                        <span>${officeData[tracker.currentOfficeId]?.department || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Time in Office:</span>
+                                        <span>${formatTimeDifference(activeEntry.createdAt)}</span>
+                                    </div>
+                                    ${activeEntry.notes ? `
+                                    <div class="mt-2 p-2 bg-blue-50 rounded border border-blue-100">
+                                        <div class="text-xs font-medium text-blue-800 mb-1">Current Notes:</div>
+                                        <div class="text-xs text-blue-700">${activeEntry.notes}</div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Movement History</h4>
+                            <div class="space-y-3 max-h-80 overflow-y-auto">
+                                ${tracker.logEntries.map((entry, index) => {
+                                    const isActive = entry.status === 'active';
+                                    const entryClass = isActive ? 'log-entry log-entry-active' : 'log-entry log-entry-completed';
+                                    return `
+                                    <div class="${entryClass} p-3 rounded">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium">${entry.officeName}</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                                ${isActive ? 'Active' : 'Completed'}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-gray-600 space-y-1">
+                                            <div>Log ID: <span class="font-mono">${entry.logId}</span></div>
+                                            <div>Logged In: ${entry.logInDate} at ${entry.logInTime}</div>
+                                            ${entry.logOutDate ? `<div>Logged Out: ${entry.logOutDate} at ${entry.logOutTime}</div>` : ''}
+                                            ${entry.notes ? `<div class="mt-1"><strong>Notes:</strong> ${entry.notes}</div>` : ''}
+                                        </div>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('details-dialog').classList.add('show');
+            lucide.createIcons();
+        }
+
+        // Filter files based on search and filters
+        function filterFiles() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const priorityFilter = document.getElementById('priority-filter').value;
+            const officeFilter = document.getElementById('office-filter').value;
+            
+            filteredTrackers = fileTrackers.filter(tracker => {
+                // Search filter
+                const matchesSearch = 
+                    tracker.fileName.toLowerCase().includes(searchTerm) ||
+                    tracker.fileNo.toLowerCase().includes(searchTerm) ||
+                    tracker.trackingId.toLowerCase().includes(searchTerm);
+                
+                // Priority filter
+                const matchesPriority = priorityFilter === 'ALL' || tracker.priority === priorityFilter;
+                
+                // Office filter
+                const matchesOffice = officeFilter === 'ALL' || 
+                    tracker.logEntries.some(entry => entry.officeId === officeFilter && entry.status === 'active');
+                
+                return matchesSearch && matchesPriority && matchesOffice;
+            });
+            
+            updateFilesTable();
+            if (chartsVisible) {
+                updateCharts();
+            }
+        }
+
+        // Update charts
+        function updateCharts() {
+            updatePriorityChart();
+            updateOfficeChart();
+        }
+
+        // Update priority chart
+        function updatePriorityChart() {
+            const ctx = document.getElementById('priority-chart').getContext('2d');
+            
+            // Count priorities
+            const priorityCounts = {
+                HIGH: filteredTrackers.filter(t => t.priority === 'HIGH').length,
+                MEDIUM: filteredTrackers.filter(t => t.priority === 'MEDIUM').length,
+                LOW: filteredTrackers.filter(t => t.priority === 'LOW').length
+            };
+            
+            if (priorityChart) {
+                priorityChart.destroy();
+            }
+            
+            priorityChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Priority', 'Medium Priority', 'Low Priority'],
+                    datasets: [{
+                        data: [priorityCounts.HIGH, priorityCounts.MEDIUM, priorityCounts.LOW],
+                        backgroundColor: [
+                            '#EF4444',
+                            '#F59E0B',
+                            '#10B981'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+
+        // Update office chart
+        function updateOfficeChart() {
+            const ctx = document.getElementById('office-chart').getContext('2d');
+            
+            // Count files per office
+            const officeCounts = {};
+            filteredTrackers.forEach(tracker => {
+                const activeEntry = tracker.logEntries.find(entry => entry.status === 'active');
+                if (activeEntry) {
+                    const officeId = activeEntry.officeId;
+                    officeCounts[officeId] = (officeCounts[officeId] || 0) + 1;
+                }
+            });
+            
+            // Sort offices by count
+            const sortedOffices = Object.entries(officeCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8); // Show top 8 offices
+            
+            const labels = sortedOffices.map(([officeId]) => officeData[officeId]?.name || officeId);
+            const data = sortedOffices.map(([, count]) => count);
+            
+            if (officeChart) {
+                officeChart.destroy();
+            }
+            
+            officeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Files in Office',
+                        data: data,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        hoverBackgroundColor: 'rgba(59, 130, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Files: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Toggle charts visibility
+        function toggleCharts() {
+            const chartsSection = document.getElementById('charts-section');
+            const toggleBtn = document.getElementById('toggleChartsBtn');
+            const icon = toggleBtn.querySelector('i');
+            const textSpan = toggleBtn.querySelector('span');
+            
+            chartsVisible = !chartsVisible;
+            
+            if (chartsVisible) {
+                chartsSection.classList.add('show');
+                toggleBtn.innerHTML = '<i data-lucide="x" class="h-4 w-4 mr-1"></i><span>Hide Charts</span>';
+                toggleBtn.classList.remove('bg-purple-50');
+                toggleBtn.classList.add('bg-purple-100');
+                
+                // Initialize charts if they haven't been created yet
+                if (!priorityChart || !officeChart) {
+                    setTimeout(updateCharts, 300);
+                } else {
+                    updateCharts();
+                }
+            } else {
+                chartsSection.classList.remove('show');
+                toggleBtn.innerHTML = '<i data-lucide="bar-chart-3" class="h-4 w-4 mr-1"></i><span>Show Charts</span>';
+                toggleBtn.classList.remove('bg-purple-100');
+                toggleBtn.classList.add('bg-purple-50');
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateDashboardStats();
+            updateFilesTable();
+            
+            // Set up event listeners
+            document.getElementById('search-input').addEventListener('input', filterFiles);
+            document.getElementById('priority-filter').addEventListener('change', filterFiles);
+            document.getElementById('office-filter').addEventListener('change', filterFiles);
+            document.getElementById('clear-filters').addEventListener('click', () => {
+                document.getElementById('search-input').value = '';
+                document.getElementById('priority-filter').value = 'ALL';
+                document.getElementById('office-filter').value = 'ALL';
+                filterFiles();
+            });
+            
+            // Priority chart filter buttons
+            document.querySelectorAll('.priority-filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active state
+                    document.querySelectorAll('.priority-filter-btn').forEach(btn => {
+                        btn.classList.remove('bg-blue-100', 'text-blue-700');
+                        btn.classList.add('text-gray-500', 'hover:bg-gray-100');
+                    });
+                    this.classList.remove('text-gray-500', 'hover:bg-gray-100');
+                    this.classList.add('bg-blue-100', 'text-blue-700');
+                    
+                    // Apply filter
+                    const priority = this.dataset.priority;
+                    document.getElementById('priority-filter').value = priority;
+                    filterFiles();
+                });
+            });
+            
+            // Office chart filter buttons
+            document.querySelectorAll('.office-filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active state
+                    document.querySelectorAll('.office-filter-btn').forEach(btn => {
+                        btn.classList.remove('bg-blue-100', 'text-blue-700');
+                        btn.classList.add('text-gray-500', 'hover:bg-gray-100');
+                    });
+                    this.classList.remove('text-gray-500', 'hover:bg-gray-100');
+                    this.classList.add('bg-blue-100', 'text-blue-700');
+                    
+                    // Note: This is just for UI, actual filtering is done by the main filters
+                });
+            });
+            
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                // In a real application, this would fetch updated data from the server
+                updateDashboardStats();
+                filterFiles();
+                if (chartsVisible) {
+                    updateCharts();
+                }
+                // Show refresh animation
+                const icon = document.querySelector('#refreshBtn i');
+                icon.classList.add('animate-spin');
+                setTimeout(() => {
+                    icon.classList.remove('animate-spin');
+                }, 1000);
+            });
+            
+            document.getElementById('createFileBtn').addEventListener('click', () => {
+                alert('Redirecting to Create File Tracker page...');
+                // In a real application, this would navigate to the create file page
+            });
+            
+            // Toggle charts button
+            document.getElementById('toggleChartsBtn').addEventListener('click', toggleCharts);
+            
+            // Details dialog event listeners
+            document.getElementById('close-details').addEventListener('click', () => {
+                document.getElementById('details-dialog').classList.remove('show');
+            });
+            document.getElementById('close-details-btn').addEventListener('click', () => {
+                document.getElementById('details-dialog').classList.remove('show');
+            });
+            document.getElementById('print-details-btn').addEventListener('click', () => {
+                alert('Print functionality would be implemented here');
+                // In a real implementation, this would open a print dialog or generate a PDF
+            });
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        lucide.createIcons();
+    </script>
+</body>
+</html>
