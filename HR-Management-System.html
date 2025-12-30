@@ -63,6 +63,38 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
+        .badge-active {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-inactive {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-8hrs {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-4hrs {
+            background-color: #8b5cf6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
         .dialog-overlay {
             position: fixed;
             inset: 0;
@@ -109,6 +141,28 @@
             max-height: 200px;
             overflow-y: auto;
         }
+        .select-option {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+        }
+        .select-option:hover {
+            background-color: #f9fafb;
+        }
+        input:focus, button:focus, select:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            ring-width: 2px;
+            ring-color: #3b82f6;
+        }
+        .overtime-badge {
+            background-color: #f59e0b;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.25rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -116,7 +170,7 @@
         <!-- Page Header -->
         <div class="space-y-2">
             <h1 class="text-3xl font-bold tracking-tight">HR Management System</h1>
-            <p class="text-gray-600">Manage employee attendance, salaries, and payroll</p>
+            <p class="text-gray-600">Manage employee attendance, salaries, and payroll with flexible shift hours</p>
         </div>
 
         <!-- Stats Cards -->
@@ -128,7 +182,7 @@
                     <i class="fas fa-users-cog text-gray-400"></i>
                 </div>
                 <div class="pt-2">
-                    <div class="text-2xl font-bold" id="total-employees">45</div>
+                    <div class="text-2xl font-bold" id="total-employees">8</div>
                     <p class="text-xs text-gray-500">Active staff members</p>
                 </div>
             </div>
@@ -152,7 +206,7 @@
                     <i class="fas fa-file-alt text-gray-400"></i>
                 </div>
                 <div class="pt-2">
-                    <div class="text-2xl font-bold" id="avg-attendance">84.4%</div>
+                    <div class="text-2xl font-bold" id="avg-attendance">90.8%</div>
                     <p class="text-xs text-gray-500">This month</p>
                 </div>
             </div>
@@ -164,7 +218,7 @@
                     <i class="fas fa-dollar-sign text-gray-400"></i>
                 </div>
                 <div class="pt-2">
-                    <div class="text-2xl font-bold" id="total-payroll">₦1,250,000</div>
+                    <div class="text-2xl font-bold" id="total-payroll">₦1,037,700</div>
                     <p class="text-xs text-gray-500">This month</p>
                 </div>
             </div>
@@ -188,7 +242,7 @@
                 </button>
                 <button class="tab-button py-2 px-4 rounded-md text-sm font-medium transition-colors tab-inactive" 
                         data-tab="rates">
-                    User Rates
+                    User Rates & Shifts
                 </button>
             </div>
 
@@ -196,33 +250,33 @@
             <div class="mt-6">
                 <!-- Attendance Tab Content -->
                 <div id="attendance-tab" class="tab-content">
-                    <!-- Attendance Tracking Tab will be rendered here -->
+                    <!-- Content will be loaded dynamically -->
                 </div>
 
                 <!-- Salary Tab Content -->
                 <div id="salary-tab" class="tab-content hidden">
-                    <!-- Salary Management Tab will be rendered here -->
+                    <!-- Content will be loaded dynamically -->
                 </div>
 
                 <!-- Payroll Tab Content -->
                 <div id="payroll-tab" class="tab-content hidden">
-                    <!-- Payroll Reports Tab will be rendered here -->
+                    <!-- Content will be loaded dynamically -->
                 </div>
 
                 <!-- Rates Tab Content -->
                 <div id="rates-tab" class="tab-content hidden">
-                    <!-- User Rate Config Tab will be rendered here -->
+                    <!-- Content will be loaded dynamically -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dialogs -->
+    <!-- Bonus Dialog -->
     <div id="bonus-dialog" class="dialog-overlay hidden">
         <div class="dialog-content">
             <div class="dialog-header">
                 <h2 class="text-lg font-bold">Add Bonus/Extra Hours</h2>
-                <p class="text-sm text-gray-500 mt-1" id="dialog-description">Add bonuses or extra work hours for <span id="employee-name"></span></p>
+                <p class="text-sm text-gray-500 mt-1" id="dialog-description"></p>
             </div>
             <div class="p-6 space-y-4">
                 <div class="space-y-2">
@@ -252,10 +306,11 @@
         </div>
     </div>
 
+    <!-- Edit Rate & Shift Dialog -->
     <div id="edit-rate-dialog" class="dialog-overlay hidden">
         <div class="dialog-content">
             <div class="dialog-header">
-                <h2 class="text-lg font-bold">Edit Daily Rate</h2>
+                <h2 class="text-lg font-bold">Edit Daily Rate & Shift</h2>
                 <p class="text-sm text-gray-500 mt-1" id="rate-dialog-description"></p>
             </div>
             <div class="p-6 space-y-4">
@@ -270,13 +325,21 @@
                            class="w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div class="space-y-2">
+                    <label for="shift-hours" class="text-sm font-medium">Shift Hours</label>
+                    <select id="shift-hours" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        <option value="8">8 Hours (Full Day)</option>
+                        <option value="4">4 Hours (Half Day)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Sets the number of hours required for 1 login day</p>
+                </div>
+                <div class="space-y-2">
                     <label for="effective-date" class="text-sm font-medium">Effective Date</label>
                     <input type="date" id="effective-date" 
                            class="w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div class="space-y-2">
                     <label for="rate-reason" class="text-sm font-medium">Reason for Change</label>
-                    <input type="text" id="rate-reason" placeholder="Promotion, adjustment, etc." 
+                    <input type="text" id="rate-reason" placeholder="Promotion, shift change, adjustment, etc." 
                            class="w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
             </div>
@@ -292,44 +355,49 @@
     </div>
 
     <script>
-        // Mock data from your provided file
+        // Enhanced mock data with shift hours
         const mockAttendanceData = [
             {
                 employeeId: "EMP001",
                 name: "Ibrahim Mohammed",
                 unit: "PRA",
+                shiftHours: 8, // 8-hour shift
                 totalHoursWorked: 160,
-                loginDays: 20,
+                loginDays: 20, // 160/8 = 20 days
                 attendancePercentage: 91,
             },
             {
                 employeeId: "EMP002",
                 name: "Fatima Abubakar",
                 unit: "PIC",
+                shiftHours: 8,
                 totalHoursWorked: 152,
-                loginDays: 19,
+                loginDays: 19, // 152/8 = 19 days
                 attendancePercentage: 86,
             },
             {
                 employeeId: "EMP003",
                 name: "Usman Abdullahi",
                 unit: "Page Typing",
+                shiftHours: 4, // 4-hour shift
                 totalHoursWorked: 168,
-                loginDays: 21,
+                loginDays: 42, // 168/4 = 42 days (but capped at 22 working days)
                 attendancePercentage: 95,
             },
             {
                 employeeId: "EMP004",
                 name: "Aisha Bello",
                 unit: "Blind Scanning",
+                shiftHours: 4,
                 totalHoursWorked: 144,
-                loginDays: 18,
+                loginDays: 36, // 144/4 = 36 days (but capped at 22 working days)
                 attendancePercentage: 82,
             },
             {
                 employeeId: "EMP005",
                 name: "Yusuf Garba",
                 unit: "Indexing",
+                shiftHours: 8,
                 totalHoursWorked: 176,
                 loginDays: 22,
                 attendancePercentage: 100,
@@ -338,14 +406,16 @@
                 employeeId: "EMP006",
                 name: "Halima Aliyu",
                 unit: "File Archiving",
+                shiftHours: 4,
                 totalHoursWorked: 168,
-                loginDays: 21,
+                loginDays: 42, // 168/4 = 42 days (but capped at 22 working days)
                 attendancePercentage: 95,
             },
             {
                 employeeId: "EMP007",
                 name: "Musa Ibrahim",
                 unit: "File Tracking",
+                shiftHours: 8,
                 totalHoursWorked: 152,
                 loginDays: 19,
                 attendancePercentage: 86,
@@ -354,8 +424,9 @@
                 employeeId: "EMP008",
                 name: "Zainab Hassan",
                 unit: "Sorting, Collation & Batching",
+                shiftHours: 4,
                 totalHoursWorked: 160,
-                loginDays: 20,
+                loginDays: 40, // 160/4 = 40 days (but capped at 22 working days)
                 attendancePercentage: 91,
             },
         ];
@@ -366,6 +437,7 @@
                 name: "Ibrahim Mohammed",
                 unit: "PRA",
                 dailyRate: 5000,
+                shiftHours: 8,
                 totalHoursWorked: 160,
                 loginDays: 20,
                 baseSalary: 100000,
@@ -378,6 +450,7 @@
                 name: "Fatima Abubakar",
                 unit: "PIC",
                 dailyRate: 4500,
+                shiftHours: 8,
                 totalHoursWorked: 152,
                 loginDays: 19,
                 baseSalary: 85500,
@@ -390,6 +463,7 @@
                 name: "Usman Abdullahi",
                 unit: "Page Typing",
                 dailyRate: 6000,
+                shiftHours: 4,
                 totalHoursWorked: 168,
                 loginDays: 21,
                 baseSalary: 126000,
@@ -402,6 +476,7 @@
                 name: "Aisha Bello",
                 unit: "Blind Scanning",
                 dailyRate: 4000,
+                shiftHours: 4,
                 totalHoursWorked: 144,
                 loginDays: 18,
                 baseSalary: 72000,
@@ -414,6 +489,7 @@
                 name: "Yusuf Garba",
                 unit: "Indexing",
                 dailyRate: 7000,
+                shiftHours: 8,
                 totalHoursWorked: 176,
                 loginDays: 22,
                 baseSalary: 154000,
@@ -426,6 +502,7 @@
                 name: "Halima Aliyu",
                 unit: "File Archiving",
                 dailyRate: 5500,
+                shiftHours: 4,
                 totalHoursWorked: 168,
                 loginDays: 21,
                 baseSalary: 115500,
@@ -438,6 +515,7 @@
                 name: "Musa Ibrahim",
                 unit: "File Tracking",
                 dailyRate: 4800,
+                shiftHours: 8,
                 totalHoursWorked: 152,
                 loginDays: 19,
                 baseSalary: 91200,
@@ -450,6 +528,7 @@
                 name: "Zainab Hassan",
                 unit: "Sorting, Collation & Batching",
                 dailyRate: 5200,
+                shiftHours: 4,
                 totalHoursWorked: 160,
                 loginDays: 20,
                 baseSalary: 104000,
@@ -466,6 +545,7 @@
                 unit: "PRA",
                 position: "Senior Officer",
                 dailyRate: 5000,
+                shiftHours: 8,
                 status: "Active",
             },
             {
@@ -474,6 +554,7 @@
                 unit: "PIC",
                 position: "Officer",
                 dailyRate: 4500,
+                shiftHours: 8,
                 status: "Active",
             },
             {
@@ -482,6 +563,7 @@
                 unit: "Page Typing",
                 position: "Lead Typist",
                 dailyRate: 6000,
+                shiftHours: 4,
                 status: "Active",
             },
             {
@@ -490,6 +572,7 @@
                 unit: "Blind Scanning",
                 position: "Scanner Operator",
                 dailyRate: 4000,
+                shiftHours: 4,
                 status: "Active",
             },
             {
@@ -498,6 +581,7 @@
                 unit: "Indexing",
                 position: "Indexing Specialist",
                 dailyRate: 7000,
+                shiftHours: 8,
                 status: "Active",
             },
             {
@@ -506,6 +590,7 @@
                 unit: "File Archiving",
                 position: "Archive Manager",
                 dailyRate: 5500,
+                shiftHours: 4,
                 status: "Active",
             },
             {
@@ -514,6 +599,7 @@
                 unit: "File Tracking",
                 position: "Tracking Officer",
                 dailyRate: 4800,
+                shiftHours: 8,
                 status: "Active",
             },
             {
@@ -522,6 +608,7 @@
                 unit: "Sorting, Collation & Batching",
                 position: "Operations Lead",
                 dailyRate: 5200,
+                shiftHours: 4,
                 status: "Active",
             },
         ];
@@ -553,6 +640,22 @@
             setupSearch();
         });
 
+        // Function to calculate login days based on shift hours
+        function calculateLoginDays(totalHoursWorked, shiftHours, maxWorkingDays = 22) {
+            // Calculate login days based on shift hours
+            const calculatedDays = totalHoursWorked / shiftHours;
+            
+            // Cap at maximum working days (usually 22 days in a month)
+            return Math.min(calculatedDays, maxWorkingDays);
+        }
+
+        // Function to calculate overtime hours
+        function calculateOvertimeHours(totalHoursWorked, shiftHours, maxWorkingDays = 22) {
+            const maxRegularHours = maxWorkingDays * shiftHours;
+            const overtime = totalHoursWorked - maxRegularHours;
+            return overtime > 0 ? overtime : 0;
+        }
+
         // Function to update employee payroll
         function updateEmployeePayroll(employeeId, bonuses, extraHours) {
             salaryData = salaryData.map(record => {
@@ -574,6 +677,72 @@
             }
             
             // Update the total payroll display
+            updateTotalPayroll();
+        }
+
+        // Function to update employee shift hours
+        function updateEmployeeShift(employeeId, shiftHours) {
+            // Update in all data sets
+            const updateData = (dataSet) => {
+                return dataSet.map(record => {
+                    if (record.employeeId === employeeId) {
+                        const newLoginDays = calculateLoginDays(record.totalHoursWorked, shiftHours);
+                        return {
+                            ...record,
+                            shiftHours: shiftHours,
+                            loginDays: newLoginDays
+                        };
+                    }
+                    return record;
+                });
+            };
+
+            mockAttendanceData = updateData(mockAttendanceData);
+            
+            // For salary data, also recalculate base salary
+            salaryData = salaryData.map(record => {
+                if (record.employeeId === employeeId) {
+                    const newLoginDays = calculateLoginDays(record.totalHoursWorked, shiftHours);
+                    const newBaseSalary = record.dailyRate * newLoginDays;
+                    const newTotalSalary = newBaseSalary + record.bonuses + record.extraHours;
+                    
+                    return {
+                        ...record,
+                        shiftHours: shiftHours,
+                        loginDays: newLoginDays,
+                        baseSalary: newBaseSalary,
+                        totalSalary: newTotalSalary
+                    };
+                }
+                return record;
+            });
+
+            mockUserRates = mockUserRates.map(record => {
+                if (record.employeeId === employeeId) {
+                    return {
+                        ...record,
+                        shiftHours: shiftHours
+                    };
+                }
+                return record;
+            });
+
+            // Re-render current tab if needed
+            switch(activeTab) {
+                case 'attendance':
+                    renderAttendanceTab();
+                    break;
+                case 'salary':
+                    renderSalaryTab();
+                    break;
+                case 'payroll':
+                    renderPayrollTab();
+                    break;
+                case 'rates':
+                    renderRatesTab();
+                    break;
+            }
+            
             updateTotalPayroll();
         }
 
@@ -662,7 +831,7 @@
                             </div>
 
                             <div class="flex items-end">
-                                <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center">
+                                <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center export-attendance-btn">
                                     <i class="fas fa-download mr-2"></i>
                                     Export Report
                                 </button>
@@ -675,19 +844,21 @@
                         <div class="space-y-2">
                             <h3 class="text-lg font-bold">Employee Attendance Records</h3>
                             <p class="text-sm text-gray-500">
-                                Attendance calculated based on man-hours (8 hours = 1 login day). System tracks total hours logged in the app.
+                                Attendance calculated based on shift hours: 8 hours = 1 full day, 4 hours = 0.5 days
                             </p>
                         </div>
                         <div class="mt-4">
                             <div class="rounded-md border overflow-auto">
-                                <table class="w-full min-w-[800px]">
+                                <table class="w-full min-w-[900px]">
                                     <thead class="bg-gray-50 sticky-header">
                                         <tr>
                                             <th class="text-left p-4 font-medium">Employee ID</th>
                                             <th class="text-left p-4 font-medium">Name</th>
                                             <th class="text-left p-4 font-medium">Unit</th>
+                                            <th class="text-center p-4 font-medium">Shift</th>
                                             <th class="text-center p-4 font-medium">Hours Worked</th>
                                             <th class="text-center p-4 font-medium">Login Days</th>
+                                            <th class="text-center p-4 font-medium">Overtime</th>
                                             <th class="text-center p-4 font-medium">Attendance %</th>
                                             <th class="text-center p-4 font-medium">Status</th>
                                         </tr>
@@ -699,8 +870,8 @@
                             </div>
                             <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
                                 <p class="text-sm text-blue-900">
-                                    <strong>Note:</strong> Login Days are calculated based on man-hours. Every 8 hours logged equals 1 full
-                                    day. For example, 4 hours = 0.5 days, 12 hours = 1.5 days.
+                                    <strong>Note:</strong> Login Days are calculated based on shift hours. 8-hour shift employees need 8 hours for 1 day, 
+                                    4-hour shift employees need 4 hours for 1 day. Overtime is calculated for hours beyond regular shift requirements.
                                 </p>
                             </div>
                         </div>
@@ -742,14 +913,25 @@
                     badgeText = 'Good';
                 }
                 
+                // Calculate overtime
+                const overtimeHours = calculateOvertimeHours(user.totalHoursWorked, user.shiftHours);
+                const shiftBadgeClass = user.shiftHours === 8 ? 'badge-8hrs' : 'badge-4hrs';
+                const shiftText = user.shiftHours === 8 ? '8hrs' : '4hrs';
+                
                 row.innerHTML = `
                     <td class="p-4 font-medium">${user.employeeId}</td>
                     <td class="p-4">${user.name}</td>
                     <td class="p-4">${user.unit}</td>
+                    <td class="p-4 text-center">
+                        <span class="${shiftBadgeClass}">${shiftText}</span>
+                    </td>
                     <td class="p-4 text-center font-semibold">${user.totalHoursWorked}h</td>
                     <td class="p-4 text-center">
-                        <span class="font-semibold">${user.loginDays}</span>
+                        <span class="font-semibold">${user.loginDays.toFixed(1)}</span>
                         <span class="text-xs text-gray-500 ml-1">days</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        ${overtimeHours > 0 ? `<span class="overtime-badge">+${overtimeHours}h</span>` : '<span class="text-gray-400">-</span>'}
                     </td>
                     <td class="p-4 text-center">
                         <span class="font-semibold">${user.attendancePercentage}%</span>
@@ -815,10 +997,11 @@
                             </div>
                         </div>
                         <div class="rounded-md border overflow-auto">
-                            <table class="w-full min-w-[900px]">
+                            <table class="w-full min-w-[1000px]">
                                 <thead class="bg-gray-50 sticky-header">
                                     <tr>
                                         <th class="text-left p-4 font-medium">Employee</th>
+                                        <th class="text-center p-4 font-medium">Shift</th>
                                         <th class="text-right p-4 font-medium">Daily Rate</th>
                                         <th class="text-center p-4 font-medium">Login Days</th>
                                         <th class="text-right p-4 font-medium">Base Salary</th>
@@ -833,7 +1016,7 @@
                                 </tbody>
                                 <tfoot class="bg-gray-50 font-bold">
                                     <tr class="border-t-2">
-                                        <td colspan="3" class="p-4 text-right">Total Payroll:</td>
+                                        <td colspan="4" class="p-4 text-right">Total Payroll:</td>
                                         <td class="p-4 text-right" id="total-base-salary">₦0</td>
                                         <td class="p-4 text-right text-green-600" id="total-bonuses">+₦0</td>
                                         <td class="p-4 text-right text-blue-600" id="total-extra-hours">+₦0</td>
@@ -876,15 +1059,19 @@
                 const row = document.createElement('tr');
                 row.className = 'border-t hover:bg-gray-50';
                 
+                const shiftBadgeClass = user.shiftHours === 8 ? 'badge-8hrs' : 'badge-4hrs';
+                const shiftText = user.shiftHours === 8 ? '8hrs' : '4hrs';
+                
                 row.innerHTML = `
                     <td class="p-4">
-                        <div>
-                            <div class="font-medium">${user.name}</div>
-                            <div class="text-sm text-gray-500">${user.employeeId}</div>
-                        </div>
+                        <div class="font-medium">${user.name}</div>
+                        <div class="text-sm text-gray-500">${user.employeeId}</div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="${shiftBadgeClass}">${shiftText}</span>
                     </td>
                     <td class="p-4 text-right">₦${user.dailyRate.toLocaleString()}</td>
-                    <td class="p-4 text-center">${user.loginDays}</td>
+                    <td class="p-4 text-center">${user.loginDays.toFixed(1)}</td>
                     <td class="p-4 text-right font-medium">₦${user.baseSalary.toLocaleString()}</td>
                     <td class="p-4 text-right text-green-600">+₦${user.bonuses.toLocaleString()}</td>
                     <td class="p-4 text-right text-blue-600">+₦${user.extraHours.toLocaleString()}</td>
@@ -997,7 +1184,7 @@
                         <div class="space-y-2 mb-4">
                             <h3 class="text-lg font-bold">Employee Payroll Details</h3>
                             <p class="text-sm text-gray-500">
-                                Individual salary breakdown for ${getMonthLabel(payrollMonth)} (based on man-hours: 8 hours = 1 day)
+                                Individual salary breakdown for ${getMonthLabel(payrollMonth)} (based on shift hours)
                             </p>
                         </div>
                         <div class="rounded-md border overflow-auto">
@@ -1007,6 +1194,7 @@
                                         <th class="sticky left-0 z-10 bg-gray-50 text-left p-4 font-medium border-r">Employee ID</th>
                                         <th class="sticky left-[120px] z-10 bg-gray-50 text-left p-4 font-medium border-r">Name</th>
                                         <th class="text-left p-4 font-medium">Unit</th>
+                                        <th class="text-center p-4 font-medium">Shift</th>
                                         <th class="text-right p-4 font-medium">Daily Rate</th>
                                         <th class="text-center p-4 font-medium">Hours Worked</th>
                                         <th class="text-center p-4 font-medium bg-blue-50">Login Days</th>
@@ -1021,7 +1209,7 @@
                                 </tbody>
                                 <tfoot class="bg-gray-50 font-bold border-t-2">
                                     <tr>
-                                        <td class="sticky left-0 z-10 bg-gray-50 p-4 border-r" colspan="2">
+                                        <td class="sticky left-0 z-10 bg-gray-50 p-4 border-r" colspan="3">
                                             Grand Total (<span id="employee-count">0</span> employees)
                                         </td>
                                         <td class="p-4" colspan="4"></td>
@@ -1064,13 +1252,19 @@
                 const row = document.createElement('tr');
                 row.className = 'border-t hover:bg-gray-50';
                 
+                const shiftBadgeClass = employee.shiftHours === 8 ? 'badge-8hrs' : 'badge-4hrs';
+                const shiftText = employee.shiftHours === 8 ? '8hrs' : '4hrs';
+                
                 row.innerHTML = `
                     <td class="sticky left-0 z-10 bg-white p-4 font-medium border-r">${employee.employeeId}</td>
                     <td class="sticky left-[120px] z-10 bg-white p-4 border-r">${employee.name}</td>
                     <td class="p-4">${employee.unit}</td>
+                    <td class="p-4 text-center">
+                        <span class="${shiftBadgeClass}">${shiftText}</span>
+                    </td>
                     <td class="p-4 text-right">₦${employee.dailyRate.toLocaleString()}</td>
                     <td class="p-4 text-center font-semibold">${employee.totalHoursWorked}h</td>
-                    <td class="p-4 text-center bg-blue-50 font-bold">${employee.loginDays}</td>
+                    <td class="p-4 text-center bg-blue-50 font-bold">${employee.loginDays.toFixed(1)}</td>
                     <td class="p-4 text-right">₦${employee.baseSalary.toLocaleString()}</td>
                     <td class="p-4 text-right text-green-600">₦${employee.bonuses.toLocaleString()}</td>
                     <td class="p-4 text-right text-blue-600">₦${employee.extraHours.toLocaleString()}</td>
@@ -1141,7 +1335,7 @@
             `;
         }
 
-        // Render Rates Tab
+        // Render Rates Tab (now includes shift configuration)
         function renderRatesTab() {
             const container = document.getElementById('rates-tab');
             container.innerHTML = `
@@ -1149,8 +1343,8 @@
                     <!-- Search -->
                     <div class="bg-white rounded-lg border card-shadow p-6">
                         <div class="space-y-2">
-                            <h3 class="text-lg font-bold">User Daily Rates Configuration</h3>
-                            <p class="text-sm text-gray-500">Manage daily rates for all employees (used for salary calculations)</p>
+                            <h3 class="text-lg font-bold">User Daily Rates & Shift Configuration</h3>
+                            <p class="text-sm text-gray-500">Manage daily rates and shift hours for all employees</p>
                         </div>
                         <div class="mt-4 space-y-2">
                             <label for="user-search" class="text-sm font-medium">Search Employee</label>
@@ -1165,11 +1359,11 @@
                     <!-- User Rates Table -->
                     <div class="bg-white rounded-lg border card-shadow p-6">
                         <div class="space-y-2 mb-4">
-                            <h3 class="text-lg font-bold">Employee Daily Rates</h3>
-                            <p class="text-sm text-gray-500">View and update daily rates for employees</p>
+                            <h3 class="text-lg font-bold">Employee Daily Rates & Shifts</h3>
+                            <p class="text-sm text-gray-500">View and update daily rates and shift hours for employees</p>
                         </div>
                         <div class="rounded-md border overflow-auto">
-                            <table class="w-full min-w-[800px]">
+                            <table class="w-full min-w-[900px]">
                                 <thead class="bg-gray-50 sticky-header">
                                     <tr>
                                         <th class="text-left p-4 font-medium">Employee ID</th>
@@ -1177,6 +1371,7 @@
                                         <th class="text-left p-4 font-medium">Unit</th>
                                         <th class="text-left p-4 font-medium">Position</th>
                                         <th class="text-right p-4 font-medium">Daily Rate</th>
+                                        <th class="text-center p-4 font-medium">Shift Hours</th>
                                         <th class="text-center p-4 font-medium">Status</th>
                                         <th class="text-center p-4 font-medium">Actions</th>
                                     </tr>
@@ -1213,7 +1408,9 @@
                 const row = document.createElement('tr');
                 row.className = 'border-t hover:bg-gray-50';
                 
-                const badgeClass = user.status === "Active" ? 'badge-excellent' : 'badge-poor';
+                const badgeClass = user.status === "Active" ? 'badge-active' : 'badge-inactive';
+                const shiftBadgeClass = user.shiftHours === 8 ? 'badge-8hrs' : 'badge-4hrs';
+                const shiftText = user.shiftHours === 8 ? '8hrs' : '4hrs';
                 
                 row.innerHTML = `
                     <td class="p-4 font-medium">${user.employeeId}</td>
@@ -1222,10 +1419,13 @@
                     <td class="p-4">${user.position}</td>
                     <td class="p-4 text-right font-semibold">₦${user.dailyRate.toLocaleString()}</td>
                     <td class="p-4 text-center">
+                        <span class="${shiftBadgeClass}">${shiftText}</span>
+                    </td>
+                    <td class="p-4 text-center">
                         <span class="${badgeClass}">${user.status}</span>
                     </td>
                     <td class="p-4 text-center">
-                        <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 edit-rate-btn" data-employee-id="${user.employeeId}" data-employee-name="${user.name}">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 edit-rate-btn" data-employee-id="${user.employeeId}" data-employee-name="${user.name}" data-shift-hours="${user.shiftHours}">
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </button>
@@ -1239,6 +1439,13 @@
         function updateTotalPayroll() {
             const totalPayroll = salaryData.reduce((sum, record) => sum + record.totalSalary, 0);
             document.getElementById('total-payroll').textContent = `₦${totalPayroll.toLocaleString()}`;
+            
+            // Update employee count
+            document.getElementById('total-employees').textContent = mockUserRates.length;
+            
+            // Update average attendance
+            const avgAttendance = mockAttendanceData.reduce((sum, record) => sum + record.attendancePercentage, 0) / mockAttendanceData.length;
+            document.getElementById('avg-attendance').textContent = `${avgAttendance.toFixed(1)}%`;
         }
 
         // Set up event listeners for attendance tab
@@ -1367,7 +1574,7 @@
                         // Refresh table header description
                         const description = document.querySelector('#payroll-tab .text-sm.text-gray-500');
                         if (description) {
-                            description.textContent = `Individual salary breakdown for ${getMonthLabel(value)} (based on man-hours: 8 hours = 1 day)`;
+                            description.textContent = `Individual salary breakdown for ${getMonthLabel(value)} (based on shift hours)`;
                         }
                     } else if (type === 'payroll-unit') {
                         if (value === 'all') {
@@ -1453,15 +1660,17 @@
                     const button = e.target.closest('.edit-rate-btn');
                     const employeeId = button.getAttribute('data-employee-id');
                     const employeeName = button.getAttribute('data-employee-name');
+                    const shiftHours = button.getAttribute('data-shift-hours');
                     
                     // Find the user
                     const user = mockUserRates.find(u => u.employeeId === employeeId);
                     if (user) {
                         currentSelectedEmployee = employeeId;
                         document.getElementById('rate-dialog-description').textContent = 
-                            `Update daily rate for ${user.name} (${user.employeeId})`;
+                            `Update daily rate and shift for ${user.name} (${user.employeeId})`;
                         document.getElementById('current-rate').value = `₦${user.dailyRate.toLocaleString()}`;
                         document.getElementById('new-rate').value = user.dailyRate;
+                        document.getElementById('shift-hours').value = user.shiftHours;
                         document.getElementById('edit-rate-dialog').classList.remove('hidden');
                     }
                 }
@@ -1515,39 +1724,40 @@
             document.querySelector('.save-rate-btn')?.addEventListener('click', function() {
                 if (currentSelectedEmployee) {
                     const newRate = parseFloat(document.getElementById('new-rate').value);
+                    const newShiftHours = parseInt(document.getElementById('shift-hours').value);
+                    
                     const userIndex = mockUserRates.findIndex(u => u.employeeId === currentSelectedEmployee);
                     
                     if (userIndex !== -1) {
-                        // Update the rate
+                        // Update the rate and shift
                         mockUserRates[userIndex].dailyRate = newRate;
+                        mockUserRates[userIndex].shiftHours = newShiftHours;
                         
                         // Also update salary data if this employee exists there
                         const salaryIndex = salaryData.findIndex(s => s.employeeId === currentSelectedEmployee);
                         if (salaryIndex !== -1) {
+                            // Update shift hours
+                            updateEmployeeShift(currentSelectedEmployee, newShiftHours);
+                            
                             // Recalculate base salary based on new daily rate
                             const employee = salaryData[salaryIndex];
                             const newBaseSalary = newRate * employee.loginDays;
                             salaryData[salaryIndex].dailyRate = newRate;
                             salaryData[salaryIndex].baseSalary = newBaseSalary;
                             salaryData[salaryIndex].totalSalary = newBaseSalary + employee.bonuses + employee.extraHours;
-                            
-                            // If salary tab is active, refresh it
-                            if (activeTab === 'salary') {
-                                renderSalaryTab();
-                            }
-                            if (activeTab === 'payroll') {
-                                renderPayrollTab();
-                            }
-                            
-                            updateTotalPayroll();
                         }
                         
-                        // Refresh rates tab
-                        if (activeTab === 'rates') {
-                            populateRatesTable();
+                        // Update attendance data
+                        const attendanceIndex = mockAttendanceData.findIndex(a => a.employeeId === currentSelectedEmployee);
+                        if (attendanceIndex !== -1) {
+                            mockAttendanceData[attendanceIndex].shiftHours = newShiftHours;
+                            mockAttendanceData[attendanceIndex].loginDays = calculateLoginDays(
+                                mockAttendanceData[attendanceIndex].totalHoursWorked, 
+                                newShiftHours
+                            );
                         }
                         
-                        alert(`Daily rate updated for ${mockUserRates[userIndex].name}`);
+                        alert(`Daily rate and shift updated for ${mockUserRates[userIndex].name}`);
                     }
                     
                     document.getElementById('edit-rate-dialog').classList.add('hidden');
@@ -1594,6 +1804,7 @@
                 "Employee ID",
                 "Name",
                 "Unit",
+                "Shift Hours",
                 "Daily Rate",
                 "Hours Worked",
                 "Login Days",
@@ -1610,6 +1821,7 @@
                         emp.employeeId,
                         `"${emp.name}"`,
                         `"${emp.unit}"`,
+                        emp.shiftHours,
                         emp.dailyRate,
                         emp.totalHoursWorked,
                         emp.loginDays,
@@ -1633,9 +1845,7 @@
         }
 
         // Handle payroll print
-
-        
-      
+       
         // Helper function to get month label
         function getMonthLabel(monthValue) {
             const months = {
