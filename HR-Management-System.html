@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .card-shadow {
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .tab-active {
+            background-color: #f8fafc;
+            color: #0f172a;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .tab-inactive {
+            background-color: transparent;
+            color: #64748b;
+        }
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            background-color: #f9fafb;
+            z-index: 10;
+        }
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        th, td {
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th:first-child, td:first-child {
+            border-left: 1px solid #e5e7eb;
+        }
+        thead th {
+            border-top: 1px solid #e5e7eb;
+        }
+        .badge-excellent {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-good {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-poor {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .dialog-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .dialog-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .dialog-content:focus {
+            outline: none;
+        }
+        .dialog-header {
+            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+        }
+        .dialog-footer {
+            padding: 1rem 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        .select-container {
+            position: relative;
+        }
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 40;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto py-6 space-y-6">
+        <!-- Page Header -->
+        <div class="space-y-2">
+            <h1 class="text-3xl font-bold tracking-tight">HR Management System</h1>
+            <p class="text-gray-600">Manage employee attendance, salaries, and payroll</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Employees Card -->
+            <div class="bg-white rounded-lg border card-shadow p-6">
+                <div class="flex flex-row items-center justify-between pb-2">
+                    <h3 class="text-sm font-medium">Total Employees</h3>
+                    <i class="fas fa-users-cog text-gray-400"></i>
+                </div>
+                <div class="pt-2">
+                    <div class="text-2xl font-bold" id="total-employees">45</div>
+                    <p class="text-xs text-gray-500">Active staff members</p>
+                </div>
+            </div>
+
+            <!-- Present Today Card -->
+            <div class="bg-white rounded-lg border card-shadow p-6">
+                <div class="flex flex-row items-center justify-between pb-2">
+                    <h3 class="text-sm font-medium">Present Today</h3>
+                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                </div>
+                <div class="pt-2">
+                    <div class="text-2xl font-bold" id="present-today">38</div>
+                    <p class="text-xs text-gray-500">Logged in today</p>
+                </div>
+            </div>
+
+            <!-- Avg Attendance Card -->
+            <div class="bg-white rounded-lg border card-shadow p-6">
+                <div class="flex flex-row items-center justify-between pb-2">
+                    <h3 class="text-sm font-medium">Avg Attendance</h3>
+                    <i class="fas fa-file-alt text-gray-400"></i>
+                </div>
+                <div class="pt-2">
+                    <div class="text-2xl font-bold" id="avg-attendance">84.4%</div>
+                    <p class="text-xs text-gray-500">This month</p>
+                </div>
+            </div>
+
+            <!-- Total Payroll Card -->
+            <div class="bg-white rounded-lg border card-shadow p-6">
+                <div class="flex flex-row items-center justify-between pb-2">
+                    <h3 class="text-sm font-medium">Total Payroll</h3>
+                    <i class="fas fa-dollar-sign text-gray-400"></i>
+                </div>
+                <div class="pt-2">
+                    <div class="text-2xl font-bold" id="total-payroll">₦1,250,000</div>
+                    <p class="text-xs text-gray-500">This month</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="bg-white rounded-lg border card-shadow p-6">
+            <!-- Tabs Navigation -->
+            <div class="grid w-full grid-cols-4 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button class="tab-button py-2 px-4 rounded-md text-sm font-medium transition-colors tab-active" 
+                        data-tab="attendance">
+                    Attendance Tracking
+                </button>
+                <button class="tab-button py-2 px-4 rounded-md text-sm font-medium transition-colors tab-inactive" 
+                        data-tab="salary">
+                    Salary Management
+                </button>
+                <button class="tab-button py-2 px-4 rounded-md text-sm font-medium transition-colors tab-inactive" 
+                        data-tab="payroll">
+                    Payroll Reports
+                </button>
+                <button class="tab-button py-2 px-4 rounded-md text-sm font-medium transition-colors tab-inactive" 
+                        data-tab="rates">
+                    User Rates
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="mt-6">
+                <!-- Attendance Tab Content -->
+                <div id="attendance-tab" class="tab-content">
+                    <!-- Attendance Tracking Tab will be rendered here -->
+                </div>
+
+                <!-- Salary Tab Content -->
+                <div id="salary-tab" class="tab-content hidden">
+                    <!-- Salary Management Tab will be rendered here -->
+                </div>
+
+                <!-- Payroll Tab Content -->
+                <div id="payroll-tab" class="tab-content hidden">
+                    <!-- Payroll Reports Tab will be rendered here -->
+                </div>
+
+                <!-- Rates Tab Content -->
+                <div id="rates-tab" class="tab-content hidden">
+                    <!-- User Rate Config Tab will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialogs -->
+    <div id="bonus-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h2 class="text-lg font-bold">Add Bonus/Extra Hours</h2>
+                <p class="text-sm text-gray-500 mt-1" id="dialog-description">Add bonuses or extra work hours for <span id="employee-name"></span></p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="space-y-2">
+                    <label for="bonus-amount" class="text-sm font-medium">Bonus Amount (₦)</label>
+                    <input type="number" id="bonus-amount" placeholder="0" 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="extra-hours-amount" class="text-sm font-medium">Extra Hours Payment (₦)</label>
+                    <input type="number" id="extra-hours-amount" placeholder="0" 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="reason" class="text-sm font-medium">Reason</label>
+                    <input type="text" id="reason" placeholder="Performance bonus, overtime, etc." 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 cancel-dialog-btn">
+                    Cancel
+                </button>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 add-payroll-btn">
+                    Add to Payroll
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-rate-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h2 class="text-lg font-bold">Edit Daily Rate</h2>
+                <p class="text-sm text-gray-500 mt-1" id="rate-dialog-description"></p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="space-y-2">
+                    <label for="current-rate" class="text-sm font-medium">Current Daily Rate</label>
+                    <input type="text" id="current-rate" disabled 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50">
+                </div>
+                <div class="space-y-2">
+                    <label for="new-rate" class="text-sm font-medium">New Daily Rate (₦)</label>
+                    <input type="number" id="new-rate" placeholder="Enter new rate" 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="effective-date" class="text-sm font-medium">Effective Date</label>
+                    <input type="date" id="effective-date" 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="rate-reason" class="text-sm font-medium">Reason for Change</label>
+                    <input type="text" id="rate-reason" placeholder="Promotion, adjustment, etc." 
+                           class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 cancel-rate-dialog-btn">
+                    Cancel
+                </button>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 save-rate-btn">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data from your provided file
+        const mockAttendanceData = [
+            {
+                employeeId: "EMP001",
+                name: "Ibrahim Mohammed",
+                unit: "PRA",
+                totalHoursWorked: 160,
+                loginDays: 20,
+                attendancePercentage: 91,
+            },
+            {
+                employeeId: "EMP002",
+                name: "Fatima Abubakar",
+                unit: "PIC",
+                totalHoursWorked: 152,
+                loginDays: 19,
+                attendancePercentage: 86,
+            },
+            {
+                employeeId: "EMP003",
+                name: "Usman Abdullahi",
+                unit: "Page Typing",
+                totalHoursWorked: 168,
+                loginDays: 21,
+                attendancePercentage: 95,
+            },
+            {
+                employeeId: "EMP004",
+                name: "Aisha Bello",
+                unit: "Blind Scanning",
+                totalHoursWorked: 144,
+                loginDays: 18,
+                attendancePercentage: 82,
+            },
+            {
+                employeeId: "EMP005",
+                name: "Yusuf Garba",
+                unit: "Indexing",
+                totalHoursWorked: 176,
+                loginDays: 22,
+                attendancePercentage: 100,
+            },
+            {
+                employeeId: "EMP006",
+                name: "Halima Aliyu",
+                unit: "File Archiving",
+                totalHoursWorked: 168,
+                loginDays: 21,
+                attendancePercentage: 95,
+            },
+            {
+                employeeId: "EMP007",
+                name: "Musa Ibrahim",
+                unit: "File Tracking",
+                totalHoursWorked: 152,
+                loginDays: 19,
+                attendancePercentage: 86,
+            },
+            {
+                employeeId: "EMP008",
+                name: "Zainab Hassan",
+                unit: "Sorting, Collation & Batching",
+                totalHoursWorked: 160,
+                loginDays: 20,
+                attendancePercentage: 91,
+            },
+        ];
+
+        let salaryData = [
+            {
+                employeeId: "EMP001",
+                name: "Ibrahim Mohammed",
+                unit: "PRA",
+                dailyRate: 5000,
+                totalHoursWorked: 160,
+                loginDays: 20,
+                baseSalary: 100000,
+                bonuses: 15000,
+                extraHours: 8000,
+                totalSalary: 123000,
+            },
+            {
+                employeeId: "EMP002",
+                name: "Fatima Abubakar",
+                unit: "PIC",
+                dailyRate: 4500,
+                totalHoursWorked: 152,
+                loginDays: 19,
+                baseSalary: 85500,
+                bonuses: 10000,
+                extraHours: 5000,
+                totalSalary: 100500,
+            },
+            {
+                employeeId: "EMP003",
+                name: "Usman Abdullahi",
+                unit: "Page Typing",
+                dailyRate: 6000,
+                totalHoursWorked: 168,
+                loginDays: 21,
+                baseSalary: 126000,
+                bonuses: 20000,
+                extraHours: 10000,
+                totalSalary: 156000,
+            },
+            {
+                employeeId: "EMP004",
+                name: "Aisha Bello",
+                unit: "Blind Scanning",
+                dailyRate: 4000,
+                totalHoursWorked: 144,
+                loginDays: 18,
+                baseSalary: 72000,
+                bonuses: 8000,
+                extraHours: 4000,
+                totalSalary: 84000,
+            },
+            {
+                employeeId: "EMP005",
+                name: "Yusuf Garba",
+                unit: "Indexing",
+                dailyRate: 7000,
+                totalHoursWorked: 176,
+                loginDays: 22,
+                baseSalary: 154000,
+                bonuses: 25000,
+                extraHours: 15000,
+                totalSalary: 194000,
+            },
+            {
+                employeeId: "EMP006",
+                name: "Halima Aliyu",
+                unit: "File Archiving",
+                dailyRate: 5500,
+                totalHoursWorked: 168,
+                loginDays: 21,
+                baseSalary: 115500,
+                bonuses: 18000,
+                extraHours: 9000,
+                totalSalary: 142500,
+            },
+            {
+                employeeId: "EMP007",
+                name: "Musa Ibrahim",
+                unit: "File Tracking",
+                dailyRate: 4800,
+                totalHoursWorked: 152,
+                loginDays: 19,
+                baseSalary: 91200,
+                bonuses: 12000,
+                extraHours: 6000,
+                totalSalary: 109200,
+            },
+            {
+                employeeId: "EMP008",
+                name: "Zainab Hassan",
+                unit: "Sorting, Collation & Batching",
+                dailyRate: 5200,
+                totalHoursWorked: 160,
+                loginDays: 20,
+                baseSalary: 104000,
+                bonuses: 16000,
+                extraHours: 8500,
+                totalSalary: 128500,
+            },
+        ];
+
+        const mockUserRates = [
+            {
+                employeeId: "EMP001",
+                name: "Ibrahim Mohammed",
+                unit: "PRA",
+                position: "Senior Officer",
+                dailyRate: 5000,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP002",
+                name: "Fatima Abubakar",
+                unit: "PIC",
+                position: "Officer",
+                dailyRate: 4500,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP003",
+                name: "Usman Abdullahi",
+                unit: "Page Typing",
+                position: "Lead Typist",
+                dailyRate: 6000,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP004",
+                name: "Aisha Bello",
+                unit: "Blind Scanning",
+                position: "Scanner Operator",
+                dailyRate: 4000,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP005",
+                name: "Yusuf Garba",
+                unit: "Indexing",
+                position: "Indexing Specialist",
+                dailyRate: 7000,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP006",
+                name: "Halima Aliyu",
+                unit: "File Archiving",
+                position: "Archive Manager",
+                dailyRate: 5500,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP007",
+                name: "Musa Ibrahim",
+                unit: "File Tracking",
+                position: "Tracking Officer",
+                dailyRate: 4800,
+                status: "Active",
+            },
+            {
+                employeeId: "EMP008",
+                name: "Zainab Hassan",
+                unit: "Sorting, Collation & Batching",
+                position: "Operations Lead",
+                dailyRate: 5200,
+                status: "Active",
+            },
+        ];
+
+        // State management
+        let activeTab = "attendance";
+        let currentSelectedEmployee = null;
+        let selectedUnits = [];
+        let attendanceMonth = "2024-01";
+        let salaryMonth = "2024-01";
+        let payrollMonth = "2024-01";
+
+        // DOM Elements
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render initial tab content
+            renderAttendanceTab();
+            
+            // Set up tab switching
+            setupTabs();
+            
+            // Set up dialog event listeners
+            setupDialogs();
+            
+            // Set up search functionality
+            setupSearch();
+        });
+
+        // Function to update employee payroll
+        function updateEmployeePayroll(employeeId, bonuses, extraHours) {
+            salaryData = salaryData.map(record => {
+                if (record.employeeId === employeeId) {
+                    const newTotalSalary = record.baseSalary + bonuses + extraHours;
+                    return {
+                        ...record,
+                        bonuses: bonuses,
+                        extraHours: extraHours,
+                        totalSalary: newTotalSalary
+                    };
+                }
+                return record;
+            });
+            
+            // Re-render salary tab if active
+            if (activeTab === "salary") {
+                renderSalaryTab();
+            }
+            
+            // Update the total payroll display
+            updateTotalPayroll();
+        }
+
+        // Set up tab switching
+        function setupTabs() {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab button styles
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('tab-inactive');
+                    });
+                    
+                    this.classList.remove('tab-inactive');
+                    this.classList.add('tab-active');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show active tab content
+                    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                    
+                    // Update activeTab state and render content
+                    activeTab = tabId;
+                    
+                    switch(tabId) {
+                        case 'attendance':
+                            renderAttendanceTab();
+                            break;
+                        case 'salary':
+                            renderSalaryTab();
+                            break;
+                        case 'payroll':
+                            renderPayrollTab();
+                            break;
+                        case 'rates':
+                            renderRatesTab();
+                            break;
+                    }
+                });
+            });
+        }
+
+        // Render Attendance Tab
+        function renderAttendanceTab() {
+            const container = document.getElementById('attendance-tab');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Filters -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-bold">Attendance Filters</h3>
+                            <p class="text-sm text-gray-500">Filter attendance records by month and employee</p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-2">
+                                <label for="attendance-month" class="text-sm font-medium">Month</label>
+                                <div class="select-container">
+                                    <div class="w-full border border-gray-300 rounded-md px-3 py-2 flex justify-between items-center cursor-pointer select-trigger" 
+                                         data-type="attendance-month">
+                                        <span>${getMonthLabel(attendanceMonth)}</span>
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                    <div class="select-dropdown hidden" id="attendance-month-dropdown">
+                                        <div class="py-1">
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-01">January 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-02">February 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-03">March 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-04">April 2024</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="attendance-search" class="text-sm font-medium">Search Employee</label>
+                                <div class="relative">
+                                    <i class="fas fa-search absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"></i>
+                                    <input type="text" id="attendance-search" placeholder="Search by name or ID..." 
+                                           class="w-full border border-gray-300 rounded-md pl-8 pr-3 py-2 attendance-search-input">
+                                </div>
+                            </div>
+
+                            <div class="flex items-end">
+                                <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Export Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Table -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-bold">Employee Attendance Records</h3>
+                            <p class="text-sm text-gray-500">
+                                Attendance calculated based on man-hours (8 hours = 1 login day). System tracks total hours logged in the app.
+                            </p>
+                        </div>
+                        <div class="mt-4">
+                            <div class="rounded-md border overflow-auto">
+                                <table class="w-full min-w-[800px]">
+                                    <thead class="bg-gray-50 sticky-header">
+                                        <tr>
+                                            <th class="text-left p-4 font-medium">Employee ID</th>
+                                            <th class="text-left p-4 font-medium">Name</th>
+                                            <th class="text-left p-4 font-medium">Unit</th>
+                                            <th class="text-center p-4 font-medium">Hours Worked</th>
+                                            <th class="text-center p-4 font-medium">Login Days</th>
+                                            <th class="text-center p-4 font-medium">Attendance %</th>
+                                            <th class="text-center p-4 font-medium">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendance-table-body">
+                                        <!-- Attendance data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                <p class="text-sm text-blue-900">
+                                    <strong>Note:</strong> Login Days are calculated based on man-hours. Every 8 hours logged equals 1 full
+                                    day. For example, 4 hours = 0.5 days, 12 hours = 1.5 days.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Populate attendance table
+            populateAttendanceTable();
+            
+            // Set up event listeners for this tab
+            setupAttendanceListeners();
+        }
+
+        // Populate attendance table
+        function populateAttendanceTable(searchQuery = "") {
+            const tableBody = document.getElementById('attendance-table-body');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            const filteredData = mockAttendanceData.filter(
+                user => user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       user.employeeId.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            
+            filteredData.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'border-t hover:bg-gray-50';
+                
+                let badgeClass = 'badge-poor';
+                let badgeText = 'Poor';
+                
+                if (user.attendancePercentage >= 90) {
+                    badgeClass = 'badge-excellent';
+                    badgeText = 'Excellent';
+                } else if (user.attendancePercentage >= 70) {
+                    badgeClass = 'badge-good';
+                    badgeText = 'Good';
+                }
+                
+                row.innerHTML = `
+                    <td class="p-4 font-medium">${user.employeeId}</td>
+                    <td class="p-4">${user.name}</td>
+                    <td class="p-4">${user.unit}</td>
+                    <td class="p-4 text-center font-semibold">${user.totalHoursWorked}h</td>
+                    <td class="p-4 text-center">
+                        <span class="font-semibold">${user.loginDays}</span>
+                        <span class="text-xs text-gray-500 ml-1">days</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="font-semibold">${user.attendancePercentage}%</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="${badgeClass}">${badgeText}</span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render Salary Tab
+        function renderSalaryTab() {
+            const container = document.getElementById('salary-tab');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Filters -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-bold">Salary Calculation</h3>
+                            <p class="text-sm text-gray-500">
+                                Monthly salary calculated based on daily rate × login days + bonuses + extra hours
+                            </p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="salary-month" class="text-sm font-medium">Month</label>
+                                <div class="select-container">
+                                    <div class="w-full border border-gray-300 rounded-md px-3 py-2 flex justify-between items-center cursor-pointer select-trigger" 
+                                         data-type="salary-month">
+                                        <span>${getMonthLabel(salaryMonth)}</span>
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                    <div class="select-dropdown hidden" id="salary-month-dropdown">
+                                        <div class="py-1">
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-01">January 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-02">February 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-03">March 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-04">April 2024</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="salary-search" class="text-sm font-medium">Search Employee</label>
+                                <div class="relative">
+                                    <i class="fas fa-search absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"></i>
+                                    <input type="text" id="salary-search" placeholder="Search by name or ID..." 
+                                           class="w-full border border-gray-300 rounded-md pl-8 pr-3 py-2 salary-search-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Salary Table -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold">Salary Breakdown</h3>
+                                <p class="text-sm text-gray-500">View and manage employee salaries for the month</p>
+                            </div>
+                        </div>
+                        <div class="rounded-md border overflow-auto">
+                            <table class="w-full min-w-[900px]">
+                                <thead class="bg-gray-50 sticky-header">
+                                    <tr>
+                                        <th class="text-left p-4 font-medium">Employee</th>
+                                        <th class="text-right p-4 font-medium">Daily Rate</th>
+                                        <th class="text-center p-4 font-medium">Login Days</th>
+                                        <th class="text-right p-4 font-medium">Base Salary</th>
+                                        <th class="text-right p-4 font-medium">Bonuses</th>
+                                        <th class="text-right p-4 font-medium">Extra Hours</th>
+                                        <th class="text-right p-4 font-medium">Total</th>
+                                        <th class="text-center p-4 font-medium">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salary-table-body">
+                                    <!-- Salary data will be populated here -->
+                                </tbody>
+                                <tfoot class="bg-gray-50 font-bold">
+                                    <tr class="border-t-2">
+                                        <td colspan="3" class="p-4 text-right">Total Payroll:</td>
+                                        <td class="p-4 text-right" id="total-base-salary">₦0</td>
+                                        <td class="p-4 text-right text-green-600" id="total-bonuses">+₦0</td>
+                                        <td class="p-4 text-right text-blue-600" id="total-extra-hours">+₦0</td>
+                                        <td class="p-4 text-right" id="total-salary">₦0</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Populate salary table
+            populateSalaryTable();
+            
+            // Set up event listeners for this tab
+            setupSalaryListeners();
+        }
+
+        // Populate salary table
+        function populateSalaryTable(searchQuery = "") {
+            const tableBody = document.getElementById('salary-table-body');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            const filteredData = salaryData.filter(
+                user => user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       user.employeeId.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            
+            // Calculate totals
+            let totalBase = 0;
+            let totalBonuses = 0;
+            let totalExtra = 0;
+            let totalSalary = 0;
+            
+            filteredData.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'border-t hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="p-4">
+                        <div>
+                            <div class="font-medium">${user.name}</div>
+                            <div class="text-sm text-gray-500">${user.employeeId}</div>
+                        </div>
+                    </td>
+                    <td class="p-4 text-right">₦${user.dailyRate.toLocaleString()}</td>
+                    <td class="p-4 text-center">${user.loginDays}</td>
+                    <td class="p-4 text-right font-medium">₦${user.baseSalary.toLocaleString()}</td>
+                    <td class="p-4 text-right text-green-600">+₦${user.bonuses.toLocaleString()}</td>
+                    <td class="p-4 text-right text-blue-600">+₦${user.extraHours.toLocaleString()}</td>
+                    <td class="p-4 text-right font-bold">₦${user.totalSalary.toLocaleString()}</td>
+                    <td class="p-4 text-center">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 add-bonus-btn" data-employee-id="${user.employeeId}" data-employee-name="${user.name}">
+                            <i class="fas fa-plus mr-1"></i>
+                            Add
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                
+                // Update totals
+                totalBase += user.baseSalary;
+                totalBonuses += user.bonuses;
+                totalExtra += user.extraHours;
+                totalSalary += user.totalSalary;
+            });
+            
+            // Update footer totals
+            document.getElementById('total-base-salary').textContent = `₦${totalBase.toLocaleString()}`;
+            document.getElementById('total-bonuses').textContent = `+₦${totalBonuses.toLocaleString()}`;
+            document.getElementById('total-extra-hours').textContent = `+₦${totalExtra.toLocaleString()}`;
+            document.getElementById('total-salary').textContent = `₦${totalSalary.toLocaleString()}`;
+        }
+
+        // Render Payroll Tab
+        function renderPayrollTab() {
+            const container = document.getElementById('payroll-tab');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Report Filters -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-bold">Payroll Reports</h3>
+                            <p class="text-sm text-gray-500">Generate and export individual employee payroll reports</p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-2">
+                                <label for="payroll-month" class="text-sm font-medium">Month</label>
+                                <div class="select-container">
+                                    <div class="w-full border border-gray-300 rounded-md px-3 py-2 flex justify-between items-center cursor-pointer select-trigger" 
+                                         data-type="payroll-month">
+                                        <span>${getMonthLabel(payrollMonth)}</span>
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                    <div class="select-dropdown hidden" id="payroll-month-dropdown">
+                                        <div class="py-1">
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-01">January 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-02">February 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-03">March 2024</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="2024-04">April 2024</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="unit" class="text-sm font-medium">Unit</label>
+                                <div class="select-container">
+                                    <div class="w-full border border-gray-300 rounded-md px-3 py-2 flex justify-between items-center cursor-pointer select-trigger" 
+                                         data-type="payroll-unit">
+                                        <span>${selectedUnits.length === 0 ? 'All Units' : selectedUnits.length + ' units selected'}</span>
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                    <div class="select-dropdown hidden" id="payroll-unit-dropdown">
+                                        <div class="py-1">
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="all">All Units</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="PRA">PRA</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="PIC">PIC</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="Page Typing">Page Typing</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="Blind Scanning">Blind Scanning</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="Indexing">Indexing</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="File Archiving">File Archiving</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="File Tracking">File Tracking</div>
+                                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer select-option" data-value="Sorting, Collation & Batching">Sorting, Collation & Batching</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="selected-units-container" class="flex flex-wrap gap-2 mt-2">
+                                    ${selectedUnits.map(unit => `
+                                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                                            ${unit}
+                                            <i class="fas fa-times text-xs cursor-pointer remove-unit-btn" data-unit="${unit}"></i>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div class="flex items-end gap-2">
+                                <button class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center export-payroll-btn">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Export
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center justify-center print-payroll-btn">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="payroll-summary-cards">
+                        <!-- Summary cards will be populated here -->
+                    </div>
+
+                    <!-- Payroll Details Table -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2 mb-4">
+                            <h3 class="text-lg font-bold">Employee Payroll Details</h3>
+                            <p class="text-sm text-gray-500">
+                                Individual salary breakdown for ${getMonthLabel(payrollMonth)} (based on man-hours: 8 hours = 1 day)
+                            </p>
+                        </div>
+                        <div class="rounded-md border overflow-auto">
+                            <table class="w-full min-w-[1200px]">
+                                <thead class="bg-gray-50 sticky-header">
+                                    <tr>
+                                        <th class="sticky left-0 z-10 bg-gray-50 text-left p-4 font-medium border-r">Employee ID</th>
+                                        <th class="sticky left-[120px] z-10 bg-gray-50 text-left p-4 font-medium border-r">Name</th>
+                                        <th class="text-left p-4 font-medium">Unit</th>
+                                        <th class="text-right p-4 font-medium">Daily Rate</th>
+                                        <th class="text-center p-4 font-medium">Hours Worked</th>
+                                        <th class="text-center p-4 font-medium bg-blue-50">Login Days</th>
+                                        <th class="text-right p-4 font-medium">Base Salary</th>
+                                        <th class="text-right p-4 font-medium">Bonuses</th>
+                                        <th class="text-right p-4 font-medium">Extra Hours</th>
+                                        <th class="text-right p-4 font-medium">Total Salary</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payroll-table-body">
+                                    <!-- Payroll data will be populated here -->
+                                </tbody>
+                                <tfoot class="bg-gray-50 font-bold border-t-2">
+                                    <tr>
+                                        <td class="sticky left-0 z-10 bg-gray-50 p-4 border-r" colspan="2">
+                                            Grand Total (<span id="employee-count">0</span> employees)
+                                        </td>
+                                        <td class="p-4" colspan="4"></td>
+                                        <td class="p-4 text-right" id="payroll-total-base">₦0</td>
+                                        <td class="p-4 text-right text-green-600" id="payroll-total-bonuses">₦0</td>
+                                        <td class="p-4 text-right text-blue-600" id="payroll-total-extra">₦0</td>
+                                        <td class="p-4 text-right" id="payroll-grand-total">₦0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Populate payroll data
+            populatePayrollData();
+            
+            // Set up event listeners for this tab
+            setupPayrollListeners();
+        }
+
+        // Populate payroll data
+        function populatePayrollData() {
+            const tableBody = document.getElementById('payroll-table-body');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            const filteredEmployees = selectedUnits.length === 0 
+                ? salaryData 
+                : salaryData.filter(emp => selectedUnits.includes(emp.unit));
+            
+            let totalBaseSalary = 0;
+            let totalBonuses = 0;
+            let totalExtraHours = 0;
+            let grandTotal = 0;
+            
+            filteredEmployees.forEach(employee => {
+                const row = document.createElement('tr');
+                row.className = 'border-t hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="sticky left-0 z-10 bg-white p-4 font-medium border-r">${employee.employeeId}</td>
+                    <td class="sticky left-[120px] z-10 bg-white p-4 border-r">${employee.name}</td>
+                    <td class="p-4">${employee.unit}</td>
+                    <td class="p-4 text-right">₦${employee.dailyRate.toLocaleString()}</td>
+                    <td class="p-4 text-center font-semibold">${employee.totalHoursWorked}h</td>
+                    <td class="p-4 text-center bg-blue-50 font-bold">${employee.loginDays}</td>
+                    <td class="p-4 text-right">₦${employee.baseSalary.toLocaleString()}</td>
+                    <td class="p-4 text-right text-green-600">₦${employee.bonuses.toLocaleString()}</td>
+                    <td class="p-4 text-right text-blue-600">₦${employee.extraHours.toLocaleString()}</td>
+                    <td class="p-4 text-right font-bold">₦${employee.totalSalary.toLocaleString()}</td>
+                `;
+                tableBody.appendChild(row);
+                
+                // Update totals
+                totalBaseSalary += employee.baseSalary;
+                totalBonuses += employee.bonuses;
+                totalExtraHours += employee.extraHours;
+                grandTotal += employee.totalSalary;
+            });
+            
+            // Update footer totals
+            document.getElementById('employee-count').textContent = filteredEmployees.length;
+            document.getElementById('payroll-total-base').textContent = `₦${totalBaseSalary.toLocaleString()}`;
+            document.getElementById('payroll-total-bonuses').textContent = `₦${totalBonuses.toLocaleString()}`;
+            document.getElementById('payroll-total-extra').textContent = `₦${totalExtraHours.toLocaleString()}`;
+            document.getElementById('payroll-grand-total').textContent = `₦${grandTotal.toLocaleString()}`;
+            
+            // Update summary cards
+            updatePayrollSummaryCards(totalBaseSalary, totalBonuses, totalExtraHours, grandTotal);
+        }
+
+        // Update payroll summary cards
+        function updatePayrollSummaryCards(base, bonuses, extra, total) {
+            const container = document.getElementById('payroll-summary-cards');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="bg-white rounded-lg border card-shadow p-6">
+                    <div class="pb-3">
+                        <h3 class="text-sm font-medium">Base Salaries</h3>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold">₦${base.toLocaleString()}</div>
+                        <p class="text-xs text-gray-500 mt-1">Total base pay</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border card-shadow p-6">
+                    <div class="pb-3">
+                        <h3 class="text-sm font-medium">Bonuses</h3>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-green-600">₦${bonuses.toLocaleString()}</div>
+                        <p class="text-xs text-gray-500 mt-1">Performance bonuses</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border card-shadow p-6">
+                    <div class="pb-3">
+                        <h3 class="text-sm font-medium">Extra Hours</h3>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-blue-600">₦${extra.toLocaleString()}</div>
+                        <p class="text-xs text-gray-500 mt-1">Overtime pay</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border card-shadow p-6">
+                    <div class="pb-3">
+                        <h3 class="text-sm font-medium">Grand Total</h3>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600">₦${total.toLocaleString()}</div>
+                        <p class="text-xs text-gray-500 mt-1">Total payroll</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render Rates Tab
+        function renderRatesTab() {
+            const container = document.getElementById('rates-tab');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Search -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-bold">User Daily Rates Configuration</h3>
+                            <p class="text-sm text-gray-500">Manage daily rates for all employees (used for salary calculations)</p>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <label for="user-search" class="text-sm font-medium">Search Employee</label>
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"></i>
+                                <input type="text" id="user-search" placeholder="Search by name or ID..." 
+                                       class="w-full border border-gray-300 rounded-md pl-8 pr-3 py-2 rates-search-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Rates Table -->
+                    <div class="bg-white rounded-lg border card-shadow p-6">
+                        <div class="space-y-2 mb-4">
+                            <h3 class="text-lg font-bold">Employee Daily Rates</h3>
+                            <p class="text-sm text-gray-500">View and update daily rates for employees</p>
+                        </div>
+                        <div class="rounded-md border overflow-auto">
+                            <table class="w-full min-w-[800px]">
+                                <thead class="bg-gray-50 sticky-header">
+                                    <tr>
+                                        <th class="text-left p-4 font-medium">Employee ID</th>
+                                        <th class="text-left p-4 font-medium">Name</th>
+                                        <th class="text-left p-4 font-medium">Unit</th>
+                                        <th class="text-left p-4 font-medium">Position</th>
+                                        <th class="text-right p-4 font-medium">Daily Rate</th>
+                                        <th class="text-center p-4 font-medium">Status</th>
+                                        <th class="text-center p-4 font-medium">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rates-table-body">
+                                    <!-- Rates data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Populate rates table
+            populateRatesTable();
+            
+            // Set up event listeners for this tab
+            setupRatesListeners();
+        }
+
+        // Populate rates table
+        function populateRatesTable(searchQuery = "") {
+            const tableBody = document.getElementById('rates-table-body');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            const filteredData = mockUserRates.filter(
+                user => user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       user.employeeId.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            
+            filteredData.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'border-t hover:bg-gray-50';
+                
+                const badgeClass = user.status === "Active" ? 'badge-excellent' : 'badge-poor';
+                
+                row.innerHTML = `
+                    <td class="p-4 font-medium">${user.employeeId}</td>
+                    <td class="p-4">${user.name}</td>
+                    <td class="p-4">${user.unit}</td>
+                    <td class="p-4">${user.position}</td>
+                    <td class="p-4 text-right font-semibold">₦${user.dailyRate.toLocaleString()}</td>
+                    <td class="p-4 text-center">
+                        <span class="${badgeClass}">${user.status}</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 edit-rate-btn" data-employee-id="${user.employeeId}" data-employee-name="${user.name}">
+                            <i class="fas fa-edit mr-1"></i>
+                            Edit
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update total payroll calculation
+        function updateTotalPayroll() {
+            const totalPayroll = salaryData.reduce((sum, record) => sum + record.totalSalary, 0);
+            document.getElementById('total-payroll').textContent = `₦${totalPayroll.toLocaleString()}`;
+        }
+
+        // Set up event listeners for attendance tab
+        function setupAttendanceListeners() {
+            // Month select
+            const attendanceMonthTrigger = document.querySelector('.select-trigger[data-type="attendance-month"]');
+            if (attendanceMonthTrigger) {
+                attendanceMonthTrigger.addEventListener('click', function() {
+                    const dropdown = document.getElementById('attendance-month-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+            
+            // Search input
+            const attendanceSearch = document.querySelector('.attendance-search-input');
+            if (attendanceSearch) {
+                attendanceSearch.addEventListener('input', function() {
+                    populateAttendanceTable(this.value);
+                });
+            }
+            
+            // Select options
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('select-option')) {
+                    const value = e.target.getAttribute('data-value');
+                    const type = e.target.closest('.select-dropdown').id.replace('-dropdown', '');
+                    
+                    if (type === 'attendance-month') {
+                        attendanceMonth = value;
+                        document.querySelector('.select-trigger[data-type="attendance-month"] span').textContent = getMonthLabel(value);
+                    }
+                    
+                    // Close dropdown
+                    e.target.closest('.select-dropdown').classList.add('hidden');
+                }
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.select-container')) {
+                    document.querySelectorAll('.select-dropdown').forEach(dropdown => {
+                        dropdown.classList.add('hidden');
+                    });
+                }
+            });
+        }
+
+        // Set up event listeners for salary tab
+        function setupSalaryListeners() {
+            // Month select
+            const salaryMonthTrigger = document.querySelector('.select-trigger[data-type="salary-month"]');
+            if (salaryMonthTrigger) {
+                salaryMonthTrigger.addEventListener('click', function() {
+                    const dropdown = document.getElementById('salary-month-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+            
+            // Search input
+            const salarySearch = document.querySelector('.salary-search-input');
+            if (salarySearch) {
+                salarySearch.addEventListener('input', function() {
+                    populateSalaryTable(this.value);
+                });
+            }
+            
+            // Add bonus buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.add-bonus-btn')) {
+                    const button = e.target.closest('.add-bonus-btn');
+                    const employeeId = button.getAttribute('data-employee-id');
+                    const employeeName = button.getAttribute('data-employee-name');
+                    
+                    currentSelectedEmployee = employeeId;
+                    document.getElementById('employee-name').textContent = employeeName;
+                    document.getElementById('bonus-dialog').classList.remove('hidden');
+                }
+            });
+            
+            // Select options for salary tab
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('select-option')) {
+                    const value = e.target.getAttribute('data-value');
+                    const type = e.target.closest('.select-dropdown').id.replace('-dropdown', '');
+                    
+                    if (type === 'salary-month') {
+                        salaryMonth = value;
+                        document.querySelector('.select-trigger[data-type="salary-month"] span').textContent = getMonthLabel(value);
+                    }
+                    
+                    // Close dropdown
+                    e.target.closest('.select-dropdown').classList.add('hidden');
+                }
+            });
+        }
+
+        // Set up event listeners for payroll tab
+        function setupPayrollListeners() {
+            // Month select
+            const payrollMonthTrigger = document.querySelector('.select-trigger[data-type="payroll-month"]');
+            if (payrollMonthTrigger) {
+                payrollMonthTrigger.addEventListener('click', function() {
+                    const dropdown = document.getElementById('payroll-month-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+            
+            // Unit select
+            const payrollUnitTrigger = document.querySelector('.select-trigger[data-type="payroll-unit"]');
+            if (payrollUnitTrigger) {
+                payrollUnitTrigger.addEventListener('click', function() {
+                    const dropdown = document.getElementById('payroll-unit-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+            
+            // Unit selection
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('select-option')) {
+                    const value = e.target.getAttribute('data-value');
+                    const type = e.target.closest('.select-dropdown').id.replace('-dropdown', '');
+                    
+                    if (type === 'payroll-month') {
+                        payrollMonth = value;
+                        document.querySelector('.select-trigger[data-type="payroll-month"] span').textContent = getMonthLabel(value);
+                        // Refresh table header description
+                        const description = document.querySelector('#payroll-tab .text-sm.text-gray-500');
+                        if (description) {
+                            description.textContent = `Individual salary breakdown for ${getMonthLabel(value)} (based on man-hours: 8 hours = 1 day)`;
+                        }
+                    } else if (type === 'payroll-unit') {
+                        if (value === 'all') {
+                            selectedUnits = [];
+                        } else if (!selectedUnits.includes(value)) {
+                            selectedUnits.push(value);
+                        }
+                        
+                        // Update UI
+                        document.querySelector('.select-trigger[data-type="payroll-unit"] span').textContent = 
+                            selectedUnits.length === 0 ? 'All Units' : selectedUnits.length + ' units selected';
+                        
+                        // Refresh selected units display
+                        const container = document.getElementById('selected-units-container');
+                        if (container) {
+                            container.innerHTML = selectedUnits.map(unit => `
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                                    ${unit}
+                                    <i class="fas fa-times text-xs cursor-pointer remove-unit-btn" data-unit="${unit}"></i>
+                                </span>
+                            `).join('');
+                        }
+                        
+                        // Refresh table
+                        populatePayrollData();
+                    }
+                    
+                    // Close dropdown
+                    e.target.closest('.select-dropdown').classList.add('hidden');
+                }
+                
+                // Remove unit
+                if (e.target.classList.contains('remove-unit-btn')) {
+                    const unit = e.target.getAttribute('data-unit');
+                    selectedUnits = selectedUnits.filter(u => u !== unit);
+                    
+                    // Update UI
+                    document.querySelector('.select-trigger[data-type="payroll-unit"] span').textContent = 
+                        selectedUnits.length === 0 ? 'All Units' : selectedUnits.length + ' units selected';
+                    
+                    // Refresh selected units display
+                    const container = document.getElementById('selected-units-container');
+                    if (container) {
+                        container.innerHTML = selectedUnits.map(unit => `
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                                ${unit}
+                                <i class="fas fa-times text-xs cursor-pointer remove-unit-btn" data-unit="${unit}"></i>
+                            </span>
+                        `).join('');
+                    }
+                    
+                    // Refresh table
+                    populatePayrollData();
+                }
+            });
+            
+            // Export button
+            const exportBtn = document.querySelector('.export-payroll-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', handleExportPayroll);
+            }
+            
+            // Print button
+            const printBtn = document.querySelector('.print-payroll-btn');
+            if (printBtn) {
+                printBtn.addEventListener('click', handlePrintPayroll);
+            }
+        }
+
+        // Set up event listeners for rates tab
+        function setupRatesListeners() {
+            // Search input
+            const ratesSearch = document.querySelector('.rates-search-input');
+            if (ratesSearch) {
+                ratesSearch.addEventListener('input', function() {
+                    populateRatesTable(this.value);
+                });
+            }
+            
+            // Edit rate buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-rate-btn')) {
+                    const button = e.target.closest('.edit-rate-btn');
+                    const employeeId = button.getAttribute('data-employee-id');
+                    const employeeName = button.getAttribute('data-employee-name');
+                    
+                    // Find the user
+                    const user = mockUserRates.find(u => u.employeeId === employeeId);
+                    if (user) {
+                        currentSelectedEmployee = employeeId;
+                        document.getElementById('rate-dialog-description').textContent = 
+                            `Update daily rate for ${user.name} (${user.employeeId})`;
+                        document.getElementById('current-rate').value = `₦${user.dailyRate.toLocaleString()}`;
+                        document.getElementById('new-rate').value = user.dailyRate;
+                        document.getElementById('edit-rate-dialog').classList.remove('hidden');
+                    }
+                }
+            });
+        }
+
+        // Set up search functionality
+        function setupSearch() {
+            // Global search listeners are handled in each tab's setup function
+        }
+
+        // Set up dialogs
+        function setupDialogs() {
+            // Bonus dialog cancel button
+            document.querySelector('.cancel-dialog-btn')?.addEventListener('click', function() {
+                document.getElementById('bonus-dialog').classList.add('hidden');
+                resetBonusDialog();
+            });
+            
+            // Bonus dialog add button
+            document.querySelector('.add-payroll-btn')?.addEventListener('click', function() {
+                if (currentSelectedEmployee) {
+                    const bonusAmount = parseFloat(document.getElementById('bonus-amount').value) || 0;
+                    const extraHoursAmount = parseFloat(document.getElementById('extra-hours-amount').value) || 0;
+                    
+                    // Get current employee data
+                    const employee = salaryData.find(emp => emp.employeeId === currentSelectedEmployee);
+                    if (employee) {
+                        // Add to existing bonuses and extra hours
+                        updateEmployeePayroll(
+                            currentSelectedEmployee, 
+                            employee.bonuses + bonusAmount, 
+                            employee.extraHours + extraHoursAmount
+                        );
+                        
+                        alert(`Payroll updated for ${employee.name}`);
+                    }
+                    
+                    document.getElementById('bonus-dialog').classList.add('hidden');
+                    resetBonusDialog();
+                }
+            });
+            
+            // Rate dialog cancel button
+            document.querySelector('.cancel-rate-dialog-btn')?.addEventListener('click', function() {
+                document.getElementById('edit-rate-dialog').classList.add('hidden');
+                resetRateDialog();
+            });
+            
+            // Rate dialog save button
+            document.querySelector('.save-rate-btn')?.addEventListener('click', function() {
+                if (currentSelectedEmployee) {
+                    const newRate = parseFloat(document.getElementById('new-rate').value);
+                    const userIndex = mockUserRates.findIndex(u => u.employeeId === currentSelectedEmployee);
+                    
+                    if (userIndex !== -1) {
+                        // Update the rate
+                        mockUserRates[userIndex].dailyRate = newRate;
+                        
+                        // Also update salary data if this employee exists there
+                        const salaryIndex = salaryData.findIndex(s => s.employeeId === currentSelectedEmployee);
+                        if (salaryIndex !== -1) {
+                            // Recalculate base salary based on new daily rate
+                            const employee = salaryData[salaryIndex];
+                            const newBaseSalary = newRate * employee.loginDays;
+                            salaryData[salaryIndex].dailyRate = newRate;
+                            salaryData[salaryIndex].baseSalary = newBaseSalary;
+                            salaryData[salaryIndex].totalSalary = newBaseSalary + employee.bonuses + employee.extraHours;
+                            
+                            // If salary tab is active, refresh it
+                            if (activeTab === 'salary') {
+                                renderSalaryTab();
+                            }
+                            if (activeTab === 'payroll') {
+                                renderPayrollTab();
+                            }
+                            
+                            updateTotalPayroll();
+                        }
+                        
+                        // Refresh rates tab
+                        if (activeTab === 'rates') {
+                            populateRatesTable();
+                        }
+                        
+                        alert(`Daily rate updated for ${mockUserRates[userIndex].name}`);
+                    }
+                    
+                    document.getElementById('edit-rate-dialog').classList.add('hidden');
+                    resetRateDialog();
+                }
+            });
+            
+            // Close dialogs when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('dialog-overlay')) {
+                    e.target.classList.add('hidden');
+                    if (e.target.id === 'bonus-dialog') {
+                        resetBonusDialog();
+                    } else if (e.target.id === 'edit-rate-dialog') {
+                        resetRateDialog();
+                    }
+                }
+            });
+        }
+
+        // Reset bonus dialog
+        function resetBonusDialog() {
+            document.getElementById('bonus-amount').value = '';
+            document.getElementById('extra-hours-amount').value = '';
+            document.getElementById('reason').value = '';
+            currentSelectedEmployee = null;
+        }
+
+        // Reset rate dialog
+        function resetRateDialog() {
+            document.getElementById('new-rate').value = '';
+            document.getElementById('effective-date').value = '';
+            document.getElementById('rate-reason').value = '';
+            currentSelectedEmployee = null;
+        }
+
+        // Handle payroll export
+        function handleExportPayroll() {
+            const filteredEmployees = selectedUnits.length === 0 
+                ? salaryData 
+                : salaryData.filter(emp => selectedUnits.includes(emp.unit));
+            
+            const headers = [
+                "Employee ID",
+                "Name",
+                "Unit",
+                "Daily Rate",
+                "Hours Worked",
+                "Login Days",
+                "Base Salary",
+                "Bonuses",
+                "Extra Hours",
+                "Total Salary",
+            ];
+
+            const csvContent = [
+                headers.join(","),
+                ...filteredEmployees.map(emp =>
+                    [
+                        emp.employeeId,
+                        `"${emp.name}"`,
+                        `"${emp.unit}"`,
+                        emp.dailyRate,
+                        emp.totalHoursWorked,
+                        emp.loginDays,
+                        emp.baseSalary,
+                        emp.bonuses,
+                        emp.extraHours,
+                        emp.totalSalary,
+                    ].join(",")
+                ),
+            ].join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `payroll_report_${payrollMonth}.csv`);
+            link.style.visibility = "hidden";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Handle payroll print
+
+        
+      
+        // Helper function to get month label
+        function getMonthLabel(monthValue) {
+            const months = {
+                '2024-01': 'January 2024',
+                '2024-02': 'February 2024',
+                '2024-03': 'March 2024',
+                '2024-04': 'April 2024'
+            };
+            return months[monthValue] || monthValue;
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-NG', {
+                style: 'currency',
+                currency: 'NGN'
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>
