@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valuation Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @media print {
+        @page {
+          margin: 10mm 8mm;
+          size: A4 portrait;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          font-size: 12pt !important;
+          line-height: 1.35 !important;
+        }
+        .page {
+          page-break-after: always;
+        }
+       
+        h1 {
+          font-size: 24pt !important;
+          margin: 10px 0 20px;
+          text-align: center;
+          font-weight: 700;
+        }
+        .section-title {
+          font-size: 10pt !important;
+          font-weight: bold;
+          margin: 14px 0 6px;
+          border-bottom: 2.5px solid #000;
+          padding-bottom: 4px;
+        }
+        .field-row {
+          margin: 6px 0;
+          font-size: 10pt !important;
+        }
+        .label {
+          width: 160px;
+          display: inline-block;
+          vertical-align: top;
+          font-weight: 700;
+        }
+        input,
+        textarea {
+          border: none !important;
+          border-bottom: 2px solid #000 !important;
+          background: transparent !important;
+          font-size: 14pt !important;
+          padding: 3px 0;
+          margin: 0;
+          font-weight: 500;
+        }
+        textarea {
+          height: 60px;
+          resize: none;
+          min-height: 50px;
+        }
+        .grid-compact {
+          gap: 6px 10px !important;
+        }
+        .sign-block div {
+          margin-top: 25px;
+        }
+        .sign-line {
+          border-bottom: 2px solid #000;
+          height: 20px;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .text-xs {
+          font-size: 10pt !important;
+        }
+      }
+
+      /* Screen styles */
+      body {
+        font-size: 12pt;
+        line-height: 1;
+      }
+      
+      h1 {
+        font-size: 28pt;
+        margin: 10px 0 20px;
+        text-align: center;
+        font-weight: 700;
+      }
+      
+      .section-title {
+        font-size: 16pt;
+        font-weight: bold;
+        margin: 14px 0 6px;
+        border-bottom: 2.5px solid #000;
+        padding-bottom: 4px;
+      }
+      
+      .field-row {
+        margin: 2px 0;
+      }
+      
+      .label {
+        width: 160px;
+        display: inline-block;
+        vertical-align: top;
+        font-weight: 700;
+      }
+      
+      input,
+      textarea {
+        border: none;
+        border-bottom: 2px dotted #666;
+        background: transparent;
+        width: 100%;
+        outline: none;
+        font-size: 14pt;
+        padding: 3px 0;
+        font-weight: 500;
+      }
+      
+      input:focus,
+      textarea:focus {
+        border-bottom: 3px solid #000;
+        background-color: #f8f9fa;
+      }
+      
+      textarea {
+        height: 60px;
+        resize: none;
+        min-height: 60px;
+      }
+      
+      .grid-compact {
+        gap: 6px 10px !important;
+      }
+      
+      .sign-line {
+        border-bottom: 2px dotted #000;
+        height: 24px; 
+      }
+      
+      .text-xs {
+        font-size: 10pt;
+      }
+      
+      /* Larger buttons */
+      .no-print.text-sm {
+        font-size: 14pt !important;
+      }
+      
+      .no-print button {
+        font-size: 13pt !important;
+        padding: 10px 20px !important;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body class="bg-white text-black">
+    <div class="no-print bg-amber-50 p-5 mb-8 max-w-5xl mx-auto rounded text-base">
+      <strong class="text-lg">Print Tips:</strong> Chrome/Edge • Margins: Minimal/Default •
+      Headers/Footers: Off • Scale: 100%<br />
+      <div class="mt-4 space-x-4">
+        <button
+          onclick="window.print()"
+          class="bg-blue-600 text-white px-5 py-3 rounded mr-2 font-semibold"
+        >
+          Print Report
+        </button>
+        <button
+          onclick="fillSample()"
+          class="bg-gray-700 text-white px-5 py-3 rounded mr-2 font-semibold"
+        >
+          Fill Sample Data
+        </button>
+        <button
+          onclick="clearAll()"
+          class="bg-red-600 text-white px-5 py-3 rounded font-semibold"
+        >
+          Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Single Page Container -->
+    <div class="page max-w-5xl mx-auto px-4 py-8 print:px-0 print:py-0">
+      <h1>VALUATION REPORT</h1>
+
+      <div class="space-y-4">
+        <div class="field-row">
+          <span class="label">1. INSPECTION DATE</span><input type="text" />
+        </div>
+        <div class="field-row">
+          <span class="label">2. PURPOSE OF VALUATION</span><input type="text" />
+        </div>
+
+        <div class="section-title">3. OWNER / CLIENT DETAILS</div>
+        <div class="grid grid-cols-[160px_1fr] grid-compact">
+          <span>a) Full Name</span><input type="text" />
+          <span>b) Address</span><input type="text" />
+          <span>c) Plot/Property No.</span><input type="text" />
+          <span>d) Street Name</span><input type="text" />
+          <span>e) Estate/Quarters</span><input type="text" />
+          <span>f) Town/City</span><input type="text" />
+          <span>g) Local Government Area</span><input type="text" />
+        </div>
+
+        <div class="section-title">4. PROPERTY DESCRIPTION</div>
+        <div class="grid grid-cols-[160px_1fr] grid-compact">
+          <span>a) Property Type</span><input type="text" />
+          <span>b) Number of Blocks</span><input type="text" />
+          <span>c) Storey Height</span><input type="text" />
+          <span>d) Bedroom Units</span><input type="text" />
+          <span>e) Ancillary Buildings</span><input type="text" />
+          <span>f) Current Use</span><input type="text" />
+        </div>
+
+        <div class="section-title">5. CONSTRUCTION DETAILS</div>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+          <div>
+            <div class="font-bold mb-2 text-base">FOUNDATION</div>
+            <div class="grid grid-cols-[100px_1fr] gap-2">
+              <span>Type</span><input type="text" /><span>Stage</span><input type="text" />
+            </div>
+
+            <div class="font-bold mt-4 mb-2 text-base">FLOOR</div>
+            <div class="grid grid-cols-[100px_1fr] gap-2">
+              <span>Type</span><input type="text" /><span>Finish</span><input type="text" />
+            </div>
+
+            <div class="font-bold mt-4 mb-2 text-base">WALLS</div>
+            <div class="grid grid-cols-[100px_1fr] gap-2">
+              <span>Type</span><input type="text" /><span>Finish</span><input type="text" />
+            </div>
+          </div>
+          <div>
+            <div class="font-bold mb-2 text-base">ROOF</div>
+            <div class="grid grid-cols-[100px_1fr] gap-2">
+              <span>Type</span><input type="text" /><span>Material</span><input type="text" />
+            </div>
+
+            <div class="font-bold mt-4 mb-2 text-base">CEILING</div>
+            <input class="mt-2" type="text" />
+
+            <div class="font-bold mt-4 mb-2 text-base">DOORS & WINDOWS</div>
+            <div class="grid grid-cols-[120px_1fr] gap-2">
+              <span>External Doors</span><input type="text" />
+              <span>Window Type</span><input type="text" />
+              <span>Burglary Proof</span><input type="text" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-title">6. SERVICES & UTILITIES</div>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+          <div>
+            <div class="font-bold mb-2 text-base">TOILET & BATHROOM</div>
+            <input type="text" />
+          </div>
+          <div>
+            <div class="font-bold mb-2 text-base">WATER SUPPLY</div>
+            <input type="text" />
+          </div>
+          <div>
+            <div class="font-bold mb-2 text-base">ELECTRICITY</div>
+            <input type="text" />
+          </div>
+          <div>
+            <div class="font-bold mb-2 text-base">DRAINAGE SYSTEM</div>
+            <input type="text" />
+          </div>
+        </div>
+        
+        <div class="section-title">7. FITTINGS & FIXTURES (SUMMARY)</div>
+        <textarea
+          placeholder="Describe fittings in sitting room, kitchen, bedrooms, bathrooms, etc."
+        ></textarea>
+
+        <div class="section-title">8. REMARKS & OBSERVATIONS</div>
+        <textarea
+          placeholder="Property condition, neighborhood, access, defects, market observations..."
+        ></textarea>
+
+        <div class="section-title mt-6">9. VALUATION DETAILS</div>
+        <div class="grid grid-cols-[160px_1fr] grid-compact">
+          <span>Basis of Valuation</span><input type="text" />
+          <span>Value in Words</span><input type="text" />
+          <span>Amount (₦)</span><input type="text" />
+        </div>
+        
+        <div class="section-title mt-6">10. SURVEYOR DETAILS</div>
+        <div class="grid grid-cols-[160px_1fr] grid-compact">
+          <span>Surveyor Name</span><input type="text" />
+          <span>Rank/Registration No.</span><input type="text" />
+        </div>
+        <div class="section-title mt-6 ">11. OFFICE OF CHIEF VALUER</div>
+        <div class="grid grid-cols-[160px_1fr] grid-compact">
+          <span>CHIEF VALUER Name</span><input type="text" />
+          
+        </div>
+        
+        <div class="sign-block grid grid-cols-2 gap-8 mt-10">
+          <div>
+            <div class="mb-3 font-bold text-base">.</div>
+          </div>
+          <div class="text-right">
+            <div class="mb-3 font-bold text-base">SURVEYOR'S SIGNATURE & DATE</div>
+            <div class="sign-line w-72 inline-block"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function fillSample() {
+        const vals = [
+          "07/02/2026",
+          "Mortgage Security Valuation",
+          "Mr. Chinedu Okeke",
+          "Plot 47, Phase 2, GRA Extension",
+          "PL/2026/0047",
+          "Liberation Road",
+          "GRA Quarters",
+          "Port Harcourt",
+          "Obio-Akpor Local Government Area",
+          "4-Bedroom Detached Duplex",
+          "1",
+          "2 Storeys",
+          "4 Bedroom Units",
+          "BQ + Double Garage",
+          "Owner Occupied Residential",
+          "Raft Foundation",
+          "Completed",
+          "Reinforced Concrete",
+          "Porcelain Tiles",
+          "Sandcrete Blocks",
+          "Plaster & Emulsion Paint",
+          "Pitched Roof",
+          "Longspan Aluminum Sheets",
+          "PVC Suspended Ceiling",
+          "Solid Hardwood Doors",
+          "Sliding Aluminum Windows",
+          "Full Burglary Proofing",
+          "Modern Ensuite with Water Heater",
+          "Borehole with Overhead Tank",
+          "PHED with 15KVA Generator",
+          "Modern Soakaway System",
+          "Air Conditioners, Chandeliers, Granite Kitchen Countertops, Built-in Wardrobes",
+          "Property in excellent condition. Located in good GRA neighborhood. No structural defects observed.",
+          "Market Comparison Approach",
+          "Three Hundred Twenty Million Naira Only",
+          "₦320,000,000.00",
+          "Engr. Charles Nwosu (ANIVS)",
+          "Principal Surveyor / REG-2024-0567"
+        ];
+        document.querySelectorAll("input, textarea").forEach((el, i) => {
+          if (vals[i]) el.value = vals[i];
+        });
+      }
+
+      function clearAll() {
+        document
+          .querySelectorAll("input, textarea")
+          .forEach((el) => (el.value = ""));
+      }
+    </script>
+  </body>
+</html>
