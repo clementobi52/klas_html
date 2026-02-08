@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recommendation for Grant of Statutory Right of Occupancy</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 1.4cm 1.6cm 1.5cm;
+    }
+
+    body {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 10.8pt;
+      line-height: 1.28;
+      color: black;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 18.8cm;
+      margin: 0 auto;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.3cm;
+    }
+
+    .qr {
+      width: 65px;
+      height: 65px;
+    }
+
+    .coat {
+      text-align: center;
+      flex: 1;
+    }
+
+    .coat img {
+      height: 80px;
+    }
+
+    .serial {
+      border: 1px solid black;
+      padding: 4px 7px;
+      font-size: 9pt;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .ministry {
+      font-size: 17pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0.1cm 0 0.05cm;
+      letter-spacing: 0.4px;
+    }
+
+    .address {
+      font-size: 10pt;
+      text-align: center;
+      margin-bottom: 0.45cm;
+    }
+
+    .title-bar {
+      display: flex;
+      align-items: center;
+      margin: 0.6cm 0 0.3cm;
+    }
+
+    .title-bar hr {
+      flex: 1;
+      border: none;
+      border-top: 1px solid black;
+      margin: 0;
+    }
+
+    .title-green {
+      background: #006400;
+      color: white;
+      padding: 0.1cm 0.5cm;
+      font-size: 10.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      line-height: 1.1;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 10.5pt;
+      margin: 0.3cm 0 0.15cm;
+      text-align: center;
+    }
+
+    .field {
+      border-bottom: 1px solid black;
+      display: inline-block;
+      min-width: 160px;
+      margin: 0 3px;
+    }
+
+    .paired {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.12cm;
+    }
+
+    .paired > div {
+      width: 49%;
+    }
+
+    .full-line {
+      border-bottom: 1px solid black;
+      margin: 0.15cm 0;
+    }
+
+    .reasons {
+      min-height: 2.2cm;
+      border-bottom: 1px solid black;
+      margin: 0.4cm 0 0.7cm;
+    }
+
+    .sig-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.7cm 0 0.35cm;
+      font-size: 10.5pt;
+    }
+
+    .sig-label {
+      min-width: 110px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .sig-line {
+      border-bottom: 1px solid black;
+      width: 180px;
+      display: inline-block;
+    }
+
+    .approval-bar {
+      display: flex;
+      align-items: center;
+      margin: 0.9cm 0 0.35cm;
+    }
+
+    .approval-bar hr {
+      flex: 1;
+      border: none;
+      border-top: 1px solid black;
+      margin: 0;
+    }
+
+    .approval-green {
+      background: #006400;
+      color: white;
+      padding: 0.1cm 0.5cm;
+      font-size: 10.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      line-height: 1.1;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .red-text {
+      color: #b00000;
+      font-weight: bold;
+      margin: 0.8cm 0 0.5cm;
+      font-size: 11pt;
+    }
+
+    .camscanner {
+      font-size: 8.5pt;
+      color: #666;
+      text-align: right;
+      margin-top: 0.8cm;
+    }
+
+    @media print {
+      .no-print { 
+        display: none !important; 
+      }
+      body { 
+        font-size: 10.8pt !important; 
+      }
+      .title-green, .approval-green {
+        background: #006400 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    .print-button {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #006400;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+    }
+
+    .print-button:hover {
+      background-color: #004d00;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="top-header">
+    <img src="https://via.placeholder.com/65?text=QR" alt="QR Code" class="qr">
+
+    <div class="coat">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" alt="Coat of Arms of Nigeria">
+    </div>
+
+    <div class="serial">
+      CODE: LAND II B<br>
+      SERIAL NO: 20497
+    </div>
+  </div>
+
+  <div class="ministry">MINISTRY OF LAND AND PHYSICAL PLANNING</div>
+  <div class="address">No. 2 Dr. Bala Moh'd Road, Nassarawa GRA, Kano PMB 3038 Kano-Nigeria.</div>
+
+  <div class="title-bar">
+    <hr />
+    <div class="title-green">
+      RECOMMENDATION FOR GRANT OF<br>STATUTORY RIGHT OF OCCUPANCY
+    </div>
+    <hr />
+  </div>
+
+  <div class="subtitle">CONDITIONS FOR APPLICATION</div>
+
+  <div>Name of Applicant: <span class="field" style="width:300px;"></span></div>
+
+  <div class="paired">
+    <div>(a) File Ref. No.: <span class="field" style="width:160px;"></span></div>
+    <div>(b) Purpose of Clause: <span class="field" style="width:160px;"></span></div>
+  </div>
+
+  <div class="paired">
+    <div>(c) Location: <span class="field" style="width:160px;"></span></div>
+    <div>(d) Plot No.: <span class="field" style="width:160px;"></span></div>
+  </div>
+
+  <div>(e) Layout Plan No.: <span class="field" style="width:300px;"></span></div>
+
+  <div class="full-line"></div>
+
+  <div>Term: <span class="field" style="width:380px;"></span></div>
+
+  <div>value for proposed development N: <span class="field" style="width:300px;"></span></div>
+
+  <div>Timer for completion of proposed development: <span class="field" style="width:240px;"></span></div>
+
+  <div>Annual Ground Rent: <span class="field" style="width:320px;"></span></div>
+
+  <div>Development Charge (if any): <span class="field" style="width:280px;"></span></div>
+
+  <div>Survey and processing charges: <span class="field" style="width:260px;"></span></div>
+
+  <div style="margin:0.6cm 0 0.2cm;">
+    The Director of Land recommends/does not recommend the application for the following reasons:
+  </div>
+
+  <div class="reasons"></div>
+
+  <div class="sig-row">
+    <div><span class="sig-label">Director Land</span> <span class="sig-line"></span></div>
+    <div><span class="sig-label">Date</span> <span class="sig-line"></span></div>
+  </div>
+
+  <div class="approval-bar">
+    <hr />
+    <div class="approval-green">
+      APPROVAL FOR GRANT OF<br>STATUTORY RIGHT OF OCCUPANCY
+    </div>
+    <hr />
+  </div>
+
+  <div style="margin-bottom:0.4cm;">
+    I recommend/do not recommend the application for a Grant over Plot No.: <span class="field" style="width:180px;"></span>
+  </div>
+
+  <div class="paired" style="margin-bottom:0.6cm;">
+    <div>Plan No.: <span class="field" style="width:140px;"></span></div>
+    <div>Location: <span class="field" style="width:170px;"></span></div>
+  </div>
+
+  <div class="sig-row">
+    <div>
+      <span class="sig-line"></span>
+      <br>
+      <span class="sig-label">Permanent Secretary</span> 
+    </div>
+    <div>
+      <span class="sig-line"></span>
+      <br>
+      <span class="sig-label">Date</span>
+    </div>
+  </div>
+
+  <div class="red-text">
+    The Grant of Occupancy is hereby APPROVED/NOT APPROVED
+  </div>
+
+  <div class="sig-row">
+    <div>
+      <span class="sig-line"></span>
+      <br>
+      <span class="sig-label">Honourable Commissioner</span>
+    </div>
+    <div>
+      <span class="sig-line"></span>
+      <br>
+      <span class="sig-label">Date</span>
+    </div>
+  </div>
+
+
+</div>
+
+<button class="no-print print-button" onclick="window.print()">
+  Print (should fit one A4 page)
+</button>
+
+</body>
+</html>
