@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consent to Assign Property - Kano Ministry</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @page { 
+      size: A4 portrait; 
+      margin: 1.2cm 1.5cm 1.5cm 1.5cm; 
+    }
+    body { 
+      font-family: 'Times New Roman', Times, serif; 
+      font-size: 12pt; 
+      line-height: 1.3; 
+      color: #000; 
+      background-color: white !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    .json-data {
+      font-weight: bold;
+    }
+    .print-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #006633;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .print-btn:hover {
+      background: #004d26;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    .print-btn:active {
+      transform: translateY(0);
+    }
+    @media print {
+      body {
+        background: white !important;
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-btn {
+        display: none !important;
+      }
+      .json-data {
+        font-weight: bold !important;
+      }
+      /* Make the letterhead space visible but empty when printing */
+      .letterhead-space::before {
+        content: "" !important;
+      }
+    }
+    /* Actual space for pre-printed letterhead - WILL PRINT */
+    .letterhead-space {
+      min-height: 240px; /* Space for coat of arms, ministry header, and contact info */
+      width: 100%;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    /* Visual guide for screen (won't print) */
+    .letterhead-space::before {
+      content: "[Space for pre-printed letterhead]";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #999;
+      font-style: italic;
+      font-size: 14px;
+      text-align: center;
+      border: 1px dashed #ccc;
+      padding: 20px;
+      background: rgba(255,255,255,0.9);
+      width: 80%;
+    }
+    @media print {
+      .letterhead-space::before {
+        display: none !important;
+      }
+    }
+    .document-container {
+      position: relative;
+    }
+  </style>
+</head>
+<body class="print:bg-white">
+
+  <!-- Print Button -->
+  <button class="print-btn no-print" onclick="window.print()">
+    <i class="fas fa-print"></i> Print Document
+  </button>
+
+  <div class="w-[210mm] h-[297mm] mx-auto bg-white p-[1.5cm] box-border document-container">
+
+    <!-- Actual Space for Pre-printed Letterhead (240px height) -->
+    <div class="letterhead-space">
+      <!-- This div creates the actual blank space that will print -->
+    </div>
+
+    <!-- Content Starts Here (for letterhead paper) -->
+    
+    <!-- Reference Number -->
+    <div class="text-center font-bold pt-2">
+      LKN/RES/2018/586
+    </div>
+
+    <!-- Date -->
+    <div class="text-right mt-6 text-sm">
+      4<sup>th</sup> February, 2026
+    </div>
+
+    <!-- Recipient Address -->
+    <div class="mt-6 leading-relaxed text-sm">
+      <span id="recipientName" class="json-data">ABDULLAHI UMAR</span><br>
+      <span id="recipientAddress" class="json-data">No. 134 Rijiyar Zaki Gabas, Gwarzo Road,</span><br>
+      Kano State
+    </div>
+
+    <!-- Salutation -->
+    <div class="mt-4 text-sm">
+      Sir,
+    </div>
+
+    <!-- Subject -->
+    <div class="text-center mt-6 uppercase font-bold text-base leading-tight">
+      RE: APPLICATION FOR CONSENT TO ASSIGN THE PROPERTY COVERED BY<br>
+      CERTIFICATE OF OCCUPANCY: <span id="subjectCertificateNumber" class="json-data">LKN/RES/2018/586</span>
+    </div>
+
+    <!-- Body Text -->
+    <div class="mt-6 leading-relaxed text-md text-justify">
+      By virtue of the powers conferred upon the Governor of Kano state by the provisions of Section 9, 21 and 22 of the Land Use Act, Laws of the Federation of Nigeria, Vol.118, and further to your application dated <span id="applicationDate" class="json-data">29<sup>th</sup> December, 2025</span> on the above subject matter. I hereby convey my Approval for Consent to Assign the property with Certificate of Occupancy No.<span id="bodyCertificateNumber" class="json-data">LKN/RES/2018/586</span> to <span id="assigneeName" class="json-data">MUJITABA SANI HARUNA</span> of <span id="assigneeAddress" class="json-data">No. 1180 Sak, Kuyan Layout, Kano State</span>. for a Consideration of <span id="considerationAmount" class="json-data">Three Million Naira Only, (₦3,000,000.00)</span> only. This is subject to the submission of a Deed of Assignment and payment of Stamp Duty.
+    </div>
+
+    <!-- Closing -->
+    <div class="mt-8 text-sm">
+      Yours faithfully,
+    </div>
+
+    <!-- Signature Area -->
+    <div class="mt-12">
+      <div id="commissionerName" class="font-bold uppercase text-base json-data">
+        ALH ABDULJABBAR M. UMAR
+      </div>
+      <div class="font-bold uppercase text-sm">
+        HON. COMMISSIONER,
+      </div>
+      <div class="uppercase text-sm">
+        MINISTRY OF LAND AND PHYSICAL PLANNING,
+      </div>
+      <div class="uppercase text-sm">
+        KANO STATE
+      </div>
+      
+      <!-- Official Stamp Placeholder -->
+      <div class="mt-6 pt-4 border-t border-gray-300 text-xs text-gray-600">
+        <div>OFFICIAL STAMP:</div>
+        <div class="w-32 h-12 border border-gray-400 mt-1 flex items-center justify-center text-gray-500">
+          [Official Stamp Here]
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JSON Data and JavaScript -->
+  <script>
+    // JSON Data for reusability
+    const documentData = {
+      certificateNumber: "LKN/RES/2018/586",
+      assigneeName: "MUJITABA SANI HARUNA",
+      assigneeAddress: "No. 1180 Sak, Kuyan Layout, Kano State",
+      considerationAmount: "Three Million Naira Only, (₦3,000,000.00)",
+      recipientName: "ABDULLAHI UMAR",
+      recipientAddress: "No. 134 Rijiyar Zaki Gabas, Gwarzo Road, Kano State",
+      date: "4<sup>th</sup> February, 2026",
+      applicationDate: "29<sup>th</sup> December, 2025",
+      commissionerName: "ALH ABDULJABBAR M. UMAR"
+    };
+
+    // Function to populate data from JSON
+    function populateDocumentData() {
+      // Reference number at top
+      const refElement = document.querySelector('.text-center.font-bold.pt-2');
+      if (refElement) {
+        refElement.innerHTML = `<strong>${documentData.certificateNumber}</strong>`;
+      }
+      
+      // Certificate number in subject
+      document.getElementById('subjectCertificateNumber').innerHTML = `<strong>${documentData.certificateNumber}</strong>`;
+      document.getElementById('bodyCertificateNumber').innerHTML = `<strong>${documentData.certificateNumber}</strong>`;
+      
+      // Assignee information
+      document.getElementById('assigneeName').innerHTML = `<strong>${documentData.assigneeName}</strong>`;
+      document.getElementById('assigneeAddress').innerHTML = `<strong>${documentData.assigneeAddress}</strong>`;
+      
+      // Consideration amount
+      document.getElementById('considerationAmount').innerHTML = `<strong>${documentData.considerationAmount}</strong>`;
+      
+      // Recipient information
+      document.getElementById('recipientName').innerHTML = `<strong>${documentData.recipientName}</strong>`;
+      document.getElementById('recipientAddress').innerHTML = `<strong>${documentData.recipientAddress}</strong>`;
+      
+      // Dates
+      const dateElement = document.querySelector('.text-right.mt-6.text-sm');
+      if (dateElement) {
+        dateElement.innerHTML = `<strong>${documentData.date}</strong>`;
+      }
+      
+      // Application date
+      document.getElementById('applicationDate').innerHTML = `<strong>${documentData.applicationDate}</strong>`;
+      
+      // Commissioner name
+      document.getElementById('commissionerName').innerHTML = `<strong>${documentData.commissionerName}</strong>`;
+    }
+
+    // Populate data when page loads
+    document.addEventListener('DOMContentLoaded', populateDocumentData);
+  </script>
+
+</body>
+</html>
