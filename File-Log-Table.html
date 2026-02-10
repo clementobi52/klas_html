@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Log Manager </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .priority-LOW { background-color: #10B981; color: white; }
+        .priority-MEDIUM { background-color: #F59E0B; color: white; }
+        .priority-HIGH { background-color: #EF4444; color: white; }
+        .log-entry-active { background-color: #F0F9FF; }
+        .dropdown-menu {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Card border colors based on handler status */
+        .card-my-file {
+            border-left: 4px solid #3B82F6; /* Blue for your files */
+        }
+        .card-awaiting-acceptance {
+            border-left: 4px solid #10B981; /* Green for awaiting acceptance */
+            background-color: #F0FDF4; /* Very light green background */
+        }
+        .card-other-handler {
+            border-left: 4px solid #EF4444; /* Red for other handler's files */
+            background-color: #FEF2F2; /* Very light red background */
+        }
+        .card-completed {
+            border-left: 4px solid #6B7280; /* Gray for completed */
+            background-color: #F9FAFB; /* Light gray background */
+        }
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .status-assigned { background-color: #DBEAFE; color: #1E40AF; }
+        .status-awaiting { background-color: #D1FAE5; color: #065F46; }
+        .status-other { background-color: #FEE2E2; color: #991B1B; }
+        .status-completed { background-color: #F3F4F6; color: #374151; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with User Info -->
+        <div class="mb-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">File Log Manager</h1>
+                    <p class="text-gray-600 mt-2"> Track and manage assigned files</p>
+                </div>
+                <div class="flex items-center gap-4 px-4 py-2 bg-white border border-gray-200 rounded-lg">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="user" class="h-5 w-5 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Current Handler</p>
+                        <p class="text-sm text-gray-600">Clement Joseph (You)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">My Files</p>
+                        <p class="text-2xl font-bold text-blue-600" id="my-files-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="folder" class="h-6 w-6 text-blue-600"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Files currently assigned to you</p>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Awaiting Acceptance</p>
+                        <p class="text-2xl font-bold text-green-600" id="awaiting-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                        <i data-lucide="clock" class="h-6 w-6 text-green-600"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Files pending your acceptance</p>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Other Handler's Files</p>
+                        <p class="text-2xl font-bold text-red-600" id="other-files-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <i data-lucide="users" class="h-6 w-6 text-red-600"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Files assigned to other handlers</p>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Completed</p>
+                        <p class="text-2xl font-bold text-gray-600" id="completed-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <i data-lucide="check-circle" class="h-6 w-6 text-gray-600"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Files marked as completed</p>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Control Panel</h3>
+                    <p class="text-sm text-gray-600 mt-1">Manage your file trackers and filter results</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="refresh-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 mr-2"></i>
+                        Refresh
+                    </button>
+                    <button id="add-sample-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                        <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
+                        Create File Tracker
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Handler Filter Card -->
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                        <i data-lucide="user-check" class="h-4 w-4"></i>
+                        File Status Filter
+                    </h4>
+                    <div class="space-y-2">
+                        <select id="status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Files</option>
+                            <option value="my-files">My Files Only</option>
+                            <option value="awaiting">Awaiting My Acceptance</option>
+                            <option value="other-handlers">Other Handler's Files</option>
+                            <option value="completed">Completed Files</option>
+                        </select>
+                        <div class="text-xs text-gray-500 mt-2">
+                            <p>• <span class="text-green-600 font-medium">Green cards</span>: Files awaiting your acceptance</p>
+                            <p>• <span class="text-red-600 font-medium">Red cards</span>: Files belonging to other handlers</p>
+                            <p>• <span class="text-blue-600 font-medium">Blue cards</span>: Files assigned to you</p>
+                            <p>• <span class="text-gray-600 font-medium">Gray cards</span>: Completed files</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Filters Card -->
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                        <i data-lucide="filter" class="h-4 w-4"></i>
+                        Priority Filters
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="filter-btn px-3 py-1.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors" data-priority="all">
+                            All
+                        </button>
+                        <button class="filter-btn px-3 py-1.5 text-xs bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors" data-priority="LOW">
+                            Low Priority
+                        </button>
+                        <button class="filter-btn px-3 py-1.5 text-xs bg-yellow-100 text-yellow-800 rounded-md hover:bg-yellow-200 transition-colors" data-priority="MEDIUM">
+                            Medium
+                        </button>
+                        <button class="filter-btn px-3 py-1.5 text-xs bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors" data-priority="HIGH">
+                            High Priority
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Card -->
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                        <i data-lucide="search" class="h-4 w-4"></i>
+                        Search Files
+                    </h4>
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="Search by file name, number, or handler..." 
+                               class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Trackers Table Section -->
+        <div id="file-trackers-section">
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <i data-lucide="file-text" class="h-5 w-5"></i>
+                            File Log Table
+                        </h3>
+                        <p class="text-sm text-gray-600 mt-1">All file trackers with handler assignment status</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm text-gray-500">
+                            <span id="tracker-count">0</span> files found
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-assigned">My Files</span>
+                            <span class="status-badge status-awaiting">Awaiting</span>
+                            <span class="status-badge status-other">Other's Files</span>
+                            <span class="status-badge status-completed">Completed</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="trackers-container" class="p-6">
+                    <!-- File trackers will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Dialog for Adding New Log Entries -->
+    <div id="notes-dialog" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Add Notes</h2>
+                <button id="close-notes" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label for="new-log-notes" class="block text-sm font-medium text-gray-700">Notes/Remarks</label>
+                    <textarea id="new-log-notes" rows="4" placeholder="Reason why the file is being moved to this office..." 
+                              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <p class="text-xs text-gray-500">Enter the reason for moving the file to this office</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button id="cancel-notes" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button id="confirm-notes" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accept File Dialog -->
+    <div id="accept-dialog" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Accept File Assignment</h2>
+                <button id="close-accept-dialog" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check-circle" class="h-6 w-6 text-green-600"></i>
+                        <div>
+                            <h4 class="font-medium text-green-800">File Ready for Acceptance</h4>
+                            <p class="text-sm text-green-600 mt-1" id="accept-file-info"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label for="accept-notes" class="block text-sm font-medium text-gray-700">Acceptance Notes (Optional)</label>
+                    <textarea id="accept-notes" rows="3" placeholder="Add any notes about accepting this file..." 
+                              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button id="reject-file" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Reject
+                </button>
+                <button id="accept-file" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                    <i data-lucide="check" class="h-4 w-4 mr-2"></i>
+                    Accept File
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Office data
+        const officeData = {
+            'OFF-001': { name: 'Reception', code: 'RCP', department: 'Customer Service' },
+            'OFF-002': { name: 'Customer Care Unit', code: 'CCU', department: 'Customer Service' },
+            'OFF-003': { name: 'Document Verification', code: 'DVF', department: 'Legal' },
+            'OFF-004': { name: 'Survey Department', code: 'SUR', department: 'Technical' },
+            'OFF-005': { name: 'Legal Department', code: 'LEG', department: 'Legal' },
+            'OFF-006': { name: 'Planning Department', code: 'PLN', department: 'Technical' },
+            'OFF-007': { name: "Director's Office", code: 'DIR', department: 'Management' },
+            'OFF-008': { name: 'Certificate Issuance', code: 'CRT', department: 'Operations' },
+            'OFF-009': { name: 'Archive', code: 'ARC', department: 'Records' },
+            'OFF-010': { name: 'Finance Department', code: 'FIN', department: 'Finance' },
+            'OFF-011': { name: 'IT Department', code: 'ITD', department: 'Technical' },
+            'OFF-012': { name: 'Registry', code: 'REG', department: 'Records' }
+        };
+
+        // Handler data - Current user is Clement Joseph (HND-001)
+        const handlers = {
+            'HND-001': { id: 'HND-001', name: 'Clement Joseph', email: 'john.doe@company.com' },
+            'HND-002': { id: 'HND-002', name: 'Jane Smith', email: 'jane.smith@company.com' },
+            'HND-003': { id: 'HND-003', name: 'Robert Johnson', email: 'robert.j@company.com' },
+            'HND-004': { id: 'HND-004', name: 'Kator', email: 'sarah.w@company.com' },
+            'HND-005': { id: 'HND-005', name: 'Michael Brown', email: 'michael.b@company.com' }
+        };
+
+        // Current handler is fixed as Clement Joseph
+        const currentHandler = 'HND-001';
+        let fileToAccept = null;
+
+        // Sample data for demonstration with handler assignments
+        let fileTrackers = [
+            {
+                fileNo: 'RES-2023-4859',
+                fileName: 'Alhaji Ibrahim Dantata',
+                trackingId: 'TRK-ABC123',
+                priority: 'HIGH',
+                currentOffice: 'Reception',
+                currentOfficeId: 'OFF-001',
+                assignedHandler: 'HND-001', // Assigned to Clement Joseph (current user)
+                previousHandler: 'HND-002',
+                status: 'assigned',
+                acceptanceStatus: 'accepted',
+                awaitingHandler: null,
+                logEntries: [
+                    {
+                        logId: 'LOG-202312011230-001',
+                        logInDate: '2023-12-01',
+                        logInTime: '12:30',
+                        logOutDate: '2023-12-02',
+                        logOutTime: '14:45',
+                        officeId: 'OFF-001',
+                        officeName: 'Reception',
+                        handlerId: 'HND-002',
+                        handlerName: 'Jane Smith',
+                        notes: 'Initial reception and registration',
+                        status: 'completed',
+                        createdAt: '2023-12-01T12:30:00Z'
+                    },
+                    {
+                        logId: 'LOG-202312021445-002',
+                        logInDate: '2023-12-02',
+                        logInTime: '14:45',
+                        logOutDate: '',
+                        logOutTime: '',
+                        officeId: 'OFF-003',
+                        officeName: 'Document Verification',
+                        handlerId: 'HND-001',
+                        handlerName: 'Clement Joseph',
+                        notes: 'Documents submitted for verification',
+                        status: 'active',
+                        createdAt: '2023-12-02T14:45:00Z'
+                    }
+                ],
+                createdAt: '2023-12-01T12:30:00Z'
+            },
+            {
+                fileNo: 'RES-2023-4860',
+                fileName: 'Mrs. Amina Bello',
+                trackingId: 'TRK-DEF456',
+                priority: 'MEDIUM',
+                currentOffice: 'Legal Department',
+                currentOfficeId: 'OFF-005',
+                assignedHandler: 'HND-002',
+                previousHandler: null,
+                status: 'awaiting',
+                acceptanceStatus: 'pending',
+                awaitingHandler: 'HND-001', // Waiting for Clement Joseph to accept
+                logEntries: [
+                    {
+                        logId: 'LOG-202312030915-003',
+                        logInDate: '2023-12-03',
+                        logInTime: '09:15',
+                        logOutDate: '',
+                        logOutTime: '',
+                        officeId: 'OFF-005',
+                        officeName: 'Legal Department',
+                        handlerId: 'HND-002',
+                        handlerName: 'Jane Smith',
+                        notes: 'Legal review required - awaiting acceptance from Clement Joseph',
+                        status: 'active',
+                        createdAt: '2023-12-03T09:15:00Z'
+                    }
+                ],
+                createdAt: '2023-12-03T09:15:00Z'
+            },
+            {
+                fileNo: 'RES-2023-4861',
+                fileName: 'Dr. Samuel Johnson',
+                trackingId: 'TRK-GHI789',
+                priority: 'LOW',
+                currentOffice: 'Archive',
+                currentOfficeId: 'OFF-009',
+                assignedHandler: 'HND-003',
+                previousHandler: 'HND-001',
+                status: 'assigned',
+                acceptanceStatus: 'accepted',
+                awaitingHandler: null,
+                logEntries: [
+                    {
+                        logId: 'LOG-202311281030-004',
+                        logInDate: '2023-11-28',
+                        logInTime: '10:30',
+                        logOutDate: '2023-12-01',
+                        logOutTime: '11:00',
+                        officeId: 'OFF-005',
+                        officeName: 'Legal Department',
+                        handlerId: 'HND-001',
+                        handlerName: 'Clement Joseph',
+                        notes: 'Completed legal review',
+                        status: 'completed',
+                        createdAt: '2023-11-28T10:30:00Z'
+                    },
+                    {
+                        logId: 'LOG-202312011100-005',
+                        logInDate: '2023-12-01',
+                        logInTime: '11:00',
+                        logOutDate: '',
+                        logOutTime: '',
+                        officeId: 'OFF-009',
+                        officeName: 'Archive',
+                        handlerId: 'HND-003',
+                        handlerName: 'Robert Johnson',
+                        notes: 'Archived for storage',
+                        status: 'active',
+                        createdAt: '2023-12-01T11:00:00Z'
+                    }
+                ],
+                createdAt: '2023-11-28T10:30:00Z'
+            },
+            {
+                fileNo: 'RES-2023-4862',
+                fileName: 'Tech Corp Ltd',
+                trackingId: 'TRK-JKL012',
+                priority: 'HIGH',
+                currentOffice: 'Finance Department',
+                currentOfficeId: 'OFF-010',
+                assignedHandler: 'HND-001',
+                previousHandler: null,
+                status: 'completed',
+                acceptanceStatus: 'accepted',
+                awaitingHandler: null,
+                logEntries: [
+                    {
+                        logId: 'LOG-202311201430-006',
+                        logInDate: '2023-11-20',
+                        logInTime: '14:30',
+                        logOutDate: '2023-11-25',
+                        logOutTime: '16:00',
+                        officeId: 'OFF-010',
+                        officeName: 'Finance Department',
+                        handlerId: 'HND-001',
+                        handlerName: 'Clement Joseph',
+                        notes: 'Financial review completed',
+                        status: 'completed',
+                        createdAt: '2023-11-20T14:30:00Z'
+                    }
+                ],
+                createdAt: '2023-11-20T14:30:00Z'
+            },
+            {
+                fileNo: 'RES-2023-4863',
+                fileName: 'City Development Project',
+                trackingId: 'TRK-MNO345',
+                priority: 'MEDIUM',
+                currentOffice: 'Planning Department',
+                currentOfficeId: 'OFF-006',
+                assignedHandler: 'HND-004',
+                previousHandler: 'HND-001',
+                status: 'awaiting',
+                acceptanceStatus: 'pending',
+                awaitingHandler: 'HND-001', // Waiting for Clement Joseph to accept
+                logEntries: [
+                    {
+                        logId: 'LOG-202312051100-007',
+                        logInDate: '2023-12-05',
+                        logInTime: '11:00',
+                        logOutDate: '',
+                        logOutTime: '',
+                        officeId: 'OFF-006',
+                        officeName: 'Planning Department',
+                        handlerId: 'HND-004',
+                        handlerName: 'Kator',
+                        notes: 'Planning review - transferred to Clement Joseph for approval',
+                        status: 'active',
+                        createdAt: '2023-12-05T11:00:00Z'
+                    }
+                ],
+                createdAt: '2023-12-05T11:00:00Z'
+            }
+        ];
+
+        let pendingLogEntry = null;
+
+        // Generate unique IDs
+        function generateTrackingId() {
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substr(2, 5);
+            return `TRK-${timestamp.toUpperCase()}-${random.toUpperCase()}`;
+        }
+
+        function generateLogId() {
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[-:T]/g, '').split('.')[0];
+            const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+            return `LOG-${timestamp}-${random}`;
+        }
+
+        // Determine card class based on file status relative to current handler
+        function getCardClass(tracker) {
+            if (tracker.status === 'completed') {
+                return 'card-completed';
+            } else if (tracker.awaitingHandler === currentHandler) {
+                return 'card-awaiting-acceptance';
+            } else if (tracker.assignedHandler === currentHandler) {
+                return 'card-my-file';
+            } else {
+                return 'card-other-handler';
+            }
+        }
+
+        // Get status badge text and class
+        function getStatusInfo(tracker) {
+            if (tracker.status === 'completed') {
+                return { text: 'Completed', class: 'status-completed' };
+            } else if (tracker.awaitingHandler === currentHandler) {
+                return { text: 'Awaiting Your Acceptance', class: 'status-awaiting' };
+            } else if (tracker.assignedHandler === currentHandler) {
+                return { text: 'Assigned to You', class: 'status-assigned' };
+            } else {
+                return { text: `Assigned to ${handlers[tracker.assignedHandler]?.name || 'Other'}`, class: 'status-other' };
+            }
+        }
+
+        // Update file trackers table
+        function updateFileTrackersTable(filteredTrackers = null) {
+            const container = document.getElementById('trackers-container');
+            const trackersToDisplay = filteredTrackers || fileTrackers;
+            const trackerCount = trackersToDisplay.length;
+            
+            // Update tracker count
+            document.getElementById('tracker-count').textContent = trackerCount;
+            
+            if (trackerCount > 0) {
+                container.innerHTML = trackersToDisplay.map(tracker => {
+                    const priorityClass = `priority-${tracker.priority}`;
+                    const priorityText = tracker.priority.charAt(0) + tracker.priority.slice(1).toLowerCase();
+                    const cardClass = getCardClass(tracker);
+                    const statusInfo = getStatusInfo(tracker);
+                    const assignedHandler = handlers[tracker.assignedHandler];
+                    
+                    return `
+                    <div class="border rounded-lg p-4 mb-6 hover:shadow-md transition-shadow duration-200 ${cardClass}">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-semibold text-lg text-gray-900">${tracker.fileName}</h3>
+                                    <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3 mt-1">
+                                    <p class="text-sm text-gray-600">File No: ${tracker.fileNo}</p>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <p class="text-sm text-gray-600">Tracking ID: ${tracker.trackingId}</p>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <div class="flex items-center gap-1">
+                                        <i data-lucide="user" class="h-3 w-3 ${tracker.assignedHandler === currentHandler ? 'text-blue-500' : 'text-gray-400'}"></i>
+                                        <span class="text-sm ${tracker.assignedHandler === currentHandler ? 'text-blue-600 font-medium' : 'text-gray-600'}">
+                                            ${assignedHandler?.name || 'Unassigned'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">${priorityText}</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${tracker.currentOfficeId}</span>
+                                ${tracker.awaitingHandler === currentHandler ? `
+                                    <button class="accept-btn inline-flex items-center px-3 py-1.5 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors" data-tracking-id="${tracker.trackingId}">
+                                        <i data-lucide="check" class="h-4 w-4 mr-2"></i>
+                                        Accept File
+                                    </button>
+                                ` : ''}
+                                <button class="view-details-btn inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors" data-tracking-id="${tracker.trackingId}">
+                                    <i data-lucide="eye" class="h-4 w-4 mr-2"></i>
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Log ID</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Handler</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Log In</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Log Out</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${tracker.logEntries.map(entry => {
+                                        const statusClass = entry.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
+                                        const isActive = entry.status === 'active';
+                                        const rowClass = isActive ? 'log-entry-active' : '';
+                                        const entryHandler = handlers[entry.handlerId];
+                                        const isMyEntry = entry.handlerId === currentHandler;
+                                        
+                                        return `
+                                        <tr class="${rowClass}">
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm font-mono">${entry.logId}</td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">${entry.officeId}</span>
+                                                    <span class="text-sm">${entry.officeName}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-6 h-6 rounded-full ${isMyEntry ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'} flex items-center justify-center">
+                                                        <i data-lucide="user" class="h-3 w-3"></i>
+                                                    </div>
+                                                    <span class="text-sm ${isMyEntry ? 'font-medium text-blue-700' : 'text-gray-700'}">
+                                                        ${entryHandler?.name || 'Unknown'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                                <div class="font-medium">${entry.logInDate}</div>
+                                                <div class="text-gray-500 text-xs">${entry.logInTime}</div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                                <div class="font-medium">${entry.logOutDate || '-'}</div>
+                                                <div class="text-gray-500 text-xs">${entry.logOutTime || '-'}</div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                                                    ${entry.status === 'active' ? 'Active' : 'Completed'}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">
+                                                ${entry.notes ? `
+                                                    <div class="max-w-xs truncate" title="${entry.notes}">
+                                                        ${entry.notes}
+                                                    </div>
+                                                ` : '-'}
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-right">
+                                                <div class="relative inline-block text-left">
+                                                    <button type="button" class="dropdown-trigger inline-flex items-center justify-center w-8 h-8 bg-white rounded-md border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" 
+                                                            data-tracker-id="${tracker.trackingId}" data-log-id="${entry.logId}" data-status="${entry.status}">
+                                                        <i data-lucide="more-horizontal" class="h-4 w-4 text-gray-500"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu hidden absolute right-0 mt-1 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                                        <div class="py-1">
+                                                            ${tracker.awaitingHandler === currentHandler && entry.status === 'active' ? `
+                                                                <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-green-700 hover:bg-gray-100" data-action="accept-file">
+                                                                    <i data-lucide="check-circle" class="mr-2 h-4 w-4"></i>
+                                                                    Accept File Assignment
+                                                                </button>
+                                                                <hr class="my-1 border-gray-200">
+                                                            ` : ''}
+                                                            <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="generate-log">
+                                                                <i data-lucide="file-down" class="mr-2 h-4 w-4"></i>
+                                                                Generate Log Sheet
+                                                            </button>
+                                                            <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="print-log">
+                                                                <i data-lucide="printer" class="mr-2 h-4 w-4"></i>
+                                                                Print Log Sheet
+                                                            </button>
+                                                            ${entry.status === 'active' && tracker.assignedHandler === currentHandler ? `
+                                                                <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="log-out">
+                                                                    <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
+                                                                    Log Out
+                                                                </button>
+                                                            ` : ''}
+                                                            ${tracker.assignedHandler === currentHandler || tracker.awaitingHandler === currentHandler ? `
+                                                                <hr class="my-1 border-gray-200">
+                                                                <button class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100" data-action="delete-log">
+                                                                    <i data-lucide="trash-2" class="mr-2 h-4 w-4"></i>
+                                                                    Delete Log Entry
+                                                                </button>
+                                                            ` : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        ${tracker.assignedHandler === currentHandler ? `
+                            <!-- Dropdown for adding new log entries -->
+                            <div class="mt-4 flex justify-end">
+                                <div class="relative">
+                                    <select class="add-log-select w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                            data-tracker-id="${tracker.trackingId}">
+                                        <option value="">Add new log entry to office...</option>
+                                        ${Object.entries(officeData).map(([officeId, office]) => `
+                                            <option value="${officeId}">${office.name} (${office.code})</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    `;
+                }).join('');
+                
+                setupDropdownMenus();
+                setupAddLogSelects();
+                setupViewDetailsButtons();
+                setupAcceptButtons();
+                updateStats();
+                lucide.createIcons();
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="folder-open" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No file trackers found</h3>
+                        <p class="text-gray-500">Create a new file tracker or adjust your search filters.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                updateStats();
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const myFiles = fileTrackers.filter(t => t.assignedHandler === currentHandler && t.status !== 'completed').length;
+            const awaiting = fileTrackers.filter(t => t.awaitingHandler === currentHandler && t.status === 'awaiting').length;
+            const otherFiles = fileTrackers.filter(t => t.assignedHandler !== currentHandler && t.status !== 'completed').length;
+            const completed = fileTrackers.filter(t => t.status === 'completed').length;
+            
+            document.getElementById('my-files-count').textContent = myFiles;
+            document.getElementById('awaiting-count').textContent = awaiting;
+            document.getElementById('other-files-count').textContent = otherFiles;
+            document.getElementById('completed-count').textContent = completed;
+        }
+
+        // Setup dropdown menus
+        function setupDropdownMenus() {
+            // Handle dropdown toggle
+            document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const menu = this.nextElementSibling;
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.classList.add('hidden');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    menu.classList.toggle('hidden');
+                });
+            });
+
+            // Handle dropdown item clicks
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const trigger = this.closest('.relative').querySelector('.dropdown-trigger');
+                    const trackerId = trigger.dataset.trackerId;
+                    const logId = trigger.dataset.logId;
+                    
+                    // Close dropdown
+                    this.closest('.dropdown-menu').classList.add('hidden');
+                    
+                    // Handle different actions
+                    switch(action) {
+                        case 'generate-log':
+                            alert(`Generating log sheet for ${logId}`);
+                            break;
+                        case 'print-log':
+                            alert(`Printing log sheet for ${logId}`);
+                            break;
+                        case 'log-out':
+                            handleLogOut(trackerId, logId);
+                            break;
+                        case 'delete-log':
+                            handleDeleteLogEntry(trackerId, logId);
+                            break;
+                        case 'accept-file':
+                            const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+                            if (tracker && tracker.awaitingHandler === currentHandler) {
+                                showAcceptDialog(tracker);
+                            }
+                            break;
+                    }
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            });
+        }
+
+        // Setup accept buttons
+        function setupAcceptButtons() {
+            document.querySelectorAll('.accept-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const trackingId = this.dataset.trackingId;
+                    const tracker = fileTrackers.find(t => t.trackingId === trackingId);
+                    if (tracker && tracker.awaitingHandler === currentHandler) {
+                        showAcceptDialog(tracker);
+                    }
+                });
+            });
+        }
+
+        // Show accept dialog
+        function showAcceptDialog(tracker) {
+            fileToAccept = tracker;
+            document.getElementById('accept-file-info').textContent = 
+                `File: ${tracker.fileName} (${tracker.fileNo}) is awaiting your acceptance.`;
+            document.getElementById('accept-dialog').classList.remove('hidden');
+            document.getElementById('accept-notes').value = '';
+        }
+
+        // Handle file acceptance
+        function handleAcceptFile(notes) {
+            if (!fileToAccept) return;
+            
+            // Update the file status
+            fileToAccept.assignedHandler = currentHandler;
+            fileToAccept.awaitingHandler = null;
+            fileToAccept.status = 'assigned';
+            fileToAccept.acceptanceStatus = 'accepted';
+            
+            // Add acceptance note to the latest log entry
+            if (fileToAccept.logEntries.length > 0) {
+                const latestEntry = fileToAccept.logEntries[fileToAccept.logEntries.length - 1];
+                latestEntry.notes = `${latestEntry.notes || ''} ${notes ? `\nAccepted by Clement Joseph: ${notes}` : `\nAccepted by Clement Joseph`}`;
+                latestEntry.handlerId = currentHandler;
+                latestEntry.handlerName = 'Clement Joseph';
+            }
+            
+            updateFileTrackersTable();
+            document.getElementById('accept-dialog').classList.add('hidden');
+            alert(`File ${fileToAccept.fileNo} has been accepted and assigned to you.`);
+            fileToAccept = null;
+        }
+
+        // Setup office selection dropdowns
+        function setupAddLogSelects() {
+            document.querySelectorAll('.add-log-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const trackerId = this.dataset.trackerId;
+                    const officeId = this.value;
+                    
+                    if (officeId) {
+                        // Store the pending log entry info
+                        pendingLogEntry = { trackerId, officeId };
+                        
+                        // Show the notes dialog
+                        document.getElementById('notes-dialog').classList.remove('hidden');
+                        document.getElementById('new-log-notes').value = '';
+                        document.getElementById('new-log-notes').focus();
+                        
+                        this.value = ''; // Reset the select
+                    }
+                });
+            });
+        }
+
+        // Setup view details buttons
+        function setupViewDetailsButtons() {
+            document.querySelectorAll('.view-details-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const trackingId = this.dataset.trackingId;
+                    showTrackerDetails(trackingId);
+                });
+            });
+        }
+
+        // Handle adding new log entry
+        function handleAddLogEntry(trackerId, officeId, notes) {
+            const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+            const office = officeData[officeId];
+            
+            if (tracker && office) {
+                const now = new Date();
+                const newLogId = generateLogId();
+                
+                const newLogEntry = {
+                    logId: newLogId,
+                    logInTime: now.toTimeString().split(' ')[0].substring(0, 5),
+                    logInDate: now.toISOString().split('T')[0],
+                    logOutTime: '',
+                    logOutDate: '',
+                    officeId: officeId,
+                    officeName: office.name,
+                    handlerId: currentHandler,
+                    handlerName: 'Clement Joseph',
+                    notes: notes,
+                    status: 'active',
+                    createdAt: now.toISOString()
+                };
+                
+                // Mark any existing active entries as completed
+                tracker.logEntries.forEach(entry => {
+                    if (entry.status === 'active') {
+                        entry.status = 'completed';
+                        entry.logOutTime = now.toTimeString().split(' ')[0].substring(0, 5);
+                        entry.logOutDate = now.toISOString().split('T')[0];
+                    }
+                });
+                
+                // Add the new log entry
+                tracker.logEntries.push(newLogEntry);
+                
+                // Update current office info
+                tracker.currentOffice = office.name;
+                tracker.currentOfficeId = officeId;
+                
+                updateFileTrackersTable();
+                alert(`New log entry created: ${newLogId}\nFile moved to ${office.name}`);
+            }
+        }
+
+        // Handle log out
+        function handleLogOut(trackerId, logId) {
+            const now = new Date();
+            const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+            
+            if (tracker) {
+                const entry = tracker.logEntries.find(e => e.logId === logId);
+                if (entry && entry.status === 'active') {
+                    entry.logOutTime = now.toTimeString().split(' ')[0].substring(0, 5);
+                    entry.logOutDate = now.toISOString().split('T')[0];
+                    entry.status = 'completed';
+                    
+                    updateFileTrackersTable();
+                    alert('File logged out successfully!');
+                }
+            }
+        }
+
+        // Handle delete log entry
+        function handleDeleteLogEntry(trackerId, logId) {
+            if (confirm('Are you sure you want to delete this log entry?')) {
+                const tracker = fileTrackers.find(t => t.trackingId === trackerId);
+                if (tracker) {
+                    tracker.logEntries = tracker.logEntries.filter(e => e.logId !== logId);
+                    
+                    // If no entries left, remove the tracker
+                    if (tracker.logEntries.length === 0) {
+                        fileTrackers = fileTrackers.filter(t => t.trackingId !== trackerId);
+                    }
+                    
+                    updateFileTrackersTable();
+                    alert('Log entry deleted successfully!');
+                }
+            }
+        }
+
+        // Show tracker details
+        function showTrackerDetails(trackingId) {
+            const tracker = fileTrackers.find(t => t.trackingId === trackingId);
+            if (!tracker) return;
+            
+            const priorityClass = `priority-${tracker.priority}`;
+            const priorityText = tracker.priority.charAt(0) + tracker.priority.slice(1).toLowerCase();
+            const assignedHandler = handlers[tracker.assignedHandler];
+            const previousHandler = tracker.previousHandler ? handlers[tracker.previousHandler] : null;
+            const awaitingHandler = tracker.awaitingHandler ? handlers[tracker.awaitingHandler] : null;
+            
+            let details = `File Details:\n\n`;
+            details += `File Name: ${tracker.fileName}\n`;
+            details += `File No: ${tracker.fileNo}\n`;
+            details += `Tracking ID: ${tracker.trackingId}\n`;
+            details += `Current Office: ${tracker.currentOffice}\n`;
+            details += `Priority: ${priorityText}\n\n`;
+            details += `Assigned Handler: ${assignedHandler?.name || 'Unassigned'}\n`;
+            if (previousHandler) details += `Previous Handler: ${previousHandler.name}\n`;
+            if (awaitingHandler) details += `Awaiting Acceptance From: ${awaitingHandler.name}\n`;
+            details += `Status: ${getStatusInfo(tracker).text}\n`;
+            details += `Acceptance Status: ${tracker.acceptanceStatus}\n\n`;
+            details += `Total Log Entries: ${tracker.logEntries.length}`;
+            
+            alert(details);
+        }
+
+        // Filter trackers by priority
+        function filterByPriority(priority) {
+            if (priority === 'all') {
+                updateFileTrackersTable();
+                return;
+            }
+            
+            const filteredTrackers = fileTrackers.filter(tracker => tracker.priority === priority);
+            updateFileTrackersTable(filteredTrackers);
+        }
+
+        // Filter trackers by handler status
+        function filterByStatus(status) {
+            switch(status) {
+                case 'my-files':
+                    const myFiles = fileTrackers.filter(t => t.assignedHandler === currentHandler && t.status !== 'completed');
+                    updateFileTrackersTable(myFiles);
+                    break;
+                case 'awaiting':
+                    const awaiting = fileTrackers.filter(t => t.awaitingHandler === currentHandler && t.status === 'awaiting');
+                    updateFileTrackersTable(awaiting);
+                    break;
+                case 'other-handlers':
+                    const otherFiles = fileTrackers.filter(t => t.assignedHandler !== currentHandler && t.status !== 'completed');
+                    updateFileTrackersTable(otherFiles);
+                    break;
+                case 'completed':
+                    const completed = fileTrackers.filter(t => t.status === 'completed');
+                    updateFileTrackersTable(completed);
+                    break;
+                default:
+                    updateFileTrackersTable();
+            }
+        }
+
+        // Search trackers
+        function searchTrackers(query) {
+            if (!query.trim()) {
+                updateFileTrackersTable();
+                return;
+            }
+            
+            const lowerQuery = query.toLowerCase();
+            const filteredTrackers = fileTrackers.filter(tracker => 
+                tracker.fileName.toLowerCase().includes(lowerQuery) ||
+                tracker.fileNo.toLowerCase().includes(lowerQuery) ||
+                tracker.trackingId.toLowerCase().includes(lowerQuery) ||
+                (handlers[tracker.assignedHandler]?.name?.toLowerCase().includes(lowerQuery))
+            );
+            
+            updateFileTrackersTable(filteredTrackers);
+        }
+
+        // Create File Tracker
+        function addSampleFile() {
+            const sampleNumber = fileTrackers.length + 1;
+            // Randomly assign to current handler or another handler
+            const handlerKeys = Object.keys(handlers);
+            const randomHandlerKey = handlerKeys[Math.floor(Math.random() * handlerKeys.length)];
+            
+            const needsAcceptance = randomHandlerKey !== currentHandler && Math.random() > 0.3;
+            const awaitingHandler = needsAcceptance ? currentHandler : null;
+            const status = needsAcceptance ? 'awaiting' : 'assigned';
+            
+            const newTracker = {
+                fileNo: `RES-2023-48${60 + sampleNumber}`,
+                fileName: `Sample File ${sampleNumber}`,
+                trackingId: generateTrackingId(),
+                priority: ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)],
+                currentOffice: 'Reception',
+                currentOfficeId: 'OFF-001',
+                assignedHandler: randomHandlerKey,
+                previousHandler: null,
+                status: status,
+                acceptanceStatus: needsAcceptance ? 'pending' : 'accepted',
+                awaitingHandler: awaitingHandler,
+                logEntries: [
+                    {
+                        logId: generateLogId(),
+                        logInDate: new Date().toISOString().split('T')[0],
+                        logInTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+                        logOutDate: '',
+                        logOutTime: '',
+                        officeId: 'OFF-001',
+                        officeName: 'Reception',
+                        handlerId: randomHandlerKey,
+                        handlerName: handlers[randomHandlerKey].name,
+                        notes: needsAcceptance ? `New file created - awaiting acceptance from Clement Joseph` : 'New sample file created',
+                        status: 'active',
+                        createdAt: new Date().toISOString()
+                    }
+                ],
+                createdAt: new Date().toISOString()
+            };
+            
+            fileTrackers.unshift(newTracker);
+            updateFileTrackersTable();
+            
+            if (needsAcceptance && randomHandlerKey !== currentHandler) {
+                alert(`New sample file added! This file is awaiting your acceptance.`);
+            } else {
+                alert(`New sample file added!`);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial render
+            updateFileTrackersTable();
+            lucide.createIcons();
+            
+            // Set "All" filter as active by default
+            document.querySelector('[data-priority="all"]').classList.add('ring-2', 'ring-offset-1', 'ring-blue-500');
+            
+            // Event listeners for accept dialog
+            document.getElementById('close-accept-dialog').addEventListener('click', () => {
+                document.getElementById('accept-dialog').classList.add('hidden');
+                fileToAccept = null;
+            });
+            
+            document.getElementById('reject-file').addEventListener('click', () => {
+                if (fileToAccept) {
+                    alert(`File ${fileToAccept.fileNo} has been rejected. It will remain with the current handler.`);
+                    document.getElementById('accept-dialog').classList.add('hidden');
+                    fileToAccept = null;
+                }
+            });
+            
+            document.getElementById('accept-file').addEventListener('click', () => {
+                const notes = document.getElementById('accept-notes').value;
+                handleAcceptFile(notes);
+            });
+            
+            // Event listeners for notes dialog
+            document.getElementById('close-notes').addEventListener('click', () => {
+                document.getElementById('notes-dialog').classList.add('hidden');
+                pendingLogEntry = null;
+            });
+            
+            document.getElementById('cancel-notes').addEventListener('click', () => {
+                document.getElementById('notes-dialog').classList.add('hidden');
+                pendingLogEntry = null;
+            });
+            
+            document.getElementById('confirm-notes').addEventListener('click', () => {
+                const notes = document.getElementById('new-log-notes').value;
+                if (pendingLogEntry) {
+                    handleAddLogEntry(pendingLogEntry.trackerId, pendingLogEntry.officeId, notes);
+                    document.getElementById('notes-dialog').classList.add('hidden');
+                    pendingLogEntry = null;
+                }
+            });
+            
+            // Control panel event listeners
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                updateFileTrackersTable();
+                alert('Table refreshed!');
+            });
+            
+            document.getElementById('add-sample-btn').addEventListener('click', addSampleFile);
+            
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const priority = this.dataset.priority;
+                    filterByPriority(priority);
+                    
+                    // Update active filter button
+                    document.querySelectorAll('.filter-btn').forEach(btn => {
+                        btn.classList.remove('ring-2', 'ring-offset-1', 'ring-blue-500');
+                    });
+                    this.classList.add('ring-2', 'ring-offset-1', 'ring-blue-500');
+                });
+            });
+            
+            // Status filter dropdown
+            document.getElementById('status-filter').addEventListener('change', function() {
+                filterByStatus(this.value);
+            });
+            
+            // Search input
+            document.getElementById('search-input').addEventListener('input', function() {
+                searchTrackers(this.value);
+            });
+        });
+    </script>
+</body>
+</html>
