@@ -1,0 +1,803 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kano State - Right of Occupancy Official</title>
+    <style>
+        :root {
+            --gov-green: #006b3f;
+        }
+
+        /* Base layout */
+        body {
+            background-color: #d3d3d3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 3;
+            font-size: 20pt;
+            padding: 20px 0;
+            margin: 0;
+            font-family: "Times New Roman", Times, serif;
+            position: relative;
+        }
+
+        .page-container {
+            background-color: #fff;
+            width: 210mm;
+            height: 297mm;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .security-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            pointer-events: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20"><path d="M0 10 Q 25 0 50 10 T 100 10" fill="none" stroke="black" stroke-width="0.5"/></svg>');
+            background-size: 60px 12px;
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            margin: 8mm;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* EXACT ORIGINAL DIMENSIONS - only margin adjusted */
+        .ornate-border {
+            border: 45px solid transparent;
+            border-image-source: url("https://media.istockphoto.com/id/1003557140/vector/ornate-certificate-border.jpg?s=612x612&w=0&k=20&c=h2TB8OQko38_5Hi15OIs-Di6y9zz37FjAJxDZcCB9fs=");
+            border-image-slice: 160;
+            border-image-repeat: round;
+            border-image-width: 45px;
+            /* Only changed this value to pull border closer to footer */
+            margin: 8mm 8mm -18mm 8mm;
+        }
+
+        .simple-margin {
+            margin: 20mm;
+        }
+
+        .inner-content {
+            padding: 20px 30px;
+            flex: 1;
+            box-sizing: border-box;
+            font-size: 14.5px;
+            line-height: 1.35;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-main {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .logo {
+            width: 75px;
+            height: 75px;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+        .header-center {
+            text-align: center;
+            flex: 1;
+        }
+        .state-name {
+            font-size: 25px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .ministry-title {
+            color: var(--gov-green);
+            font-size: 15px;
+            margin: 2px 0;
+        }
+
+        .ref-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 15px;
+            margin: 8px 0;
+        }
+
+        .row {
+            display: flex;
+            margin-bottom: 3px;
+            font-weight: bold;
+            align-items: baseline;
+        }
+        .title-center {
+            text-align: center;
+            color: #c90202 !important;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 15px 0;
+        }
+
+        /* SIGNATURE BLOCK - Commissioner line uses the exact CSS technique provided, no double lines */
+        .signature-block {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px 20px 40px;
+            text-align: center;
+            font-weight: bold;
+            align-items: flex-end;
+        }
+
+        /* Security line container - acts as the line, NO EXTRA BORDERS */
+        .security-line-container {
+            position: relative;
+            width: 280px;           /* width of the line */
+            height: 15px;           /* enough to contain the microtext */
+            margin-bottom: 1px;
+            overflow: hidden;
+            background: transparent;
+            /* No border here - the pseudo-element provides the visual line effect */
+        }
+
+        /* Exact CSS from user's request applied to pseudo-element */
+        .security-line-container::after {
+            content: "Kano State Ministry of Land and Physical Planning Kano State Ministry of Land and Physical Planning Kano State Ministry of Land and Physical Planning Kano State Ministry of Land and Physical Planning ";
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            font-size: 3px;
+            font-weight: 900;
+            letter-spacing: -0.65px;
+            word-spacing: -3.2px;
+            color: #000;
+            white-space: nowrap;
+            overflow: hidden;
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 2;
+            font-family: 'Arial Narrow', 'Helvetica Condensed', 'Courier New', monospace;
+            text-align: center;
+            line-height: 1;
+            /* Add a subtle line effect through text if needed, but keep it clean */
+            text-shadow: 0 0.5px 0 #666;
+        }
+
+        /* Date side - single clean line */
+        .date-line {
+            width: 150px;
+            border-top: 2px solid #000;
+            padding-top: 0;
+            margin-top: 0;
+            height: 1px;            /* just the border */
+            margin-bottom: 8px;      /* space between line and "DATE" */
+        }
+
+        .signature-block > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* FOOTER - exactly as your original */
+        .footer-barcode-area {
+            height: 25mm;
+            padding: 0 22mm 8mm 22mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 5;
+            position: relative;
+        }
+
+        .barcode-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            visibility: hidden;
+        }
+        .barcode-img {
+            height: 32px;
+        }
+
+        .qr-code-group {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            visibility: visible;
+        }
+        .qr-img {
+            margin-top: 20px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .bordered-section {
+            border: 2px solid #000;
+            padding: 10px 12px;
+            margin-top: 5px;
+            background-color: #fff;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .conditions-list-fixed p {
+            margin: 4px 0;
+            text-align: justify;
+            line-height: 1.4;
+        }
+
+        .condition-item {
+            margin-bottom: 8px;
+        }
+        .sub-item {
+            margin-left: 20px;
+            margin-top: 2px;
+        }
+        .sub-item-line {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 2px;
+        }
+        .sub-item-label {
+            min-width: 20px;
+            margin-right: 5px;
+        }
+
+        .inline-data {
+            display: inline-block;
+            border-bottom: 1px dotted #000;
+            min-width: 45px;
+            margin-left: 5px;
+            font-weight: normal;
+            color: #000;
+            padding-bottom: 1px;
+        }
+
+        /* Print Button Styles */
+        .print-btn-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .print-btn {
+            padding: 12px 24px;
+            background-color: #006b3f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition:
+                background-color 0.3s,
+                transform 0.2s;
+        }
+        .print-btn:hover {
+            background-color: #004d2c;
+            transform: translateY(-2px);
+        }
+        .print-btn:active {
+            transform: translateY(0);
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 0 !important;
+            }
+            body {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .page-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                height: 100vh !important;
+                page-break-after: always !important;
+            }
+            .page-container:last-of-type {
+                page-break-after: auto !important;
+            }
+            .print-btn-container {
+                display: none !important;
+            }
+            .barcode-group {
+                visibility: hidden !important;
+            }
+        }
+
+        /* Page2 specific styles */
+        .applicant-address-block {
+            display: flex;
+            border: 1px solid #000;
+            margin-bottom: 15px;
+            min-height: 100px;
+        }
+        .left-commissioner {
+            padding: 10px;
+            width: 50%;
+            border-right: 1px solid #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .right-address {
+            padding: 10px;
+            width: 50%;
+        }
+        .address-line-box {
+            height: 20px;
+            border-bottom: 1px dotted #000;
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .address-line-box:first-of-type {
+            margin-top: 0;
+        }
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 11px;
+        }
+        .fee-table th,
+        .fee-table td {
+            border: 1px solid #000;
+            padding: 4px;
+        }
+        .note-box {
+            border: 1px solid #000;
+            padding: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+        }
+        .signature-item {
+            border-top: 1px solid #000;
+            width: 45%;
+            text-align: center;
+            padding-top: 5px;
+        }
+        .signature-item-date {
+            border-top: 1px solid #000;
+            width: 30%;
+            text-align: center;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="print-btn-container">
+        <button class="print-btn" onclick="window.print()">Print Document</button>
+    </div>
+
+    <!-- PAGE 1 – Signature line uses exact CSS technique, no double lines -->
+    <div class="page-container" id="page1">
+        <div class="security-bg"></div>
+        <div class="content-wrapper ornate-border">
+            <div class="inner-content">
+                <div style="min-height: 10px"></div>
+                <div class="header-main">
+                    <img src="coat of.jpg" class="logo" alt="Kano Seal" />
+                    <div class="header-center">
+                        <p class="state-name">KANO STATE GOVERNMENT</p>
+                        <p class="ministry-title">
+                            MINISTRY OF LAND AND PHYSICAL PLANNING
+                        </p>
+                        <p style="margin: 0; font-size: 15px; font-weight: bold">
+                            No. 2 Dr. Bala Mohd Road, P.M.B. 3083, Kano State
+                        </p>
+                    </div>
+                    <div style="text-align: right; font-weight: bold; font-size: 12px">
+                        <span style="color: red">Original</span><br />
+                        LAND 14
+                    </div>
+                </div>
+
+                <!-- REF-GRID SECTION -->
+                <div class="ref-grid">
+                    <div>
+                        <div class="bordered-section">
+                            <div class="row">
+                                To:<span class="inline-data" id="recipient-name">Alhaji Musa Abdullahi</span>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <span class="inline-data" id="recipient-address1" style="margin-left: 20px">No. 15, Ahmadu Bello Way</span>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <span class="inline-data" id="recipient-address2" style="margin-left: 20px">Nasarawa G.R.A.Kano State</span>
+                            </div>
+                            <!-- <div class="row"><span class="inline-data" id="recipient-address3" style="margin-left: 20px"></span></div> -->
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bordered-section">
+                            <div class="row">
+                                R of O No:<span class="inline-data" id="roo-number" style="min-width: 235px">KSG/ROO/2024/001</span>
+                            </div>
+                            <div class="row">
+                                PLOT/PLAN No:<span class="inline-data" id="plot-plan-number" style="min-width: 190px; margin-top: 10px">PLOT/123/456</span>
+                            </div>
+                            <div class="row">
+                                LOCATION:<span class="inline-data" id="location" style="min-width: 220px; margin-top: 10px">Tudun Wada, Kano</span>
+                            </div>
+                            <div class="row">
+                                DATE OF ISSUE:<span class="inline-data" id="date-of-issue" style="min-width: 190px; margin-top: 10px">15th January, 2024</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="title-center">
+                    TERMS OF OFFER OF GRANT/CONVEYANCE OF APPROVAL
+                </div>
+
+                <!-- CONDITIONS SECTION -->
+                <div class="conditions-list-fixed">
+                    <p class="condition-item">
+                        With reference to your application dated
+                        <span class="inline-data" id="application-date" style="min-width: 80px">10th November</span>
+                        <span class="inline-data" id="application-year" style="min-width: 30px">2023</span>, I am directed to inform you that the Governor of Kano State has
+                        approved the grant of a Right of Occupancy to you over piece of
+                        land/plot No
+                        <span class="inline-data" id="plot-number" style="min-width: 40px">1234</span>
+                        situated at
+                        <span class="inline-data" id="location-details" style="min-width: 150px">Tudun Wada, Kano</span>
+                        on the following conditions:
+                    </p>
+
+                    <div class="condition-item">
+                        <strong>1. Payment of:</strong>
+                        <div class="sub-item">
+                            <div class="sub-item-line">
+                                <span class="sub-item-label">(a)</span> Ground Rent N
+                                <span class="inline-data" id="ground-rent" style="min-width: 80px">50,000.00</span>
+                                P.H.P.A.
+                            </div>
+                            <div class="sub-item-line">
+                                <span class="sub-item-label">(b)</span> Development Charges N
+                                <span class="inline-data" id="development-charges" style="min-width: 80px">25,000.00</span>
+                            </div>
+                            <div class="sub-item-line">
+                                <span class="sub-item-label">(c)</span> Survey/Processing fees
+                                N
+                                <span class="inline-data" id="survey-processing-fees" style="min-width: 80px">15,000.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="condition-item">
+                        <strong>2.</strong>
+                        <div class="sub-item">
+                            <div class="sub-item-line">
+                                <span class="sub-item-label">(a)</span> Term:
+                                <span class="inline-data" id="term-years" style="min-width: 40px">99</span>
+                                years.
+                            </div>
+                            <div class="sub-item-line">
+                                <span class="sub-item-label">(b)</span> Purpose:
+                                <span class="inline-data" id="purpose" style="min-width: 120px">Residential</span>
+                            </div>
+                            <div class="sub-item-line">
+                                <span class="sub-item-label">(c)</span> Improvement Value: N
+                                <span class="inline-data" id="improvement-value" style="min-width: 80px">5,000,000.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="condition-item">
+                        <strong>3.</strong> Not to alienate the Right of Occupation in
+                        part or whole without written consent of the Governor.
+                    </p>
+                    <p class="condition-item">
+                        <strong>4.</strong> Responsible for development/maintenance of
+                        drainage, landscaping and frontage beautification.
+                    </p>
+                    <p class="condition-item">
+                        <strong>5.</strong> No building/development except in accordance
+                        with plans approved by the Planning Authority.
+                    </p>
+                    <p class="condition-item">
+                        <strong>6.</strong> To complete development of the land within
+                        <span class="inline-data" id="years-to-complete" style="min-width: 30px">2</span>
+                        years.
+                    </p>
+                    <p class="condition-item">
+                        <strong>7.</strong> For Petrol Stations, 33 1/2 percent of annual
+                        rental is payable to the Government.
+                    </p>
+                    <p class="condition-item">
+                        <strong>8.</strong> This offer lapses if not returned with fees
+                        within three months from the above date.
+                    </p>
+                </div>
+
+                <!-- SIGNATURE BLOCK - FIXED: no double lines, date line is clean single border -->
+                <div class="signature-block">
+                    <div>
+                        <!-- the line container with pseudo-element security text - NO EXTRA BORDER -->
+                        <div class="security-line-container"></div>
+                        <div>HONOURABLE COMMISSIONER</div>
+                    </div>
+                    <div>
+                        <!-- single clean line via border-top, no extra underscores -->
+                        <div class="security-line-container"></div>                       
+                         <div style="margin-top:5px;">DATE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER - Exactly as your original -->
+        <div class="footer-barcode-area">
+            <div class="barcode-group" style="visibility: visible; opacity: 0.0001">
+                <div style="font-size: 7px; transform: rotate(-90deg)">©NSPM</div>
+                <div style="display: flex; flex-direction: column; align-items: center">
+                    <img src="https://bwipjs-api.metafloor.com/?bcid=code128&text=KSG-MLPP-1234&scale=1" class="barcode-img" style="margin-bottom: -10px" />
+                    <span style="font-size: 8px" id="barcode-text">KSG-MLPP-1234</span>
+                </div>
+            </div>
+            <div class="qr-code-group" style="margin-top: 20px">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KSG-MLPP-000002" class="qr-img" alt="QR" id="qr-code-img" style="margin-bottom: -10px" />
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2 – Acceptance Letter -->
+    <div class="page-container" id="page2">
+        <div class="security-bg"></div>
+        <div class="content-wrapper simple-margin">
+            <div class="inner-content">
+                <div class="applicant-address-block">
+                    <div class="left-commissioner">
+                        <div style="text-align: center">
+                            The Honourable Commissioner<br />
+                            Ministry of Land and Physical Planning
+                        </div>
+                    </div>
+                    <div class="right-address">
+                        <div class="address-line-box" style="margin-top: 0">
+                            <span class="inline-data" id="applicant-address-line1" style="width: 100%; border: none; min-width: auto">No. 15, Ahmadu Bello Way</span>
+                        </div>
+                        <div class="address-line-box">
+                            <span class="inline-data" id="applicant-address-line2" style="width: 100%; border: none; min-width: auto">Nasarawa G.R.A.</span>
+                        </div>
+                        <div class="address-line-box">
+                            <span class="inline-data" id="applicant-address-line3" style="width: 100%; border: none; min-width: auto">Kano State</span>
+                        </div>
+                        <br />
+                        Date:
+                        <span class="inline-data" id="acceptance-date" style="min-width: 200px">20th January, 2024</span><br />
+                        <br />
+                        <center>Applicant's Address</center>
+                    </div>
+                </div>
+
+                <h3 style="text-align: center; text-decoration: underline; margin: 10px 0;">
+                    ACCEPTANCE LETTER
+                </h3>
+                <p>
+                    With reference to the Offer of Grant, I hereby accept the terms and
+                    conditions of the grant of the Right of Occupancy as conveyed to me
+                    by your overleaf quoted letter.
+                </p>
+                <p>
+                    I will submit my building plan to you for approval before I commence
+                    any improvement on the Site, and on completion of the improvement, I
+                    will get your completion Certificate before occupation of the
+                    building. I forwarded herewith:
+                </p>
+
+                <table class="fee-table">
+                    <tr>
+                        <th>Land Use</th>
+                        <th>Survey Fees (N)</th>
+                        <th>Dev. Charge (N)</th>
+                    </tr>
+                    <tr>
+                        <td>Agriculture</td>
+                        <td>10,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Residential</td>
+                        <td>20,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;i. Very High Density</td>
+                        <td>20,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;ii. High Density</td>
+                        <td>20,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;iii. Medium Density</td>
+                        <td>20,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;iv. Low Density</td>
+                        <td>25,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Commercial</td>
+                        <td>10,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Industrial</td>
+                        <td>10,000.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>TOTAL</strong></td>
+                        <td>N ______________</td>
+                        <td></td>
+                    </tr>
+                </table>
+
+                <p>
+                    I require the Director Survey to carry out the land survey for me
+                    <strong>(<span class="inline-data" id="survey-requirement" style="min-width: 20px">YES</span>) / (<span class="inline-data" id="survey-requirement-no" style="min-width: 20px"></span>)</strong>.
+                </p>
+                <p>
+                    I require a licensed surveyor to carry out the land survey for me
+                    <strong>(<span class="inline-data" id="licensed-surveyor-yes" style="min-width: 20px"></span>) / (<span class="inline-data" id="licensed-surveyor-no" style="min-width: 20px">NO</span>)</strong>.
+                </p>
+
+                <div class="note-box">
+                    NOTE: APPLICANT TO RETAIN ORIGINAL AND RETURN 2 COPIES AFTER
+                    SIGNING.
+                </div>
+
+                <div class="signature-row">
+                    <div class="signature-item">APPLICANT'S SIGNATURE</div>
+                    <div class="signature-item-date">DATE</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-barcode-area"></div>
+    </div>
+
+    <script>
+        const sampleData = {
+            recipient: {
+                name: "Alhaji Musa Abdullahi",
+                address1: "No. 15, Ahmadu Bello Way",
+                address2: "Nasarawa G.R.A. Kano State  ",
+                address3: "Kano State",
+            },
+            refNumbers: {
+                rooNumber: "KSG/ROO/2024/001",
+                plotPlanNumber: "PLOT/123/456",
+                location: "Tudun Wada, Kano",
+                dateOfIssue: "15th January, 2024",
+            },
+            application: {
+                date: "10th November",
+                year: "2023",
+                plotNumber: "1234",
+            },
+            payments: {
+                groundRent: "50,000.00",
+                developmentCharges: "25,000.00",
+                surveyProcessingFees: "15,000.00",
+            },
+            terms: {
+                years: "99",
+                purpose: "Residential",
+                improvementValue: "5,000,000.00",
+            },
+            development: {
+                yearsToComplete: "2",
+            },
+            acceptance: {
+                applicantAddress: "No. 15, Ahmadu Bello Way, Nasarawa G.R.A., Kano State",
+                surveyRequirement: "YES",
+                licensedSurveyor: "NO",
+            },
+        };
+
+        function populateDataFromJSON(jsonData) {
+            try {
+                const data = jsonData || sampleData;
+
+                // PAGE 1 fields
+                document.getElementById("recipient-name").textContent = data.recipient.name || "";
+                document.getElementById("recipient-address1").textContent = data.recipient.address1 || "";
+                document.getElementById("recipient-address2").textContent = data.recipient.address2 || "";
+                document.getElementById("recipient-address3").textContent = data.recipient.address3 || "";
+
+                document.getElementById("roo-number").textContent = data.refNumbers.rooNumber || "";
+                document.getElementById("plot-plan-number").textContent = data.refNumbers.plotPlanNumber || "";
+                document.getElementById("location").textContent = data.refNumbers.location || "";
+                document.getElementById("date-of-issue").textContent = data.refNumbers.dateOfIssue || "";
+                document.getElementById("location-details").textContent = data.refNumbers.location || "";
+
+                document.getElementById("application-date").textContent = data.application.date || "";
+                document.getElementById("application-year").textContent = data.application.year || "";
+                document.getElementById("plot-number").textContent = data.application.plotNumber || "";
+
+                document.getElementById("ground-rent").textContent = data.payments.groundRent || "";
+                document.getElementById("development-charges").textContent = data.payments.developmentCharges || "";
+                document.getElementById("survey-processing-fees").textContent = data.payments.surveyProcessingFees || "";
+
+                document.getElementById("term-years").textContent = data.terms.years || "";
+                document.getElementById("purpose").textContent = data.terms.purpose || "";
+                document.getElementById("improvement-value").textContent = data.terms.improvementValue || "";
+
+                document.getElementById("years-to-complete").textContent = data.development.yearsToComplete || "";
+
+                // PAGE 2 fields
+                const addr = data.acceptance.applicantAddress || "";
+                const parts = addr.split(", ");
+                document.getElementById("applicant-address-line1").textContent = parts[0] || "";
+                document.getElementById("applicant-address-line2").textContent = parts[1] || "";
+                document.getElementById("applicant-address-line3").textContent = parts[2] || "";
+
+                const today = new Date().toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                });
+                document.getElementById("acceptance-date").textContent = today;
+
+                const surveyVal = data.acceptance.surveyRequirement || "YES";
+                const licensedVal = data.acceptance.licensedSurveyor || "NO";
+
+                document.getElementById("survey-requirement").textContent = surveyVal;
+                const surveyNoEl = document.getElementById("survey-requirement-no");
+                if (surveyNoEl) surveyNoEl.textContent = surveyVal === "YES" ? "" : "NO";
+
+                document.getElementById("licensed-surveyor-yes").textContent = licensedVal === "YES" ? "YES" : "";
+                document.getElementById("licensed-surveyor-no").textContent = licensedVal;
+
+                // Update QR and barcode with RofO number
+                const roo = data.refNumbers.rooNumber || "KSG/ROO/2024/001";
+                const qrImg = document.getElementById("qr-code-img");
+                if (qrImg) {
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(roo)}`;
+                }
+                const barcodeSpan = document.getElementById("barcode-text");
+                if (barcodeSpan) barcodeSpan.textContent = roo;
+            } catch (err) {
+                console.error("Populate error:", err);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            populateDataFromJSON(sampleData);
+        });
+    </script>
+</body>
+</html>
