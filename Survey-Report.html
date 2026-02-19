@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Request for Survey Report - Kano State</title>
+    <style>
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        @media print {
+            html, body {
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+            }
+            @page { 
+                size: A4; 
+                margin: 0; 
+            }
+            .no-print { display: none !important; }
+            .a4-page {
+                width: 210mm;
+                height: 297mm;
+                padding: 12mm !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .line-input {
+            border-bottom: 1px solid #000;
+            flex-grow: 1;
+            height: 20px;
+            margin-left: 4px;
+        }
+
+        .section-box {
+            border: 2px solid #2e4a3d;
+            padding: 12px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .text-green-custom {
+            color: #2e4a3d;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 flex flex-col items-center p-4">
+
+    <button onclick="window.print()" class="no-print mb-6 bg-[#2e4a3d] text-white px-10 py-3 rounded-full font-bold shadow-xl hover:bg-[#1f332a] transition-all">
+        Print Survey Report Form
+    </button>
+
+    <div class="a4-page bg-white w-[210mm] h-[297mm] p-12 border border-gray-300 shadow-2xl relative text-black box-border flex flex-col">
+        
+        <div class="flex justify-between items-start mb-2">
+            <div class="w-20">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=KanoLandSurvey12" alt="QR Code" class="w-16 h-16">
+            </div>
+            <div class="text-center flex-1 pt-2">
+                <img src="min1.jpg" class="w-14 mx-auto mb-2" alt="Nigeria Coat of Arms">
+            </div>
+            <div class="w-40 text-[11px]">
+                <div class="border border-black p-1 flex justify-between mb-1">
+                    <span class="font-bold">CODE:</span> <span>LAND 12</span>
+                </div>
+                <div class="border border-black p-1 flex justify-between">
+                    <span class="font-bold">SERIAL NO:</span> <span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ministry of Land and Physical Planning in Green -->
+        <div class="text-center mb-6">
+            <h1 class="text-[#2e4a3d] text-2xl font-bold tracking-tight uppercase">Ministry of Land and Physical Planning</h1>
+            <p class="text-[9px] font-medium text-gray-700">No. 2 Dr. Bala Mohd Road, Nassarawa GRA, Kano PMB 3038 Kano-Nigeria.</p>
+        </div>
+
+        <!-- DIRECTOR-CADASTRAL in Green -->
+        <div class="section-box">
+            <h2 class="text-[#2e4a3d] font-bold text-sm mb-3 underline">DIRECTOR-CADASTRAL</h2>
+            
+            <div class="flex justify-center mb-4">
+                <span class="bg-red-500 text-white px-6 py-0.5 text-xs font-bold uppercase rounded shadow-sm italic">Request for Survey Report</span>
+            </div>
+
+            <p class="text-[11px] mb-2 font-semibold">Please find enclosed hereby the following:</p>
+            <ul class="text-[11px] ml-4 mb-4 space-y-1">
+                <li>a. Completed application forms</li>
+                <li>b. Four copies of site-plan and</li>
+                <li>c. Local Government Conformation</li>
+            </ul>
+
+            <p class="text-[11px] font-semibold mb-4 italic">You are to record the application and prepare surveyCadastral report in due course</p>
+
+            <div class="flex">
+                <div class="w-1/2 space-y-3">
+                    <div class="flex items-end text-[11px]"><span>Date:</span> <div class="line-input"></div></div>
+                </div>
+                <div class="w-1/2 space-y-3 pl-8">
+                    <div class="flex items-end text-[11px]"><span>Name:</span> <div class="line-input"></div></div>
+                    <div class="flex items-end text-[11px]"><span>Rank:</span> <div class="line-input"></div></div>
+                    <div class="flex items-end text-[11px]"><span>Signature:</span> <div class="line-input"></div></div>
+                    <div class="text-right text-[10px] font-bold pr-2 pt-1">For: Director Land</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERMANENT SECRETARY in Green -->
+        <div class="section-box flex-grow">
+            <h2 class="text-[#2e4a3d] font-bold text-sm mb-4 underline">PERMANENT SECRETARY</h2>
+            
+            <div class="space-y-4 mb-6">
+                <div class="flex items-end text-[11px]">
+                    <span class="font-semibold">The above application has been allocated Right of Occupancy No:</span>
+                    <div class="line-input"></div>
+                </div>
+                <div class="flex items-end text-[11px]">
+                    <span class="font-semibold">Item G. No:</span>
+                    <div class="line-input"></div>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-[11px]">
+                <div class="flex gap-2">
+                    <span class="font-bold">1.</span>
+                    <p class="font-semibold">The ground is open and application is completed satisfactory with regards to survey requirements.</p>
+                </div>
+                
+                <div class="flex gap-2 flex-col">
+                    <div class="flex gap-2">
+                        <span class="font-bold">2.</span>
+                        <p class="font-semibold">I have to report that:</p>
+                    </div>
+                    
+                    <div class="ml-6 space-y-4">
+                        <div class="flex flex-col">
+                            <span class="mb-1">a. The correct description of the plot is</span>
+                            <div class="border-b border-black h-5 w-full"></div>
+                            <div class="border-b border-black h-5 w-full"></div>
+                        </div>
+
+                        <div class="flex items-end">
+                            <span>b. Survey will be necessary</span>
+                            <div class="line-input"></div>
+                        </div>
+
+                        <div class="flex flex-col">
+                            <span>c. The applicant is require to Confirm/Note that the plot is demarcated by the following property beacons number:</span>
+                            <div class="border-b border-black h-5 w-full mt-2"></div>
+                            <div class="border-b border-black h-5 w-full"></div>
+                            <div class="border-b border-black h-5 w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex mt-8 mb-4">
+                <div class="w-1/3 text-center">
+                    <div class="border-b border-black w-3/4 mx-auto mb-1"></div>
+                    <span class="text-[10px] font-bold">Date</span>
+                </div>
+                <div class="w-2/3 text-center">
+                    <div class="border-b border-black w-3/4 mx-auto mb-1"></div>
+                    <span class="text-[10px] font-bold uppercase">For: DIRECTOR CADASTRAL</span>
+                </div>
+            </div>
+        
+        </div>
+
+        <div class="mt-4 flex justify-between items-end">
+            <div class="w-1/3 text-center">
+                <div class="border-b border-black w-3/4 mx-auto mb-1"></div>
+                <span class="text-[10px] font-bold">Date</span>
+            </div>
+            <div class="w-1/2 text-center">
+                <div class="border-b border-black w-full mb-1"></div>
+                <span class="text-[10px] font-bold uppercase">For: HONOURABLE COMMISSIONER</span>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
