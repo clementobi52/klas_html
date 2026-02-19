@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Kano State Land Form - Accurate Replica</title>
+    <style>
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .form-master-adjust {
+        position: relative;
+        top: 0px;
+        left: 0px;
+      }
+
+      @media print {
+        html,
+        body {
+          height: 100%;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden;
+        }
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .a4-page {
+          width: 210mm;
+          height: 297mm;
+          padding: 10mm !important;
+          margin: 0 !important;
+          border: none !important;
+          box-shadow: none !important;
+          background-color: #fdfcf0 !important;
+        }
+      }
+
+      .dotted-line {
+        border-bottom: 1px solid #1a4731;
+        flex-grow: 1;
+        height: 14px;
+        margin-left: 4px;
+      }
+
+      /* Custom border radius for top left side of green header */
+      .header-green-bg {
+        background-color: #1a4731;
+        border-top-left-radius: 30px 15px;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        position: relative;
+      }
+
+      /* Alternative simpler approach - just top left radius */
+      .rounded-header-left {
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      /* Full width green bar - extends to both ends with no line */
+      .full-width-green {
+        background-color: #1a4731;
+        margin-left: -24px; /* Negative margin to extend to left border */
+        margin-right: -24px; /* Negative margin to extend to right border */
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        width: calc(100% + 48px); /* Compensate for the negative margins */
+        border: none; /* Ensure no border */
+        outline: none; /* Ensure no outline */
+        box-sizing: border-box;
+        position: relative;
+        z-index: 10; /* Ensure it stays above any potential border lines */
+      }
+
+      /* Ensure parent doesn't create lines */
+      .no-extra-lines {
+        border: none;
+        outline: none;
+      }
+
+      /* Green line below main header */
+      .green-line-below {
+        position: relative;
+      }
+      .green-line-below::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #1a4731;
+        border-radius: 1px;
+      }
+
+      /* Text color classes for clarity */
+      .text-green-custom {
+        color: #1a4731;
+      }
+      .text-red-custom {
+        color: #dc2626; /* red-600 */
+      }
+      .text-black-custom {
+        color: #000000;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-800 flex flex-col items-center font-serif p-2">
+    <button
+      onclick="window.print()"
+      class="no-print my-4 bg-[#1a4731] text-white px-8 py-2 rounded-full font-bold shadow-lg hover:bg-[#0f2e1f]"
+    >
+      Print Final Form
+    </button>
+
+    <div
+      class="a4-page bg-[#fdfcf0] w-[210mm] h-[297mm] p-8 border border-gray-400 shadow-2xl relative text-[#1a4731] flex flex-col box-border overflow-hidden"
+    >
+      <div class="form-master-adjust h-full flex flex-col">
+        <div class="flex justify-between items-start mb-1 px-2">
+          <div
+            class="w-14 h-14 border border-[#1a4731] flex items-center justify-center bg-white p-1"
+          >
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=KanoLand2356"
+              alt="QR"
+              class="w-full h-full grayscale"
+            />
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-sm text-[#1a4731]">
+              Serial No.
+              <span class="border-b border-black px-6 ml-1 text-base text-black"
+                >2356</span
+              >
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="border-2 border-[#1a4731] p-6 flex flex-col flex-grow box-border relative overflow-hidden"
+        >
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16">
+              <img
+                src="min1.jpg"
+                class="w-14 mx-auto"
+                alt="Logo"
+              />
+            </div>
+            <!-- Green header with top-left border radius and green line below -->
+            <div
+              class="bg-[#1a4731] text-white text-center py-2 px-4 flex-1 relative"
+              style="border-top-left-radius: 25px"
+            >
+              <h1
+                class="font-bold text-[16px] uppercase tracking-tighter leading-tight"
+              >
+                Recommendation for the Conversion of <br />
+                Customary Title to Statutory Right of Occupancy
+              </h1>
+              <!-- Green line below the header -->
+              <div
+                class="absolute -bottom-2 left-0 w-full h-0.5 bg-[#1a4731]"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Green text for Honourable Commissioner section -->
+          <div class="mb-4 text-[11px] font-bold leading-tight text-[#1a4731]">
+            <p>Honourable Commissioner</p>
+            <p class="italic text-[#2e6349]">
+              Ministry of Land and Physical Planning
+            </p>
+            <p>Kano State.</p>
+          </div>
+
+          <!-- Black text for all form fields and labels -->
+          <div class="text-black space-y-3 text-[11px] mb-6">
+            <div class="flex items-end">
+              <span
+                >Page
+                <span class="border-b border-black w-10 inline-block"></span
+              ></span>
+              <span class="ml-4">Application by:</span>
+              <div class="dotted-line border-[#1a4731]"></div>
+            </div>
+            <div class="ml-20 flex items-end">
+              <span>for the Right of Occupancy</span>
+              <div class=" dotted-line border-[#1a4731]"></div>
+            </div>
+            <div class="flex items-end">
+              <div class=" ml-20 dotted-line border-[#1a4731]"></div>
+            </div>
+            <div class="ml-20 flex items-end">
+              <span>for the purpose of</span>
+              <div class="dotted-line border-[#1a4731]"></div>
+            </div>
+            <div class="flex items-end">
+              <span
+                >Page
+                <span class="border-b border-black w-10 inline-block"></span
+              ></span>
+              <span class="ml-4">Survey Report</span>
+              <div class="dotted-line border-[#1a4731]"></div>
+            </div>
+          </div>
+
+          <!-- Black text for PLANNING RECOMMENDATION section -->
+          <div class="mb-6 text-black">
+            <p class="text-center font-bold text-[10px] mb-2 uppercase">
+              PLANNING RECOMMENDATION (IF ANY)
+            </p>
+            <div class="space-y-5">
+              <div class="border-b border-black w-full h-1"></div>
+              <div class="border-b border-black w-full h-1"></div>
+              <div class="border-b border-black w-full h-1"></div>
+            </div>
+          </div>
+
+          <!-- Black text for terms section -->
+          <div class="text-black text-[10px] space-y-2.5 mb-6">
+            <p>
+              The grant of Right of Occupancy is recommended on the terms set
+              out as follows:
+            </p>
+            <div class="grid grid-cols-[20px_100px_1fr] items-end px-2">
+              <span class="text-black">(a)</span>
+              <span class="text-black">Rent:</span>
+              <div class="border-b border-black h-3"></div>
+            </div>
+            <div class="grid grid-cols-[20px_100px_1fr] items-end px-2">
+              <span class="text-black">(b)</span>
+              <span class="text-black">Terms:</span>
+              <div class="border-b border-black h-3"></div>
+            </div>
+            <div class="grid grid-cols-[20px_100px_1fr] items-end px-2">
+              <span class="text-black">(c)</span>
+              <span class="text-black">Improvement:</span>
+              <div class="border-b border-black h-3"></div>
+            </div>
+            <div class="grid grid-cols-[20px_100px_1fr] items-end px-2">
+              <span class="text-black">(d)</span>
+              <span class="text-black">Revision Period:</span>
+              <div class="border-b border-black h-3"></div>
+            </div>
+            <div class="grid grid-cols-[20px_100px_1fr] items-end px-2">
+              <span class="text-black">(e)</span>
+              <span class="text-black">Time of Erection:</span>
+              <div class="border-b border-black h-3"></div>
+            </div>
+          </div>
+
+          <!-- Black text for recommendation paragraph -->
+          <p class="text-black text-[10px] italic mb-6 leading-tight">
+            You may wish to approve this application on the terms set out above
+            and subject to Survey Report and <br />
+            recommendation of the Urban Planning Board/ Physical Planning
+            Department at page
+            <span class="inline-block w-16 border-b border-black"></span>.
+          </p>
+
+          <!-- Black text for Rank and Director Land -->
+          <div
+            class="flex justify-between text-center text-[10px] mb-8 px-4 text-black"
+          >
+            <div class="w-40 border-t border-black pt-1">Rank</div>
+            <div class="w-40 border-t border-black pt-1">Director Land</div>
+          </div>
+
+          <!-- Full width green bar - extends to both ends with no line -->
+          <div
+            class="full-width-green text-white text-center py-3 mb-4"
+            style="border: none; outline: none; box-shadow: none"
+          >
+            <h2
+              class="font-bold text-[14px] uppercase tracking-tight"
+              style="border: none; outline: none"
+            >
+              APPROVAL FOR THE CONVERSION OF CUSTOMARY <br />
+              TITLE TO STATUTORY RIGHT OF OCCUPANCY
+            </h2>
+            <div
+              class="absolute -bottom-2 left-0 w-full h-0.5 bg-[#1a4731]"
+            ></div>
+          </div>
+
+          <!-- Black text for approval details -->
+          <div class="text-black text-[10px] space-y-4 mb-8">
+            <div class="flex items-end">
+              <span
+                >I recommend/do not recommend the application for a Grant over
+                Plot No.:</span
+              >
+              <div class="dotted-line border-[#1a4731]"></div>
+            </div>
+            <div class="flex items-end gap-4">
+              <span>Plan No.</span>
+              <div class="dotted-line border-[#1a4731]"></div>
+              <span>Location</span>
+              <div class="dotted-line w-2/3 border-[#1a4731]"></div>
+            </div>
+          </div>
+
+          <div class="mt-auto space-y-8">
+            <!-- Black text for Permanent Secretary and Date -->
+            <div class="flex justify-between text-[10px] text-black">
+              <div
+                class="w-56 border-t border-black text-center pt-1 font-bold uppercase"
+              >
+                Permanent Secretary
+              </div>
+              <div
+                class="w-24 border-t border-black text-center pt-1 font-bold uppercase"
+              >
+                Date
+              </div>
+            </div>
+
+            <!-- Red text for approval statement -->
+            <p
+              class="text-red-600 font-bold text-[10px] text-left tracking-tighter"
+            >
+              The Grant of Occupancy is hereby APPROVED/NOT APPROVED
+            </p>
+
+            <!-- Black text for Honourable Commissioner and Date -->
+            <div class="flex justify-between text-[10px] text-black">
+              <div
+                class="w-56 border-t border-black text-center pt-1 font-bold uppercase"
+              >
+                Honourable Commissioner
+              </div>
+              <div
+                class="w-24 border-t border-black text-center pt-1 font-bold uppercase"
+              >
+                Date
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- inner border div -->
+      </div>
+      <!-- form-master-adjust -->
+    </div>
+    <!-- a4-page -->
+  </body>
+</html>
