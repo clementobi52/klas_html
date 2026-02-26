@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Document Grid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .doc-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Dragging Logic */
+        .doc-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.9);
+            border: 2px dashed #3b82f6;
+            box-shadow: none;
+        }
+
+        .doc-card.drag-over {
+            transform: scale(1.05);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+        }
+
+        .handle {
+            cursor: grab;
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .handle:active { cursor: grabbing; }
+
+        /* Document Preview Placeholder */
+        .doc-preview {
+            height: 120px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Document Gallery</h1>
+                <p class="text-slate-500 text-sm">Drag thumbnails to rearrange the public display order.</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="saveOrder" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all">
+                    <i data-lucide="cloud-upload" class="w-4 h-4"></i> Save Changes
+                </button>
+            </div>
+        </div>
+
+        <div id="documentGrid" class="doc-grid">
+            </div>
+
+        <div id="statusInfo" class="mt-8 flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg text-sm text-slate-500">
+            <span id="itemCount">Loading documents...</span>
+            <span id="syncStatus" class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full"></span> All synced to server
+            </span>
+        </div>
+    </div>
+
+    <script>
+        class GridDocManager {
+            constructor(gridId) {
+                this.grid = document.getElementById(gridId);
+                this.dragSrcElement = null;
+                
+                // Sample data structure from your server/database
+                this.documents = [
+                    { id: 101, name: 'Proposal_v1.pdf', type: 'PDF', icon: 'file-text' },
+                    { id: 102, name: 'Brand_Assets.zip', type: 'ZIP', icon: 'archive' },
+                    { id: 103, name: 'Q4_Financials.xlsx', type: 'XLS', icon: 'table' },
+                    { id: 104, name: 'Intro_Video.mp4', type: 'MOV', icon: 'video' },
+                    { id: 105, name: 'User_Flow.png', type: 'IMG', icon: 'image' },
+                    { id: 106, name: 'Legal_Draft.docx', type: 'DOC', icon: 'file-text' }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.render();
+                document.getElementById('saveOrder').addEventListener('click', () => this.saveToServer());
+            }
+
+            render() {
+                this.grid.innerHTML = '';
+                this.documents.forEach((doc, index) => {
+                    const card = this.createCard(doc, index);
+                    this.grid.appendChild(card);
+                });
+                
+                document.getElementById('itemCount').textContent = `${this.documents.length} documents found`;
+                lucide.createIcons();
+                this.attachEvents();
+            }
+
+            createCard(doc, index) {
+                const div = document.createElement('div');
+                div.className = 'doc-card';
+                div.setAttribute('draggable', 'true');
+                div.setAttribute('data-index', index);
+                div.setAttribute('data-id', doc.id);
+
+                div.innerHTML = `
+                    <div class="handle"><i data-lucide="grip-horizontal" class="w-4 h-4"></i></div>
+                    <div class="doc-preview">
+                        <i data-lucide="${doc.icon}" class="w-12 h-12 text-slate-300"></i>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1">${doc.type}</p>
+                        <h3 class="text-sm font-semibold text-slate-700 truncate" title="${doc.name}">${doc.name}</h3>
+                        <p class="text-[10px] text-slate-400 mt-2 italic">ID: #${doc.id}</p>
+                    </div>
+                `;
+                return div;
+            }
+
+            attachEvents() {
+                const cards = this.grid.querySelectorAll('.doc-card');
+                
+                cards.forEach(card => {
+                    card.addEventListener('dragstart', (e) => {
+                        this.dragSrcElement = card;
+                        card.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    card.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        if (card !== this.dragSrcElement) {
+                            card.classList.add('drag-over');
+                        }
+                    });
+
+                    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+
+                    card.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        card.classList.remove('drag-over');
+                        
+                        const fromIndex = parseInt(this.dragSrcElement.getAttribute('data-index'));
+                        const toIndex = parseInt(card.getAttribute('data-index'));
+
+                        if (fromIndex !== toIndex) {
+                            this.handleReorder(fromIndex, toIndex);
+                        }
+                    });
+
+                    card.addEventListener('dragend', () => {
+                        card.classList.remove('dragging');
+                        cards.forEach(c => c.classList.remove('drag-over'));
+                    });
+                });
+            }
+
+            handleReorder(from, to) {
+                // Update local state
+                const [movedItem] = this.documents.splice(from, 1);
+                this.documents.splice(to, 0, movedItem);
+                
+                // Show unsaved status
+                document.getElementById('syncStatus').innerHTML = `
+                    <span class="w-2 h-2 bg-amber-500 rounded-full"></span> Unsaved changes
+                `;
+                
+                this.render();
+            }
+
+            async saveToServer() {
+                const status = document.getElementById('syncStatus');
+                status.innerHTML = `<span class="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-600"></span> Saving...`;
+
+                const orderPayload = this.documents.map(d => d.id);
+                console.log("Sending to server:", orderPayload);
+
+                // Simulate fetch call
+                await new Promise(res => setTimeout(res, 1000));
+                
+                status.innerHTML = `<span class="w-2 h-2 bg-green-500 rounded-full"></span> All synced to server`;
+                alert(`Server Updated: Order of ${orderPayload.length} documents saved.`);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new GridDocManager('documentGrid');
+        });
+    </script>
+</body>
+</html>
