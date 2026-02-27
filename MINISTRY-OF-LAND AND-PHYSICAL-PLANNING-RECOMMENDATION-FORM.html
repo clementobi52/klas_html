@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical Planning Department - Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .print-btn {
+            margin-bottom: 20px;
+            padding: 10px 25px;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .form-container {
+            background-color: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+
+        .header h2 {
+            font-size: 18px;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+
+        .header h3 {
+            font-size: 14px;
+            margin: 15px 0;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .date-line {
+            text-align: right;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .dotted-line {
+            border-bottom: 2px dotted #000;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        /* Recommendation Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .label-col {
+            width: 30%;
+            font-weight: normal;
+        }
+
+        .data-col {
+            width: 70%;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        /* Large Measurement cells */
+        .large-cell {
+            height: 80px;
+        }
+
+        /* Signature Row */
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .sig-block {
+            width: 30%;
+        }
+
+        .sig-line {
+            border-top: 2px dotted black;
+            margin-bottom: 10px;
+        }
+
+        .sig-title {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        @media print {
+            .print-btn { display: none; }
+            body { background-color: white; padding: 0; }
+            .form-container { box-shadow: none; border: none; width: 100%; }
+            @page { size: A4; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">Print Recommendation Form</button>
+
+    <div class="form-container">
+        <div class="header">
+            <h1>MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+            <h2>KANO</h2>
+            <h3>PHYSICAL PLANNING DEPARTMENT (FINAL RECOMMENDATION)</h3>
+        </div>
+
+        <div class="date-line">
+            APPLICATION DATE: <span class="dotted-line" style="min-width: 200px;"></span>
+        </div>
+
+        <table>
+            <tr>
+                <td class="label-col">FROM</td>
+                <td class="data-col">DIRECTOR PHYSICAL PLANNING</td>
+            </tr>
+            <tr>
+                <td class="label-col">TO</td>
+                <td class="data-col">PERMANENT SECRETARY</td>
+            </tr>
+            <tr>
+                <td class="label-col">APPLICANT NAME</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">APPLICATION NUMBER</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">LOCATION</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">PURPOSE</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">SITE MEASUREMENTS</td>
+                <td class="data-col large-cell"></td>
+            </tr>
+            <tr>
+                <td class="label-col">RECOMMENDED SITE MEASUREMENTS</td>
+                <td class="data-col large-cell"></td>
+            </tr>
+            <tr>
+                <td class="label-col">EXISTING ROAD RESERVATION</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">SURROUNDING LANDUSE</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">RECOMMENDED ROAD RESERVATION</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">RECOMMENDED LAND USE</td>
+                <td class="data-col"></td>
+            </tr>
+            <tr>
+                <td class="label-col">CHANGE OF PURPOSE</td>
+                <td class="data-col" style="font-weight: normal; font-size: 11px;">Any change of purpose must be with the consent of the physical planning department</td>
+            </tr>
+            <tr>
+                <td class="label-col">BUILDING PERMISSION</td>
+                <td class="data-col" style="font-weight: normal; font-size: 11px;">Building must be forwarded to the ministry for registration/approval.</td>
+            </tr>
+            <tr>
+                <td class="label-col">ALTERATION</td>
+                <td class="data-col" style="font-weight: normal; font-size: 11px;">Any Alteration on the recommended site plan renders this recommendation invalid.</td>
+            </tr>
+        </table>
+
+        <div class="signature-row">
+            <div class="sig-block">
+                <div class="sig-line"></div>
+                <div class="sig-title">Inspection Officer</div>
+            </div>
+            
+            <div class="sig-block" style="margin-top: 40px;">
+                <div class="sig-line"></div>
+                <div class="sig-title">Director</div>
+            </div>
+
+            <div class="sig-block">
+                <div class="sig-line"></div>
+                <div class="sig-title">Deputy Director</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
