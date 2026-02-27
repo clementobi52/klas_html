@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule of Payment - Kano State</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .print-btn {
+            margin-bottom: 20px;
+            padding: 10px 25px;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .form-container {
+            background-color: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin: 5px 0;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .header h2 {
+            font-size: 20px;
+            margin: 5px 0;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .header h3 {
+            font-size: 18px;
+            margin: 15px 0;
+            text-transform: uppercase;
+            font-style: italic;
+            text-decoration: underline;
+        }
+
+        .recipient-line {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .instruction {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        td {
+            border: 2px solid black;
+            padding: 12px;
+            font-size: 15px;
+            height: 35px;
+            text-transform: uppercase;
+        }
+
+        .label-cell {
+            width: 40%;
+            font-weight: bold;
+        }
+
+        /* Signature Section */
+        .sig-section {
+            margin-top: 50px;
+            line-height: 2.5;
+        }
+
+        .sig-row {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .sig-label {
+            font-weight: bold;
+            width: 100px;
+            font-size: 16px;
+        }
+
+        .sig-line {
+            flex-grow: 1;
+            border-bottom: 2px solid black;
+            margin-left: 10px;
+        }
+
+        @media print {
+            .print-btn { display: none; }
+            body { background-color: white; padding: 0; }
+            .form-container { box-shadow: none; border: none; width: 100%; }
+            @page { size: A4; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">Print Schedule of Payment</button>
+
+    <div class="form-container">
+        <div class="header">
+            <h1>MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+            <h2>KANO STATE</h2>
+            <h3>Schedule of Payment</h3>
+        </div>
+
+        <div class="recipient-line">ACCOUNTANT:</div>
+        <div class="instruction">Please receive payment as per details below</div>
+
+        <table>
+            <tr>
+                <td class="label-cell">NAME</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="label-cell">FILE NUMBER</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="label-cell">PURPOSE OF PAYMENT</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="label-cell">AMOUNT</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="label-cell">TICK WHERE APPROPRIATE</td>
+                <td>BANK / ACCOUNT NUMBER</td>
+            </tr>
+            <tr>
+                <td class="label-cell">LAND RELATED CHARGES</td>
+                <td>JAIZ BANK</td>
+            </tr>
+            <tr>
+                <td class="label-cell">OTHER CHARGES</td>
+                <td>TAJ BANK</td>
+            </tr>
+        </table>
+
+        <div class="sig-section">
+            <div class="sig-row">
+                <span class="sig-label">NAME:</span>
+                <div class="sig-line"></div>
+            </div>
+            <div class="sig-row">
+                <span class="sig-label">RANK:</span>
+                <div class="sig-line"></div>
+            </div>
+            <div class="sig-row">
+                <span class="sig-label">SIGNATURE:</span>
+                <div class="sig-line"></div>
+            </div>
+            <div class="sig-row">
+                <span class="sig-label">DATE:</span>
+                <div class="sig-line"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
