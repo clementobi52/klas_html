@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OP Verification Form - Kano State</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .print-btn {
+            margin-bottom: 20px;
+            padding: 10px 25px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .form-container {
+            background-color: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Header Section */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .qr-placeholder {
+            width: 85px;
+            height: 85px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .center-logo {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .center-logo img {
+            width: 75px;
+        }
+
+        .form-id {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .ministry-title {
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .ministry-title h1 {
+            color: #2e7d32;
+            font-size: 22px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .ministry-title p {
+            font-size: 10px;
+            margin: 2px 0;
+            color: #333;
+        }
+
+        .one-stop-shop {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin: 15px 0 10px 0;
+        }
+
+        /* Badge Heading */
+        .badge-heading {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .badge-text {
+            background-color: #f28d8d;
+            color: white;
+            padding: 6px 25px;
+            font-weight: bold;
+            border: 1px solid #d32f2f;
+            display: inline-block;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+
+        /* Passport Photo Box */
+        .passport-box {
+            position: absolute;
+            top: 175px;
+            right: 40px;
+            width: 100px;
+            height: 120px;
+            border: 1px solid #999;
+            font-size: 9px;
+            text-align: center;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        /* Form Parts */
+        .part-header {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2e7d32;
+            margin: 15px 0 10px 0;
+        }
+
+        .field-row {
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .field-label {
+            display: inline-block;
+        }
+
+        .field-line {
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            flex-grow: 1;
+            height: 1.2em;
+            margin-left: 5px;
+        }
+
+        .flex-field {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        /* Checkbox list */
+        .id-list {
+            margin-left: 30px;
+            list-style: none;
+        }
+
+        .id-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .check-box {
+            width: 25px;
+            height: 25px;
+            border: 1px solid #000;
+            margin-left: auto;
+            margin-right: 150px;
+        }
+
+        /* Official Use Box */
+        .official-box {
+            border: 2px solid #ccc;
+            margin-top: 40px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .official-title {
+            text-align: center;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 20px;
+        }
+
+        .rec-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chairman-sig {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .sig-line {
+            display: inline-block;
+            border-top: 1px solid #000;
+            width: 250px;
+            text-align: center;
+            padding-top: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        @media print {
+            .print-btn { display: none; }
+            body { background-color: white; padding: 0; }
+            .form-container { box-shadow: none; border: none; width: 100%; }
+            @page { size: A4; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">Print Verification Form</button>
+
+    <div class="form-container">
+        <div class="header-top">
+            <div class="qr-placeholder">QR CODE</div>
+            <div class="center-logo">
+                <img src="min1.jpg" alt="Coat of Arms">
+            </div>
+            <div class="form-id">FORM LN-03A</div>
+        </div>
+
+        <div class="ministry-title">
+            <h1>MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+            <p>No. 2 Dr. Bala Mohd. Road, Nassarawa GRA, Kano P.M.B. 3083, Kano-Nigeria</p>
+        </div>
+
+        <div class="one-stop-shop">ONE STOP SHOP</div>
+
+        <div class="badge-heading">
+            <div class="badge-text">OCCUPANCY PERMIT (OP) VERIFICATION FORM</div>
+        </div>
+
+        <div class="passport-box">
+            PASSPORT PHOTOGRAPH OF ALOTEE
+        </div>
+
+        <div class="part-header">PART A</div>
+        
+        <div class="field-row flex-field">
+            <span class="field-label">1. Name of Applicant:</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">2. Address:</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">3. Phone Number(s):</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">4. E-mail Address:</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row">
+            <span class="field-label">5. Means of Identification (Photocopy to be attached)</span>
+            <ul class="id-list">
+                <li class="id-item">a. National I.D. <div class="check-box"></div></li>
+                <li class="id-item">b. Voters Card <div class="check-box"></div></li>
+                <li class="id-item">c. Driving Licence <div class="check-box"></div></li>
+                <li class="id-item">d. International Passport <div class="check-box"></div></li>
+                <li class="id-item">e. Others (Specify) <div class="check-box"></div></li>
+            </ul>
+        </div>
+
+        <div class="part-header">PART B</div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">1. Name of Original Allotee</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">2. OP No.</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">3. Plot No./Plan No.</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="field-row flex-field">
+            <span class="field-label">4. Location</span>
+            <div class="field-line"></div>
+        </div>
+
+        <div class="official-box">
+            <div class="official-title">FOR OFFICIAL USE ONLY</div>
+            
+            <div class="rec-row">
+                <span style="width: 150px; font-weight: bold;">Recommended</span>
+                <div style="width: 30px; height: 30px; border: 1px solid #000;"></div>
+            </div>
+
+            <div class="rec-row">
+                <span style="width: 150px; font-weight: bold;">Not Recommended</span>
+                <div style="width: 30px; height: 30px; border: 1px solid #000;"></div>
+            </div>
+
+            <div class="chairman-sig">
+                <div class="sig-line">CHAIRMAN<br>One Stop Shop</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
