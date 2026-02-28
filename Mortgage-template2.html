@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kano State Land Application - Full Document</title>
+    <style>
+        /* Base Styling */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        /* Fixed Print Button */
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 25px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .print-btn:hover { background-color: #00509e; }
+
+        /* Page Container */
+        .page {
+            background-color: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+
+        /* Shared Components */
+        .header { text-align: center; color: #003366; margin-bottom: 15px; }
+        .coat-of-arms { width: 100px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+        h1 { font-size: 20px; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .field-line { display: inline-block; border-bottom: 1px dotted #000; min-width: 50px; height: 1.1em; vertical-align: bottom; flex-grow: 1; }
+        .form-row { display: flex; margin-bottom: 12px; align-items: flex-end; line-height: 1.5; }
+        .field-label { font-size: 14px; padding-right: 8px; white-space: nowrap; }
+
+        /* Page 1 Specifics */
+        .meta-box { border: 2px solid #003366; width: 220px; margin-left: auto; margin-bottom: 15px; }
+        .meta-row { display: flex; border-bottom: 1px solid #003366; padding: 4px; font-size: 13px; }
+        .meta-row:last-child { border-bottom: none; }
+        .requirement-box { border: 2px solid #003366; padding: 12px; margin-bottom: 20px; font-size: 13px; }
+        .req-title { font-weight: bold; text-align: center; border-bottom: 1px solid #003366; margin-bottom: 8px; text-transform: uppercase; }
+        .warning { color: #cc0000; font-weight: bold; margin-top: 8px; font-size: 12px; }
+
+        /* Page 2 Specifics */
+        .official-header { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 30px; text-decoration: underline; color: #000; }
+        .section { margin-bottom: 25px; line-height: 1.8; font-size: 14px; }
+        .section-title { font-weight: bold; margin-bottom: 5px; }
+        .sig-block { display: flex; justify-content: space-between; margin-top: 20px; }
+        .sig-line-container { text-align: center; width: 250px; }
+        .approval-box { border: 2px solid #003366; padding: 20px; margin-top: 40px; display: flex; justify-content: space-between; }
+
+        /* Print Optimization */
+        @media print {
+            .print-btn { display: none; }
+            body { background-color: white; padding: 0; }
+            .page { 
+                box-shadow: none; 
+                border: none; 
+                margin: 0; 
+                page-break-after: always; /* Forces new page for second section */
+            }
+            @page { size: A4; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">Print Documents</button>
+
+    <div class="page">
+        <div class="header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" alt="Coat of Arms" class="coat-of-arms">
+            <h1>MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+            <h1>KANO STATE</h1>
+        </div>
+
+        <div class="meta-box">
+            <div class="meta-row"><b>CODE:</b> &nbsp; KSY DEED - 2</div>
+            <div class="meta-row"><b>SERIAL NO:</b> &nbsp; </div>
+        </div>
+
+        <div class="requirement-box">
+            <div class="req-title">APPLICATION FOR CONSENT TO MORTGAGE STATUTORY RIGHT OF OCCUPANCY</div>
+            <strong>REQUIREMENT:</strong><br>
+            * Forms - Price Per set of two copies - ₦300.00<br>
+            * Non-Refundable Application Fees of ₦1,500.00<br>
+            * Written Consent of Title Holder<br>
+            * Applicant's Tax Clearance Certificate
+            <div class="warning">WARNING: Applications will not be treated without complete documents. It is dangerous to attach forged documents.</div>
+        </div>
+
+        <p><b>TO: Honourable Commissioner</b></p>
+
+        <div class="form-row"><span class="field-label">1. Right of Occupancy Number</span><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">2. Name of Applicant</span><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">3. Location and Correspondence Address</span><div class="field-line"></div></div>
+        <div class="form-row" style="margin-left: 20px;"><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">4. Name of Holder (If Different from Application)</span><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">5. Location of Right of Occupancy</span><div class="field-line"></div></div>
+        <div class="form-row">
+            <span class="field-label">6. Date of Grant</span><div class="field-line" style="flex-grow: 0.4;"></div>
+            <span class="field-label" style="padding-left:15px;">Purpose</span><div class="field-line"></div>
+        </div>
+        <div class="form-row"><span class="field-label">7. Mortgagor Institution</span><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">8. Location and Correspondence Address</span><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">9. Amount of Consideration ₦</span><div class="field-line"></div></div>
+        <div class="form-row"><span class="field-label">10. Specify special Mortgage Term</span><div class="field-line"></div></div>
+
+        <div class="sig-block" style="margin-top: 60px;">
+            <div>Date: <span class="field-line" style="width: 150px;"></span></div>
+            <div>Signature: <span class="field-line" style="width: 200px;"></span></div>
+        </div>
+    </div>
+
+    <div class="page">
+        <div class="official-header">FOR OFFICIAL USE ONLY</div>
+
+        <div class="section">
+            <div class="section-title">A. Deed Registrar:</div>
+            Overleaf an application for consent to mortgage the property covered by right of Occupancy <br>
+            Certificate No. <span class="field-line" style="width: 150px;"></span> <span class="field-line"></span> by the Holder/Representatives/Solicitor <br>
+            <div class="form-row"><div class="field-line"></div></div>
+            <div class="form-row"><div class="field-line"></div>To bank/Department</div>
+            <div class="form-row"><div class="field-line"></div>Whose address is</div>
+            <div class="form-row"><div class="field-line"></div></div>
+            <p>Application Fee ₦1,500.00 has been Paid. Current Tax Clearance Certificate of Holder is attached and all Ground Rents/Charges have been paid to date and there are no encumbrances on the title. You may therefore recommend the application for the approval of Honourable Commissioner subject to the usual conditions.</p>
+            
+            <div class="sig-block">
+                <div>Date: <span class="field-line" style="width: 150px;"></span></div>
+                <div class="sig-line-container">
+                    <div class="field-line" style="width: 100%;"></div>
+                    <b>Head Registration:</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">B. Permanent Secretary,</div>
+            The Above application is in order and therefore forwarded for consideration please.
+            <div class="sig-block">
+                <div>Date: <span class="field-line" style="width: 150px;"></span></div>
+                <div class="sig-line-container">
+                    <div class="field-line" style="width: 100%;"></div>
+                    <b>Deed Registrar:</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">C. Honourable Commissioner,</div>
+            The application for consent to mortgage is hereby recommended for your approval please.
+            <div class="sig-block">
+                <div>Date: <span class="field-line" style="width: 150px;"></span></div>
+                <div class="sig-line-container">
+                    <div class="field-line" style="width: 100%;"></div>
+                    <b>Permanent Secretary:</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="section"><b>D. Permanent Secretary,</b></div>
+
+        <div class="approval-box">
+            <div style="font-weight: bold;">
+                APPROVAL:<br>
+                The Application is hereby:<br><br>
+                APPROVED <br>
+                NOT APPROVED
+            </div>
+            <div style="text-align: center; align-self: flex-end;">
+                <div class="field-line" style="width: 250px;"></div><br>
+                <b>Honourable Commissioner</b><br><br>
+                Date: <span class="field-line" style="width: 120px;"></span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
