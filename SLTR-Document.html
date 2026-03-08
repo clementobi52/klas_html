@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kano State SLTR - 2 Page Document</title>
+    <style>
+      /* General Layout */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: #525659;
+        font-family: "Times New Roman", Times, serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 0;
+        gap: 30px;
+      }
+
+      /* Standard A4 Dimensions */
+      .page {
+        background: white;
+        width: 210mm;
+        height: 297mm;
+        padding: 15mm 20mm;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        /* Forces colors to stay during print */
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .underline {
+        border-bottom: 1px solid #000;
+        display: inline-block;
+      }
+      .bold {
+        font-weight: bold;
+      }
+
+      /* --- PAGE 1: OFFICE OF THE COMMISSIONER --- */
+      .logo-container {
+        text-align: center;
+        margin-bottom: 5px;
+      }
+      .logo-container img {
+        width: 85px;
+      }
+
+      .green-header {
+        background-color: #1b4d2e !important; /* Force green background */
+        color: white !important;
+        text-align: center;
+        padding: 12px;
+        border: 1.5px solid #1b4d2e;
+        margin-bottom: 15px;
+      }
+      .green-header h1 {
+        font-size: 15pt;
+        margin: 0;
+        letter-spacing: 1px;
+      }
+      .green-header p {
+        font-size: 8pt;
+        margin-top: 3px;
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        border: 1px solid #000;
+      }
+      .meta-box {
+        padding: 12px;
+        min-height: 120px;
+        font-size: 11pt;
+      }
+      .to-box {
+        border-right: 1px solid #000;
+      }
+
+      .sltr-section {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .sltr-title {
+        color: #8b2d2d !important;
+        font-size: 22pt;
+        font-weight: bold;
+        margin: 0;
+      }
+      .sltr-subtitle {
+        color: #8b2d2d !important;
+        font-size: 19pt;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .body-text {
+        font-size: 11.5pt;
+        text-align: justify;
+        line-height: 1.4;
+        margin-bottom: 10px;
+      }
+
+      ol.conditions {
+        padding-left: 25px;
+        flex-grow: 1;
+      }
+      ol.conditions > li {
+        margin-bottom: 8px;
+        font-size: 10.5pt;
+        text-align: justify;
+      }
+      .sub-list {
+        list-style: none;
+        padding-left: 15px;
+        margin-top: 5px;
+      }
+
+      /* --- PAGE 2: ACCEPTANCE --- */
+      .address-header {
+        text-align: right;
+        margin-bottom: 30px;
+        font-size: 11pt;
+      }
+      .line-blank {
+        border-bottom: 1px solid #000;
+        width: 250px;
+        display: inline-block;
+        margin-bottom: 10px;
+      }
+
+      .acceptance-box {
+        border: 1.2px solid #000;
+        padding: 15px;
+        margin-top: 10px;
+        flex-grow: 1;
+      }
+      .acceptance-title {
+        text-align: center;
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 13pt;
+        margin-bottom: 10px;
+      }
+
+      .fee-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .fee-table th,
+      .fee-table td {
+        border: 1.2px solid #000;
+        padding: 5px 8px;
+        font-size: 9.5pt;
+      }
+      .sub-item {
+        padding-left: 25px;
+      }
+
+      .surveyor-options {
+        margin-top: 15px;
+      }
+      .option {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 6px;
+        font-size: 10.5pt;
+      }
+      .check-box {
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid #000;
+        margin-right: 12px;
+        flex-shrink: 0;
+      }
+
+      /* Signatures & Instructions */
+      .footer-sigs {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .sig-block {
+        text-align: center;
+      }
+      .sig-line {
+        border-top: 1.2px solid #000;
+        padding-top: 5px;
+        font-size: 11pt;
+      }
+
+      .instruction-tag {
+        text-align: center;
+        font-size: 8.5pt;
+        font-weight: bold;
+        border-top: 1px solid #000;
+        margin-top: 25px;
+        padding-top: 8px;
+        text-transform: uppercase;
+      }
+      .sltr-footer-tag {
+        position: absolute;
+        bottom: 8mm;
+        right: 15mm;
+        font-size: 7.5pt;
+        font-style: italic;
+        color: #444;
+      }
+
+      /* Print Button Style */
+      .print-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background: #1b4d2e;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+      }
+
+      /* SECURITY LINE CONTAINER STYLE */
+      .security-line-container {
+        position: relative;
+        width: 100%;
+        height: 12px;
+        margin: 0;
+        overflow: hidden;
+      }
+      .security-line-container::after {
+        content: "Kano State Ministry of Land and Physical Planning Kano State Ministry of Land and Physical Planning Kano State Ministry of Land and Physical Planning Kano State Ministry of Land and Physical Planning ";
+        position: absolute;
+        top: -1px;
+        left: 0;
+        width: 100%;
+        font-size: 3px;
+        font-weight: 900;
+        letter-spacing: -0.65px;
+        word-spacing: -3.2px;
+        color: #000;
+        white-space: nowrap;
+        overflow: hidden;
+        text-transform: uppercase;
+        pointer-events: none;
+        z-index: 2;
+        font-family:
+          "Arial Narrow", "Helvetica Condensed", "Courier New", monospace;
+        text-align: center;
+        line-height: 1;
+        text-shadow: 0 0.5px 0 #666;
+      }
+
+      /* --- PRINT CONFIGURATION - FIXED --- */
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+          margin: 0;
+          height: auto;
+          display: block;
+        }
+        .print-btn {
+          display: none;
+        }
+
+        .page {
+          box-shadow: none;
+          margin: 0;
+          width: 100%;
+          height: auto;
+          min-height: 100vh;
+          page-break-after: always;
+          border: none;
+          overflow: hidden;
+        }
+
+        /* Ensure the last page doesn't force an extra blank page */
+        .page:last-child {
+          page-break-after: auto;
+        }
+
+        @page {
+          size: A4;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-btn" onclick="window.print()">Print Document</button>
+
+    <!-- PAGE 1 -->
+    <div class="page">
+      <div class="logo-container">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg"
+          alt="Coat of Arms"
+        />
+      </div>
+      <div class="green-header">
+        <h1>MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+        <p>NO. 2, DR BALA MUHAMMAD ROAD NASSARAWA GRA</p>
+        <p>P.M.B 3083, KANO STATE</p>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-box to-box">
+          <p>
+            <strong>To:</strong>
+            <span class="underline" style="width: 75%"></span>
+          </p>
+          <p><span class="underline" style="width: 90%"></span></p>
+          <p><span class="underline" style="width: 90%"></span></p>
+        </div>
+        <div class="meta-box">
+          <p>
+            <strong>SLTR NO:</strong>
+            <span class="underline" style="width: 55%"></span>
+          </p>
+          <p>
+            <strong>LOCATION:</strong>
+            <span class="underline" style="width: 55%"></span>
+          </p>
+          <p>
+            <strong>LAND USE:</strong>
+            <span class="underline" style="width: 55%"></span>
+          </p>
+          <p>
+            <strong>DATE OF ISSUE:</strong>
+            <span class="underline" style="width: 45%"></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="sltr-section">
+        <h2 class="sltr-title">SLTR</h2>
+        <h3 class="sltr-subtitle">
+          Terms of Offer of Grant/Conveyance of Approval
+        </h3>
+      </div>
+
+      <p class="body-text">
+        With reference to your application dated
+        <span class="underline" style="min-width: 120px"></span>, I am directed
+        to inform you that the Governor of Kano State has approved the grant of
+        Right of occupancy to you over piece of land/plot No.
+        <span class="underline" style="min-width: 70px"></span> situated at
+        <span class="underline" style="min-width: 130px"></span> in
+        <span class="underline" style="min-width: 130px"></span> on the
+        following conditions.
+      </p>
+
+      <ol class="conditions">
+        <li>
+          Payment of:
+          <ul class="sub-list">
+            <li>
+              (a) Ground rent ₦
+              <span class="underline" style="width: 250px"></span> P.h.p.a.
+              (Revisable every 5 years)
+            </li>
+            <li>
+              (b) Processing Fee of ₦
+              <span class="underline" style="width: 250px"></span>
+            </li>
+          </ul>
+        </li>
+        <li>
+          (a) Term <span class="underline" style="width: 120px"></span> Years.
+          <br />
+          (b) Purpose <span class="underline" style="width: 300px"></span>
+        </li>
+        <li>
+          Not to alienate the Right of Occupancy in part or whole without the
+          written consent of the Governor.
+        </li>
+        <li>
+          To be responsible for the development and maintenance of the drainage,
+          landscaping and general beautification of the frontage of the subject
+          property.
+        </li>
+        <li>
+          Not to erect or permit to be erected on the subject land any building
+          or development except in accordance with plans and specifications
+          approved by the State Planning Authority in the case of urban areas or
+          this ministry in the case of rural areas.
+        </li>
+        <li>
+          Compliance with the Statutory Bills and Charges under Systematic Land
+          Titling and Registration (SLTR) Law.
+        </li>
+        <li>
+          This letter of Grant must be returned within three months from the
+          above date, duly completed with the required fees; otherwise, the
+          offer lapses.
+        </li>
+      </ol>
+
+      <!-- MODIFIED SECTION WITH SECURITY LINE CONTAINER -->
+      <div class="footer-sigs">
+        <div class="sig-block" style="width: 45%">
+          <div class="security-line-container"></div>
+          <div style="margin-top: 2px">
+            <span class="bold">Honourable Commissioner</span>
+          </div>
+          <p style="font-size: 8pt; margin-top: 2px; margin-bottom: 0">
+            Ministry of Land and Physical Planning<br />Kano State
+          </p>
+        </div>
+        <div class="sig-block" style="width: 30%">
+          <div class="security-line-container"></div>
+          <div style="margin-top: 2px">
+            <span class="bold">Date</span>
+          </div>
+          <!-- QR Code added below Date line -->
+          <div style="margin-top: 15px; text-align: center">
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=Kano%20State%20SLTR%20-%20Official%20Document%20%7C%20Verify%20at%20sltr.kano.gov.ng"
+              alt="QR Code"
+              style="width: 70px; height: 70px; border: 1px solid #ccc"
+            />
+            <p style="font-size: 7pt; margin-top: 5px">Scan to verify</p>
+          </div>
+        </div>
+      </div>
+      <p class="sltr-footer-tag">
+        Generated by: Systematic Land Titling Registration Department (SLTR)
+      </p>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page">
+      <div class="address-header">
+        <span class="line-blank"></span><br />
+        <span class="line-blank"></span><br />
+        <span class="line-blank"></span><br />
+        <p>Date <span class="underline" style="width: 150px"></span></p>
+      </div>
+
+      <div class="body-text">
+        <p>The Honorable Commissioner</p>
+        <p>Ministry of Land and Physical Planning</p>
+        <p>Kano State.</p>
+      </div>
+
+      <div class="acceptance-box">
+        <h2 class="acceptance-title">ACCEPTANCE LETTER</h2>
+        <p class="body-text" style="font-size: 10.5pt">
+          With reference to the Letter of Grant, I hereby accept the terms and
+          conditions of the grant of the Right of Occupancy as conveyed to me by
+          your overleaf quoted letter.
+        </p>
+        <p class="body-text" style="font-size: 10.5pt">
+          I will submit my building plans to you for approval before I commence
+          any improvement on the Site, and on completion of the improvement, I
+          will get your completion Certificate before occupation on the
+          building. I forward herewith.
+        </p>
+
+        <table class="fee-table">
+          <thead>
+            <tr>
+              <th width="60%">Land Use</th>
+              <th>Processing Fees</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>a. Residential</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="sub-item">i. Systematic</td>
+              <td>- ₦ 5,000.00</td>
+            </tr>
+            <tr>
+              <td class="sub-item">ii. On demand</td>
+              <td>- ₦ 10,000.00</td>
+            </tr>
+            <tr>
+              <td>b. Commercial</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="sub-item">i. Systematic</td>
+              <td>- ₦ 10,000.00</td>
+            </tr>
+            <tr>
+              <td class="sub-item">ii. On Demand Within Metro</td>
+              <td>- ₦ 50,000.00</td>
+            </tr>
+            <tr>
+              <td class="sub-item">iii. On Demand Outside Metro</td>
+              <td>- ₦ 40,000.00</td>
+            </tr>
+            <tr>
+              <td>c. Warehouse</td>
+              <td>- ₦ 100,000.00</td>
+            </tr>
+            <tr>
+              <td>d. Above one (1) Hectare</td>
+              <td>- ₦ 100,000.00</td>
+            </tr>
+            <tr>
+              <td>e. Farmland</td>
+              <td>- ₦ 50,000.00</td>
+            </tr>
+            <tr>
+              <td style="text-align: right">One year Ground Rent</td>
+              <td>₦ <span class="underline" style="width: 150px"></span></td>
+            </tr>
+            <tr>
+              <td style="text-align: right"><span class="bold">TOTAL</span></td>
+              <td>₦ <span class="underline" style="width: 150px"></span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="surveyor-options">
+          <div class="option">
+            <div class="check-box"></div>
+            <span
+              >I require the Director Survey to carry out the land survey for
+              me</span
+            >
+          </div>
+          <div class="option">
+            <div class="check-box"></div>
+            <span
+              >I require a licensed Surveyor to carry out the land survey for
+              me</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <p class="instruction-tag">
+        Applicant to retain original and return 2 copies after signing his/her
+        acceptance grant
+      </p>
+
+      <div class="footer-sigs">
+        <div class="sig-block" style="width: 45%">
+          <div class="sig-line">
+            <span class="bold">APPLICANT SIGNATURE</span>
+          </div>
+        </div>
+        <div class="sig-block" style="width: 30%">
+          <div class="sig-line"><span class="bold">DATE</span></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
