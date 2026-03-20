@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KANGIS - Official Search Report (Online Copy)</title>
+    <style>
+      /* General Page Setup */
+      body {
+        background-color: #525659;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .page {
+        background-color: #fff;
+        width: 11in;
+        min-height: 8.5in;
+        padding: 0.5in 0.6in;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+        position: relative;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        width: 100%;
+        border-bottom: 2px solid #000;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo-box img {
+        width: 85px;
+        height: auto;
+      }
+      .title-block {
+        text-align: center;
+        flex: 1;
+      }
+      .title-block h1 {
+        font-size: 20px;
+        color: #007a33;
+        margin: 0;
+        font-weight: bold;
+      }
+      .title-block h3 {
+        font-size: 15px;
+        margin: 0;
+        text-decoration: underline;
+        font-weight: bold;
+      }
+      .date-line {
+        text-align: right;
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      .section-label {
+        border: 1px solid #000;
+        display: inline-block;
+        padding: 2px 8px;
+        font-weight: bold;
+        font-size: 13px;
+        margin: 10px 0;
+        background: #fff;
+      }
+
+      /* PROPERTY DETAILS - FIXED ALIGNMENT */
+      .prop-details {
+        font-size: 14px;
+        margin-bottom: 15px;
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+      }
+      .prop-details td {
+        padding: 6px 0;
+        vertical-align: top;
+      }
+
+      .bold-lbl-left { font-weight: bold; white-space: nowrap; width: 130px; }
+      .val-cell-left { width: auto; }
+      .bold-lbl-right { font-weight: bold; white-space: nowrap; width: 80px; padding-left: 40px; }
+      .val-cell-right { width: 200px; }
+
+      /* Transaction Table */
+      .transaction-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10.5px;
+        table-layout: fixed;
+        margin-bottom: 20px;
+      }
+      .transaction-table th,
+      .transaction-table td {
+        padding: 8px 5px;
+        vertical-align: top;
+        border-bottom: 0.5px solid #eee;
+        word-wrap: break-word;
+      }
+      .transaction-table .header-row th {
+        font-weight: bold;
+        border-bottom: 1.5px solid #000;
+        background: #fff;
+        text-align: left;
+      }
+
+      .c1 { width: 4%; } .c2 { width: 14%; } .c3 { width: 14%; }
+      .c4 { width: 13%; } .c5 { width: 10%; } .c6 { width: 8%; }
+      .c7 { width: 5%; } .c8 { width: 6%; } .c9 { width: 26%; }
+
+      /* Footer/Signature Section */
+      .content-pusher { flex-grow: 1; }
+      .signature-section {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+      .sig-box { text-align: center; width: 250px; }
+      .sig-line { border-top: 1px solid #000; margin-bottom: 5px; }
+      .sig-text { font-size: 12px; font-weight: bold; }
+
+      footer {
+        width: 100%;
+        padding-top: 10px;
+        background-color: white;
+      }
+      .remarks-container {
+        border-top: 2px solid #000;
+        width: 100%;
+      }
+      .timestamp-text {
+        font-size: 12px;
+        font-weight: bold;
+        margin: 8px 0;
+      }
+      
+      /* New Footer Branding Layout */
+      .branding-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+      }
+      
+      .disclaimer-box {
+        text-align: left;
+        font-size: 10px;
+        color: #333;
+        line-height: 1.4;
+      }
+      
+      .logo-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+      
+      .logo-group img {
+        height: 20px;
+        width: auto;
+      }
+
+      @media print {
+        @page { size: landscape; margin: 0.5in; }
+        body { background: none; padding: 0; margin: 0; }
+        .page { box-shadow: none; width: 100%; min-height: 100vh; padding: 0.5in 0.6in; display: flex; flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="header-top">
+          <div class="logo-box"><img src="min1.jpg" alt="Logo" /></div>
+          <div class="title-block">
+            <h1>KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+            <h3>OFFICIAL SEARCH REPORT (CERTIFIED ONLINE COPY)</h3>
+          </div>
+          <div class="logo-box"><img src="min2.png" alt="Logo" /></div>
+        </div>
+        <div class="date-line">Date: March 19, 2026</div>
+      </header>
+
+      <div class="section-label">Property Details</div>
+      <table class="prop-details">
+        <tr>
+          <td class="bold-lbl-left">File Number:</td>
+          <td class="val-cell-left"><strong>KN:LND:2026:5501</strong></td>
+
+          <td class="bold-lbl-right">File Title:</td>
+          <td class="val-cell-right"><strong>AL-HASSAN TRADING CO.</strong></td>
+        </tr>
+        <tr>
+          <td class="bold-lbl-left">District/LGA:</td>
+          <td class="val-cell-left"><strong>Tarauni/Nassarawa</strong></td>
+
+          <td class="bold-lbl-right">Plot No:</td>
+          <td class="val-cell-right"><strong>Plot 45A</strong></td>
+        </tr>
+        <tr>
+          <td class="bold-lbl-left">Plot Description:</td>
+          <td class="val-cell-left">
+            <strong>Commercial Layout at Zoo Road, Kano State.</strong>
+          </td>
+
+          <td class="bold-lbl-right">TPNO:</td>
+          <td class="val-cell-right"><strong>TP/KN/NSR/102</strong></td>
+        </tr>
+      </table>
+
+      <div class="section-label">Transaction History</div>
+      <table class="transaction-table">
+        <tbody>
+          <tr class="header-row">
+            <th class="c1">S/N</th>
+            <th class="c2">Grantor</th>
+            <th class="c3">Grantee</th>
+            <th class="c4">Instrument Type</th>
+            <th class="c5">Reg. Time<br />Reg. Date</th>
+            <th class="c6">Reg. No.</th>
+            <th class="c7">Size</th>
+            <th class="c8">Caveat</th>
+            <th class="c9">Comments</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>GOVT. OF KANO STATE</td>
+            <td>AL-HASSAN TRADING CO.</td>
+            <td>Statutory Right Of Occupancy</td>
+            <td><strong>10:45 AM</strong><br />Feb 12, 2012</td>
+            <td>KN/TR/404</td>
+            <td>1.2Ha</td>
+            <td>No</td>
+            <td>Records verified via KANGIS portal.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="content-pusher"></div>
+
+      <div class="signature-section">
+        <div class="sig-box">
+          <div class="sig-line"></div>
+          <div class="sig-text">Director of Deeds / Authorized Officer</div>
+          <div style="font-size: 10px">
+            Kano State Ministry of Land & Physical Planning
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="remarks-container">
+          <div class="section-label">Remarks</div>
+          <p class="timestamp-text">
+            Certified as a true reflection of the records held at KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING as at
+            Thursday, March 19, 2026 10:30 PM.
+          </p>
+        </div>
+        
+        <div class="branding-row">
+          <div class="disclaimer-box">
+            <!-- The disclaimer<br> -->
+            Generated by system-admin at 10:30 PM & 19/03/2026
+          </div>
+          
+          <div class="logo-group">
+            <img src="http://app.klaes.ng/storage/upload/logo/logo.png" alt="KLAES Logo" />
+            <img src="http://app.klaes.ng/assets/logo/las.jpg" alt="LAS Logo" />
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
