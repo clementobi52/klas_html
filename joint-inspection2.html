@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residential Layout Inspection Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Document Setup */
+        * { box-sizing: border-box; }
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .paper {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm 15mm;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            color: #000;
+        }
+
+        /* HEADER UI */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 85px;
+            height: auto;
+        }
+
+        .header-center {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-center h1 {
+            font-size: 13pt;
+            margin: 0;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .header-center h2 {
+            font-size: 11.5pt;
+            margin: 5px 0 0 0;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* RECIPIENT BLOCK */
+        .recipient-block {
+            margin-bottom: 20px;
+        }
+
+        .director-label {
+            font-weight: bold;
+            font-size: 11pt;
+            display: block;
+        }
+
+        .dept-title {
+            font-weight: bold;
+            font-size: 11pt;
+            margin-top: 15px;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        /* BODY CONTENT */
+        .report-content {
+            font-size: 10.5pt;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .paragraph {
+            margin-bottom: 15px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        /* DATA LISTING */
+        .technical-details {
+            margin: 20px 0;
+        }
+
+        .detail-item {
+            margin-bottom: 5px;
+        }
+        /* SIGNATURE */
+        .signature {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 11pt;
+            text-transform: uppercase;
+        }
+
+        /* FOOTER */
+        .timestamp {
+            position: absolute;
+            bottom: 20mm;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 7.5pt;
+            color: #666;
+        }
+
+        /* PRINT CONFIG */
+        @media print {
+            body { background: none; padding: 0; }
+            .paper { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="paper">
+    <header>
+        <img src="min1.jpg" alt="Coat of Arms" class="logo">
+        
+        <div class="header-center">
+            <h1>PHYSICAL PLANNING</h1>
+            <h1>DEPARTMENT</h1>
+            <h2>JOINT SITE INSPECTION REPORT</h2>
+        </div>
+
+        <img src="min2.png" alt="State Logo" class="logo">
+    </header>
+
+    <div class="recipient-block">
+        <span class="director-label">THE DIRECTOR</span>
+        <div class="dept-title">
+            PHYSICAL<br>
+            PLANNING
+        </div>
+    </div>
+
+    <div class="report-content">
+        <div class="paragraph">
+            Below Is A Joint Site Inspection Report Conducted On <span class="bold">25 February 2026</span> Of An Application Made For conversion from customary title to statutory Residential LAYOUT The Name Of <span class="bold">Alhaji Musbahu Bashir</span> Located At <span class="bold">Lafiya Road, Nassarawa Gra, Kano State</span> With Plot No <span class="bold">PIECE OF LAND</span>.
+        </div>
+
+        <div class="paragraph">
+            The site has been inspected and found to be <span class="bold">available on the ground</span> and bounded as follows: On the North: shehu close; On the East: kwairanga road; On the South: lafia road; On the West: shehu close.. The property is obtainable, accessible and conform with the existing land use as described below.
+        </div>
+
+        <div class="paragraph">
+            <span class="bold">Existing Site Area Measurements:</span> The following existing site measurements were observed during the joint site inspection: 188m x 82.17m x 22.88m <br>
+            <span class="bold">x 13.73m x 76.5m (10166m²/1.0166ha)</span>
+        </div>
+
+        <div class="paragraph">
+            The following existing measurements were observed during the joint site inspection.
+        </div>
+
+        <div class="technical-details">
+            <div class="detail-item"><span class="bold">Existing Road</span></div>
+            <div class="detail-item">reservation: <span class="bold">10m</span></div>
+            <div class="detail-item"><span class="bold">Layout plan Number: mlpp/pp/pL/2026/009</span></div>
+            <div class="detail-item"><span class="bold">Average plot size 50m x 50m (225m²)</span></div>
+            <div class="detail-item"><span class="bold">Total number of plots 100</span></div>
+            <div class="detail-item"><span class="bold">shared facilities (mosque, school, Refuse collection center, overhead Water Tank)</span></div>
+            <div class="detail-item"><span class="bold">Prevailing Land use:</span></div>
+            <div class="detail-item">&nbsp;&nbsp;&nbsp;Residential</div>
+            <div class="detail-item"><span class="bold">Applied land use: Residential</span></div>
+        </div>
+
+        <div class="paragraph">
+            Based on the analysis conducted to assess compliance with statutory requirements and planning standards, the proposed site is <span class="bold">OBTAINABLE</span> based on the existing dimensions listed above. The scheme consists of shared facilities and is in conformity with existing land use in the area. See dimensions of fragmented units as described by the recommended site plan in Table B above.
+        </div>
+    </div>
+    <div class="signature">
+            TPL. ZAKARI SULEIMAN SALISU
+        </div>
+
+    <div class="timestamp">
+        Generated on March 10, 2026 at 3:25 PM by RS Umar
+    </div>
+</div>
+
+</body>
+</html>
