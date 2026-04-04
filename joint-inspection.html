@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Physical Planning Report Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Document Setup */
+        * { box-sizing: border-box; }
+        body {
+            background-color: #525659; /* Browser PDF viewer style background */
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .paper {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm 15mm;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+            color: #000;
+        }
+
+        /* HEADER DESIGN UI */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .logo-placeholder {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #ccc; /* Placeholder for actual images */
+        }
+
+        .header-center {
+            text-align: center;
+            flex: 1;
+            padding-top: 10px;
+        }
+
+        .header-center h1 {
+            font-size: 13.5pt;
+            margin: 0;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .header-center h2 {
+            font-size: 11pt;
+            margin: 8px 0 0 0;
+            text-decoration: underline;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        /* RECIPIENT BLOCK */
+        .recipient-block {
+            margin-top: 10px;
+            margin-bottom: 35px;
+        }
+
+        .recipient-block .director {
+            font-weight: bold;
+            font-size: 11pt;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .recipient-block .dept-label {
+            font-weight: bold;
+            font-size: 11pt;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        /* BODY CONTENT */
+        .content {
+            font-size: 10.5pt;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .section {
+            margin-bottom: 18px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .data-table {
+            margin: 25px 0;
+        }
+
+        .data-row {
+            margin-bottom: 6px;
+        }
+
+        /* SIGNATURE */
+        .signature {
+            margin-top: 60px;
+            font-weight: bold;
+            font-size: 11pt;
+            text-transform: uppercase;
+        }
+
+        /* FOOTER */
+        .footer-stamp {
+            position: absolute;
+            width: calc(100% - 30mm);
+            text-align: center;
+            font-size: 8pt;
+            color: #444;
+            border-top: 1px solid #eee;
+            padding-top: 50px;
+        }
+
+        /* PRINT SETTINGS */
+        @media print {
+            body { background: none; padding: 0; }
+            .paper { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="paper">
+    <header>
+        <div class="logo-placeholder">
+            <img src="min1.jpg" alt="Left Logo" style="max-width:100%">
+        </div>
+        
+        <div class="header-center">
+            <h1>PHYSICAL PLANNING</h1>
+            <h1>DEPARTMENT</h1>
+            <h2>JOINT SITE INSPECTION REPORT</h2>
+        </div>
+
+        <div class="logo-placeholder">
+            <img src="min2.png" alt="Right Logo" style="max-width:100%">
+        </div>
+    </header>
+
+    <div class="recipient-block">
+        <span class="director">THE DIRECTOR</span>
+        <div class="dept-label">
+            PHYSICAL<br>
+            PLANNING
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section">
+            Below Is A Joint Site Inspection Report Conducted On <span class="bold">25 February 2026</span> Of An Application Made For conversion from customary title to statutory <span class="bold">Agricultural mixed farming</span> In The Name Of <span class="bold">Alhaji Musbahu Bashir</span> Located At <span class="bold">Lafiya Road, Nassarawa Gra, Kano State</span> With Plot No <span class="bold">PIECE OF LAND</span>.
+        </div>
+
+        <div class="section">
+            The site has been inspected and found to be <span class="bold">available on the ground</span> and bounded as follows: On the North: shehu close; On the East: kwairanga road; On the South: lafia road; On the West: shehu close.. The property is obtainable, accessible and conform with the existing land use as described below.
+        </div>
+
+        <div class="section">
+            <span class="bold">Existing Site Area Measurements:</span> The following existing site measurements were 
+            <br>
+            observed during the joint site inspection: 188m x 82.17m x 22.88m <br>
+            <span class="bold">x 13.73m x 76.5m (10166m²/1.0166ha)</span>
+        </div>
+
+        <div class="section">
+            The following existing measurements were observed during<br>
+            the joint site inspection:
+        </div>
+
+        <div class="data-table">
+            <div class="data-row"><span class="bold">Existing Road 10m</span></div>
+            <div class="data-row"><span class="bold">reservation: 10m</span></div>
+            <div class="data-row"><span class="bold">Prevailing Land use:</span> Residential</div>
+            <div class="data-row"><span class="bold">Applied land use: Residential</span></div>
+        </div>
+
+        <div class="section">
+            Based on the analysis conducted to assess compliance with statutory requirements and planning standards, the proposed site is <span class="bold">OBTAINABLE</span>. The site is in conformity with existing land use in the area.
+        </div>
+
+        <div class="signature">
+            TPL. ZAKARI SULEIMAN SALISU
+        </div>
+    </div>
+
+    <div class="footer-stamp">
+        Generated on March 10, 2026 at 3:25 PM by RS Umar
+    </div>
+</div>
+
+</body>
+</html>
