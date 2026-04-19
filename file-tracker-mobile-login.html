@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#fefce8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>KLAES File Tracker - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #fefce8 0%, #fef3c7 50%, #fde68a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background blobs */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.4;
+      z-index: 0;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .blob-1 {
+      width: 300px;
+      height: 300px;
+      background: #a16207;
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .blob-2 {
+      width: 400px;
+      height: 400px;
+      background: #f59e0b;
+      bottom: -150px;
+      right: -150px;
+      animation-delay: 5s;
+    }
+
+    .blob-3 {
+      width: 250px;
+      height: 250px;
+      background: #78350f;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: 10s;
+      opacity: 0.2;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+
+    /* Main container */
+    .login-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* Glassmorphic card */
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 48px;
+      padding: 40px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    /* Logo section */
+    .logo-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #a16207, #78350f);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 10px 20px -5px rgba(161, 98, 7, 0.3);
+    }
+
+    .logo-icon i {
+      font-size: 36px;
+      color: white;
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a16207, #78350f);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .logo-subtitle {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Welcome text */
+    .welcome-text {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .welcome-text h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .welcome-text p {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    /* Form group */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4b5563;
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i:first-child {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 14px 16px 14px 48px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 28px;
+      background: white;
+      outline: none;
+      transition: all 0.2s;
+      color: #1f2937;
+    }
+
+    .input-wrapper input:focus {
+      border-color: #a16207;
+      box-shadow: 0 0 0 3px rgba(161, 98, 7, 0.1);
+    }
+
+    .input-wrapper input:focus + i:first-child {
+      color: #a16207;
+    }
+
+    /* Password toggle */
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #9ca3af;
+      transition: color 0.2s;
+      z-index: 2;
+    }
+
+    .password-toggle:hover {
+      color: #a16207;
+    }
+
+    /* Options row */
+    .options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      font-size: 12px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .remember-me input {
+      width: 16px;
+      height: 16px;
+      accent-color: #a16207;
+      cursor: pointer;
+    }
+
+    .remember-me span {
+      color: #6b7280;
+    }
+
+    .forgot-link {
+      color: #a16207;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+
+    .forgot-link:hover {
+      color: #78350f;
+      text-decoration: underline;
+    }
+
+    /* Login button */
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #a16207, #78350f);
+      border: none;
+      border-radius: 32px;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(161, 98, 7, 0.3);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(161, 98, 7, 0.4);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+    }
+
+    .footer p {
+      font-size: 10px;
+      color: #9ca3af;
+    }
+
+    /* Error message */
+    .error-message {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      border-radius: 20px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: #dc2626;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-message i {
+      font-size: 14px;
+    }
+
+    /* Loading state */
+    .login-btn.loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .login-btn.loading i {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 32px 24px;
+      }
+      .logo-icon {
+        width: 60px;
+        height: 60px;
+      }
+      .logo-icon i {
+        font-size: 30px;
+      }
+      .logo-text {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="logo-section">
+        <div class="logo-icon">
+          <i class="fas fa-folder-tree"></i>
+        </div>
+        <div class="logo-text">KLAES</div>
+        <div class="logo-subtitle">File Tracking System</div>
+      </div>
+
+      <!-- Welcome -->
+      <div class="welcome-text">
+        <h2>Welcome Back</h2>
+        <p>Sign in to access your file tracking dashboard</p>
+      </div>
+
+      <!-- Error Message (hidden by default) -->
+      <div id="errorMessage" class="error-message" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorText">Invalid email or password</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="return handleLogin(event)">
+        <div class="form-group">
+          <label class="input-label">Email Address</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Enter your email" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="input-label">Password</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <i class="fas fa-eye-slash password-toggle" id="togglePassword"></i>
+          </div>
+        </div>
+
+        <div class="options-row">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe">
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-link" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">
+          <i class="fas fa-arrow-right-to-bracket"></i>
+          Sign In
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2026 KLAES - Land Administration Enterprise System</p>
+        <p style="margin-top: 4px;">Version 1.0.0</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('fa-eye-slash');
+      this.classList.toggle('fa-eye');
+    });
+
+    // Mock authentication - Replace with your actual API call
+    function authenticateUser(email, password) {
+      // This is a mock function - Replace with your actual authentication logic
+      return new Promise((resolve, reject) => {
+        // Simulate API call delay
+        setTimeout(() => {
+          // For demo purposes only - Replace with your actual validation
+          if (email && password && password.length >= 4) {
+            resolve({
+              success: true,
+              user: {
+                id: Math.random().toString(36).substr(2, 9),
+                name: email.split('@')[0],
+                email: email,
+                role: 'user'
+              }
+            });
+          } else {
+            reject({ message: 'Invalid email or password' });
+          }
+        }, 1000);
+      });
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      errorText.textContent = message;
+      errorDiv.style.display = 'flex';
+      setTimeout(() => {
+        errorDiv.style.opacity = '0';
+        setTimeout(() => {
+          errorDiv.style.display = 'none';
+          errorDiv.style.opacity = '1';
+        }, 300);
+      }, 3000);
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const loginBtn = document.getElementById('loginBtn');
+      
+      // Validate inputs
+      if (!email) {
+        showError('Please enter your email address');
+        return false;
+      }
+      
+      if (!password) {
+        showError('Please enter your password');
+        return false;
+      }
+      
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address');
+        return false;
+      }
+      
+      // Show loading state
+      loginBtn.classList.add('loading');
+      loginBtn.innerHTML = '<i class="fas fa-spinner"></i> Signing in...';
+      
+      try {
+        // Call authentication function - Replace with your actual API endpoint
+        const result = await authenticateUser(email, password);
+        
+        if (result.success) {
+          // Store user session
+          const sessionData = {
+            id: result.user.id,
+            name: result.user.name,
+            email: result.user.email,
+            role: result.user.role,
+            loggedInAt: new Date().toISOString()
+          };
+          
+          if (rememberMe) {
+            localStorage.setItem('klaes_session', JSON.stringify(sessionData));
+          } else {
+            sessionStorage.setItem('klaes_session', JSON.stringify(sessionData));
+          }
+          
+          // Success animation
+          loginBtn.innerHTML = '<i class="fas fa-check-circle"></i> Success!';
+          loginBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+          
+          setTimeout(() => {
+            // Redirect to dashboard or home page
+            window.location.href = 'dashboard.html';
+          }, 800);
+        } else {
+          throw new Error(result.message || 'Authentication failed');
+        }
+      } catch (error) {
+        loginBtn.classList.remove('loading');
+        loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+        showError(error.message || 'Invalid email or password. Please try again.');
+      }
+      
+      return false;
+    }
+    
+    function showForgotPassword() {
+      const email = document.getElementById('email').value.trim();
+      if (email && email.includes('@')) {
+        alert(`Password reset link has been sent to ${email}\n\nPlease check your inbox.`);
+      } else {
+        alert('Please Contact the Admin');
+      }
+    }
+    
+    // Check if already logged in
+    const existingSession = localStorage.getItem('klaes_session') || sessionStorage.getItem('klaes_session');
+    if (existingSession) {
+      try {
+        const session = JSON.parse(existingSession);
+        if (session.loggedInAt) {
+          const loginTime = new Date(session.loggedInAt);
+          const now = new Date();
+          const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+          // Session expires after 24 hours
+          if (hoursDiff < 24) {
+            // Auto redirect to dashboard if session exists and is valid
+            // window.location.href = 'dashboard.html';
+            console.log('Valid session exists, would redirect to dashboard');
+          } else {
+            // Clear expired session
+            localStorage.removeItem('klaes_session');
+            sessionStorage.removeItem('klaes_session');
+          }
+        }
+      } catch(e) {
+        // Invalid session data, ignore
+      }
+    }
+    
+    // Add enter key support
+    passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        handleLogin(e);
+      }
+    });
+    
+    // Clear error when user starts typing
+    const emailInput = document.getElementById('email');
+    emailInput.addEventListener('input', function() {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.style.display = 'none';
+    });
+    passwordInput.addEventListener('input', function() {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
