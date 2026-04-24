@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KANGIS - Official Search Report (Pay-Per-Search)</title>
+    <style>
+      /* Screen Layout */
+      body { background-color: #525659; font-family: Arial, sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; }
+      
+      .page { 
+        background-color: #fff; 
+        width: 11in; 
+        min-height: 8.5in; /* Ensures at least one full page height */
+        padding: 0.2in 0.4in; 
+        position: relative; 
+        box-sizing: border-box; 
+        display: flex; 
+        flex-direction: column; /* This allows flex-grow to work vertically */
+      }
+      
+      /* Pushes everything below it to the bottom */
+      .main-content { flex-grow: 1; } 
+
+      .watermark-img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; opacity: 0.06; pointer-events: none; z-index: 0; }
+      
+      header { width: 100%; border-bottom: 2px solid #000; padding-bottom: 2px; margin-bottom: 6px; }
+      .header-top { display: flex; justify-content: space-between; align-items: center; }
+      .logo-box img { width: 75px; height: auto; }
+      .title-block { text-align: center; flex: 1; }
+      .title-block h1 { font-size: 19px; color: #007a33; margin: 0; font-weight: bold; }
+      .title-block h2 { font-size: 15px; margin: 2px 0; font-weight: bold; }
+      .title-block h3 { font-size: 13px; margin: 0; text-decoration: underline; font-weight: bold; }
+      .date-line { text-align: right; font-size: 13px; font-weight: bold; margin-top: 2px; }
+
+      .section-label { border: 1px solid #000; display: inline-block; padding: 1px 6px; font-weight: bold; font-size: 11px; margin: 3px 0; background: #fff; }
+
+      .prop-details { font-size: 12px; margin-bottom: 5px; border-collapse: collapse; width: 100%; table-layout: fixed; }
+      .prop-details td { padding: 1px 0; vertical-align: top; }
+      .bold-lbl-left { font-weight: bold; width: 125px; }
+      .bold-lbl-right { font-weight: bold; width: 110px; padding-left: 35px; }
+
+      .transaction-table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; margin-bottom: 6px; }
+      .transaction-table th, .transaction-table td { padding: 4px 4px; vertical-align: top; border-bottom: 0.5px solid #eee; word-wrap: break-word; }
+      .transaction-table .header-row th { font-weight: bold; border-bottom: 1.5px solid #000; text-align: left; }
+
+      /* FOOTER WRAPPER STYLING */
+      .footer-wrapper { margin-top: auto; width: 100%; }
+
+      .remarks-container { border-top: 2px solid #000; width: 100%; padding-top: 2px; margin-top: 10px; }
+      .timestamp-text { font-size: 9px; font-weight: bold; margin: 3px 0; }
+      
+      .signature-section { display: table; width: 100%; margin-top: 8px; page-break-inside: avoid; }
+      .sig-row { display: table-row; }
+      .sig-box { display: table-cell; width: 33.33%; font-size: 10.5px; line-height: 1.5; padding-right: 20px; vertical-align: top; }
+      .sig-box > div { margin-bottom: 4px; }
+
+      .disclaimer-nb { font-size: 9.5px; font-style: italic; font-weight: bold; text-align: center; margin: 8px 0 4px 0; color: #333; }
+
+      .footer-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 4px; }
+      .gen-text { font-size: 9px; color: #333; }
+      .logo-group img { height: 16px; margin-left: 10px; }
+
+      @media print {
+        @page { size: landscape; margin: 0.2in; }
+        body { background: none; padding: 0; }
+        .page { box-shadow: none; width: 100%; padding: 0.1in 0.2in; min-height: 98vh; display: flex; flex-direction: column; }
+        /* Ensures the footer content doesn't split across pages */
+        .footer-wrapper { page-break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <img class="watermark-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/250px-Coat_of_arms_of_Nigeria.svg.png" />
+      
+      <div class="main-content">
+        <header>
+          <div class="header-top">
+            <div class="logo-box"><img src="min1.jpg" /></div>
+            <div class="title-block">
+              <h1>KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+              <h2>LEGAL SEARCH REPORT</h2>
+              <h3>ON-PREMISE PAY-PER-SEARCH</h3>
+            </div>
+            <div class="logo-box"><img src="min2.png" /></div>
+          </div>
+          <div class="date-line">Date: March 19, 2026</div>
+        </header>
+
+        <div class="section-label">Property Details</div>
+        <table class="prop-details">
+          <tr>
+            <td class="bold-lbl-left">File Number:</td><td><strong>KN:LND:2026:5501</strong></td>
+            <td class="bold-lbl-right">District/LGA:</td><td><strong>Tarauni/Nassarawa</strong></td>
+          </tr>
+          <tr>
+            <td class="bold-lbl-left">File Title:</td><td><strong>AL-HASSAN TRADING CO.</strong></td>
+            <td class="bold-lbl-right">Plot No:</td><td><strong>Plot 45A</strong></td>
+          </tr>
+          <tr>
+            <td class="bold-lbl-left">Land Use:</td><td><strong>-</strong></td>
+            <td class="bold-lbl-right">Size:</td><td><strong>-</strong></td>
+          </tr>
+          <tr>
+            <td class="bold-lbl-left">Plot Description:</td><td><strong>Commercial Layout at Zoo Road, Kano State.</strong></td>
+            <td class="bold-lbl-right">TP No:</td><td><strong>PPS-8829-00X-2026</strong></td>
+          </tr>
+        </table>
+
+        <div class="section-label">File History</div>
+        <table class="transaction-table">
+          <tr class="header-row">
+            <th style="width: 3%">S/N</th>
+            <th style="width: 15%">Party 1</th>
+            <th style="width: 15%">Party 2</th>
+            <th style="width: 15%">Instrument Type</th>
+            <th style="width: 12%">Reg. Time/Date</th>
+            <th style="width: 10%">Particulars</th>
+            <th style="width: 5%">Caveat</th>
+            <th>Comments</th>
+          </tr>
+          <tr><td>1</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>2</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>3</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>4</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+        <tr><td>1</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>2</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>3</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>4</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+        <tr><td>1</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>2</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>3</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>4</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+        <tr><td>1</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>2</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+          <tr><td>3</td><td>GOVT. OF KANO STATE</td><td>AL-HASSAN TRADING CO.</td><td>Statutory Right Of Occupancy</td><td><strong>10:45 AM</strong><br>Feb 12, 2012</td><td>KN/TR/404</td><td>No</td><td>Validated search record.</td></tr>
+        
+        
+        </table>
+      </div>
+
+      <div class="footer-wrapper">
+        <div class="remarks-container">
+          <div class="section-label">Remarks</div>
+          <p class="timestamp-text">
+            This is a single-use paid search report generated from KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING as at Thursday, March 19, 2026 10:30 PM.
+          </p>
+        </div>
+
+        <div class="signature-section">
+          <div class="sig-row">
+            <div class="sig-box">
+              <div>Name:...............................................</div>
+              <div>Rank:...............................................</div>
+              <div>Sign:............................ Date:................</div>
+            </div>
+            <div class="sig-box">
+              <div>Verified by:.......................................</div>
+              <div>Rank:...............................................</div>
+              <div>Sign:............................ Date:................</div>
+            </div>
+            <div class="sig-box">
+              <div>Sign:............................ Date:................</div>
+              <div style="font-weight:bold">Director Lands</div>
+              <div style="font-size:9px">(for Permanent Secretary/Hon. Commissioner)</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="disclaimer-nb">
+          N.B: This search report is deduced based on the available records from the file and does not represent any document in possession of any body.
+        </p>
+
+        <div class="footer-bottom">
+          <div class="gen-text">Generated via Pay-Per-Search at 10:30 PM & 19/03/2026</div>
+          <div class="logo-group">
+            <img src="http://app.klaes.ng/storage/upload/logo/logo.png" alt="KLAES" />
+            <img src="http://app.klaes.ng/assets/logo/las.jpg" alt="LAS" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
