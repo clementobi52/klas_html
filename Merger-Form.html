@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merger Form - Enhanced with Total & System Date</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f5f7fa;
+            --border: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .card {
+            background: #fff;
+            width: 100%;
+            max-width: 900px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .span-full { grid-column: 1 / -1; }
+
+        .section-box {
+            background: #fdfdfd;
+            padding: 20px 15px 15px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .section-label {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: #fff;
+            padding: 0 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .total-box {
+            background-color: #f1f8ff;
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+        }
+
+        .add-more {
+            float: right;
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: -5px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4a5568;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 0.95rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .readonly { background-color: #f1f3f5; color: #7f8c8d; font-weight: bold; cursor: not-allowed; }
+
+        .footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 60px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover { background-color: #1a252f; }
+
+        @media (max-width: 768px) {
+            .grid-container { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body onload="setSystemDate()">
+
+<div class="card">
+    <h2>Merger</h2>
+    
+    <form>
+        <div class="grid-container">
+            <div class="form-group">
+                <label>Temp File No (Sys Gen)</label>
+                <input type="text" class="readonly" value="TMP-2026-X99" readonly>
+            </div>
+            <div class="form-group">
+                <label>No of Plots to Merge</label>
+                <input type="number" id="plotCount" placeholder="0" oninput="generatePlotSizes()">
+            </div>
+            <div></div>
+
+            <div class="form-group span-full section-box">
+                <span class="section-label">Individual Plot Sizes (Sqm)</span>
+                
+                <div class="total-box">
+                    <label style="margin-bottom: 0;">Total Merged Area:</label>
+                    <input type="text" id="totalSize" class="readonly" value="0.00 Sqm" readonly style="width: 150px; text-align: right; background: white;">
+                </div>
+
+                <div id="plotSizesContainer" class="grid-container" style="margin-top: 5px;">
+                    <p style="grid-column: 1/-1; color: #94a3b8; font-size: 0.85rem; font-style: italic; margin: 0;">
+                        Enter the number of plots above to list their sizes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group span-full section-box">
+                <span class="section-label">File Details</span>
+                <a href="#" class="add-more">+ Add More</a>
+                <div class="grid-container" style="margin-top: 5px;">
+                    <div class="form-group">
+                        <label>File No</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>File Title</label>
+                        <input type="text">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group span-full section-box">
+                <span class="section-label">Location</span>
+                <div class="grid-container" style="margin-top: 5px;">
+                    <div class="form-group">
+                        <label>House No</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>Plot No</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>Street Name</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>District</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>LGA</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        <input type="text">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Generated By</label>
+                <input type="text" class="readonly" value="Admin_User" readonly>
+            </div>
+            <div class="form-group">
+                <label>Date (System Generated)</label>
+                <input type="date" id="sysDate" class="readonly" readonly>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button type="submit" class="submit-btn">SUBMIT</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Set system date on page load
+    function setSystemDate() {
+        const dateInput = document.getElementById('sysDate');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+
+    function generatePlotSizes() {
+        const container = document.getElementById('plotSizesContainer');
+        const count = document.getElementById('plotCount').value;
+        
+        container.innerHTML = '';
+
+        if (count > 0) {
+            for (let i = 1; i <= count; i++) {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.innerHTML = `
+                    <label>Plot ${i} Size</label>
+                    <input type="number" class="plot-input" step="0.01" placeholder="0.00" oninput="calculateTotal()">
+                `;
+                container.appendChild(div);
+            }
+        } else {
+            container.innerHTML = '<p style="grid-column: 1/-1; color: #94a3b8; font-size: 0.85rem; font-style: italic; margin: 0;">Enter the number of plots above to list their sizes.</p>';
+            document.getElementById('totalSize').value = "0.00 Sqm";
+        }
+    }
+
+    function calculateTotal() {
+        const inputs = document.querySelectorAll('.plot-input');
+        let total = 0;
+        
+        inputs.forEach(input => {
+            const val = parseFloat(input.value);
+            if (!isNaN(val)) {
+                total += val;
+            }
+        });
+        
+        document.getElementById('totalSize').value = total.toFixed(2) + " Sqm";
+    }
+</script>
+
+</body>
+</html>
