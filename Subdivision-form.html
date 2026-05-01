@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subdivision Form - System Generated Date</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f4f7f6;
+            --border: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .form-container {
+            background: #fff;
+            width: 100%;
+            max-width: 850px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            margin: 0 0 25px 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+            border-left: 5px solid var(--accent);
+            padding-left: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .span-2 { grid-column: span 2; }
+        .span-full { grid-column: 1 / -1; }
+
+        .section-box {
+            background: #fdfdfd;
+            padding: 20px 15px 15px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .section-label {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: #fff;
+            padding: 0 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #546e7a;
+        }
+
+        input {
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .total-box {
+            background-color: #f1f8ff;
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .readonly { background: #f9f9f9; color: #7f8c8d; font-weight: bold; cursor: not-allowed; }
+
+        .footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .grid-layout { grid-template-columns: 1fr 1fr; }
+            .span-2 { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body onload="setSystemDate()">
+
+<div class="form-container">
+    <h2>Sub division</h2>
+    
+    <form>
+        <div class="grid-layout">
+            <div class="form-group">
+                <label>File No</label>
+                <input type="text" placeholder="KNML-001">
+            </div>
+            <div class="form-group span-2">
+                <label>File Title</label>
+                <input type="text" placeholder="Project Name">
+            </div>
+
+            <div class="form-group">
+                <label>No. of Plots (Subdivision)</label>
+                <input type="number" id="numPlots" min="0" max="50" oninput="generateFragments()" placeholder="Enter quantity">
+            </div>
+            <div class="form-group">
+                <label>Plot No</label>
+                <input type="text">
+            </div>
+            <div class="form-group">
+                <label>House No</label>
+                <input type="text">
+            </div>
+
+            <div class="form-group span-full section-box">
+                <span class="section-label">Size of Fragments (Sqm)</span>
+                
+                <div class="total-box">
+                    <label style="margin-bottom: 0;">Total Fragment Area:</label>
+                    <input type="text" id="totalSize" class="readonly" value="0.00 Sqm" readonly style="width: 150px; text-align: right;">
+                </div>
+
+                <div id="fragmentsContainer" class="grid-layout">
+                    <p style="grid-column: 1/-1; color: #999; font-size: 0.85rem; font-style: italic; margin: 0;">
+                        Enter "No. of Plots" above to define fragment sizes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Street Name</label>
+                <input type="text">
+            </div>
+            <div class="form-group">
+                <label>District</label>
+                <input type="text">
+            </div>
+            <div class="form-group">
+                <label>LGA</label>
+                <input type="text">
+            </div>
+
+            <div class="form-group">
+                <label>State</label>
+                <input type="text">
+            </div>
+            <div class="form-group">
+                <label>Generated By</label>
+                <input type="text" class="readonly" value="Admin" readonly>
+            </div>
+            <div class="form-group">
+                <label>Date (System Generated)</label>
+                <input type="date" id="sysDate" class="readonly" readonly>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button type="submit" class="submit-btn">SUBMIT</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Logic for system generated date
+    function setSystemDate() {
+        const dateInput = document.getElementById('sysDate');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+
+    function generateFragments() {
+        const container = document.getElementById('fragmentsContainer');
+        const num = document.getElementById('numPlots').value;
+        
+        container.innerHTML = ''; 
+
+        if (num > 0) {
+            for (let i = 1; i <= num; i++) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                
+                group.innerHTML = `
+                    <label>Plot ${i} Size</label>
+                    <input type="number" class="fragment-input" step="0.01" placeholder="0.00" oninput="calculateTotal()">
+                `;
+                container.appendChild(group);
+            }
+        } else {
+            container.innerHTML = '<p style="grid-column: 1/-1; color: #999; font-size: 0.85rem; font-style: italic; margin: 0;">Enter "No. of Plots" above to define fragment sizes.</p>';
+            document.getElementById('totalSize').value = "0.00 Sqm";
+        }
+    }
+
+    function calculateTotal() {
+        const inputs = document.querySelectorAll('.fragment-input');
+        let total = 0;
+        
+        inputs.forEach(input => {
+            const val = parseFloat(input.value);
+            if (!isNaN(val)) {
+                total += val;
+            }
+        });
+        
+        document.getElementById('totalSize').value = total.toFixed(2) + " Sqm";
+    }
+</script>
+
+</body>
+</html>
