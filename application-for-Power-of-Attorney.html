@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kano State Land and Physical Planning Minutes</title>
+    <style>
+        :root {
+            --page-color: #fdf6e3; 
+            --accent-red: #cc0000;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            background-color: #525659;
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            display: flex;
+            justify-content: center;
+        }
+
+        .a4-page {
+            background-color: var(--page-color);
+            width: 210mm;
+            height: 297mm;
+            display: flex;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden; /* Strict one-page constraint */
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 10px 50px 10px 95px; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-block { height: 110px; } /* Slightly reduced to save space */
+
+        .addressee {
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 10px 0 8px 0;
+        }
+
+        .body-paragraph {
+            text-align: justify;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        /* --- STAGE 1: DEEDS SECTION --- */
+        .deeds-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .left-col { width: 55%; }
+        .right-col { width: 35%; }
+
+        .input-group {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 6px;
+        }
+
+        .label { font-weight: bold; white-space: nowrap; margin-right: 5px; }
+        .line { border-bottom: 1px solid black; flex-grow: 1; min-height: 1.2em; font-family: cursive; font-size: 0.9em; }
+
+        /* --- STAGE 2: PERM SEC RECOMMENDATION --- */
+        .recommendation-block {
+            position: relative;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+
+        .perm-sec-sig {
+            float: right;
+            text-align: center;
+            width: 200px;
+        }
+
+        /* --- STAGE 3: COMMISSIONER APPROVAL --- */
+        .approval-block {
+            border-top: 1px solid black;
+            padding-top: 8px;
+            clear: both;
+        }
+
+        .final-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 10px;
+        }
+
+        .red-date {
+            color: var(--accent-red);
+            font-weight: bold;
+            font-size: 1.2em;
+            border-bottom: 1px solid black;
+            padding: 0 10px;
+        }
+
+        .commissioner-stamp {
+            text-align: center;
+            width: 250px;
+        }
+
+        .bold-caps { font-weight: bold; text-transform: uppercase; }
+
+        @media print {
+            body { background: none; }
+            .a4-page { box-shadow: none; }
+            @page { size: A4; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="a4-page">
+        <div class="main-container">
+            <div class="header-block"></div>
+
+            <div class="addressee">THE PERMANENT SECRETARY</div>
+
+            <div class="body-paragraph">
+                You may wish to refers to page 25 which is an application for power of attorney from the solicitors of the title holder 
+                <span class="bold-caps">ABUBAKAR YUSUF MAITAMA SULE</span> and his others heirs (DONORS) covered by the certificate of occupancy 
+                number: <span class="bold-caps">LKN/RES/RC/84/205</span> TO <span class="bold-caps">ABUBAKAR YUSUF MAITAMASULE</span> (DONEE) by his other heirs.
+            </div>
+
+            <div class="body-paragraph">You may wish to note that all necessary charges have been paid as per page 26 herein.</div>
+
+            <div class="body-paragraph">
+                In view of the forgoing you may kindly wish to recommended the application for power of attorney from 
+                <span class="bold-caps">ABUBAKAR YUSUF MAITAMA SULE</span> and his others heirs to <span class="bold-caps">ABUBAKAR YUSUF MAITAMA SULE</span> for the 
+                approval of THE HONORABLE COMMISSIONER.
+            </div>
+
+            <div class="deeds-section">
+                <div class="left-col">
+                    <div class="input-group"><span class="label">Name:</span><span class="line">Habibu Ibrahim Gezawa</span></div>
+                    <div class="input-group" style="margin-top: 30px;"><span class="label">Rank:</span><span class="line">Deputy Director Deeds</span></div>
+                    <div class="input-group"><span class="label">Sign:</span><span class="line"></span></div>
+                    <div class="input-group"><span class="label">Date:</span><span class="line">14-09-2023</span></div>
+                </div>
+                <div class="right-col">
+                    <div class="input-group"><span class="label">counter sign:</span><span class="line"></span></div>
+                    <div style="margin-top: 15px; font-weight: bold;">Director Deeds</div>
+                    <div class="input-group" style="margin-top: 5px;"><span class="label">Date:</span><span class="line">14-09-2023</span></div>
+                </div>
+            </div>
+
+            <div class="recommendation-block">
+                <div class="addressee">THE HONORABLE COMMISSIONER</div>
+                <div class="body-paragraph">The application is hereby recommended for your kind approval, please.</div>
+                
+                <div class="input-group" style="width: 200px; float: left;">
+                    <span class="label" style="margin-top: 25px;">Date:</span><span class="line">15/12/2023</span>
+                </div>
+                
+                <div class="perm-sec-sig">
+                    <div style="border-bottom: 1px solid black; height: 35px;"></div>
+                    <div class="label">Permanent Secretary</div>
+                </div>
+            </div>
+
+            <div class="approval-block">
+                <div class="addressee">PERMANENT SECRETARY</div>
+                <div class="body-paragraph">The application is hereby APPROVED/<s>NOT APPROVED</s>.</div>
+                
+                <div class="final-row">
+                    <div class="input-group" style="width: 250px;">
+                        <span class="label" style="margin-top: 30px;">Date:</span><span class="red-date">23/08/2024</span>
+                    </div>
+                    
+                    <div class="commissioner-stamp">
+                        <div style="border-bottom: 1px solid black; height: 45px;"></div>
+                        <div class="label" style="margin-top: 5px;">THE HONORABLE COMMISSIONER</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
