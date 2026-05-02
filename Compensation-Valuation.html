@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compensation Valuation - Landscape</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: "Times New Roman", Times, serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px; /* Wider for landscape feel */
+            background-color: white;
+            padding: 30px;
+            border: 2px solid #00008B;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            text-decoration: underline;
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        /* Header Information */
+        .header-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .underline-field {
+            border-bottom: 1px solid black;
+            display: inline-block;
+            min-width: 200px;
+            padding-left: 5px;
+        }
+
+        /* Location Bar */
+        .location-banner {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            border-top: 2px solid black;
+            border-bottom: 2px solid black;
+            padding: 12px 0;
+            margin-bottom: 0;
+        }
+
+        /* Table Design */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Ensures even distribution in landscape */
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #ffffff;
+            height: 50px;
+        }
+
+        tr {
+            height: 45px;
+        }
+
+        /* Footer Signatures */
+        .footer-signatures {
+            margin-top: 50px;
+        }
+
+        .sig-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 60px;
+        }
+
+        .sig-line {
+            width: 250px;
+            border-top: 1px solid black;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+
+        .perm-sec-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* PRINT SETTINGS */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0.5cm;
+            }
+            
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .container {
+                width: 100%;
+                max-width: none;
+                box-shadow: none;
+                border: 2px solid #00008B;
+            }
+
+            /* Ensure colors print (optional) */
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>COMPENSATION VALUATION</h1>
+
+    <div class="header-meta">
+        <div>
+            To: <span class="underline-field">The Honourable Commissioner</span><br>
+            <span style="margin-left: 25px;"></span><span class="underline-field">Ministry of Land and Physical</span><br>
+            <span style="margin-left: 25px;"></span><span class="underline-field">Planning, Kano State</span>
+        </div>
+        <div style="text-align: right;">
+            Our Ref: <span class="underline-field">LS/VAL/FGE/5KM</span><br>
+            Your Ref: <span class="underline-field">&nbsp;</span><br>
+            Date: <span class="underline-field">19th November, 2025</span>
+        </div>
+    </div>
+
+    <div class="location-banner">
+        LOCATION: <span style="text-decoration: underline;">COMPENSATION OF 5KM ROAD PROJECT, FAGGE LGA, KANO</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 4%;">S/N</th>
+                <th style="width: 15%;">Name of Owner</th>
+                <th style="width: 12%;">Type of Building</th>
+                <th style="width: 8%;">No. of Building</th>
+                <th style="width: 10%;">Area Covered in M<sup>2</sup></th>
+                <th style="width: 10%;">Rate of Cost N</th>
+                <th style="width: 12%;">Amount of Compensation N</th>
+                <th style="width: 10%;">Account Number</th>
+                <th style="width: 10%;">Phone Number</th>
+                <th style="width: 9%;">Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="footer-signatures">
+        <div class="sig-row">
+            <div class="sig-line">Head of Valuation</div>
+            <div class="sig-line" style="text-align: right;">Director Deeds</div>
+        </div>
+        <div class="perm-sec-wrap">
+            <div class="sig-line" style="text-align: center; width: 350px;">Permanent Secretary</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
