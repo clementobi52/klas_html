@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .entry-card {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #00008B;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+        }
+
+        .entry-card h2 {
+            color: #00008B;
+            margin-top: 0;
+            border-bottom: 2px solid #00008B;
+            padding-bottom: 10px;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input, select, textarea {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00008B;
+            box-shadow: 0 0 5px rgba(0,0,139,0.2);
+        }
+
+        .btn-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-save {
+            background-color: #00008B;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-save:hover {
+            background-color: #0000cd;
+        }
+
+        .btn-clear {
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 10px 25px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="entry-card">
+    <h2>New Entry: Compensation Record</h2>
+    <form id="valuationForm">
+        <div class="form-grid">
+            <!-- Basic Info -->
+            <div class="form-group full-width">
+                <label for="ownerName">NAME OF OWNER</label>
+                <input type="text" id="ownerName" placeholder="Enter full name" required>
+            </div>
+
+            <!-- Building Details -->
+            <div class="form-group">
+                <label for="buildingType">TYPE OF BUILDING</label>
+                <input type="text" id="buildingType" placeholder="e.g. Bungalow, Shop">
+            </div>
+            <div class="form-group">
+                <label for="buildingNo">NO. OF BUILDING(S)</label>
+                <input type="number" id="buildingNo" min="1" value="1">
+            </div>
+
+            <!-- Measurements and Rates -->
+            <div class="form-group">
+                <label for="area">AREA COVERED (M²)</label>
+                <input type="number" step="0.01" id="area" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="rate">RATE OF COST (₦)</label>
+                <input type="number" step="0.01" id="rate" placeholder="0.00">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="compensation">TOTAL COMPENSATION (₦)</label>
+                <input type="number" id="compensation" style="background: #f9f9f9;" readonly placeholder="Calculated automatically">
+            </div>
+
+            <!-- Contact Info -->
+            <div class="form-group">
+                <label for="accountNo">ACCOUNT NUMBER</label>
+                <input type="text" id="accountNo" maxlength="10">
+            </div>
+            <div class="form-group">
+                <label for="phoneNo">PHONE NUMBER</label>
+                <input type="tel" id="phoneNo">
+            </div>
+
+            <!-- Remarks -->
+            <div class="form-group full-width">
+                <label for="remarks">REMARKS</label>
+                <textarea id="remarks" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button type="reset" class="btn-clear">Clear Form</button>
+            <button type="submit" class="btn-save">Add to Table</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Logic to auto-calculate Compensation
+    const areaInput = document.getElementById('area');
+    const rateInput = document.getElementById('rate');
+    const compInput = document.getElementById('compensation');
+
+    [areaInput, rateInput].forEach(input => {
+        input.addEventListener('input', () => {
+            const area = parseFloat(areaInput.value) || 0;
+            const rate = parseFloat(rateInput.value) || 0;
+            compInput.value = (area * rate).toFixed(2);
+        });
+    });
+</script>
+
+</body>
+</html>
