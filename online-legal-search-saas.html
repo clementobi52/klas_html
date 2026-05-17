@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>KLAES Enterprise - Institutional Legal Search Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -195,6 +195,34 @@
       border-radius: 10px;
     }
 
+    /* Mobile menu styles */
+    .mobile-menu-open {
+      max-height: 300px;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-closed {
+      max-height: 0;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* Responsive slider */
+    @media (max-width: 768px) {
+      .slider-container {
+        height: 300px;
+      }
+      
+      .slide-content h3 {
+        font-size: 1.25rem;
+      }
+      
+      .slide-content p {
+        font-size: 0.875rem;
+      }
+    }
+
     /* Print styles */
     @media print {
       .no-print {
@@ -225,6 +253,7 @@
     <div class="relative overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-green-600/5"></div>
 
+      <!-- Responsive Navigation -->
       <nav class="relative z-10 bg-white/80 backdrop-blur-md shadow-sm sticky top-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-16">
@@ -238,7 +267,9 @@
                 <h1 class="text-xl font-bold text-gray-900">KLAES</h1>
               </div>
             </div>
-            <div class="flex items-center space-x-4">
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center space-x-4">
               <button id="landing-signin-btn"
                 class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
                 Sign In
@@ -248,11 +279,30 @@
                 Register
               </button>
             </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition">
+              <i data-lucide="menu" class="w-6 h-6 text-gray-700"></i>
+            </button>
+          </div>
+          
+          <!-- Mobile Menu Dropdown -->
+          <div id="mobile-menu" class="md:hidden overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 invisible">
+            <div class="py-4 border-t border-gray-200 space-y-3">
+              <button id="mobile-landing-signin-btn"
+                class="w-full inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Sign In
+              </button>
+              <button id="mobile-landing-register-btn"
+                class="w-full inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700">
+                Register
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
-      <!-- Image Slider Banner -->
+      <!-- Image Slider Banner - Responsive -->
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="slider-container">
           <div class="slide active" style="background-image: url('imagebg1.jpeg')">
@@ -303,19 +353,19 @@
             <i data-lucide="crown" class="w-4 h-4 mr-2"></i> Official
             Government Platform
           </div>
-          <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold text-gray-900 mb-6 leading-tight">
+          <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 leading-tight">
             Kano State Ministry of Land
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-600">and Physical
               Planning Property History Search (PHS)
               Portal</span>
           </h1>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+          <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-10">
             Secure, token-based legal search for banks, law firms, and
             corporate institutions.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button id="hero-signin-btn"
-              class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl">
+              class="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl">
               Get Started
               <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
             </button>
@@ -323,39 +373,39 @@
         </div>
       </div>
 
-      <div class="bg-white py-20">
+      <div class="bg-white py-12 sm:py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Why Choose KLAES Enterprise?
             </h2>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center p-6">
-              <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <i data-lucide="coins" class="w-10 h-10 text-blue-600"></i>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+            <div class="text-center p-4 sm:p-6">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5">
+                <i data-lucide="coins" class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600"></i>
               </div>
-              <h3 class="text-xl font-semibold mb-3">Token-Based System</h3>
-              <p class="text-gray-600">
+              <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Token-Based System</h3>
+              <p class="text-sm sm:text-base text-gray-600">
                 Pay-as-you-go with flexible token packages. Each search
                 consumes 1 token.
               </p>
             </div>
-            <div class="text-center p-6">
-              <div class="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <i data-lucide="shield" class="w-10 h-10 text-green-600"></i>
+            <div class="text-center p-4 sm:p-6">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5">
+                <i data-lucide="shield" class="w-8 h-8 sm:w-10 sm:h-10 text-green-600"></i>
               </div>
-              <h3 class="text-xl font-semibold mb-3">Official & Secure</h3>
-              <p class="text-gray-600">
+              <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Official & Secure</h3>
+              <p class="text-sm sm:text-base text-gray-600">
                 Government-verified records with official search slips.
               </p>
             </div>
-            <div class="text-center p-6">
-              <div class="w-20 h-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <i data-lucide="clock" class="w-10 h-10 text-purple-600"></i>
+            <div class="text-center p-4 sm:p-6">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5">
+                <i data-lucide="clock" class="w-8 h-8 sm:w-10 sm:h-10 text-purple-600"></i>
               </div>
-              <h3 class="text-xl font-semibold mb-3">Instant Results</h3>
-              <p class="text-gray-600">
+              <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Instant Results</h3>
+              <p class="text-sm sm:text-base text-gray-600">
                 Real-time searches with downloadable official slips.
               </p>
             </div>
@@ -363,17 +413,17 @@
         </div>
       </div>
 
-      <div class="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+      <div class="py-12 sm:py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Flexible Token Packages
             </h2>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-              <h3 class="text-2xl font-bold text-green-600 mb-2">Starter</h3>
-              <div class="text-4xl font-bold mb-2">₦50,000</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center">
+              <h3 class="text-xl sm:text-2xl font-bold text-green-600 mb-2">Starter</h3>
+              <div class="text-3xl sm:text-4xl font-bold mb-2">₦50,000</div>
               <p class="text-gray-500 mb-4">2,000 Tokens</p>
               <button
                 class="landing-package-btn w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
@@ -381,15 +431,15 @@
                 Get Started
               </button>
             </div>
-            <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-blue-500 relative">
+            <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-blue-500 relative">
               <div
-                class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs font-semibold rounded-full whitespace-nowrap">
                 POPULAR
               </div>
-              <h3 class="text-2xl font-bold text-blue-600 mb-2">
+              <h3 class="text-xl sm:text-2xl font-bold text-blue-600 mb-2">
                 Professional
               </h3>
-              <div class="text-4xl font-bold mb-2">₦100,000</div>
+              <div class="text-3xl sm:text-4xl font-bold mb-2">₦100,000</div>
               <p class="text-gray-500 mb-4">5,000 Tokens</p>
               <button
                 class="landing-package-btn w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -397,11 +447,11 @@
                 Get Started
               </button>
             </div>
-            <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-              <h3 class="text-2xl font-bold text-purple-600 mb-2">
+            <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center sm:col-span-2 lg:col-span-1">
+              <h3 class="text-xl sm:text-2xl font-bold text-purple-600 mb-2">
                 Enterprise
               </h3>
-              <div class="text-4xl font-bold mb-2">₦180,000</div>
+              <div class="text-3xl sm:text-4xl font-bold mb-2">₦180,000</div>
               <p class="text-gray-500 mb-4">10,000 Tokens</p>
               <button
                 class="landing-package-btn w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
@@ -413,22 +463,22 @@
         </div>
       </div>
 
-      <div class="bg-gradient-to-r from-blue-600 to-purple-700 py-16">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-700 py-12 sm:py-16">
         <div class="max-w-4xl mx-auto text-center px-4">
-          <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Transform Your Legal Search Process?
           </h2>
           <button id="cta-signin-btn"
-            class="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:shadow-xl transition">
+            class="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-blue-600 rounded-lg font-semibold hover:shadow-xl transition text-sm sm:text-base">
             Start Your Journey
             <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
           </button>
         </div>
       </div>
 
-      <footer class="bg-gray-900 text-white py-12 mt-16 no-print">
+      <footer class="bg-gray-900 text-white py-12 sm:py-12 mt-16 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
             <div>
               <div class="flex items-center space-x-4">
                 <div
@@ -440,7 +490,7 @@
                   <h1 class="text-xl font-bold text-white">KLAES</h1>
                 </div>
               </div>
-              <p class="text-gray-400 text-sm leading-relaxed">
+              <p class="text-gray-400 text-sm leading-relaxed mt-4">
                 Official government platform for legal search services and
                 land record verification in Kano State.
               </p>
@@ -503,7 +553,7 @@
               </div>
             </div>
           </div>
-          <div class="border-t border-gray-800 mt-10 pt-8 text-center text-gray-500 text-sm">
+          <div class="border-t border-gray-800 mt-8 sm:mt-10 pt-8 text-center text-gray-500 text-xs sm:text-sm">
             <p>
               &copy; 2026 Kano State Land Administration System (KLAES). All
               rights reserved.
@@ -533,7 +583,7 @@
             Welcome Back
           </h2>
         </div>
-        <div class="bg-white rounded-xl shadow-lg p-8">
+        <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
           <div class="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div class="flex items-start gap-2">
               <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
@@ -608,40 +658,40 @@
             Register Your Institution
           </h2>
         </div>
-        <div class="bg-white rounded-xl shadow-lg p-8">
+        <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
           <form id="register-form" class="space-y-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Type</label><select
-                id="institution-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Type</label>
+              <select id="institution-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                 <option value="bank">Bank / Financial Institution</option>
                 <option value="law_firm">Law Firm</option>
                 <option value="corporate">Corporate Organization</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Name *</label><input type="text"
-                id="reg-institution-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Name *</label>
+              <input type="text" id="reg-institution-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label><input type="email"
-                id="reg-email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+              <input type="email" id="reg-email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label><input type="tel"
-                id="reg-phone" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+              <input type="tel" id="reg-phone" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label><input type="password"
-                id="reg-password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+              <input type="password" id="reg-password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label><input
-                type="password" id="reg-confirm-password" required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
+              <input type="password" id="reg-confirm-password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
-            <label class="flex items-center"><input type="checkbox" required
-                class="rounded border-gray-300 text-blue-600" /><span class="ml-2 text-sm text-gray-600">I agree to the
-                Terms of Service and Privacy Policy</span></label>
+            <label class="flex items-center">
+              <input type="checkbox" required class="rounded border-gray-300 text-blue-600" />
+              <span class="ml-2 text-sm text-gray-600">I agree to the Terms of Service and Privacy Policy</span>
+            </label>
             <button type="submit"
               class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition">
               Register Institution
@@ -668,6 +718,7 @@
 
   <!-- ==================== DASHBOARD with Dynamic Organization Branding ==================== -->
   <div id="dashboard-page" class="page page-hidden">
+    <!-- Responsive Dashboard Header with Collapsible Mobile Menu -->
     <header class="bg-white shadow-sm border-b sticky top-0 z-40 no-print">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
@@ -678,18 +729,20 @@
                 onerror="this.style.display='none';this.parentElement.innerHTML='<i data-lucide=\'building\' class=\'h-6 w-6 text-white\'></i>'" />
             </div>
             <div>
-              <h1 id="dashboard-org-name" class="text-xl font-bold text-gray-900">
+              <h1 id="dashboard-org-name" class="text-lg sm:text-xl font-bold text-gray-900">
                 KLAES
               </h1>
-              <p class="text-sm text-gray-600">
+              <p class="text-xs sm:text-sm text-gray-600">
                 Institutional Legal Search Platform
               </p>
             </div>
           </div>
-          <div class="flex items-center space-x-4">
-            <div class="text-right mr-4 hidden md:block">
+          
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex items-center space-x-4">
+            <div class="text-right mr-4">
               <p class="text-xs text-gray-500">Available Tokens</p>
-              <p class="text-xl font-bold text-blue-600" id="token-display-header">
+              <p class="text-lg sm:text-xl font-bold text-blue-600" id="token-display-header">
                 0
               </p>
             </div>
@@ -698,53 +751,88 @@
                 class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">
                 <span id="institution-initial">B</span>
               </div>
-              <span class="hidden md:inline text-sm font-medium" id="institution-name">Bank Name</span>
+              <span class="hidden lg:inline text-sm font-medium" id="institution-name">Bank Name</span>
             </div>
             <button id="dashboard-logout-btn"
               class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
               Logout
             </button>
             <button id="open-user-management-btn"
-              class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 transition ml-2">
+              class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 transition ml-2"
+              onclick="window.open('admin.html', '_blank')">
               <i data-lucide="settings" class="w-4 h-4 mr-2"></i>Manage
               Organization
             </button>
+          </div>
+          
+          <!-- Mobile Menu Button -->
+          <button id="dashboard-mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition">
+            <i data-lucide="menu" class="w-6 h-6 text-gray-700"></i>
+          </button>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="dashboard-mobile-menu" class="md:hidden overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 invisible">
+          <div class="py-4 border-t border-gray-200 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs text-gray-500">Available Tokens</p>
+                <p class="text-xl font-bold text-blue-600" id="mobile-token-display">0</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">
+                  <span id="mobile-institution-initial">B</span>
+                </div>
+                <span class="text-sm font-medium" id="mobile-institution-name">Bank Name</span>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <button id="mobile-dashboard-logout-btn"
+                class="w-full inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Logout
+              </button>
+              <button id="mobile-open-user-management-btn"
+                class="w-full inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 transition"
+                onclick="window.open('admin.html', '_blank')">
+                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>Manage Organization
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Dynamic Organization Banner -->
+    <!-- Dynamic Organization Banner - Responsive -->
     <div id="org-dashboard-banner"
-      class="max-w-7xl mx-auto h-80 bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center relative overflow-hidden">
+      class="max-w-7xl mx-auto h-48 sm:h-64 md:h-80 bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center relative overflow-hidden">
       <div class="absolute inset-0 bg-black/20"></div>
-      <div class="relative z-10 text-center">
-        <p id="banner-text-dashboard" class="text-white text-2xl font-bold">
+      <div class="relative z-10 text-center px-4">
+        <p id="banner-text-dashboard" class="text-white text-xl sm:text-2xl font-bold">
           Welcome to Your Legal Search Portal
         </p>
-        <p id="banner-subtext" class="text-white/80 text-sm mt-2">
+        <p id="banner-subtext" class="text-white/80 text-xs sm:text-sm mt-2">
           Secure, fast, and reliable property records
         </p>
       </div>
     </div>
 
     <main class="flex-1">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Token Balance -->
-        <section class="mb-8 no-print">
-          <div class="token-display rounded-xl shadow-lg p-6 text-white">
-            <div class="flex flex-wrap justify-between items-center">
-              <div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <!-- Token Balance - Responsive -->
+        <section class="mb-6 sm:mb-8 no-print">
+          <div class="token-display rounded-xl shadow-lg p-4 sm:p-6 text-white">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div class="text-center sm:text-left">
                 <p class="text-blue-100 text-sm">Available Token Balance</p>
-                <p class="text-5xl font-bold mt-1" id="token-balance">0</p>
+                <p class="text-4xl sm:text-5xl font-bold mt-1" id="token-balance">0</p>
                 <p class="text-blue-100 text-xs mt-2">
                   Each search consumes 1 token
                 </p>
               </div>
               <div>
                 <button id="buy-tokens-btn"
-                  class="bg-white text-purple-700 px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center gap-2">
-                  <i data-lucide="shopping-cart" class="w-5 h-5"></i>Purchase
+                  class="bg-white text-purple-700 px-5 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center gap-2 text-sm sm:text-base">
+                  <i data-lucide="shopping-cart" class="w-4 h-4 sm:w-5 sm:h-5"></i>Purchase
                   Tokens
                 </button>
               </div>
@@ -752,24 +840,23 @@
           </div>
         </section>
 
-        <!-- Search Section -->
-        <section class="pb-8 no-print">
+        <!-- Search Section - Responsive -->
+        <section class="pb-6 sm:pb-8 no-print">
           <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-            <div class="p-6 md:p-8">
-              <h2 class="text-xl font-semibold mb-4">
+            <div class="p-4 sm:p-6 md:p-8">
+              <h2 class="text-lg sm:text-xl font-semibold mb-4">
                 Legal Document Search
               </h2>
               <div class="flex flex-col sm:flex-row items-center gap-3">
                 <div class="flex-1 relative w-full">
                   <i data-lucide="search"
-                    class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5"></i>
                   <input type="text" id="search-query" placeholder="File number, KANGIS No., Owner, Plot No..."
-                    class="w-full pl-11 pr-4 py-3 text-base h-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+                    class="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 text-sm sm:text-base h-10 sm:h-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
                 </div>
                 <button id="search-btn"
-                  class="inline-flex items-center justify-center rounded-lg font-medium px-7 py-3 h-12 bg-blue-600 text-white hover:bg-blue-700 transition">
-                  <i data-lucide="search" class="w-5 h-5 mr-2"></i>Search (1
-                  Token)
+                  class="inline-flex items-center justify-center rounded-lg font-medium px-5 sm:px-7 py-2 sm:py-3 h-10 sm:h-12 bg-blue-600 text-white hover:bg-blue-700 transition text-sm sm:text-base w-full sm:w-auto">
+                  <i data-lucide="search" class="w-4 h-4 sm:w-5 sm:h-5 mr-2"></i>Search (1 Token)
                 </button>
               </div>
               <p class="text-xs text-gray-500 mt-2.5">
@@ -788,8 +875,8 @@
 
         <!-- Search Results -->
         <section id="results-section" class="hidden pb-12">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
               Search Results
               <span id="results-count" class="text-gray-500 font-normal">(0 found)</span>
             </h2>
@@ -811,99 +898,61 @@
         <!-- File Details Section -->
         <section id="file-details-section" class="hidden pb-12">
           <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap gap-4">
                 <div>
-                  <h2 class="text-2xl font-bold">Legal Search Slip</h2>
-                  <p class="text-gray-500">
+                  <h2 class="text-xl sm:text-2xl font-bold">Legal Search Slip</h2>
+                  <p class="text-sm sm:text-base text-gray-500">
                     Official search result for file
                     <span id="file-reference" class="font-medium text-gray-700">--</span>
                   </p>
                 </div>
-                <div class="flex items-center gap-2 no-print">
+                <div class="flex items-center gap-2 no-print w-full sm:w-auto">
                   <button id="back-to-dashboard-btn"
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    class="flex-1 sm:flex-initial inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>Back
-                    to Results
                   </button>
                   <button id="print-slip-btn"
-                    class="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-black/90">
+                    class="flex-1 sm:flex-initial inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-black text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-black/90">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i>Print
-                    Search Slip
                   </button>
                 </div>
               </div>
             </div>
-            <div class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
-                    <i data-lucide="home" class="w-4 h-4 mr-2"></i>Property
-                    Information
+            <div class="p-4 sm:p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
+                  <h3 class="font-semibold text-gray-700 mb-3 flex items-center text-sm sm:text-base">
+                    <i data-lucide="home" class="w-4 h-4 mr-2"></i>Property Information
                   </h3>
                   <div class="space-y-2">
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">File Number:</span><span class="font-medium"
-                        id="file-number-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">KANGIS No.:</span><span class="font-medium"
-                        id="kangis-file-number-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Current Guarantor:</span><span class="font-medium"
-                        id="current-guarantor-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Current Guarantee:</span><span class="font-medium"
-                        id="current-guarantee-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">LGA:</span><span class="font-medium" id="lga-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Plot Number:</span><span class="font-medium"
-                        id="plot-number-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Property Type:</span><span class="font-medium"
-                        id="property-type-value">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Status:</span><span class="font-medium text-green-600"
-                        id="status-value">Active</span>
-                    </div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">File Number:</span><span class="font-medium text-xs sm:text-sm" id="file-number-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">KANGIS No.:</span><span class="font-medium text-xs sm:text-sm" id="kangis-file-number-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Current Guarantor:</span><span class="font-medium text-xs sm:text-sm" id="current-guarantor-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Current Guarantee:</span><span class="font-medium text-xs sm:text-sm" id="current-guarantee-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">LGA:</span><span class="font-medium text-xs sm:text-sm" id="lga-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Plot Number:</span><span class="font-medium text-xs sm:text-sm" id="plot-number-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Property Type:</span><span class="font-medium text-xs sm:text-sm" id="property-type-value">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Status:</span><span class="font-medium text-green-600 text-xs sm:text-sm" id="status-value">Active</span></div>
                   </div>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
+                  <h3 class="font-semibold text-gray-700 mb-3 flex items-center text-sm sm:text-base">
                     <i data-lucide="building-2" class="w-4 h-4 mr-2"></i>Search Details
                   </h3>
                   <div class="space-y-2">
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Institution:</span><span class="font-medium"
-                        id="requesting-institution">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Search Date:</span><span class="font-medium"
-                        id="search-date">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Reference No.:</span><span class="font-medium"
-                        id="reference-no">--</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                      <span class="text-gray-500">Tokens Used:</span><span class="font-medium">1</span>
-                    </div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Institution:</span><span class="font-medium text-xs sm:text-sm" id="requesting-institution">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Search Date:</span><span class="font-medium text-xs sm:text-sm" id="search-date">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Reference No.:</span><span class="font-medium text-xs sm:text-sm" id="reference-no">--</span></div>
+                    <div class="flex justify-between py-1"><span class="text-gray-500 text-xs sm:text-sm">Tokens Used:</span><span class="font-medium text-xs sm:text-sm">1</span></div>
                   </div>
                 </div>
               </div>
-              <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
-                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>Transaction
-                Timeline
+              <h3 class="font-semibold text-gray-700 mb-4 flex items-center text-sm sm:text-base">
+                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>Transaction Timeline
               </h3>
               <div id="timeline-container" class="space-y-0">
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-gray-500 text-sm sm:text-base">
                   Select a file to view transaction history
                 </div>
               </div>
@@ -911,55 +960,54 @@
           </div>
         </section>
 
-        <!-- Token Purchase Modal -->
+        <!-- Token Purchase Modal - Responsive -->
         <div id="token-modal"
           class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden">
           <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
-            <div class="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
+            <div class="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
               <div class="flex justify-between items-start">
                 <div>
-                  <h2 class="text-2xl md:text-3xl font-bold mb-1.5">
+                  <h2 class="text-xl sm:text-2xl md:text-3xl font-bold mb-1.5">
                     Purchase Tokens
                   </h2>
-                  <p class="text-blue-100">Choose a subscription package</p>
+                  <p class="text-blue-100 text-sm">Choose a subscription package</p>
                 </div>
                 <button id="close-token-modal" class="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2">
-                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
             </div>
-            <div class="p-6 md:p-8">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="p-4 sm:p-6 md:p-8">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <div class="package-card bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer"
                   data-tokens="2000" data-price="50000" data-name="Starter">
                   <div class="text-center pb-4 pt-6 px-6">
                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <i data-lucide="package" class="w-8 h-8 text-green-600"></i>
                     </div>
-                    <h3 class="text-2xl text-green-600">Starter</h3>
-                    <div class="text-4xl font-bold text-green-600 mt-2">
+                    <h3 class="text-xl sm:text-2xl text-green-600">Starter</h3>
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-green-600 mt-2">
                       ₦50,000
                     </div>
-                    <p class="text-gray-500 text-sm">2,000 Tokens</p>
+                    <p class="text-gray-500 text-xs sm:text-sm">2,000 Tokens</p>
                   </div>
                 </div>
                 <div class="package-card bg-white rounded-xl shadow-lg border border-blue-500 cursor-pointer relative"
                   data-tokens="5000" data-price="100000" data-name="Professional">
-                  <div
-                    class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                  <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs font-semibold rounded-full whitespace-nowrap">
                     POPULAR
                   </div>
                   <div class="text-center pb-4 pt-6 px-6">
                     <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <i data-lucide="briefcase" class="w-8 h-8 text-blue-600"></i>
                     </div>
-                    <h3 class="text-2xl text-blue-600">Professional</h3>
-                    <div class="text-4xl font-bold text-blue-600 mt-2">
+                    <h3 class="text-xl sm:text-2xl text-blue-600">Professional</h3>
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 mt-2">
                       ₦100,000
                     </div>
-                    <p class="text-gray-500 text-sm">5,000 Tokens</p>
+                    <p class="text-gray-500 text-xs sm:text-sm">5,000 Tokens</p>
                   </div>
                 </div>
                 <div class="package-card bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer"
@@ -968,28 +1016,28 @@
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <i data-lucide="building-2" class="w-8 h-8 text-purple-600"></i>
                     </div>
-                    <h3 class="text-2xl text-purple-600">Enterprise</h3>
-                    <div class="text-4xl font-bold text-purple-600 mt-2">
+                    <h3 class="text-xl sm:text-2xl text-purple-600">Enterprise</h3>
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-600 mt-2">
                       ₦180,000
                     </div>
-                    <p class="text-gray-500 text-sm">10,000 Tokens</p>
+                    <p class="text-gray-500 text-xs sm:text-sm">10,000 Tokens</p>
                   </div>
                 </div>
               </div>
               <div class="border-t pt-6 mt-4">
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                   <button id="pay-online-token"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-md flex-1 max-w-xs">
-                    <i data-lucide="credit-card" class="w-5 h-5"></i>Pay
-                    Online</button><button id="pay-invoice-token"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex-1 max-w-xs">
-                    <i data-lucide="file-text" class="w-5 h-5"></i>Request
-                    Invoice
+                    class="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-md flex-1 max-w-xs text-sm sm:text-base">
+                    <i data-lucide="credit-card" class="w-4 h-4 sm:w-5 sm:h-5"></i>Pay Online
+                  </button>
+                  <button id="pay-invoice-token"
+                    class="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex-1 max-w-xs text-sm sm:text-base">
+                    <i data-lucide="file-text" class="w-4 h-4 sm:w-5 sm:h-5"></i>Request Invoice
                   </button>
                 </div>
               </div>
               <div class="flex justify-center gap-4 mt-6">
-                <button id="cancel-token-purchase" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button id="cancel-token-purchase" class="px-5 sm:px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base">
                   Cancel
                 </button>
               </div>
@@ -1007,13 +1055,12 @@
       </div>
     </main>
 
-    <footer class="bg-gray-900 text-white py-12 mt-16 no-print">
+    <footer class="bg-gray-900 text-white py-8 sm:py-12 mt-8 sm:mt-16 no-print">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           <div>
             <div class="flex items-center space-x-4">
-              <div
-                class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600">
                 <img src="logo_klaes.png" alt="KLAES Logo" class="w-full h-full object-cover"
                   onerror="this.src='https://placehold.co/40x40/3b82f6/white?text=K'" />
               </div>
@@ -1021,7 +1068,7 @@
                 <h1 class="text-xl font-bold text-white">KLAES</h1>
               </div>
             </div>
-            <p class="text-gray-400 text-sm leading-relaxed">
+            <p class="text-gray-400 text-sm leading-relaxed mt-4">
               Official government platform for legal search services and land
               record verification in Kano State.
             </p>
@@ -1031,18 +1078,10 @@
               Services
             </h3>
             <ul class="space-y-2 text-sm">
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Legal Search</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Property Verification</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Title Investigation</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Due Diligence Reports</a>
-              </li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Legal Search</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Property Verification</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Title Investigation</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Due Diligence Reports</a></li>
             </ul>
           </div>
           <div>
@@ -1050,18 +1089,10 @@
               Support
             </h3>
             <ul class="space-y-2 text-sm">
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Help Center</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Support</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">API Documentation</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">System Status</a>
-              </li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Support</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">API Documentation</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">System Status</a></li>
             </ul>
           </div>
           <div>
@@ -1078,27 +1109,54 @@
                   class="hover:text-white transition-colors">+234 (0) 9 123 4567</a>
               </div>
               <div class="flex items-start space-x-2.5 text-gray-400">
-                <i data-lucide="map-pin" class="w-4 h-4 flex-shrink-0 mt-0.5"></i><span>KLAES Headquarters, Kano,
-                  Nigeria</span>
+                <i data-lucide="map-pin" class="w-4 h-4 flex-shrink-0 mt-0.5"></i><span>KLAES Headquarters, Kano, Nigeria</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="border-t border-gray-800 mt-10 pt-8 text-center text-gray-500 text-sm">
-          <p>
-            &copy; 2026 Kano State Land Administration System (KLAES). All
-            rights reserved.
-          </p>
-          <p class="mt-1">
-            Empowering Kano with transparent and efficient land
-            administration.
-          </p>
+        <div class="border-t border-gray-800 mt-8 sm:mt-10 pt-8 text-center text-gray-500 text-xs sm:text-sm">
+          <p>&copy; 2026 Kano State Land Administration System (KLAES). All rights reserved.</p>
+          <p class="mt-1">Empowering Kano with transparent and efficient land administration.</p>
         </div>
       </div>
     </footer>
   </div>
 
   <script>
+    // Mobile menu functionality
+    function initMobileMenu() {
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const dashboardMobileMenuBtn = document.getElementById('dashboard-mobile-menu-btn');
+      const dashboardMobileMenu = document.getElementById('dashboard-mobile-menu');
+      
+      if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+          const isOpen = mobileMenu.classList.contains('max-h-0');
+          if (isOpen) {
+            mobileMenu.classList.remove('max-h-0', 'opacity-0', 'invisible');
+            mobileMenu.classList.add('max-h-96', 'opacity-100', 'visible');
+          } else {
+            mobileMenu.classList.remove('max-h-96', 'opacity-100', 'visible');
+            mobileMenu.classList.add('max-h-0', 'opacity-0', 'invisible');
+          }
+        });
+      }
+      
+      if (dashboardMobileMenuBtn && dashboardMobileMenu) {
+        dashboardMobileMenuBtn.addEventListener('click', () => {
+          const isOpen = dashboardMobileMenu.classList.contains('max-h-0');
+          if (isOpen) {
+            dashboardMobileMenu.classList.remove('max-h-0', 'opacity-0', 'invisible');
+            dashboardMobileMenu.classList.add('max-h-96', 'opacity-100', 'visible');
+          } else {
+            dashboardMobileMenu.classList.remove('max-h-96', 'opacity-100', 'visible');
+            dashboardMobileMenu.classList.add('max-h-0', 'opacity-0', 'invisible');
+          }
+        });
+      }
+    }
+
     // Organization data store (syncs with Organization Settings)
     let organizationData = {
       first_bank: {
@@ -1308,14 +1366,18 @@
 
     function updateTokenDisplay() {
       if (!currentUser) return;
-      document.getElementById("token-balance").textContent =
-        currentUser.tokens.toLocaleString();
-      document.getElementById("token-display-header").textContent =
-        currentUser.tokens.toLocaleString();
-      document.getElementById("institution-name").textContent =
-        currentUser.name;
-      document.getElementById("institution-initial").textContent =
-        currentUser.initial;
+      const tokenBalance = currentUser.tokens.toLocaleString();
+      document.getElementById("token-balance").textContent = tokenBalance;
+      document.getElementById("token-display-header").textContent = tokenBalance;
+      if (document.getElementById("mobile-token-display")) {
+        document.getElementById("mobile-token-display").textContent = tokenBalance;
+      }
+      document.getElementById("institution-name").textContent = currentUser.name;
+      document.getElementById("institution-initial").textContent = currentUser.initial;
+      if (document.getElementById("mobile-institution-name")) {
+        document.getElementById("mobile-institution-name").textContent = currentUser.name;
+        document.getElementById("mobile-institution-initial").textContent = currentUser.initial;
+      }
       localStorage.setItem("klaes_user", JSON.stringify(currentUser));
     }
 
@@ -1355,7 +1417,7 @@
       document.getElementById("cards-results").innerHTML = results
         .map(
           (f) =>
-            `<div class="bg-white rounded-xl shadow-lg border p-5 cursor-pointer hover:shadow-xl transition-all result-card" onclick="selectFile(${f.id})"><div class="flex justify-between items-start"><div><div class="font-semibold text-lg">${f.fileNumber}</div><div class="text-xs text-gray-500">KANGIS: ${f.kangisFileNo}</div></div><span class="px-2 py-1 rounded-full text-xs ${f.caveat === "Yes" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}">${f.caveat === "Yes" ? "⚠️ Caveat" : "✓ Clear"}</span></div><div class="grid grid-cols-2 gap-2 mt-3"><div><span class="text-gray-500 text-xs">Guarantor:</span><br><span class="text-sm">${f.guarantor}</span></div><div><span class="text-gray-500 text-xs">LGA:</span><br><span class="text-sm">${f.lga}</span></div></div></div>`,
+            `<div class="bg-white rounded-xl shadow-lg border p-4 sm:p-5 cursor-pointer hover:shadow-xl transition-all result-card" onclick="selectFile(${f.id})"><div class="flex justify-between items-start"><div><div class="font-semibold text-base sm:text-lg">${f.fileNumber}</div><div class="text-xs text-gray-500">KANGIS: ${f.kangisFileNo}</div></div><span class="px-2 py-1 rounded-full text-xs ${f.caveat === "Yes" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}">${f.caveat === "Yes" ? "⚠️ Caveat" : "✓ Clear"}</span></div><div class="grid grid-cols-2 gap-2 mt-3"><div><span class="text-gray-500 text-xs">Guarantor:</span><br><span class="text-sm">${f.guarantor}</span></div><div><span class="text-gray-500 text-xs">LGA:</span><br><span class="text-sm">${f.lga}</span></div></div></div>`,
         )
         .join("");
       lucide.createIcons();
@@ -1394,7 +1456,7 @@
         timelineContainer.innerHTML = selectedFile.transactions
           .map(
             (t, idx) =>
-              `<div class="timeline-item ${idx === selectedFile.transactions.length - 1 ? "" : "completed"}"><div class="flex items-start gap-4"><div class="flex-1"><div class="flex items-center gap-3 mb-2 flex-wrap"><span class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">${t.type}</span><span class="text-xs text-gray-400 flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1"></i>${t.date}</span></div><div class="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100"><div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"><div class="flex-1"><div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"><i data-lucide="user" class="w-4 h-4 text-blue-600"></i></div><div><p class="text-xs text-gray-400">From</p><p class="font-semibold text-gray-800">${t.from}</p></div></div></div><div class="hidden md:block"><i data-lucide="arrow-right" class="w-5 h-5 text-gray-400"></i></div><div class="flex-1"><div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"><i data-lucide="user-check" class="w-4 h-4 text-green-600"></i></div><div><p class="text-xs text-gray-400">To</p><p class="font-semibold text-gray-800">${t.to}</p></div></div></div></div>${t.description ? `<div class="mt-3 pt-3 border-t border-gray-100"><p class="text-xs text-gray-500"><i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i>${t.description}</p></div>` : ""}</div></div></div></div>`,
+              `<div class="timeline-item ${idx === selectedFile.transactions.length - 1 ? "" : "completed"}"><div class="flex items-start gap-4"><div class="flex-1"><div class="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap"><span class="text-xs sm:text-sm font-semibold text-blue-600 bg-blue-50 px-2 sm:px-3 py-1 rounded-full">${t.type}</span><span class="text-xs text-gray-400 flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1"></i>${t.date}</span></div><div class="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 sm:p-4 border border-gray-100"><div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"><div class="flex-1"><div class="flex items-center gap-2 mb-2"><div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center"><i data-lucide="user" class="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"></i></div><div><p class="text-xs text-gray-400">From</p><p class="font-semibold text-gray-800 text-xs sm:text-sm">${t.from}</p></div></div></div><div class="hidden md:block"><i data-lucide="arrow-right" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400"></i></div><div class="flex-1"><div class="flex items-center gap-2 mb-2"><div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center"><i data-lucide="user-check" class="w-3 h-3 sm:w-4 sm:h-4 text-green-600"></i></div><div><p class="text-xs text-gray-400">To</p><p class="font-semibold text-gray-800 text-xs sm:text-sm">${t.to}</p></div></div></div></div>${t.description ? `<div class="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100"><p class="text-xs text-gray-500"><i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i>${t.description}</p></div>` : ""}</div></div></div></div>`,
           )
           .join("");
       } else {
@@ -1486,7 +1548,6 @@
           tokens: demoAccounts[name].tokens,
         };
         updateTokenDisplay();
-        // Apply organization branding after login
         loadOrganizationSettings();
         applyOrganizationBranding(demoAccounts[name].orgId, name);
         showPage("dashboard-page");
@@ -1643,12 +1704,20 @@
         document.getElementById("token-modal").classList.add("hidden"),
       );
 
-    // Open User Management Modal
-    document
-      .getElementById("open-user-management-btn")
-      ?.addEventListener("click", () => {
-        window.open("organization-settings.html", "_blank");
-      });
+    // Mobile menu button event listeners for sign in/register
+    const mobileSignInBtn = document.getElementById("mobile-landing-signin-btn");
+    const mobileRegisterBtn = document.getElementById("mobile-landing-register-btn");
+    const mobileDashboardLogout = document.getElementById("mobile-dashboard-logout-btn");
+    
+    if (mobileSignInBtn) {
+      mobileSignInBtn.addEventListener("click", () => showPage("signin-page"));
+    }
+    if (mobileRegisterBtn) {
+      mobileRegisterBtn.addEventListener("click", () => showPage("register-page"));
+    }
+    if (mobileDashboardLogout) {
+      mobileDashboardLogout.addEventListener("click", handleLogout);
+    }
 
     // Initialize slider
     setTimeout(() => {
@@ -1659,15 +1728,14 @@
       document
         .getElementById("nextSlide")
         ?.addEventListener("click", nextSlide);
+      initMobileMenu();
     }, 100);
 
-    // Load organization settings and apply to dashboard
     loadOrganizationSettings();
 
     const savedUser = localStorage.getItem("klaes_user");
     if (savedUser) {
       currentUser = JSON.parse(savedUser);
-      // Apply branding for the logged-in organization
       if (currentUser.orgId && organizationData[currentUser.orgId]) {
         applyOrganizationBranding(currentUser.orgId, currentUser.name);
       }
