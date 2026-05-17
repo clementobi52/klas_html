@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KLAES Enterprise - Institutional Legal Search Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            "primary-foreground": "#ffffff",
+            muted: "#f3f4f6",
+            "muted-foreground": "#6b7280",
+            border: "#e5e7eb",
+            destructive: "#ef4444",
+            "destructive-foreground": "#ffffff",
+            secondary: "#f1f5f9",
+            "secondary-foreground": "#0f172a",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .loading-spinner {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #e5e7eb;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .timeline-item {
+      border-left: 2px solid #e5e7eb;
+      position: relative;
+      padding-left: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -0.5rem;
+      top: 0;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background: #3b82f6;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px #e5e7eb;
+    }
+
+    .timeline-item.completed::before {
+      background: #10b981;
+    }
+
+    .token-display {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .package-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .package-card.selected {
+      border: 2px solid #3b82f6 !important;
+      background-color: #eff6ff;
+    }
+
+    .page {
+      transition: opacity 0.3s ease;
+    }
+
+    .page-hidden {
+      display: none;
+    }
+
+    .result-card {
+      transition: all 0.3s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Slider Styles */
+    .slider-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      overflow: hidden;
+      border-radius: 1rem;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .slide.active {
+      opacity: 1;
+    }
+
+    .slide-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      color: white;
+      border: none;
+      padding: 1rem;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .slider-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .slider-btn.prev {
+      left: 1rem;
+    }
+
+    .slider-btn.next {
+      right: 1rem;
+    }
+
+    .slider-dots {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: white;
+      width: 20px;
+      border-radius: 10px;
+    }
+
+    /* Print styles */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .print-container {
+        padding: 20px;
+      }
+
+      .timeline-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+  <!-- ==================== LANDING PAGE ==================== -->
+  <div id="landing-page" class="page">
+    <div class="relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-green-600/5"></div>
+
+      <nav class="relative z-10 bg-white/80 backdrop-blur-md shadow-sm sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-4">
+              <div
+                class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600">
+                <img src="logo_klaes.png" alt="KLAES Logo" class="w-full h-full object-cover"
+                  onerror="this.src='https://placehold.co/40x40/3b82f6/white?text=K'" />
+              </div>
+              <div>
+                <h1 class="text-xl font-bold text-gray-900">KLAES</h1>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <button id="landing-signin-btn"
+                class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Sign In
+              </button>
+              <button id="landing-register-btn"
+                class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 transition-all cursor-pointer border-0 bg-blue-600 text-white hover:bg-blue-700">
+                Register
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Image Slider Banner -->
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="slider-container">
+          <div class="slide active" style="background-image: url('imagebg1.jpeg')">
+            <div class="slide-content">
+              <h3 class="text-2xl font-bold">Official Land Records</h3>
+              <p class="text-lg">
+                Access verified property information directly from government
+                database
+              </p>
+            </div>
+          </div>
+          <div class="slide" style="background-image: url('imagebg2.jpeg')">
+            <div class="slide-content">
+              <h3 class="text-2xl font-bold">
+                Bank & Legal Institution Search
+              </h3>
+              <p class="text-lg">
+                Trusted by leading banks and law firms across Nigeria
+              </p>
+            </div>
+          </div>
+          <div class="slide" style="background-image: url('imagebg3.jpeg')">
+            <div class="slide-content">
+              <h3 class="text-2xl font-bold">Token-Based System</h3>
+              <p class="text-lg">
+                Flexible packages starting from 2,000 tokens
+              </p>
+            </div>
+          </div>
+          <div class="slide" style="background-image: url('imagebg4.jpeg')">
+            <div class="slide-content">
+              <h3 class="text-2xl font-bold">Instant Search Results</h3>
+              <p class="text-lg">
+                Get official search slips instantly with just 1 token
+              </p>
+            </div>
+          </div>
+          <button class="slider-btn prev" id="prevSlide">❮</button>
+          <button class="slider-btn next" id="nextSlide">❯</button>
+          <div class="slider-dots" id="sliderDots"></div>
+        </div>
+      </div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div class="text-center">
+          <div
+            class="inline-flex items-center rounded-full text-xs font-medium px-3 py-1 bg-blue-100 text-blue-700 mb-6">
+            <i data-lucide="crown" class="w-4 h-4 mr-2"></i> Official
+            Government Platform
+          </div>
+          <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold text-gray-900 mb-6 leading-tight">
+            Kano State Ministry of Land
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-600">and Physical
+              Planning Property History Search (PHS)
+              Portal</span>
+          </h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+            Secure, token-based legal search for banks, law firms, and
+            corporate institutions.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="hero-signin-btn"
+              class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl">
+              Get Started
+              <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose KLAES Enterprise?
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+              <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i data-lucide="coins" class="w-10 h-10 text-blue-600"></i>
+              </div>
+              <h3 class="text-xl font-semibold mb-3">Token-Based System</h3>
+              <p class="text-gray-600">
+                Pay-as-you-go with flexible token packages. Each search
+                consumes 1 token.
+              </p>
+            </div>
+            <div class="text-center p-6">
+              <div class="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i data-lucide="shield" class="w-10 h-10 text-green-600"></i>
+              </div>
+              <h3 class="text-xl font-semibold mb-3">Official & Secure</h3>
+              <p class="text-gray-600">
+                Government-verified records with official search slips.
+              </p>
+            </div>
+            <div class="text-center p-6">
+              <div class="w-20 h-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i data-lucide="clock" class="w-10 h-10 text-purple-600"></i>
+              </div>
+              <h3 class="text-xl font-semibold mb-3">Instant Results</h3>
+              <p class="text-gray-600">
+                Real-time searches with downloadable official slips.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Flexible Token Packages
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+              <h3 class="text-2xl font-bold text-green-600 mb-2">Starter</h3>
+              <div class="text-4xl font-bold mb-2">₦50,000</div>
+              <p class="text-gray-500 mb-4">2,000 Tokens</p>
+              <button
+                class="landing-package-btn w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                data-tokens="2000" data-price="50000" data-name="Starter">
+                Get Started
+              </button>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-blue-500 relative">
+              <div
+                class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                POPULAR
+              </div>
+              <h3 class="text-2xl font-bold text-blue-600 mb-2">
+                Professional
+              </h3>
+              <div class="text-4xl font-bold mb-2">₦100,000</div>
+              <p class="text-gray-500 mb-4">5,000 Tokens</p>
+              <button
+                class="landing-package-btn w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                data-tokens="5000" data-price="100000" data-name="Professional">
+                Get Started
+              </button>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+              <h3 class="text-2xl font-bold text-purple-600 mb-2">
+                Enterprise
+              </h3>
+              <div class="text-4xl font-bold mb-2">₦180,000</div>
+              <p class="text-gray-500 mb-4">10,000 Tokens</p>
+              <button
+                class="landing-package-btn w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                data-tokens="10000" data-price="180000" data-name="Enterprise">
+                Get Started
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-blue-600 to-purple-700 py-16">
+        <div class="max-w-4xl mx-auto text-center px-4">
+          <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            Ready to Transform Your Legal Search Process?
+          </h2>
+          <button id="cta-signin-btn"
+            class="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:shadow-xl transition">
+            Start Your Journey
+            <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <footer class="bg-gray-900 text-white py-12 mt-16 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div>
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600">
+                  <img src="logo_klaes.png" alt="KLAES Logo" class="w-full h-full object-cover"
+                    onerror="this.src='https://placehold.co/40x40/3b82f6/white?text=K'" />
+                </div>
+                <div>
+                  <h1 class="text-xl font-bold text-white">KLAES</h1>
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Official government platform for legal search services and
+                land record verification in Kano State.
+              </p>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold uppercase tracking-wider text-gray-300 mb-4">
+                Services
+              </h3>
+              <ul class="space-y-2 text-sm">
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">Legal Search</a>
+                </li>
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">Property Verification</a>
+                </li>
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">Title Investigation</a>
+                </li>
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">Due Diligence Reports</a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold uppercase tracking-wider text-gray-300 mb-4">
+                Support
+              </h3>
+              <ul class="space-y-2 text-sm">
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">Help Center</a>
+                </li>
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Support</a>
+                </li>
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">API Documentation</a>
+                </li>
+                <li>
+                  <a href="#" class="text-gray-400 hover:text-white transition-colors">System Status</a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold uppercase tracking-wider text-gray-300 mb-4">
+                Contact Us
+              </h3>
+              <div class="space-y-3 text-sm">
+                <div class="flex items-center space-x-2.5 text-gray-400">
+                  <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i><a href="mailto:support@klas.gov.ng"
+                    class="hover:text-white transition-colors">support@klas.gov.ng</a>
+                </div>
+                <div class="flex items-center space-x-2.5 text-gray-400">
+                  <i data-lucide="phone" class="w-4 h-4 flex-shrink-0"></i><a href="tel:+23491234567"
+                    class="hover:text-white transition-colors">+234 (0) 9 123 4567</a>
+                </div>
+                <div class="flex items-start space-x-2.5 text-gray-400">
+                  <i data-lucide="map-pin" class="w-4 h-4 flex-shrink-0 mt-0.5"></i><span>KLAES Headquarters, Kano,
+                    Nigeria</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-gray-800 mt-10 pt-8 text-center text-gray-500 text-sm">
+            <p>
+              &copy; 2026 Kano State Land Administration System (KLAES). All
+              rights reserved.
+            </p>
+            <p class="mt-1">
+              Empowering Kano with transparent and efficient land
+              administration.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ==================== SIGN IN PAGE ==================== -->
+  <div id="signin-page" class="page page-hidden">
+    <div
+      class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+          <div class="flex justify-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
+              <i data-lucide="building" class="h-8 w-8 text-white"></i>
+            </div>
+          </div>
+          <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            Welcome Back
+          </h2>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-8">
+          <div class="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-start gap-2">
+              <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+              <div class="text-sm text-blue-800">
+                <p class="font-medium">Demo Accounts:</p>
+                <p class="text-xs mt-1">
+                  Bank: First Bank of Nigeria / Password: demo123
+                </p>
+                <p class="text-xs">
+                  Law Firm: Templars Legal / Password: demo123
+                </p>
+              </div>
+            </div>
+          </div>
+          <form id="signin-form" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Name</label>
+              <div class="relative">
+                <i data-lucide="building-2"
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                <input type="text" id="institution-name" required
+                  class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your institution name" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <div class="relative">
+                <i data-lucide="lock"
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                <input type="password" id="password" required
+                  class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your password" />
+              </div>
+            </div>
+            <button type="submit"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition">
+              Sign In
+            </button>
+          </form>
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+              Don't have an account?
+              <button id="switch-to-register" class="font-medium text-blue-600 hover:text-blue-500">
+                Register here
+              </button>
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <button id="back-to-landing"
+              class="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== REGISTER PAGE ==================== -->
+  <div id="register-page" class="page page-hidden">
+    <div
+      class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+          <div class="flex justify-center">
+            <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center">
+              <i data-lucide="users" class="h-8 w-8 text-white"></i>
+            </div>
+          </div>
+          <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            Register Your Institution
+          </h2>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-8">
+          <form id="register-form" class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Type</label><select
+                id="institution-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <option value="bank">Bank / Financial Institution</option>
+                <option value="law_firm">Law Firm</option>
+                <option value="corporate">Corporate Organization</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Institution Name *</label><input type="text"
+                id="reg-institution-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label><input type="email"
+                id="reg-email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label><input type="tel"
+                id="reg-phone" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label><input type="password"
+                id="reg-password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label><input
+                type="password" id="reg-confirm-password" required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <label class="flex items-center"><input type="checkbox" required
+                class="rounded border-gray-300 text-blue-600" /><span class="ml-2 text-sm text-gray-600">I agree to the
+                Terms of Service and Privacy Policy</span></label>
+            <button type="submit"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition">
+              Register Institution
+            </button>
+          </form>
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+              Already have an account?
+              <button id="switch-to-signin" class="font-medium text-blue-600 hover:text-blue-500">
+                Sign In
+              </button>
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <button id="back-to-landing-from-register"
+              class="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DASHBOARD with Dynamic Organization Branding ==================== -->
+  <div id="dashboard-page" class="page page-hidden">
+    <header class="bg-white shadow-sm border-b sticky top-0 z-40 no-print">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-4">
+            <div id="dashboard-logo"
+              class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600">
+              <img src="logo_klaes.png" alt="Organization Logo" class="w-full h-full object-cover"
+                onerror="this.style.display='none';this.parentElement.innerHTML='<i data-lucide=\'building\' class=\'h-6 w-6 text-white\'></i>'" />
+            </div>
+            <div>
+              <h1 id="dashboard-org-name" class="text-xl font-bold text-gray-900">
+                KLAES
+              </h1>
+              <p class="text-sm text-gray-600">
+                Institutional Legal Search Platform
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="text-right mr-4 hidden md:block">
+              <p class="text-xs text-gray-500">Available Tokens</p>
+              <p class="text-xl font-bold text-blue-600" id="token-display-header">
+                0
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">
+                <span id="institution-initial">B</span>
+              </div>
+              <span class="hidden md:inline text-sm font-medium" id="institution-name">Bank Name</span>
+            </div>
+            <button id="dashboard-logout-btn"
+              class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50">
+              Logout
+            </button>
+            <button id="open-user-management-btn"
+              class="inline-flex items-center justify-center rounded-md font-medium text-sm px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 transition ml-2">
+              <i data-lucide="settings" class="w-4 h-4 mr-2"></i>Manage
+              Organization
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic Organization Banner -->
+    <div id="org-dashboard-banner"
+      class="max-w-7xl mx-auto h-80 bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center relative overflow-hidden">
+      <div class="absolute inset-0 bg-black/20"></div>
+      <div class="relative z-10 text-center">
+        <p id="banner-text-dashboard" class="text-white text-2xl font-bold">
+          Welcome to Your Legal Search Portal
+        </p>
+        <p id="banner-subtext" class="text-white/80 text-sm mt-2">
+          Secure, fast, and reliable property records
+        </p>
+      </div>
+    </div>
+
+    <main class="flex-1">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Token Balance -->
+        <section class="mb-8 no-print">
+          <div class="token-display rounded-xl shadow-lg p-6 text-white">
+            <div class="flex flex-wrap justify-between items-center">
+              <div>
+                <p class="text-blue-100 text-sm">Available Token Balance</p>
+                <p class="text-5xl font-bold mt-1" id="token-balance">0</p>
+                <p class="text-blue-100 text-xs mt-2">
+                  Each search consumes 1 token
+                </p>
+              </div>
+              <div>
+                <button id="buy-tokens-btn"
+                  class="bg-white text-purple-700 px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center gap-2">
+                  <i data-lucide="shopping-cart" class="w-5 h-5"></i>Purchase
+                  Tokens
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Search Section -->
+        <section class="pb-8 no-print">
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+            <div class="p-6 md:p-8">
+              <h2 class="text-xl font-semibold mb-4">
+                Legal Document Search
+              </h2>
+              <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="flex-1 relative w-full">
+                  <i data-lucide="search"
+                    class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                  <input type="text" id="search-query" placeholder="File number, KANGIS No., Owner, Plot No..."
+                    class="w-full pl-11 pr-4 py-3 text-base h-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+                </div>
+                <button id="search-btn"
+                  class="inline-flex items-center justify-center rounded-lg font-medium px-7 py-3 h-12 bg-blue-600 text-white hover:bg-blue-700 transition">
+                  <i data-lucide="search" class="w-5 h-5 mr-2"></i>Search (1
+                  Token)
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-2.5">
+                Examples: "COM-RES-2021-078", "KN12345", "John Doe"
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Loading -->
+        <section id="loading-section" class="hidden pb-12">
+          <div class="flex justify-center items-center py-20">
+            <div class="loading-spinner"></div>
+          </div>
+        </section>
+
+        <!-- Search Results -->
+        <section id="results-section" class="hidden pb-12">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">
+              Search Results
+              <span id="results-count" class="text-gray-500 font-normal">(0 found)</span>
+            </h2>
+          </div>
+          <div id="no-results" class="bg-white rounded-xl shadow-lg hidden">
+            <div class="p-10 text-center">
+              <i data-lucide="file-search" class="w-16 h-16 text-gray-300 mx-auto mb-6"></i>
+              <h3 class="text-2xl font-semibold text-gray-700 mb-3">
+                No Results Found
+              </h3>
+              <button id="try-new-search" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg">
+                Try a New Search
+              </button>
+            </div>
+          </div>
+          <div id="cards-results" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+        </section>
+
+        <!-- File Details Section -->
+        <section id="file-details-section" class="hidden pb-12">
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h2 class="text-2xl font-bold">Legal Search Slip</h2>
+                  <p class="text-gray-500">
+                    Official search result for file
+                    <span id="file-reference" class="font-medium text-gray-700">--</span>
+                  </p>
+                </div>
+                <div class="flex items-center gap-2 no-print">
+                  <button id="back-to-dashboard-btn"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>Back
+                    to Results
+                  </button>
+                  <button id="print-slip-btn"
+                    class="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-black/90">
+                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i>Print
+                    Search Slip
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="home" class="w-4 h-4 mr-2"></i>Property
+                    Information
+                  </h3>
+                  <div class="space-y-2">
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">File Number:</span><span class="font-medium"
+                        id="file-number-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">KANGIS No.:</span><span class="font-medium"
+                        id="kangis-file-number-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Current Guarantor:</span><span class="font-medium"
+                        id="current-guarantor-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Current Guarantee:</span><span class="font-medium"
+                        id="current-guarantee-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">LGA:</span><span class="font-medium" id="lga-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Plot Number:</span><span class="font-medium"
+                        id="plot-number-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Property Type:</span><span class="font-medium"
+                        id="property-type-value">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Status:</span><span class="font-medium text-green-600"
+                        id="status-value">Active</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="building-2" class="w-4 h-4 mr-2"></i>Search Details
+                  </h3>
+                  <div class="space-y-2">
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Institution:</span><span class="font-medium"
+                        id="requesting-institution">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Search Date:</span><span class="font-medium"
+                        id="search-date">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Reference No.:</span><span class="font-medium"
+                        id="reference-no">--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                      <span class="text-gray-500">Tokens Used:</span><span class="font-medium">1</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
+                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>Transaction
+                Timeline
+              </h3>
+              <div id="timeline-container" class="space-y-0">
+                <div class="text-center py-8 text-gray-500">
+                  Select a file to view transaction history
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Token Purchase Modal -->
+        <div id="token-modal"
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden">
+          <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
+            <div class="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h2 class="text-2xl md:text-3xl font-bold mb-1.5">
+                    Purchase Tokens
+                  </h2>
+                  <p class="text-blue-100">Choose a subscription package</p>
+                </div>
+                <button id="close-token-modal" class="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2">
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-6 md:p-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="package-card bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer"
+                  data-tokens="2000" data-price="50000" data-name="Starter">
+                  <div class="text-center pb-4 pt-6 px-6">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i data-lucide="package" class="w-8 h-8 text-green-600"></i>
+                    </div>
+                    <h3 class="text-2xl text-green-600">Starter</h3>
+                    <div class="text-4xl font-bold text-green-600 mt-2">
+                      ₦50,000
+                    </div>
+                    <p class="text-gray-500 text-sm">2,000 Tokens</p>
+                  </div>
+                </div>
+                <div class="package-card bg-white rounded-xl shadow-lg border border-blue-500 cursor-pointer relative"
+                  data-tokens="5000" data-price="100000" data-name="Professional">
+                  <div
+                    class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-blue-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                    POPULAR
+                  </div>
+                  <div class="text-center pb-4 pt-6 px-6">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i data-lucide="briefcase" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-2xl text-blue-600">Professional</h3>
+                    <div class="text-4xl font-bold text-blue-600 mt-2">
+                      ₦100,000
+                    </div>
+                    <p class="text-gray-500 text-sm">5,000 Tokens</p>
+                  </div>
+                </div>
+                <div class="package-card bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer"
+                  data-tokens="10000" data-price="180000" data-name="Enterprise">
+                  <div class="text-center pb-4 pt-6 px-6">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i data-lucide="building-2" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-2xl text-purple-600">Enterprise</h3>
+                    <div class="text-4xl font-bold text-purple-600 mt-2">
+                      ₦180,000
+                    </div>
+                    <p class="text-gray-500 text-sm">10,000 Tokens</p>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t pt-6 mt-4">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button id="pay-online-token"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-md flex-1 max-w-xs">
+                    <i data-lucide="credit-card" class="w-5 h-5"></i>Pay
+                    Online</button><button id="pay-invoice-token"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex-1 max-w-xs">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>Request
+                    Invoice
+                  </button>
+                </div>
+              </div>
+              <div class="flex justify-center gap-4 mt-6">
+                <button id="cancel-token-purchase" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <iframe id="print-frame" style="
+              position: absolute;
+              width: 0;
+              height: 0;
+              border: none;
+              visibility: hidden;
+            "></iframe>
+      </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-12 mt-16 no-print">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div>
+            <div class="flex items-center space-x-4">
+              <div
+                class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600">
+                <img src="logo_klaes.png" alt="KLAES Logo" class="w-full h-full object-cover"
+                  onerror="this.src='https://placehold.co/40x40/3b82f6/white?text=K'" />
+              </div>
+              <div>
+                <h1 class="text-xl font-bold text-white">KLAES</h1>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Official government platform for legal search services and land
+              record verification in Kano State.
+            </p>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold uppercase tracking-wider text-gray-300 mb-4">
+              Services
+            </h3>
+            <ul class="space-y-2 text-sm">
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">Legal Search</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">Property Verification</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">Title Investigation</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">Due Diligence Reports</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold uppercase tracking-wider text-gray-300 mb-4">
+              Support
+            </h3>
+            <ul class="space-y-2 text-sm">
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">Help Center</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Support</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">API Documentation</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">System Status</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold uppercase tracking-wider text-gray-300 mb-4">
+              Contact Us
+            </h3>
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center space-x-2.5 text-gray-400">
+                <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i><a href="mailto:support@klas.gov.ng"
+                  class="hover:text-white transition-colors">support@klas.gov.ng</a>
+              </div>
+              <div class="flex items-center space-x-2.5 text-gray-400">
+                <i data-lucide="phone" class="w-4 h-4 flex-shrink-0"></i><a href="tel:+23491234567"
+                  class="hover:text-white transition-colors">+234 (0) 9 123 4567</a>
+              </div>
+              <div class="flex items-start space-x-2.5 text-gray-400">
+                <i data-lucide="map-pin" class="w-4 h-4 flex-shrink-0 mt-0.5"></i><span>KLAES Headquarters, Kano,
+                  Nigeria</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-gray-800 mt-10 pt-8 text-center text-gray-500 text-sm">
+          <p>
+            &copy; 2026 Kano State Land Administration System (KLAES). All
+            rights reserved.
+          </p>
+          <p class="mt-1">
+            Empowering Kano with transparent and efficient land
+            administration.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Organization data store (syncs with Organization Settings)
+    let organizationData = {
+      first_bank: {
+        id: "first_bank",
+        name: "First Bank of Nigeria",
+        settings: {
+          name: "First Bank of Nigeria",
+          primaryColor: "#003366",
+          secondaryColor: "#D4AF37",
+          logoUrl: null,
+          bannerUrl: null,
+        },
+      },
+      templars: {
+        id: "templars",
+        name: "Templars Legal",
+        settings: {
+          name: "Templars Legal",
+          primaryColor: "#8B0000",
+          secondaryColor: "#C0C0C0",
+          logoUrl: null,
+          bannerUrl: null,
+        },
+      },
+    };
+
+    // Load organization settings from localStorage
+    function loadOrganizationSettings() {
+      const saved = localStorage.getItem("klaes_organizations");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        organizationData.first_bank.settings =
+          parsed.first_bank?.settings || organizationData.first_bank.settings;
+        organizationData.templars.settings =
+          parsed.templars?.settings || organizationData.templars.settings;
+      }
+    }
+
+    // Apply organization branding to dashboard
+    function applyOrganizationBranding(orgId, orgName) {
+      const org = organizationData[orgId];
+      if (!org) return;
+
+      const settings = org.settings;
+
+      // Update organization name in header
+      const dashboardOrgName = document.getElementById("dashboard-org-name");
+      if (dashboardOrgName) dashboardOrgName.textContent = settings.name;
+
+      // Update logo
+      const dashboardLogo = document.getElementById("dashboard-logo");
+      if (dashboardLogo && settings.logoUrl) {
+        dashboardLogo.innerHTML = `<img src="${settings.logoUrl}" class="w-full h-full object-cover">`;
+      } else if (dashboardLogo) {
+        dashboardLogo.innerHTML = `<i data-lucide="building" class="h-6 w-6 text-white"></i>`;
+      }
+
+      // Update banner
+      const bannerDiv = document.getElementById("org-dashboard-banner");
+      const bannerText = document.getElementById("banner-text-dashboard");
+      if (bannerDiv) {
+        if (settings.bannerUrl) {
+          bannerDiv.style.backgroundImage = `url(${settings.bannerUrl})`;
+          bannerDiv.style.backgroundSize = "cover";
+          bannerDiv.style.backgroundPosition = "center";
+          if (bannerText)
+            bannerText.textContent = `Welcome to ${settings.name}`;
+        } else {
+          bannerDiv.style.backgroundImage = `linear-gradient(135deg, ${settings.primaryColor}, ${settings.secondaryColor})`;
+          if (bannerText)
+            bannerText.textContent = `Welcome to ${settings.name}`;
+        }
+      }
+
+      // Update primary button colors dynamically
+      const primaryButtons = document.querySelectorAll(
+        "#search-btn, #buy-tokens-btn, .landing-package-btn",
+      );
+      primaryButtons.forEach((btn) => {
+        if (btn && !btn.classList.contains("landing-package-btn")) {
+          btn.style.backgroundColor = settings.primaryColor;
+        }
+      });
+
+      // Update token display gradient
+      const tokenDisplay = document.querySelector(".token-display");
+      if (tokenDisplay) {
+        tokenDisplay.style.background = `linear-gradient(135deg, ${settings.primaryColor}, ${settings.secondaryColor})`;
+      }
+
+      lucide.createIcons();
+    }
+
+    // Image Slider Functionality
+    let currentSlide = 0;
+    const slides = document.querySelectorAll("#landing-page .slide");
+    const dotsContainer = document.getElementById("sliderDots");
+
+    function initSlider() {
+      if (!slides.length || !dotsContainer) return;
+      slides.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.classList.add("dot");
+        if (index === 0) dot.classList.add("active");
+        dot.addEventListener("click", () => goToSlide(index));
+        dotsContainer.appendChild(dot);
+      });
+      setInterval(() => nextSlide(), 5000);
+    }
+
+    function updateSlides() {
+      slides.forEach((slide, index) =>
+        slide.classList.toggle("active", index === currentSlide),
+      );
+      const dots = document.querySelectorAll("#sliderDots .dot");
+      dots.forEach((dot, index) =>
+        dot.classList.toggle("active", index === currentSlide),
+      );
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      updateSlides();
+    }
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      updateSlides();
+    }
+    function goToSlide(index) {
+      currentSlide = index;
+      updateSlides();
+    }
+
+    // Sample data
+    const sampleFiles = [
+      {
+        id: 1,
+        fileNumber: "COM-RES-2021-078",
+        kangisFileNo: "KNML 12453",
+        guarantor: "Kano Market Development Authority",
+        guarantee: "Suleiman Abubakar Trading Co.",
+        lga: "Kano Municipal",
+        propertyType: "Commercial",
+        status: "Active",
+        plotNumber: "Plot 123",
+        caveat: "No",
+        transactions: [
+          {
+            date: "2021-04-05",
+            type: "Initial Allocation",
+            from: "Kano State Government",
+            to: "Kano Market Development Authority",
+            description: "Initial land allocation",
+          },
+        ],
+      },
+      {
+        id: 2,
+        fileNumber: "MLSF/KN/2023/002",
+        kangisFileNo: "KG-002-2023",
+        guarantor: "Michael Johnson",
+        guarantee: "Sarah Williams",
+        lga: "Fagge",
+        propertyType: "Residential",
+        status: "Active",
+        plotNumber: "Plot 456",
+        caveat: "Yes",
+        transactions: [
+          {
+            date: "2023-06-20",
+            type: "Transfer of Ownership",
+            from: "Michael Johnson",
+            to: "Sarah Williams",
+            description: "Property transferred",
+          },
+        ],
+      },
+    ];
+
+    const demoAccounts = {
+      "First Bank of Nigeria": {
+        password: "demo123",
+        tokens: 5000,
+        initial: "F",
+        orgId: "first_bank",
+      },
+      "Templars Legal": {
+        password: "demo123",
+        tokens: 3000,
+        initial: "T",
+        orgId: "templars",
+      },
+    };
+
+    let currentUser = null,
+      searchResults = [],
+      selectedFile = null,
+      selectedPackage = null;
+
+    function showPage(pageId) {
+      document
+        .querySelectorAll(".page")
+        .forEach((p) => p.classList.add("page-hidden"));
+      document.getElementById(pageId).classList.remove("page-hidden");
+      setTimeout(() => lucide.createIcons(), 100);
+    }
+
+    function updateTokenDisplay() {
+      if (!currentUser) return;
+      document.getElementById("token-balance").textContent =
+        currentUser.tokens.toLocaleString();
+      document.getElementById("token-display-header").textContent =
+        currentUser.tokens.toLocaleString();
+      document.getElementById("institution-name").textContent =
+        currentUser.name;
+      document.getElementById("institution-initial").textContent =
+        currentUser.initial;
+      localStorage.setItem("klaes_user", JSON.stringify(currentUser));
+    }
+
+    function deductToken() {
+      if (currentUser.tokens <= 0) {
+        alert("Insufficient tokens!");
+        return false;
+      }
+      currentUser.tokens--;
+      updateTokenDisplay();
+      return true;
+    }
+    function addTokens(amount) {
+      currentUser.tokens += amount;
+      updateTokenDisplay();
+    }
+
+    function searchFiles(q) {
+      const term = q.toLowerCase();
+      return sampleFiles.filter(
+        (f) =>
+          f.fileNumber.toLowerCase().includes(term) ||
+          f.kangisFileNo.toLowerCase().includes(term) ||
+          f.guarantor.toLowerCase().includes(term),
+      );
+    }
+
+    function renderSearchResults(results) {
+      document.getElementById("results-count").textContent =
+        `(${results.length} found)`;
+      if (results.length === 0) {
+        document.getElementById("no-results").classList.remove("hidden");
+        document.getElementById("cards-results").classList.add("hidden");
+        return;
+      }
+      document.getElementById("no-results").classList.add("hidden");
+      document.getElementById("cards-results").innerHTML = results
+        .map(
+          (f) =>
+            `<div class="bg-white rounded-xl shadow-lg border p-5 cursor-pointer hover:shadow-xl transition-all result-card" onclick="selectFile(${f.id})"><div class="flex justify-between items-start"><div><div class="font-semibold text-lg">${f.fileNumber}</div><div class="text-xs text-gray-500">KANGIS: ${f.kangisFileNo}</div></div><span class="px-2 py-1 rounded-full text-xs ${f.caveat === "Yes" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}">${f.caveat === "Yes" ? "⚠️ Caveat" : "✓ Clear"}</span></div><div class="grid grid-cols-2 gap-2 mt-3"><div><span class="text-gray-500 text-xs">Guarantor:</span><br><span class="text-sm">${f.guarantor}</span></div><div><span class="text-gray-500 text-xs">LGA:</span><br><span class="text-sm">${f.lga}</span></div></div></div>`,
+        )
+        .join("");
+      lucide.createIcons();
+    }
+
+    function selectFile(fileId) {
+      selectedFile = sampleFiles.find((f) => f.id === fileId);
+      if (!selectedFile) return;
+      const now = new Date();
+      document.getElementById("file-reference").textContent =
+        selectedFile.fileNumber;
+      document.getElementById("file-number-value").textContent =
+        selectedFile.fileNumber;
+      document.getElementById("kangis-file-number-value").textContent =
+        selectedFile.kangisFileNo;
+      document.getElementById("current-guarantor-value").textContent =
+        selectedFile.guarantor;
+      document.getElementById("current-guarantee-value").textContent =
+        selectedFile.guarantee;
+      document.getElementById("lga-value").textContent = selectedFile.lga;
+      document.getElementById("plot-number-value").textContent =
+        selectedFile.plotNumber || "N/A";
+      document.getElementById("property-type-value").textContent =
+        selectedFile.propertyType || "N/A";
+      document.getElementById("status-value").textContent =
+        selectedFile.status;
+      document.getElementById("requesting-institution").textContent =
+        currentUser.name;
+      document.getElementById("search-date").textContent =
+        now.toLocaleDateString();
+      document.getElementById("reference-no").textContent =
+        `KLS/${now.getFullYear()}/${Math.floor(Math.random() * 10000)}`;
+
+      const timelineContainer = document.getElementById("timeline-container");
+      if (selectedFile.transactions && selectedFile.transactions.length > 0) {
+        timelineContainer.innerHTML = selectedFile.transactions
+          .map(
+            (t, idx) =>
+              `<div class="timeline-item ${idx === selectedFile.transactions.length - 1 ? "" : "completed"}"><div class="flex items-start gap-4"><div class="flex-1"><div class="flex items-center gap-3 mb-2 flex-wrap"><span class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">${t.type}</span><span class="text-xs text-gray-400 flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1"></i>${t.date}</span></div><div class="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100"><div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"><div class="flex-1"><div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"><i data-lucide="user" class="w-4 h-4 text-blue-600"></i></div><div><p class="text-xs text-gray-400">From</p><p class="font-semibold text-gray-800">${t.from}</p></div></div></div><div class="hidden md:block"><i data-lucide="arrow-right" class="w-5 h-5 text-gray-400"></i></div><div class="flex-1"><div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"><i data-lucide="user-check" class="w-4 h-4 text-green-600"></i></div><div><p class="text-xs text-gray-400">To</p><p class="font-semibold text-gray-800">${t.to}</p></div></div></div></div>${t.description ? `<div class="mt-3 pt-3 border-t border-gray-100"><p class="text-xs text-gray-500"><i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i>${t.description}</p></div>` : ""}</div></div></div></div>`,
+          )
+          .join("");
+      } else {
+        timelineContainer.innerHTML =
+          '<div class="text-center py-8 text-gray-500">No transaction records found</div>';
+      }
+      showDashboardSection("file-details");
+      setTimeout(() => lucide.createIcons(), 100);
+    }
+
+    function generatePrintSlip(file) {
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString();
+      const formattedTime = now.toLocaleTimeString();
+      let timelineHtml =
+        file.transactions
+          ?.map(
+            (t) =>
+              `<div style="margin-bottom: 20px; padding-left: 20px; border-left: 2px solid #1a5d1a; position: relative;"><div style="position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #1a5d1a; border: 2px solid white;"></div><div style="margin-bottom: 8px;"><span style="display: inline-block; background: #e8f5e9; color: #1a5d1a; padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">${t.type}</span><span style="margin-left: 10px; color: #9ca3af; font-size: 11px;">${t.date}</span></div><div style="background: #f9fafb; padding: 12px; border-radius: 8px;"><div style="display: flex; justify-content: space-between; flex-wrap: wrap;"><div style="flex: 1;"><div style="font-size: 10px; color: #6b7280;">FROM</div><div style="font-weight: 600; font-size: 13px;">${t.from}</div></div><div style="color: #9ca3af; padding: 0 15px;">→</div><div style="flex: 1;"><div style="font-size: 10px; color: #6b7280;">TO</div><div style="font-weight: 600; font-size: 13px;">${t.to}</div></div></div>${t.description ? `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;">${t.description}</div>` : ""}</div></div>`,
+          )
+          .join("") ||
+        '<div style="text-align: center; padding: 20px; color: #9ca3af;">No transaction records found</div>';
+
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>KLAES Official Search Slip</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Georgia','Times New Roman',Times,serif;background:white;padding:40px}.slip{max-width:900px;margin:0 auto;background:white;border:1px solid #e5e7eb;box-shadow:0 10px 40px rgba(0,0,0,0.05)}.header{padding:20px 30px 15px 30px;border-bottom:3px solid #1a5d1a}.logo-container{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.logo-left,.logo-right{text-align:center}.logo-left img,.logo-right img{width:60px;height:60px;object-fit:contain;border-radius:10px}.title-container{text-align:center;flex:1}.title-container h1{color:#1a5d1a;font-size:22px;letter-spacing:1px;margin:0}.title-container h3{color:#333;font-size:14px;margin-top:5px;font-weight:normal}.content{padding:20px 30px}.info-section{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:30px}.info-box{flex:1;background:#f9fafb;padding:15px;border-radius:8px;border:1px solid #e5e7eb}.info-box h4{font-size:14px;color:#1a5d1a;margin-bottom:12px;border-bottom:2px solid #1a5d1a;padding-bottom:8px;display:inline-block}.info-row{display:flex;margin-bottom:8px;font-size:12px}.info-label{width:120px;color:#6b7280}.info-value{flex:1;font-weight:500;color:#1f2937}.section-title{font-size:16px;font-weight:bold;color:#1a5d1a;margin:20px 0 15px 0;padding-bottom:8px;border-bottom:2px solid #1a5d1a;display:inline-block}.footer{margin-top:30px;padding:15px 30px;border-top:1px solid #e5e7eb;text-align:center;font-size:11px;color:#6b7280;background:#f9fafb}.signature{margin-top:20px;display:flex;justify-content:flex-end;padding:0 30px 30px 30px}.sig-line{width:250px;text-align:center}.sig-line hr{border:none;border-top:1px solid #000;margin-bottom:8px}</style></head><body><div class="slip"><div class="header"><div class="logo-container"><div class="logo-left"><img src="min1.jpg" alt="Kano State Logo" style="width:60px;height:60px;object-fit:contain;border-radius:10px;"></div><div class="title-container"><h1>KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING</h1><h3>OFFICIAL SEARCH SLIP (CERTIFIED COPY)</h3></div><div class="logo-right"><img src="min2.png" alt="KLAES Logo" style="width:60px;height:60px;object-fit:contain;border-radius:10px;"></div></div></div><div class="content"><div class="info-section"><div class="info-box"><h4>PROPERTY INFORMATION</h4><div class="info-row"><div class="info-label">File Number:</div><div class="info-value">${file.fileNumber}</div></div><div class="info-row"><div class="info-label">KANGIS File No.:</div><div class="info-value">${file.kangisFileNo}</div></div><div class="info-row"><div class="info-label">Current Guarantor:</div><div class="info-value">${file.guarantor}</div></div><div class="info-row"><div class="info-label">Current Guarantee:</div><div class="info-value">${file.guarantee}</div></div><div class="info-row"><div class="info-label">LGA:</div><div class="info-value">${file.lga}</div></div><div class="info-row"><div class="info-label">Plot Number:</div><div class="info-value">${file.plotNumber || "N/A"}</div></div><div class="info-row"><div class="info-label">Property Type:</div><div class="info-value">${file.propertyType || "N/A"}</div></div><div class="info-row"><div class="info-label">Status:</div><div class="info-value" style="color:#10b981;">${file.status}</div></div></div><div class="info-box"><h4>SEARCH DETAILS</h4><div class="info-row"><div class="info-label">Search Reference:</div><div class="info-value">KLS/${now.getFullYear()}/${Math.floor(Math.random() * 10000)}</div></div><div class="info-row"><div class="info-label">Search Date:</div><div class="info-value">${formattedDate} at ${formattedTime}</div></div><div class="info-row"><div class="info-label">Institution:</div><div class="info-value">${currentUser.name}</div></div><div class="info-row"><div class="info-label">Token ID:</div><div class="info-value">TKN${Math.floor(Math.random() * 1000000)}</div></div><div class="info-row"><div class="info-label">Tokens Consumed:</div><div class="info-value">1</div></div></div></div><div class="section-title">TRANSACTION TIMELINE</div><div style="margin-top:15px;">${timelineHtml}</div></div><div class="footer"><p>This is an electronically generated official search slip. Verification can be made at www.klaes.gov.ng/verify</p><p><strong>STATUS: CERTIFIED VERIFIED ✓</strong></p></div><div class="signature"><div class="sig-line"><hr><p style="font-size:11px;">Authorized Signatory<br>Kano State Land Administration</p></div></div></div></body></html>`;
+    }
+
+    function printSearchSlip() {
+      if (!selectedFile) return;
+      const slipHtml = generatePrintSlip(selectedFile);
+      const printFrame = document.getElementById("print-frame");
+      printFrame.style.visibility = "visible";
+      const doc = printFrame.contentWindow.document;
+      doc.open();
+      doc.write(slipHtml);
+      doc.close();
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+      setTimeout(() => {
+        printFrame.style.visibility = "hidden";
+      }, 1000);
+    }
+
+    function performSearch() {
+      const query = document.getElementById("search-query").value.trim();
+      if (!query) {
+        alert("Please enter search criteria");
+        return;
+      }
+      if (!deductToken()) return;
+      showDashboardSection("loading");
+      setTimeout(() => {
+        renderSearchResults(searchFiles(query));
+        showDashboardSection("results");
+      }, 500);
+    }
+
+    function showDashboardSection(sectionName) {
+      const sections = [
+        "results-section",
+        "file-details-section",
+        "loading-section",
+      ];
+      sections.forEach((s) => {
+        const el = document.getElementById(s);
+        if (el) el.classList.add("hidden");
+      });
+      if (sectionName === "loading")
+        document
+          .getElementById("loading-section")
+          ?.classList.remove("hidden");
+      else if (sectionName === "results")
+        document
+          .getElementById("results-section")
+          ?.classList.remove("hidden");
+      else if (sectionName === "file-details")
+        document
+          .getElementById("file-details-section")
+          ?.classList.remove("hidden");
+    }
+
+    function handleSignIn(e) {
+      e.preventDefault();
+      const name = document.getElementById("institution-name").value.trim();
+      const pwd = document.getElementById("password").value;
+      if (demoAccounts[name] && demoAccounts[name].password === pwd) {
+        currentUser = {
+          ...demoAccounts[name],
+          name,
+          tokens: demoAccounts[name].tokens,
+        };
+        updateTokenDisplay();
+        // Apply organization branding after login
+        loadOrganizationSettings();
+        applyOrganizationBranding(demoAccounts[name].orgId, name);
+        showPage("dashboard-page");
+        lucide.createIcons();
+      } else {
+        alert(
+          'Invalid credentials. Use "First Bank of Nigeria" or "Templars Legal" with password "demo123"',
+        );
+      }
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document
+        .getElementById("reg-institution-name")
+        .value.trim();
+      const pwd = document.getElementById("reg-password").value;
+      const confirmPwd = document.getElementById(
+        "reg-confirm-password",
+      ).value;
+      if (!name || !pwd) {
+        alert("Please fill all required fields");
+        return;
+      }
+      if (pwd !== confirmPwd) {
+        alert("Passwords do not match");
+        return;
+      }
+      currentUser = {
+        name,
+        tokens: 100,
+        initial: name.charAt(0).toUpperCase(),
+        orgId: "new_org",
+      };
+      updateTokenDisplay();
+      showPage("dashboard-page");
+      lucide.createIcons();
+      alert(
+        `Registration successful! ${currentUser.name} credited with 100 bonus tokens.`,
+      );
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem("klaes_user");
+      showPage("landing-page");
+      lucide.createIcons();
+    }
+
+    function initTokenPurchase() {
+      document.querySelectorAll(".package-card").forEach((card) =>
+        card.addEventListener("click", () => {
+          document
+            .querySelectorAll(".package-card")
+            .forEach((c) => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedPackage = {
+            tokens: parseInt(card.dataset.tokens),
+            price: parseInt(card.dataset.price),
+            name: card.dataset.name,
+          };
+        }),
+      );
+      document
+        .getElementById("pay-online-token")
+        ?.addEventListener("click", () => {
+          if (!selectedPackage) {
+            alert("Select a package first.");
+            return;
+          }
+          document.getElementById("token-modal").classList.add("hidden");
+          alert(
+            `Payment Processed!\n\nPackage: ${selectedPackage.name}\nTokens: ${selectedPackage.tokens.toLocaleString()}\nAmount: ₦${selectedPackage.price.toLocaleString()}`,
+          );
+          addTokens(selectedPackage.tokens);
+          selectedPackage = null;
+        });
+      document
+        .getElementById("pay-invoice-token")
+        ?.addEventListener("click", () => {
+          if (!selectedPackage) {
+            alert("Select a package first.");
+            return;
+          }
+          document.getElementById("token-modal").classList.add("hidden");
+          alert(
+            `Invoice Request Submitted!\n\nPackage: ${selectedPackage.name}\nTokens: ${selectedPackage.tokens.toLocaleString()}\nAmount: ₦${selectedPackage.price.toLocaleString()}`,
+          );
+        });
+    }
+
+    // Event Listeners
+    document
+      .getElementById("landing-signin-btn")
+      ?.addEventListener("click", () => showPage("signin-page"));
+    document
+      .getElementById("landing-register-btn")
+      ?.addEventListener("click", () => showPage("register-page"));
+    document
+      .getElementById("hero-signin-btn")
+      ?.addEventListener("click", () => showPage("signin-page"));
+    document
+      .getElementById("cta-signin-btn")
+      ?.addEventListener("click", () => showPage("signin-page"));
+    document
+      .getElementById("back-to-landing")
+      ?.addEventListener("click", () => showPage("landing-page"));
+    document
+      .getElementById("back-to-landing-from-register")
+      ?.addEventListener("click", () => showPage("landing-page"));
+    document
+      .getElementById("switch-to-register")
+      ?.addEventListener("click", () => showPage("register-page"));
+    document
+      .getElementById("switch-to-signin")
+      ?.addEventListener("click", () => showPage("signin-page"));
+    document
+      .getElementById("signin-form")
+      ?.addEventListener("submit", handleSignIn);
+    document
+      .getElementById("register-form")
+      ?.addEventListener("submit", handleRegister);
+    document
+      .getElementById("dashboard-logout-btn")
+      ?.addEventListener("click", handleLogout);
+    document
+      .getElementById("search-btn")
+      ?.addEventListener("click", performSearch);
+    document
+      .getElementById("back-to-dashboard-btn")
+      ?.addEventListener("click", () => showDashboardSection("results"));
+    document
+      .getElementById("print-slip-btn")
+      ?.addEventListener("click", printSearchSlip);
+    document
+      .getElementById("try-new-search")
+      ?.addEventListener("click", () => {
+        document.getElementById("search-query").value = "";
+        showDashboardSection("results");
+      });
+    document
+      .getElementById("buy-tokens-btn")
+      ?.addEventListener("click", () =>
+        document.getElementById("token-modal").classList.remove("hidden"),
+      );
+    document
+      .getElementById("close-token-modal")
+      ?.addEventListener("click", () =>
+        document.getElementById("token-modal").classList.add("hidden"),
+      );
+    document
+      .getElementById("cancel-token-purchase")
+      ?.addEventListener("click", () =>
+        document.getElementById("token-modal").classList.add("hidden"),
+      );
+
+    // Open User Management Modal
+    document
+      .getElementById("open-user-management-btn")
+      ?.addEventListener("click", () => {
+        window.open("organization-settings.html", "_blank");
+      });
+
+    // Initialize slider
+    setTimeout(() => {
+      initSlider();
+      document
+        .getElementById("prevSlide")
+        ?.addEventListener("click", prevSlide);
+      document
+        .getElementById("nextSlide")
+        ?.addEventListener("click", nextSlide);
+    }, 100);
+
+    // Load organization settings and apply to dashboard
+    loadOrganizationSettings();
+
+    const savedUser = localStorage.getItem("klaes_user");
+    if (savedUser) {
+      currentUser = JSON.parse(savedUser);
+      // Apply branding for the logged-in organization
+      if (currentUser.orgId && organizationData[currentUser.orgId]) {
+        applyOrganizationBranding(currentUser.orgId, currentUser.name);
+      }
+      showPage("dashboard-page");
+    } else {
+      showPage("landing-page");
+    }
+
+    initTokenPurchase();
+    setTimeout(() => lucide.createIcons(), 100);
+    window.selectFile = selectFile;
+  </script>
+</body>
+
+</html>
