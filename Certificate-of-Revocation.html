@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Revocation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Cinzel:wght@600;700&display=swap');
+        
+        .document-body {
+            font-family: 'Courier Prime', monospace;
+            color: #1a1a1a;
+            line-height: 1.6; /* Marginally tightened for strict height constraints */
+        }
+        .doc-title {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.05em;
+        }
+        .fill-text {
+            color: #a52a2a;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0; 
+            }
+            body {
+                background-color: #fff;
+            }
+            .print-container {
+                width: 100%;
+                max-width: 100%;
+                box-shadow: none;
+                margin: 0 !important;
+                height: 100vh;
+                max-height: 297mm; /* Standard A4 Height absolute boundary */
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-10 print:py-0">
+
+    <!-- 
+      - print:pt-[180px] leaves space for your pre-printed top header.
+      - print:pb-[100px] leaves space at the absolute bottom for your pre-printed frame border.
+      - print:px-[60px] keeps content safely within the side borders.
+    -->
+    <div class="print-container max-w-4xl mx-auto bg-white p-12 pt-[100px] pb-[120px] print:pt-[180px] print:pb-[100px] print:px-[60px] min-h-[1050px] document-body flex flex-col justify-between">
+        
+        <!-- Upper Content Wrapper (Pushed upwards) -->
+        <div>
+            <!-- Serial Number -->
+            <div class="text-right text-lg font-bold tracking-widest mb-6 pr-4">
+                012130
+            </div>
+
+            <!-- Document Titles -->
+            <div class="text-center space-y-1 mb-6">
+                <h1 class="doc-title text-xl font-bold text-red-700 italic decoration-1 underline underline-offset-4">
+                    CERTIFICATE OF REVOCATION
+                </h1>
+                <h2 class="text-sm font-bold tracking-wide decoration-1 underline underline-offset-4">
+                    THE LAND USE ACT 1978 (NO. 6 OF 1978)
+                </h2>
+            </div>
+
+            <!-- Main Body Content -->
+            <div class="space-y-4 text-justify text-[14px]">
+                
+                <!-- Revocation Reference -->
+                <p class="font-bold">
+                    REVOCATION OF CERTIFICATE OF OCCUPANCY NO. :- 
+                    <span class="fill-text">CON-COM-2020-055 -- MLKN 03646</span>
+                </p>
+
+                <!-- Clause 1 -->
+                <p>
+                    <span class="font-bold">WHEREAS</span> by a Certificate of Occupancy Under the hand of Commissioner of Land and physical 
+                    planning, Kano State of Nigeria, dated <span class="fill-text">: 25TH DAY OF SEPTEMBER, 2022</span> and number which said 
+                    Certificate of Occupancy was registered as No <span class="fill-text">247</span> at page <span class="fill-text">247</span> in Volume <span class="fill-text">165</span> 
+                    (Certificates of Occupancy) of the land Registry in the office at kano,
+                </p>
+
+                <!-- Clause 2 -->
+                <p>
+                    it was certified that: <span class="fill-text">SADISU USMAN MAIFATA</span>
+                </p>
+
+                <!-- Clause 3 -->
+                <p>
+                    of <span class="fill-text">NO. 260 LAYIN RABIN MATO, BRIGADE, KANO STATE.</span>
+                </p>
+
+                <!-- Clause 4 -->
+                <p>
+                    Was entitled to a Right of Occupancy over the land with Plot number <span class="fill-text">PIECE OF LAND / CON-COM-2020-055</span> 
+                    on Plan No. <span class="fill-text">CON-COM-2020-055</span> at: <span class="fill-text">YANDANKO</span> and more particularly described 
+                    in the scheduled to the said Certificate of Occupancy.
+                </p>
+
+                <!-- Clause 5 -->
+                <p>
+                    <span class="font-bold">AND WHEREAS</span> the said that all piece of land situated at: <span class="fill-text">YANDANKO</span> in <span class="fill-text">KUMBOTSO</span> 
+                    District, covered by the above Certificate of Occupancy consisting of <span class="fill-text">0.1180ha</span>
+                </p>
+
+                <!-- Clause 6 (NOW THEREFORE) -->
+                <p>
+                    <span class="font-bold">NOW THEREFORE</span>, in excercise of the power conferred upon me by section 28 of the Land 
+                    Use Act 1978, I hereby revoked the Certificate of Occupancy Due to: <span class="fill-text">OVERRIDING PUBLIC INTEREST</span> 
+                    with effect from the the said right of occupancy of the 
+                    said: <span class="fill-text">SADISU USMAN MAIFATA</span> over that piece of land at: <span class="fill-text">YANDANKO</span> 
+                    on the plan Number: <span class="fill-text">CON-COM-2020-055</span> and more particularly described in the schedule 
+                    to the said Certificate of Occupancy Number: <span class="fill-text">CON-COM-2020-055 -- MLKN 03646</span>
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Date and Signature Section (Positioned tightly below text, safely above bottom frame) -->
+        <div class="mt-8 break-inside-avoid">
+            
+            <!-- Full-width Date Line Alignment -->
+            <div class="text-[14px] flex w-full items-baseline gap-2">
+                <span class="whitespace-nowrap">DATED This</span>
+                <div class="border-b border-black text-center flex-1 min-w-[60px] fill-text italic">25th</div>
+                <span class="whitespace-nowrap">day of</span>
+                <div class="border-b border-black text-center flex-[2] min-w-[150px] fill-text italic">September</div>
+                <span class="whitespace-nowrap">, 20</span>
+                <div class="border-b border-black text-center flex-1 min-w-[40px] fill-text italic">22</div>
+            </div>
+
+            <!-- Sub text below date line -->
+            <p class="text-[10px] text-center italic max-w-md mt-1 mx-auto leading-tight">
+                Given under my hand the day and year<br>above written
+            </p>
+
+            <!-- Signatory Footer Area -->
+            <div class="mt-10 text-center break-inside-avoid">
+                <div class="w-64 border-b border-black mx-auto mb-1"></div>
+                <p class="text-xs font-bold uppercase tracking-wider">Honourable Commissioner</p>
+                <p class="text-[11px] text-gray-700">Kano State, Nigeria</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
