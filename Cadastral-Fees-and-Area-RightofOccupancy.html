@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Right of Occupancy - Cadastral Fees and Area</title>
+    <style>
+        /* Global Page Setup for Single-Page Printing */
+        @page {
+            size: A4;
+            margin: 10mm 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #000;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .document-container {
+            background-color: #fff;
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            page-break-inside: avoid; /* Prevents splitting into 2 pages */
+        }
+
+        /* Header Layout */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .header-left {
+            width: 50%;
+        }
+
+        .header-right {
+            width: 40%;
+            text-align: left;
+        }
+
+        .line-field {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+        }
+
+        /* Title Style */
+        .document-title {
+            text-align: center;
+            color: green;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 12px 0;
+            line-height: 1.2;
+        }
+
+        /* Grid Table Breakdown */
+        .fee-breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .fee-breakdown-table td {
+            border: 1px solid green;
+            padding: 4px 6px;
+            height: 18px;
+            font-size: 12px;
+        }
+
+        .fee-breakdown-table td.label-col {
+            color: green;
+            font-weight: bold;
+            width: 60%;
+        }
+
+        .fee-breakdown-table td.empty-col {
+            width: 13.33%;
+        }
+
+        /* Info Text and Schedules */
+        .info-text {
+            font-size: 12px;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .schedule-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .schedule-list {
+            font-size: 11px;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .flex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .signature-space {
+            text-align: right;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Compact Schedule of Area Fee Table */
+        .area-fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            text-align: left;
+        }
+
+        .area-fee-table th, .area-fee-table td {
+            border: 1px solid green;
+            padding: 2px 5px;
+            line-height: 1.1;
+        }
+
+        .area-fee-table th {
+            color: green;
+            font-weight: bold;
+            font-size: 10px;
+            background-color: #fff;
+        }
+
+        /* Print Override */
+        @media print {
+            body { 
+                background-color: #fff; 
+                padding: 0; 
+            }
+            .document-container { 
+                box-shadow: none; 
+                padding: 0; 
+                max-width: 100%; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="document-container">
+    
+    <!-- Top Reference / Header Section -->
+    <div class="header-section">
+        <div class="header-left">
+            <strong>The Director Lands,<br>
+            Kano State Bureau for Land Management,<br>
+            Kano.</strong>
+        </div>
+        <div class="header-right">
+            Re CAD/ <span class="line-field" style="width: 130px;"></span><br>
+            Cadastral Department<br>
+            P.M.B 3083, Kano<br>
+            Date <span class="line-field" style="width: 130px;"></span>
+        </div>
+    </div>
+
+    <!-- Document Title -->
+    <div class="document-title">
+        Right of Occupancy No _________________<br>
+        Cadastral Fees and Area
+    </div>
+
+    <!-- Investigation and Fee breakdown Grid -->
+    <table class="fee-breakdown-table">
+        <tr>
+            <td class="label-col">Investigation and Search @ N4,000</td>
+            <td class="empty-col"></td><td class="empty-col"></td><td class="empty-col"></td>
+        </tr>
+        <tr>
+            <td class="label-col">Beacons @ (N4,000 each)</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Area fee @ (schedule below)</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Delay @ N 350 (Per day)</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Transport @ Schedule below</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Additional field work @ N350:00 (per day)</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Office Work @ N10,000 (per day)</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Plan Prints @ N400:00 (per file)</td>
+            <td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td class="label-col">Total</td>
+            <td></td><td></td><td></td>
+        </tr>
+    </table>
+
+    <!-- Context Text Fields -->
+    <div class="info-text">
+        The Area of this plot is................................................Hectares<br>
+        Please inform me you require the plans and Description to be issued.
+    </div>
+
+    <!-- Transport & Signature Row -->
+    <div class="flex-row">
+        <div>
+            <div class="schedule-title">Transport Schedule</div>
+            <div class="schedule-list">
+                1.1 km from Kano - N200.00<br>
+                11-5km from Kano - N300.00<br>
+                Over 50km from Kano - N500.00
+            </div>
+            <div class="schedule-title">Schedule of area Fee: &nbsp;&nbsp;&nbsp;&nbsp;(Kano S.L.N. No 3 of 1983)</div>
+        </div>
+        <div class="signature-space">
+            For Director Cadastral
+        </div>
+    </div>
+
+    <!-- Schedule Matrix Table -->
+    <table class="area-fee-table">
+        <thead>
+            <tr>
+                <th style="width: 18%;">HEACTARES</th>
+                <th style="width: 22%;">CURRENT FEES N</th>
+                <th style="width: 22%;">PROPOSED FEES N</th>
+                <th style="width: 20%;">ADDITIONAL N</th>
+                <th style="width: 18%;">PROPOSED N</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>0.02</td><td>65.00</td><td>200.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.03</td><td>97.50</td><td>300.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.04</td><td>130.00</td><td>400.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.05</td><td>162.00</td><td>500.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.06</td><td>195.00</td><td>600.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.07</td><td>227.00</td><td>700.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.08</td><td>260.00</td><td>800.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.09</td><td>292.00</td><td>900.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.10</td><td>325.00</td><td>1,000.00</td><td>4,00per add hctr</td><td>10,00per add hctr</td></tr>
+            
+            <tr><td>0.20</td><td>650.00</td><td>1,800.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.30</td><td>975.00</td><td>2,600.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.40</td><td>1,300.00</td><td>3,400.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.50</td><td>1,625.00</td><td>4,200.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.60</td><td>1,950.00</td><td>5,000.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.70</td><td>2,275.00</td><td>5,800.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>0.80</td><td>2,600.00</td><td>6,600.00</td><td>2,00per add hctr</td><td>5,00per add hctr</td></tr>
+            
+            <tr><td>0.90</td><td>2,925.00</td><td>7,400.00</td><td>0.01 - do -</td><td>0.01 - do -</td></tr>
+            <tr><td>1.00</td><td>3,250.00</td><td>8,200.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>2.00</td><td>3,650.00</td><td>9,600.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>3.00</td><td>4,050.00</td><td>10,200.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>4.00</td><td>4,450.00</td><td>11,200.00</td><td>0.01 per add hctr</td><td>0.01 per add hctr</td></tr>
+            
+            <tr><td>5.00</td><td>4,850.00</td><td>12,000.00</td><td>100,00. per<br>add hctr</td><td>100,00. per<br>add hctr</td></tr>
+            
+            <tr><td>6.00</td><td>5,050.00</td><td>12,400.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>7.00</td><td>5,250.00</td><td>12,800.00</td><td>0.01 - do -</td><td>0.01 - do -</td></tr>
+            <tr><td>8.00</td><td>5,450.00</td><td>13,200.00</td><td>- do -</td><td>- do -</td></tr>
+            <tr><td>9.00</td><td>5,650.00</td><td>13,600.00</td><td>- do -</td><td>- do -</td></tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
