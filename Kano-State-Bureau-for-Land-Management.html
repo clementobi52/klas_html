@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kano State Bureau for Land Management</title>
+    <style>
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            color: #4a5568; 
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px 40px;
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px; /* Slightly widened to gracefully hold the larger text rules */
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Watermark Background Styling */
+        .watermark-bg {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -45%);
+            width: 440px;
+            height: auto;
+            opacity: 0.12; 
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Header Section Layout */
+        .header-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+
+        /* Fixed: Keeping logo absolute but ensuring dimensions translate flawlessly to print engines */
+        .top-left-logo {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            width: 100px;
+            height: auto;
+            display: block;
+        }
+
+        .header-container h1 {
+            font-size: 26px;
+            font-weight: bold;
+            color: #000000;
+            margin: 0 0 4px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .header-container h2 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 4px 0;
+            letter-spacing: 0.1px;
+        }
+
+        .header-container h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.3px;
+        }
+
+        .header-container .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        /* Content Areas */
+        .content-p {
+            font-size: 20px;
+            text-align: justify;
+            margin-bottom: 14px;
+            word-spacing: 1px;
+        }
+
+        .dots {
+            letter-spacing: 2px;
+        }
+
+        .blank-lines-group {
+            margin: 20px 0;
+        }
+
+        .line-fill {
+            height: 32px;
+            border-bottom: 1px dotted #4a5568;
+            margin-bottom: 12px;
+        }
+
+        /* Footer Alignment closely bounded to prevent multi-page spill */
+        .footer-row {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 18px;
+        }
+
+        .footer-left {
+            width: 40%;
+        }
+
+        .footer-right {
+            width: 50%;
+            text-align: right;
+        }
+
+        /* Forced Single Page Landscape Print Config */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 6mm 12mm; /* Optimized to offer slightly more page-real-estate for larger fonts */
+            }
+            body {
+                padding: 0;
+                background-color: #ffffff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .container {
+                max-width: 100%;
+                width: 100%;
+                page-break-inside: avoid;
+            }
+            /* Explicitly forcing the print subsystem to obey your customized width */
+            .top-left-logo {
+                width: 100px !important;
+                height: auto !important;
+                left: 10px !important;
+                top: 0 !important;
+            }
+            .watermark-bg {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <img src="coat of.jpg" alt="Watermark" class="watermark-bg">
+
+        <div class="header-container">
+            <img src="coat of.jpg" alt="Logo" class="top-left-logo">
+            
+            <h1>KANO STATE BUREAU FOR LAND MANAGEMENT</h1>
+            <h2>OFFICE OF THE EXECUTIVE GOVERNOR, KANO STATE</h2>
+            <h3>P.M.B. 3083, KANO STATE - NIGERIA</h3>
+            <div class="title">Description of Right of Occupancy No.</div>
+        </div>
+
+        <div class="content-p">
+            All that piece of Land situated at <span class="dots">........................................................................................................................................</span>in the<span class="dots">........................................................................................................</span>
+        </div>
+        
+        <div class="content-p">
+            District of the <span class="dots">..........................................................................................................</span>Administrative Area of Kano State consisting of 
+        </div>
+
+        <div class="content-p">
+            <span class="dots">....................................................................................................</span>Hectares, the corners of which are marked in the ground by
+        </div>
+
+        <div class="content-p">
+            Property Beacons Nos. <span class="dots">...................................................................................................................................................................................................................................</span>
+        </div>
+
+        <div class="blank-lines-group">
+            <div class="line-fill"></div>
+            <div class="line-fill"></div>
+        </div>
+
+        <div class="content-p">
+            And the boundaries of which are delineated by a red verge line on the attached copy of Drawing 
+        </div>
+
+        <div class="content-p">
+            No.<span class="dots">......................................................................................................................................................................................</span> Copied from plan 
+        </div>
+
+        <div class="content-p">
+            No.<span class="dots">.....................................................................................................................................</span>Approved by and deposited in the office of the
+        </div>
+
+        <div class="content-p">
+            Director Cadastral of Kano State and is more particularly described in the drawing as
+        </div>
+
+        <div class="blank-lines-group">
+            <div class="line-fill"></div>
+            <div class="line-fill"></div>
+            <div class="line-fill"></div>
+        </div>
+
+        <div class="footer-row">
+            <div class="footer-left">
+                Date<span class="dots">....................................................................</span>
+            </div>
+            <div class="footer-right">
+                Director Cadastral<span class="dots">.................................................................</span>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
