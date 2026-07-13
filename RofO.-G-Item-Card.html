@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R. of O. / G Item Card</title>
+    <style>
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            color: #1a2530; /* Dark slate/navy tone matching the print */
+            margin: 0;
+            padding: 30px;
+            background-color: #ffffff;
+        }
+
+        .card-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 2px solid #1a2530;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Utility classes for structural alignment */
+        .flex { display: flex; }
+        .border-b { border-bottom: 1px solid #1a2530; }
+        .border-r { border-right: 1px solid #1a2530; }
+        
+        .field-line {
+            flex-grow: 1;
+            border-bottom: 1px solid #1a2530;
+            margin-left: 5px;
+            position: relative;
+            bottom: 2px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Left Sidebar (Metadata Column) */
+        .sidebar {
+            width: 22%;
+            padding: 15px 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-img {
+            width: 60px;
+            height: auto; /* Maintain aspect ratio */
+            display: block;
+            margin: 0 auto 5px auto;
+        }
+
+        .qr-img {
+            width: 55px;
+            height: 55px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-heading {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-input-row {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .sidebar-footer {
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            width: 78%;
+            box-sizing: border-box;
+        }
+
+        .top-header-row {
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .main-title {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            margin-left: 60px;
+        }
+
+        .file-number-area {
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: flex-end;
+            width: 40%;
+        }
+
+        .right-notice {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        /* Form Sub-grids */
+        .form-split-grid {
+            display: flex;
+        }
+
+        .grid-col-left {
+            width: 55%;
+            padding: 15px 15px 10px 15px;
+            box-sizing: border-box;
+        }
+
+        .grid-col-right {
+            width: 45%;
+            padding: 15px 15px 10px 15px;
+            box-sizing: border-box;
+        }
+
+        /* Center Section (Lands/Related Files Area) */
+        .related-files-bar {
+            padding: 6px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .gp-kano-footer {
+            text-align: right;
+            font-size: 11px;
+            padding: 5px 15px;
+        }
+
+        /* STYLING FOR FORCED LANDSCAPE PRINTING */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 10mm; /* Clean standard margins for printers */
+            }
+            body {
+                padding: 0;
+                background-color: #ffffff;
+            }
+            .card-container {
+                max-width: 100%; /* Spans the wide layout dynamically when printed */
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-container flex">
+        
+        <div class="sidebar border-r">
+            <div>
+                <div class="logo-area flex" style="justify-content: space-around; align-items: center;">
+                    <img src="min1.jpg" class="logo-img">
+                    <img src="qr-code.png" alt="QR Code" class="qr-img">
+                </div>
+                
+                <div style="text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 15px;">FINAL AREA</div>
+                
+                <div class="sidebar-input-row">
+                    <div class="field-line"></div><span style="margin-left: 5px; font-weight: bold;">ha.</span>
+                </div>
+                <div class="sidebar-input-row">
+                    <div class="field-line"></div><span style="margin-left: 5px; font-weight: bold;">acres</span>
+                </div>
+                
+                <div style="text-align: center; font-size: 12px; font-weight: bold; margin: 15px 0; border-bottom: 1px solid #1a2530; padding-bottom: 5px;">
+                    ( 1 ha=2,471 acres )
+                </div>
+
+                <div class="sidebar-heading">LANDS FILES</div>
+                <div class="border-b" style="height: 40px;"></div>
+
+                <div class="sidebar-heading">COMPUTATION No.</div>
+                <div class="border-b" style="height: 45px;"></div>
+
+                <div class="sidebar-heading">PLAN No.</div>
+                <div class="border-b" style="height: 45px;"></div>
+
+                <div class="sidebar-heading">TRACING No.</div>
+                <div class="border-b" style="height: 45px;"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                JSD. 10
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            <div class="top-header-row border-b flex" style="align-items: flex-end;">
+                <div class="main-title">R. of O. /G Item</div>
+                <div class="file-number-area">
+                    <span>No.:</span><div class="field-line" style="border-bottom: 2px dashed #1a2530;"></div>
+                </div>
+                <div class="right-notice">
+                    CUT OFF<br>WHEN<br>DEAD
+                </div>
+            </div>
+
+            <div class="form-split-grid border-b">
+                <div class="grid-col-left border-r">
+                    <div class="input-row">For <div class="field-line"></div></div>
+                    <div class="input-row">Locality <div class="field-line"></div></div>
+                    <div class="input-row">District <div class="field-line"></div></div>
+                    <div class="input-row">Admin. Area <div class="field-line"></div></div>
+                    <div class="input-row" style="margin-bottom: 0;">
+                        Appox. Area <div class="field-line"></div>
+                        <div style="font-size: 11px; line-height: 1; margin-left: 5px; text-align: center; font-weight: bold;">
+                            -Hectares<br>Acres
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-col-right">
+                    <div class="input-row">Plot No. <div class="field-line"></div></div>
+                    <div class="input-row">Map Sheet <div class="field-line"></div> <span style="margin-left: 5px;">scale</span> <div class="field-line"></div></div>
+                    <div class="input-row" style="margin-bottom: 18px;">Co-ordinats of <div class="field-line"></div></div>
+                    <div class="input-row" style="margin-bottom: 0;">
+                        N <div class="field-line"></div> <span style="margin-left: 10px;">F</span> <div class="field-line"></div>
+                    </div>
+                    <div class="flex" style="font-size: 12px; font-weight: bold; margin-top: 2px;">
+                        <div style="width: 50%; padding-left: 20px;">Lat.</div>
+                        <div style="width: 50%; padding-left: 15px;">Long</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="related-files-bar border-b">
+                RELATED FILES
+            </div>
+
+            <div class="form-split-grid" style="min-height: 250px;">
+                <div class="grid-col-left border-r" style="padding-top: 20px;">
+                    <div class="input-row">Recommended <div class="field-line"></div></div>
+                    <div class="input-row">Lease begins <div class="field-line"></div></div>
+                    <div class="input-row">Surrendered / Revoked <div class="field-line"></div></div>
+                    <div class="input-row">Assigned to <div class="field-line"></div></div>
+                    <div class="input-row">Assigned to <div class="field-line"></div></div>
+                    <div class="input-row">Regranted from <div class="field-line"></div></div>
+                </div>
+                
+                <div class="grid-col-right" style="padding-top: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div class="input-row">Approved <div class="field-line"></div></div>
+                        <div class="input-row" style="margin-bottom: 25px;">Expires <div class="field-line"></div></div>
+                        
+                        <div class="input-row">w.e.f. <div class="field-line"></div></div>
+                        <div class="input-row" style="margin-bottom: 25px;">w.e.f. <div class="field-line"></div></div>
+                        
+                        <div class="input-row">Expires <div class="field-line"></div></div>
+                    </div>
+                    
+                    <div class="gp-kano-footer">
+                        GP. Kano.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
