@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Tracking Stamp Table - Full Landscape Page</title>
+    <style>
+        /* Forces the landscape layout and completely removes default page borders */
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #000;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        /* Container scales to occupy the full page area */
+        .document-container {
+            background-color: #fff;
+            width: 100%;
+            height: 100%;
+            padding: 15mm;
+            box-sizing: border-box;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        /* Outer stamp border scales to 100% of the screen/page width and height */
+        .stamp-box {
+            border: 2px solid #555;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+        }
+
+        /* Table spans seamlessly across the entire canvas dimensions */
+        .stamp-table {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Prevents text overflow from shifting columns */
+        }
+
+        .stamp-table td {
+            border-bottom: 2px solid #000;
+            border-right: 2px solid #000;
+            padding: 10px 15px;
+            font-size: 18px;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+
+        /* Distribute the heights of rows equally */
+        .stamp-table tr {
+            height: calc(100% / 11);
+        }
+
+        /* Remove right border for the last column */
+        .stamp-table td:last-child {
+            border-right: none;
+        }
+
+        /* Remove bottom border for the final footer row */
+        .stamp-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Column split allocations */
+        .col-main {
+            width: 75%;
+        }
+
+        .col-side {
+            width: 25%;
+        }
+
+        /* Top Header Specific Row Setup */
+        .header-row {
+            height: calc(100% / 9) !important; 
+        }
+
+        .header-row td {
+            border-bottom: 4px solid #000;
+        }
+
+        .stamp-title-container {
+            display: flex;
+            align-items: baseline;
+            font-weight: bold;
+        }
+
+        .bold-lkn {
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            letter-spacing: -1px;
+            margin-right: 8px;
+        }
+
+        /* Handwritten Monospace Text Simulation */
+        .handwritten-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            color: #111;
+            font-size: 22px;
+        }
+
+        /* Extra vertical sizing for the final row content positioning */
+        .footer-row td {
+            vertical-align: top;
+            padding-top: 15px;
+        }
+
+        .footer-split {
+            display: flex;
+            justify-content: space-between;
+            padding-right: 40px;
+        }
+
+        /* Print Settings Override */
+        @media print {
+            body { background-color: #fff; }
+            .document-container { box-shadow: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="document-container">
+
+    <div class="stamp-box">
+        <table class="stamp-table">
+            
+            <tr class="header-row">
+                <td class="col-main">
+                    <div class="stamp-title-container">
+                        <span class="bold-lkn">LKN/</span>
+                        <span class="handwritten-text">CON/RES/2020/682</span>
+                    </div>
+                </td>
+                <td class="col-side handwritten-text">18450</td>
+            </tr>
+
+            <tr>
+                <td class="handwritten-text">For Cad. Report</td>
+                <td class="handwritten-text">26/8/21</td>
+            </tr>
+
+            <tr>
+                <td class="handwritten-text">For Survey J.G. (Yusuf Kanyis)</td>
+                <td class="handwritten-text">16-9-21</td>
+            </tr>
+
+            <tr>
+                <td class="handwritten-text">For P&A To Deeds</td>
+                <td class="handwritten-text">24-9-21</td>
+            </tr>
+
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+
+            <tr class="footer-row">
+                <td class="col-main">
+                    <div class="footer-split handwritten-text">
+                        <span>Magaji</span>
+                        <span>Mato Ibrahim</span>
+                    </div>
+                </td>
+                <td class="col-side handwritten-text" style="font-size: 18px; line-height: 1.2;">
+                    Jaba<br>Village
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
