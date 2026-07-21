@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KANGIS - Official Search Report (Pay-Per-Search)</title>
+  <style>
+    /* Screen Layout */
+    body {
+      background-color: #525659;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      background-color: #fff;
+      width: 11in;
+      /* Fixed landscape sheet height (border-box), safe for Letter/A4 usable area.
+         Screen and print use the SAME value so JS row-fill measured on screen
+         matches the printed sheet. */
+      min-height: 7.6in;
+      padding: 0.2in 0.4in;
+      position: relative;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Footer sits directly after content (page keeps min-height for the sheet). */
+    .main-content {}
+
+    .watermark-img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      width: 100%;
+      border-bottom: 2px solid #000;
+      padding-bottom: 2px;
+      margin-bottom: 6px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-box img {
+      width: 75px;
+      height: auto;
+    }
+
+    .title-block {
+      text-align: center;
+      flex: 1;
+    }
+
+    .title-block h1 {
+      font-size: 19px;
+      color: #007a33;
+      margin: 0;
+      font-weight: bold;
+    }
+
+    .title-block h2 {
+      font-size: 15px;
+      margin: 2px 0;
+      font-weight: bold;
+    }
+
+    .title-block h3 {
+      font-size: 13px;
+      margin: 0;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    .date-line {
+      text-align: right;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+
+    .section-label {
+      border: 1px solid #000;
+      display: inline-block;
+      padding: 1px 6px;
+      font-weight: bold;
+      font-size: 11px;
+      margin: 3px 0;
+      background: #fff;
+    }
+
+    /* Four label+value sections laid out on a CSS grid, separated by three
+       EXPLICIT spacer columns (.sp). The spacers are all 1fr, so whatever
+       width is left over is split equally among them — the space between
+       section 1 and 2 is always identical to the space between section 3
+       and 4. Label columns size to their longest label; value columns size
+       to their content up to a cap, then wrap. */
+    .prop-details {
+      font-size: 12px;
+      margin-bottom: 5px;
+      width: 100%;
+      display: grid;
+      grid-template-columns:
+        max-content fit-content(150px) minmax(18px, 1fr)
+        max-content fit-content(160px) minmax(18px, 1fr)
+        max-content fit-content(150px) minmax(18px, 1fr)
+        max-content fit-content(170px);
+      row-gap: 6px;
+      align-items: start;
+    }
+
+    .prop-details .lbl {
+      font-weight: bold;
+      white-space: nowrap;
+      /* Guaranteed breathing room between a label and its value. */
+      padding-right: 10px;
+    }
+
+    .prop-details .val {
+      min-width: 0;
+      /* Long values (e.g. Lon/Lat) wrap inside their own section instead of
+         spilling into the next label column. */
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      /* Breathing room before the vertical divider in the next spacer column. */
+      padding-right: 8px;
+    }
+
+    /* Vertical rule down the middle of each spacer column, separating the 4
+       label+value sections. Each row contributes its own .sp segment (one
+       per spacer column per row), so to read as a single continuous line
+       instead of 4 short broken segments, each segment is stretched to its
+       row's full height and extended by half the row-gap on each side to
+       bridge the gap to the segment above/below it. */
+    .prop-details .sp {
+      align-self: stretch;
+      margin: -3px 0;
+      border-left: 0.5px solid #000;
+    }
+
+    .transaction-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      table-layout: fixed;
+      margin-bottom: 2px;
+    }
+
+    .transaction-table th,
+    .transaction-table td {
+      padding: 2px 4px;
+      vertical-align: top;
+      border-bottom: 0.5px solid #eee;
+      word-wrap: break-word;
+      line-height: 1.2;
+    }
+
+    /* DYNAMIC FONT REDUCTION CLASSES FOR WRAPPING ROWS */
+    .transaction-table tr.row-compact td {
+      font-size: 8.5px !important;
+      line-height: 1.15 !important;
+    }
+
+    .transaction-table tr.row-tight td {
+      font-size: 7.5px !important;
+      line-height: 1.1 !important;
+    }
+
+    /* File No column: never break/wrap file numbers */
+    .transaction-table th:nth-child(2),
+    .transaction-table td:nth-child(2) {
+      white-space: nowrap;
+      word-wrap: normal;
+      overflow-wrap: normal;
+    }
+
+    .transaction-table .header-row th {
+      font-weight: bold;
+      border-bottom: 1.5px solid #000;
+      text-align: left;
+    }
+
+    /* CONTINUATION & END NOTICES (Screen/Default Rules) */
+    .table-continuation-foot,
+    .table-end-notice {
+      display: none;
+    }
+
+    /* FOOTER WRAPPER STYLING */
+    .footer-wrapper {
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .remarks-container {
+      border-top: 1px solid #000;
+      width: 100%;
+      padding-top: 6px;
+      margin-top: 6px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .remarks-label {
+      border: 1px solid #000;
+      padding: 2px 8px;
+      font-weight: bold;
+      font-size: 13px;
+      background: #fff;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .remarks-content {
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    .remarks-text {
+      color: #0f766e;
+      font-size: 13px;
+      font-weight: bold;
+      margin: 8px 0;
+      line-height: 1.4;
+      display: block;
+    }
+
+    .timestamp-text {
+      font-size: 11px;
+      font-weight: bold;
+      color: #000;
+      margin: 8px 0 0 0;
+    }
+
+    .signature-section {
+      display: table;
+      width: 100%;
+      margin-top: 4px;
+      page-break-inside: avoid;
+    }
+
+    .sig-row {
+      display: table-row;
+    }
+
+    .sig-box {
+      display: table-cell;
+      width: 33.33%;
+      font-size: 10.5px;
+      line-height: 1.35;
+      padding-right: 20px;
+      vertical-align: top;
+    }
+
+    .sig-box>div {
+      margin-bottom: 4px;
+    }
+
+    .disclaimer-nb {
+      font-size: 9.5px;
+      font-style: italic;
+      font-weight: bold;
+      text-align: center;
+      margin: 4px 0 2px 0;
+      color: #333;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #000;
+      padding-top: 4px;
+      margin-top: auto;
+    }
+
+    .gen-text {
+      font-size: 9px;
+      color: #333;
+      text-align: center;
+      flex: 1;
+    }
+
+    .footer-logo-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-logo-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-logo-left img,
+    .footer-logo-right img {
+      height: 26px;
+    }
+
+    .watermark-copy {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 110px;
+      color: rgba(220, 38, 38, 0.28);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 900;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 0;
+      display: none;
+    }
+
+    .dynamic-comment-inline {
+      display: none;
+      margin-right: 4px;
+    }
+
+    /* QR CODE STYLES */
+    #qr-code {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+
+    #qr-code canvas {
+      width: 44px !important;
+      height: 44px !important;
+    }
+
+    @media print {
+      @page {
+        size: landscape;
+        margin: 0.2in;
+      }
+
+      /* Keep flexbox in print so the footer can cleanly push to the bottom without overflowing! */
+      body {
+        background: none;
+        padding: 0;
+        display: block;
+      }
+
+      .page {
+        box-shadow: none;
+        width: 100%;
+        /* Same padding + min-height as the on-screen sheet so the JS row-fill
+           (measured on screen) matches the printed layout exactly. Fixed inches,
+           not vh — vh is unreliable in print and was spilling content to page 2. */
+        padding: 0.2in 0.4in;
+        display: flex;
+        flex-direction: column;
+        min-height: 7.6in;
+      }
+
+      .main-content {
+        display: block;
+      }
+
+      /* Table structural printing rules */
+      .transaction-table {
+        page-break-inside: auto;
+      }
+
+      .transaction-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+
+      /* Ensure header repeats on every new page! */
+      .transaction-table thead {
+        display: table-header-group;
+      }
+
+      /* CONTINUATION NOTICES PRINT RULES */
+      .table-continuation-foot {
+        display: table-footer-group; /* Automatically repeats on intermediate page breaks */
+      }
+
+      .continuation-cell {
+        text-align: center;
+        padding: 4px 0 !important;
+        border: none !important;
+        border-top: 1px dashed #000 !important;
+      }
+
+      .continuation-msg {
+        font-size: 9px;
+        font-weight: bold;
+        font-style: italic;
+        color: #444;
+        letter-spacing: 0.5px;
+      }
+
+      .table-end-notice {
+        display: block;
+        text-align: center;
+        font-size: 9px;
+        font-weight: bold;
+        font-style: italic;
+        margin: 4px 0 6px 0;
+        color: #000;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      /* Single page reports suppress the bottom continuation repeater */
+      body.single-page-report .table-continuation-foot {
+        display: none !important;
+      }
+
+      /* "Orphan" Prevention: Avoid breaking AFTER the very last row only */
+      .transaction-table tr:last-child {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      /* Ensures the footer content doesn't split across pages, and sticks close to the table */
+      .footer-wrapper {
+        page-break-inside: avoid;
+        margin-top: 6px;
+      }
+
+      .watermark-img,
+      .watermark-copy {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .watermark-img {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .watermark-copy {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+      }
+
+      .page-number-display {
+        display: none;
+      }
+
+      .footer-bottom {
+        margin-top: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <img id="watermark-img" class="watermark-img"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/250px-Coat_of_arms_of_Nigeria.svg.png"
+      alt="" />
+    <div id="wm-copy" class="watermark-copy">FILE COPY</div>
+
+    <div class="main-content">
+      <header>
+        <div class="header-top">
+          <div class="logo-box"><img src="http://app.klaes.ng/assets/logo/ministry1.jpg" alt="Logo" /></div>
+          <div class="title-block">
+            <h1>KANO STATE MINISTRY OF LAND AND PHYSICAL PLANNING</h1>
+            <h2>LEGAL SEARCH REPORT</h2>
+            <h3>On-Premise Pay-per-Search</h3>
+          </div>
+          <div id="qr-code" style="margin-right:8px;"></div>
+          <div class="logo-box"><img src="http://app.klaes.ng/assets/logo/ministry2.png" alt="Logo" /></div>
+        </div>
+      </header>
+
+      <div class="section-label">Property Details</div>
+      <!-- Property Details grid -->
+      <div class="prop-details">
+        <!-- Row 1 -->
+        <div class="lbl">File Number:</div>
+        <div class="val"><strong id="report-file-number">KN/RES/2018/1042</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">Lon/Lat:</div>
+        <div class="val"><strong id="report-district-lga">8.5321° E / 11.9964° N</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">Term:</div>
+        <div class="val"><strong id="report-term">99 Years</strong></div>
+        <div class="sp"></div>
+        <div class="lbl" id="report-client-name-lbl">Client Name:</div>
+        <div class="val"><strong id="report-client-name">Alhaji Usman Bello</strong></div>
+        
+        <!-- Row 2 -->
+        <div class="lbl">File Title (Current Holder):</div>
+        <div class="val"><strong id="report-file-title">ABDULLAHI MUKHTAR &amp; SONS LTD</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">Plot No:</div>
+        <div class="val"><strong id="report-plot-no">Plot 142B</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">Commencement <br>Date:</div>
+        <div class="val"><strong id="report-commencement-date">12/01/1998 (CofO)</strong></div>
+        <div class="sp"></div>
+        <div class="lbl" id="report-client-address-lbl">Client Address:</div>
+        <div class="val"><strong id="report-client-address">No. 15 Zoo Road, Kano</strong></div>
+        
+        <!-- Row 3 -->
+        <div class="lbl">Land Use:</div>
+        <div class="val"><strong id="report-land-use">Residential</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">Size:</div>
+        <div class="val"><strong id="report-size">1,250.00 Sq.M</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">Residual Term:</div>
+        <div class="val"><strong id="report-rent">71 Years</strong></div>
+        <div class="sp"></div>
+        <div id="report-date-line" style="grid-column: span 2; font-weight: bold; font-size: 12px;">Date: March 19, 2026</div>
+        
+        <!-- Row 4 -->
+        <div class="lbl">Plot Description:</div>
+        <div class="val"><strong id="report-plot-description">Baddarawa Commercial Layout</strong></div>
+        <div class="sp"></div>
+        <div class="lbl">TP No:</div>
+        <div class="val"><strong id="report-tpno">TP/KN/98/204</strong></div>
+        <div class="sp"></div>
+        <div class="lbl"></div>
+        <div class="val"></div>
+        <div class="sp"></div>
+        <div class="lbl"></div>
+        <div class="val"></div>
+      </div>
+
+      <div class="section-label">File History</div>
+      <div class="table-wrap">
+        <table class="transaction-table">
+          <thead>
+            <tr class="header-row">
+              <th style="width: 3%">S/N</th>
+              <th style="width: 11%">File No</th>
+              <th style="width: 10%; white-space: nowrap;">Instrument/<br>Transaction Type</th>
+              <th style="width: 11%">Party 1</th>
+              <th style="width: 11%">Party 2</th>
+              <th style="width: 6%" class="party-3-col">Party 3</th>
+              <th style="width: 6%" class="party-4-col">Party 4</th>
+              <th style="width: 9%">Transaction Date</th>
+              <th style="width: 9%">Reg. Time/Date</th>
+              <th style="width: 9%">Particulars</th>
+              <th style="width: 5%">Caveat</th>
+              <th style="width: 10%">Comments</th>
+            </tr>
+          </thead>
+
+          <!-- Table Continuation Footer Repeater -->
+          <tfoot class="table-continuation-foot">
+            <tr>
+              <td colspan="12" class="continuation-cell">
+                <span class="continuation-msg">*** CONTINUED ON NEXT PAGE ***</span>
+              </td>
+            </tr>
+          </tfoot>
+
+          <tbody id="report-transactions-body">
+            <!-- Populated via transactionsData JSON -->
+          </tbody>
+        </table>
+
+        <!-- End of Transaction History Notice -->
+        <div id="table-end-marker" class="table-end-notice">
+          *** END OF TRANSACTION HISTORY ***
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="remarks-container">
+        <div class="remarks-label">Remarks</div>
+        <div class="remarks-content">
+          <p style="font-size:13px; font-weight:bold; margin:0 0 8px 0; line-height: 1.4;">
+            <span id="report-ground-rent" class="dynamic-comment-inline" style="color:#b05c00;"></span>
+            <span id="report-encumbrance-comment" class="dynamic-comment-inline" style="color:#166534;"></span>
+            <span id="report-litigation-comment" class="dynamic-comment-inline" style="color:#be123c;"></span>
+            <span id="report-no-cofo-comment" class="dynamic-comment-inline" style="color:#166534;"></span>
+            <span id="report-wrc-comment" class="dynamic-comment-inline" style="color:#dc2626;"></span>
+            <span id="report-cofo-comment" class="dynamic-comment-inline" style="color:#166534;"></span>
+
+            <span id="report-caveat-note" class="dynamic-comment"
+              style="display:none; margin-bottom:8px; font-size:13px; font-weight:bold;"></span>
+          </p>
+          <p id="report-general-comment" class="dynamic-comment"
+            style="display:none; margin:0 0 8px 0; font-size:13px; font-weight:bold; color:#1f2937;"></p>
+        </div>
+      </div>
+
+      <div class="signature-section">
+        <div class="sig-row">
+          <div class="sig-box">
+            <br>
+            <div>Name: <span id="report-full-name" style="border-bottom: 1px dotted #000; min-width: 200px; display: inline-block; padding: 0 4px;">M. A. Haruna</span></div>
+            <br>
+            <div>Rank: <span id="report-rank" style="border-bottom: 1px dotted #000; min-width: 200px; display: inline-block; padding: 0 4px;">Higher Executive Officer</span></div>
+            <br>
+            <div>Sign:............................ Date: <span id="report-sign-date" style="border-bottom: 1px dotted #000; min-width: 90px; display: inline-block; padding: 0 4px;">19/03/2026</span></div>
+          </div>
+          <div class="sig-box">
+            <br>
+            <div>Verified by:.......................................</div>
+            <br>
+            <div>Rank:...............................................</div>
+            <br>
+            <div>Sign:............................ Date:................</div>
+          </div>
+          <div class="sig-box">
+            <br>
+            <div>Sign:............................ Date:................</div>
+            <div style="font-weight:bold">Director Deeds</div>
+            <div style="font-size:9px">(for Permanent Secretary/Hon. Commissioner)</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="disclaimer-nb">
+        N.B: This search report is deduced based on the available records from the file and does not represent any
+        document in possession of any body.<span id="report-timestamp"
+          style="font-weight:bold; color:#000; display:none;"></span>
+      </p>
+    </div> <!-- End of footer-wrapper -->
+
+    <div class="footer-bottom">
+      <div class="footer-logo-left">
+        <img src="http://app.klaes.ng/storage/upload/logo/logo.png" alt="KLAES" />
+      </div>
+      <div class="gen-text" id="report-generated-by">Generated via Pay-Per-Search</div>
+      <div class="footer-logo-right">
+        <img src="http://app.klaes.ng/assets/logo/las.jpg" alt="LAS" />
+      </div>
+    </div>
+  </div> <!-- End of page -->
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+    // JSON Dataset for transactions
+    const transactionsData = [
+      {
+        sn: 1,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Certificate of Occupancy",
+        grantor: "Kano State Government",
+        grantee: "Ibrahim Ahmad Suleiman",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "12/01/1998",
+        reg_time: "10:15 AM",
+        reg_date: "15/01/1998",
+        reg_no: "14/14/1998 A",
+        caveat: "Nil",
+        comments: "Initial Allocation granted."
+      },
+      {
+        sn: 2,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Deed of Assignment",
+        grantor: "Ibrahim Ahmad Suleiman",
+        grantee: "Kabiru Salisu & Co.",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "04/05/2005",
+        reg_time: "02:30 PM",
+        reg_date: "10/05/2005",
+        reg_no: "45/45/2005 B",
+        caveat: "Nil",
+        comments: "Duly stamped and registered."
+      },
+      {
+        sn: 3,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Tripartite Mortgage",
+        grantor: "Kabiru Salisu & Co.",
+        grantee: "First Bank Nigeria PLC",
+        party_3: "Kano Land Bureau",
+        party_4: "-",
+        transaction_date: "18/11/2012",
+        reg_time: "11:00 AM",
+        reg_date: "22/11/2012",
+        reg_no: "88/88/2012 C",
+        caveat: "Active",
+        comments: "Mortgage facility registered."
+      },
+      {
+        sn: 4,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Deed of Release",
+        grantor: "First Bank Nigeria PLC",
+        grantee: "Kabiru Salisu & Co.",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "14/02/2019",
+        reg_time: "09:45 AM",
+        reg_date: "20/02/2019",
+        reg_no: "12/12/2019 D",
+        caveat: "Cleared",
+        comments: "Mortgage fully discharged."
+      },
+      {
+        sn: 5,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Deed of Assignment",
+        grantor: "Kabiru Salisu & Co.",
+        grantee: "Abdullahi Mukhtar & Sons Ltd",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "10/10/2023",
+        reg_time: "03:15 PM",
+        reg_date: "18/10/2023",
+        reg_no: "101/101/2023 E",
+        caveat: "Nil",
+        comments: "Current registered holder."
+      },
+      {
+        sn: 6,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Deed of Release",
+        grantor: "First Bank Nigeria PLC",
+        grantee: "Kabiru Salisu & Co.",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "14/02/2019",
+        reg_time: "09:45 AM",
+        reg_date: "20/02/2019",
+        reg_no: "12/12/2019 D",
+        caveat: "Cleared",
+        comments: "Mortgage fully discharged."
+      },
+       {
+        sn: 7,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Deed of Release",
+        grantor: "First Bank Nigeria PLC",
+        grantee: "Kabiru Salisu & Co.",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "14/02/2019",
+        reg_time: "09:45 AM",
+        reg_date: "20/02/2019",
+        reg_no: "12/12/2019 D",
+        caveat: "Cleared",
+        comments: "Mortgage fully discharged."
+      },
+       {
+        sn: 8,
+        file_no: "KN/RES/2018/1042",
+        instrument_type: "Deed of Release",
+        grantor: "First Bank Nigeria PLC",
+        grantee: "Kabiru Salisu & Co.",
+        party_3: "-",
+        party_4: "-",
+        transaction_date: "14/02/2019",
+        reg_time: "09:45 AM",
+        reg_date: "20/02/2019",
+        reg_no: "12/12/2019 D",
+        caveat: "Cleared",
+        comments: "Mortgage fully discharged."
+      },
+      
+   
+    ];
+
+    function renderTransactions(rows) {
+      const tbody = document.getElementById('report-transactions-body');
+      if (!tbody || !Array.isArray(rows)) return;
+
+      const rowHtml = (row) => `
+        <tr>
+          <td>${row.sn}</td>
+          <td>${row.file_no || '-'}</td>
+          <td>${row.instrument_type}</td>
+          <td>${row.grantor}</td>
+          <td>${row.grantee}</td>
+          <td class="party-3-col">${row.party_3 || '-'}</td>
+          <td class="party-4-col">${row.party_4 || '-'}</td>
+          <td>${row.transaction_date || '-'}</td>
+          <td><strong>${row.reg_time}</strong><br>${row.reg_date}</td>
+          <td>${row.reg_no}</td>
+          <td>${row.caveat}</td>
+          <td>${row.comments}</td>
+        </tr>`;
+        
+      tbody.innerHTML = rows.map(rowHtml).join('');
+
+      const hasP3 = rows.some(r => r.party_3 && r.party_3 !== '-' && String(r.party_3).trim() !== '');
+      const hasP4 = rows.some(r => r.party_4 && r.party_4 !== '-' && String(r.party_4).trim() !== '');
+      if (!hasP3) document.querySelectorAll('.party-3-col').forEach(el => el.style.display = 'none');
+      if (!hasP4) document.querySelectorAll('.party-4-col').forEach(el => el.style.display = 'none');
+    }
+
+    let __pprDataReady = false, __pprWmReady = false, __pprPrinted = false;
+    const __pprShouldPrint = new URLSearchParams(window.location.search).has('status');
+
+    function __pprMaybePrint() {
+      if (__pprShouldPrint && __pprDataReady && __pprWmReady && !__pprPrinted) {
+        __pprPrinted = true;
+        setTimeout(function () { try { window.print(); } catch (_e) { } }, 350);
+      }
+    }
+
+    // 1. DYNAMIC FONT REDUCTION LOGIC
+    function autoFitTableRows() {
+      const rows = document.querySelectorAll('#report-transactions-body tr');
+      const MAX_TARGET_HEIGHT = 28; // Threshold in pixels before downsizing font (~2 lines + padding)
+
+      rows.forEach(row => {
+        row.classList.remove('row-compact', 'row-tight');
+        let currentHeight = row.getBoundingClientRect().height;
+
+        // Apply 8.5px font reduction if height exceeds target
+        if (currentHeight > MAX_TARGET_HEIGHT) {
+          row.classList.add('row-compact');
+          currentHeight = row.getBoundingClientRect().height;
+        }
+
+        // Apply 7.5px font reduction if it still exceeds target
+        if (currentHeight > MAX_TARGET_HEIGHT) {
+          row.classList.remove('row-compact');
+          row.classList.add('row-tight');
+        }
+      });
+    }
+
+    // 2. MULTI-PAGE PAGE COUNT DETECTOR
+    function checkMultiPageStatus() {
+      const pageElement = document.querySelector('.page');
+      if (!pageElement) return;
+
+      // Check if rendered height exceeds 1 sheet printable height (~730px or ~7.6in)
+      const isMultiPage = pageElement.scrollHeight > (pageElement.clientHeight + 5);
+
+      if (isMultiPage) {
+        document.body.classList.remove('single-page-report');
+        document.body.classList.add('multi-page-report');
+      } else {
+        document.body.classList.remove('multi-page-report');
+        document.body.classList.add('single-page-report');
+      }
+    }
+
+    // 3. ROW STRETCHING LOGIC
+    function fillSheetRows() {
+      const tbody = document.getElementById('report-transactions-body');
+      const footerWrap = document.querySelector('.footer-wrapper');
+      const footerBottom = document.querySelector('.footer-bottom');
+      if (!tbody || !footerWrap || !footerBottom) return;
+      const rows = Array.prototype.slice.call(tbody.rows);
+      if (!rows.length) return;
+
+      rows.forEach(function (r) { r.style.height = ''; });
+
+      const gap = footerBottom.getBoundingClientRect().top - footerWrap.getBoundingClientRect().bottom;
+      if (gap > 10) {
+        const add = gap / rows.length;
+        rows.forEach(function (r) {
+          r.style.height = (r.getBoundingClientRect().height + add) + 'px';
+        });
+      }
+    }
+
+    function runLayoutAdjustments() {
+      autoFitTableRows();
+      checkMultiPageStatus();
+      requestAnimationFrame(() => { fillSheetRows(); });
+    }
+
+    (function () {
+      // Default initial render using local JSON dataset
+      renderTransactions(transactionsData);
+
+      const params = new URLSearchParams(window.location.search);
+      const fileNo = params.get('file_number') || '';
+      const propId = params.get('prop_id') || '';
+      const displayFileNumber = params.get('display_file_number') || '';
+      const displayFileTitle = params.get('display_file_title') || '';
+      const displayDistrictLga = params.get('display_district_lga') || '';
+      const displayLandUse = params.get('display_land_use') || '';
+      const displaySize = params.get('display_size') || '';
+      const displayPlotNo = params.get('display_plot_no') || '';
+      const displayTpno = params.get('display_tpno') || '';
+      const displayResidualTerm = params.get('display_residual_term') || '';
+      const displayCommencementDate = params.get('display_commencement_date') || '';
+      const displayCommencementSource = params.get('display_commencement_source') || '';
+      const clientName = params.get('client_name') || '';
+      const clientAddress = params.get('client_address') || '';
+      const timelineOrder = params.get('timeline_order') || '';
+      const excludedKeys = params.get('excluded_keys') || '';
+
+      runLayoutAdjustments();
+      window.addEventListener('load', runLayoutAdjustments);
+      window.addEventListener('beforeprint', runLayoutAdjustments);
+
+      if (!fileNo && !propId) {
+        __pprDataReady = true;
+        __pprMaybePrint();
+        return;
+      }
+
+      const url = '/legal-search/report-template-data?' + new URLSearchParams({
+        file_number: fileNo,
+        prop_id: propId,
+        display_file_number: displayFileNumber,
+        display_file_title: displayFileTitle,
+        display_district_lga: displayDistrictLga,
+        display_land_use: displayLandUse,
+        display_size: displaySize,
+        display_plot_no: displayPlotNo,
+        display_tpno: displayTpno,
+        display_residual_term: displayResidualTerm,
+        display_commencement_date: displayCommencementDate,
+        display_commencement_source: displayCommencementSource,
+        client_name: clientName,
+        client_address: clientAddress,
+        timeline_order: timelineOrder,
+        excluded_keys: excludedKeys,
+      }).toString();
+
+      fetch(url, { headers: { 'Accept': 'application/json' } })
+        .then(r => r.json())
+        .then(payload => {
+          if (!payload || !payload.success || !payload.data) return;
+          const d = payload.data;
+
+          const setText = (id, v) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = (v != null && String(v).trim() !== '') ? v : '-';
+          };
+
+          const titleCase = (v) => (v || '').toString().toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase());
+
+          const termFromLandUse = (landUse) => {
+            const lu = String(landUse || '').toUpperCase();
+            if (lu.includes('RESIDENT') || lu.startsWith('RES') || lu.includes('AGRIC') || lu.startsWith('AG')) return '99 Years';
+            if (lu.includes('COMMERC') || lu.startsWith('COM') || lu.includes('INDUSTR') || lu.startsWith('IND')) return '40 Years';
+            return '';
+          };
+
+          setText('report-date-line', d.date_line);
+          setText('report-file-number', d.file_number);
+          setText('report-file-title', d.file_title ? String(d.file_title).toUpperCase() : d.file_title);
+          setText('report-district-lga', d.lon_lat);
+          setText('report-size', d.size);
+          setText('report-land-use', d.land_use);
+          setText('report-term', termFromLandUse(d.land_use));
+          setText('report-rent', d.residual_term);
+          const commencementText = (d.commencement_date && d.commencement_source)
+            ? `${d.commencement_date} (${d.commencement_source})`
+            : d.commencement_date;
+          setText('report-commencement-date', commencementText);
+          setText('report-plot-no', d.plot_no);
+          setText('report-plot-description', d.plot_description);
+          setText('report-tpno', d.tpno);
+          setText('report-client-name', titleCase(d.client_name));
+          setText('report-client-address', titleCase(d.client_address));
+          setText('report-generated-by', d.generated_by);
+          setText('report-full-name', d.full_name);
+          setText('report-rank', d.rank);
+          setText('report-sign-date', d.generated_date || (d.date_line || '').replace(/^Date:\s*/i, ''));
+
+          const tsEl = document.getElementById('report-timestamp');
+          if (tsEl) {
+            const dateStr = (d.date_line || new Date().toLocaleDateString()).replace(/^Date:\s*/i, '');
+            const fileNoStr = d.file_number || '-';
+            tsEl.textContent = ' This is a single-use paid search report for File No: ' + fileNoStr + ', generated as at ' + dateStr + '.';
+            tsEl.style.display = 'inline';
+          }
+
+          // Caveat note
+          const caveatEl = document.getElementById('report-caveat-note');
+          if (caveatEl && d.caveat_note) {
+            caveatEl.textContent = ' ' + d.caveat_note;
+            caveatEl.style.display = 'inline';
+            if (d.under_investigation || d.is_caveated || d.is_flagged) {
+              caveatEl.style.color = '#dc2626';
+            } else {
+              caveatEl.style.color = '#166534';
+            }
+          }
+
+          // Ground rent
+          const grEl = document.getElementById('report-ground-rent');
+          if (grEl && d.ground_rent) {
+            const grText = d.ground_rent.trim();
+            grEl.textContent = grText.endsWith('.') ? grText : grText + '.';
+            grEl.style.display = 'inline';
+          }
+
+          // Litigation comment
+          const ltEl = document.getElementById('report-litigation-comment');
+          if (ltEl && d.litigation_comment) {
+            const ltText = d.litigation_comment.trim();
+            ltEl.textContent = ltText.endsWith('.') ? ltText : ltText + '.';
+            ltEl.style.display = 'inline';
+          }
+
+          // General comment
+          const genEl = document.getElementById('report-general-comment');
+          if (genEl && d.general_comment) {
+            const genText = d.general_comment.trim();
+            genEl.textContent = genText.endsWith('.') ? genText : genText + '.';
+            genEl.style.display = 'block';
+          }
+
+          // No CoFO comment
+          const ncEl = document.getElementById('report-no-cofo-comment');
+          if (ncEl && d.no_cofo_comment) {
+            const ncText = d.no_cofo_comment.trim();
+            ncEl.textContent = ncText.endsWith('.') ? ncText : ncText + '.';
+            ncEl.style.display = 'inline';
+          }
+
+          // Encumbrance comment
+          const ecEl = document.getElementById('report-encumbrance-comment');
+          if (ecEl && d.encumbrance_comment) {
+            const ecText = d.encumbrance_comment.trim();
+            ecEl.textContent = ' ' + (ecText.endsWith('.') ? ecText : ecText + '.');
+            ecEl.style.display = 'inline';
+          }
+
+          // W/R/C notice
+          const wrcEl = document.getElementById('report-wrc-comment');
+          if (wrcEl && d.wrc_comment) {
+            const wrcText = d.wrc_comment.trim();
+            wrcEl.textContent = ' ' + wrcText;
+            wrcEl.style.display = 'inline';
+          }
+
+          // CoFO ready / collected notice
+          const cofoEl = document.getElementById('report-cofo-comment');
+          if (cofoEl && d.cofo_comment) {
+            const cofoText = d.cofo_comment.trim();
+            cofoEl.textContent = ' ' + (cofoText.endsWith('.') ? cofoText : cofoText + '.');
+            cofoEl.style.display = 'inline';
+          }
+
+          if (Array.isArray(d.rows) && d.rows.length > 0) {
+            renderTransactions(d.rows);
+          }
+
+          // QR Code rendering
+          if (d.qr_data && typeof QRCode !== 'undefined') {
+            const qrContainer = document.getElementById('qr-code');
+            if (qrContainer) {
+              qrContainer.innerHTML = '';
+              new QRCode(qrContainer, {
+                text: d.qr_data,
+                width: 44,
+                height: 44,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.L,
+              });
+            }
+          }
+
+          runLayoutAdjustments();
+
+          __pprDataReady = true;
+          __pprMaybePrint();
+        })
+        .catch(() => {
+          __pprDataReady = true;
+          __pprMaybePrint();
+        });
+    })();
+  </script>
+</body>
+
+</html>
