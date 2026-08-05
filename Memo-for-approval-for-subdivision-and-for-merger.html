@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Memo - Document Layout</title>
+    <style>
+        /* Page setup for A4 Print */
+        @page {
+            size: A4 portrait;
+            /* Reserve top margin for pre-printed letterhead header 
+               and left margin for vertical pre-printed side text */
+            margin-top: 25mm;   /* Adjust if header height varies */
+            margin-left: 30mm;  /* Adjust based on left sidebar width */
+            margin-right: 15mm;
+            margin-bottom: 15mm;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: #000;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Screen Preview Container to simulate pre-printed margins */
+        .document-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Typography Styles */
+        .recipient-header {
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: underline;
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+
+        p {
+            margin: 0 0 14px 0;
+            text-align: justify;
+        }
+
+        .measurements-block {
+            margin: 10px 0 16px 0;
+            font-family: 'Times New Roman', Times, serif; /* Keeps precise measurements distinct */
+        }
+
+        .measurements-block p {
+            margin-bottom: 6px;
+        }
+
+        /* Sign-off & Forms Section */
+        .signature-section {
+            margin-top: 25px;
+        }
+
+        .flex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .left-col {
+            width: 45%;
+        }
+
+        .right-col {
+            width: 45%;
+            text-align: right;
+        }
+
+        .field-line {
+            display: flex;
+            margin-bottom: 6px;
+        }
+
+        .field-label {
+            white-space: nowrap;
+        }
+
+        .dots-line {
+            flex-grow: 1;
+            border-bottom: 1px dashed #000;
+            margin-left: 4px;
+        }
+
+        .solid-line {
+            width: 100%;
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            height: 1px;
+            margin-bottom: 3px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        /* Print Media Rule adjustments */
+        @media print {
+            .document-container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="document-container">
+
+    <div class="recipient-header">THE PERMANENT SECRETARY</div>
+
+    <p>At page 69 is an application for Change of purpose from Commercial to industrial use in respect of a property covered by tittle number NO. LKN/CON/COM/89/17 (MNKL 02930) situated at AUJARAWA IN GEZAWA LOCAL GOVERNMENT AREA. submitted by K & A AGROTECH & RICE MILLS LIMITED.</p>
+
+    <p>The application was referred to Physical planning department for planning views, consequently; the department recommended the application for Change of purpose from Commercial to industrial use. Via its recommendation letter at page 75. this in view of the fact that, the site is obtainable accessible adequate in size requirement and conforms with the surrounding land use.</p>
+
+    <p>However, this recommendation is based on the recommended site plan at page 75 and back cover with the following measurements</p>
+
+    <div class="measurements-block">
+        <p><strong>Part A=</strong> 135.01m x 40.01m x 103.11m x 78.91m x 33.24m x 23.60m x 31.09m x 41.26m x 50.09m x 100.26m x 46.40m x 95.01m x 31.81m x 166.95m x 103.12m x 51.17m x 60.31m (6.443Ha)</p>
+        <p><strong>Part B=</strong> 13.92m x85.44m x 25.88m x 16.20m x 122.57m (0.1551Ha)</p>
+    </div>
+
+    <p>Meanwhile, the tittle was granted for commercial purpose to industrial for a term of 40 years commencing from 30<sup>th</sup> April 1990 AND now has the residual term of 4 years to expire.</p>
+
+    <p>In view of the above, you may kindly wish to recommend the following for approval of the Honourable commissioner</p>
+
+    <p><strong>I)</strong> consider and above the application for change of purpose from commercial to industrial use at Aujarawa in gezawa local government Area covered by certificate of occupancy NO.LKN/CON/COM/89/17(KNML 02930) in favour of K & A AGROTECH AND RICE MILLS LIMITED please</p>
+
+    <div class="signature-section">
+        
+        <!-- Field Row 1 -->
+        <div class="flex-row">
+            <div class="left-col">
+                <div class="field-line"><span class="field-label">Name:-</span><span class="dots-line"></span></div>
+                <div class="field-line"><span class="field-label">Rank:-</span><span class="dots-line"></span></div>
+                <div class="field-line"><span class="field-label">Sign:-</span><span class="dots-line"></span></div>
+                <div class="field-line"><span class="field-label">Date:-</span><span class="dots-line"></span></div>
+            </div>
+            <div class="right-col">
+                <div style="margin-bottom: 25px;">
+                    countersign:<span class="solid-line" style="width: 60%;"></span>
+                </div>
+                <div style="font-weight: bold;">Director Deeds</div>
+                <div style="margin-top: 10px;">
+                    Date:<span class="solid-line" style="width: 70%;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Permanent Secretary Recommendation -->
+        <div class="section-title">THE HONOURABLE COMMISSIONER</div>
+        <p>The application is hereby recommended for your kind approval, please.</p>
+        
+        <div class="flex-row" style="margin-bottom: 25px;">
+            <div class="left-col">
+                <div>Date: <span class="solid-line" style="width: 50%;"></span> 2026.</div>
+                <div style="font-weight: bold; margin-top: 25px;">PERMANENT SECRETARY</div>
+            </div>
+            <div class="right-col">
+                <!-- Signature line added for Permanent Secretary -->
+                <span class="solid-line" style="width: 80%;"></span>
+                <div style="font-weight: bold; text-align: center; float: right; width: 80%; margin-top: 4px;">PERMANENT SECRETARY</div>
+            </div>
+        </div>
+
+        <!-- Section 3: Final Approval -->
+        <p style="margin-bottom: 4px;">The application is hereby APPROVED/NOT APPROVED.</p>
+        
+        <div class="flex-row" style="margin-top: 2px;">
+            <div class="left-col" style="align-self: flex-start; margin-top: 2px;">
+                <div>Date: <span class="solid-line" style="width: 50%;"></span> 2026.</div>
+            </div>
+            <div class="right-col" style="width: 65%; margin-top: 35px;">
+                <!-- Lowered signature line & designation -->
+                <span class="solid-line" style="width: 80%;"></span>
+                <div style="font-weight: bold; margin-top: 4px; text-align: center; float: right; width: 80%;">THE HONOURABLE COMMISSIONER</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
