@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CompensatePro · Field Assessment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0b1220;
+            --bg-card: #151f32;
+            --bg-card-alt: #1e2a42;
+            --bg-elevated: #1a2538;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-glow: rgba(16, 185, 129, 0.18);
+            --primary-soft: rgba(16, 185, 129, 0.08);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --border-color: #2a3548;
+            --border-light: #334155;
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.12);
+            --warning: #f59e0b;
+            --info: #38bdf8;
+            --success: #22c55e;
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; line-height: 1.45; }
+        .app-view { display: none; flex: 1; padding-top: calc(56px + var(--safe-area-top)); padding-bottom: calc(72px + var(--safe-area-bottom)); }
+        .app-view.active { display: block; }
+
+        /* HEADER */
+        .pwa-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: calc(56px + var(--safe-area-top));
+            padding-top: var(--safe-area-top);
+            background: rgba(21, 31, 50, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: 16px;
+            padding-right: 16px;
+            z-index: 1000;
+        }
+        .pwa-header h2 { font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
+        .pwa-header .header-sub { font-size: 11px; color: var(--text-muted); display: block; margin-top: 1px; }
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--primary);
+            background: var(--primary-soft);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .status-pill i { font-size: 10px; }
+
+        /* STEPPER */
+        .stepper-wrapper {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: calc(56px + var(--safe-area-top));
+            z-index: 900;
+        }
+        .form-stepper {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 14px 16px 12px;
+            gap: 4px;
+            scrollbar-width: none;
+        }
+        .form-stepper::-webkit-scrollbar { display: none; }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            opacity: 0.45;
+            transition: all var(--transition);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 8px;
+        }
+        .step-indicator:hover { opacity: 0.75; }
+        .step-indicator.active { opacity: 1; background: var(--primary-soft); }
+        .step-indicator.completed { opacity: 0.85; }
+
+        .step-indicator .num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-card-alt);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all var(--transition);
+            border: 1.5px solid transparent;
+        }
+        .step-indicator.active .num { background: var(--primary); color: white; box-shadow: 0 0 0 3px var(--primary-glow); }
+        .step-indicator.completed .num { background: var(--primary-dark); color: white; }
+        .step-indicator .label { font-size: 12px; font-weight: 600; color: var(--text-main); white-space: nowrap; }
+        .step-indicator .sep { color: var(--text-dim); margin-left: 2px; font-size: 11px; opacity: 0.6; }
+
+        .progress-track { height: 3px; background: var(--bg-card-alt); margin: 0 16px 10px; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-dark), var(--primary)); border-radius: 2px; transition: width 0.35s ease; width: 16.66%; }
+
+        .content-container { padding: 20px 16px 28px; max-width: 800px; margin: 0 auto; }
+        .step-title { font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; letter-spacing: -0.02em; }
+        .step-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+
+        .form-grid { display: flex; flex-direction: column; gap: 16px; }
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 480px) { .form-row-2 { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-main); letter-spacing: 0.01em; }
+        .required { color: var(--danger); margin-left: 2px; }
+
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="date"], select, textarea {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-elevated);
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+            -webkit-appearance: none;
+        }
+        textarea { height: 96px; padding: 12px 14px; resize: vertical; min-height: 80px; }
+        input::placeholder, textarea::placeholder { color: var(--text-dim); }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: var(--bg-card);
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        /* PROJECT SELECTOR - MANDATORY WITH EMBEDDED COMPENSATION TYPE */
+        .project-selector {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px 18px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .project-selector:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+        .project-selector.warning {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+            animation: shake 0.4s ease;
+        }
+        .project-selector .project-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .project-selector select { margin-top: 2px; }
+        .project-selector .project-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        .project-selector .project-meta span {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .project-selector .project-meta strong { color: var(--text-main); }
+
+        /* COMPENSATION TYPE BADGE - READ ONLY, DERIVED FROM PROJECT */
+        .comp-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .comp-type-badge.monetary { background: var(--primary-soft); color: var(--primary); }
+        .comp-type-badge.land { background: rgba(56, 189, 248, 0.15); color: var(--info); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        /* TABLES */
+        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 14px; border: 1px solid var(--border-color); border-radius: var(--radius); background: var(--bg-card); }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 580px; }
+        .data-table th, .data-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .data-table th { background: var(--bg-card-alt); font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table input, .data-table select {
+            height: 38px;
+            font-size: 13px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            padding: 0 10px;
+            width: 100%;
+            min-width: 60px;
+        }
+        .data-table input:focus, .data-table select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+        .tree-row-total { font-weight: 700; color: var(--text-main); white-space: nowrap; }
+        .tree-row-total.updated { animation: pulse-green 0.3s ease; }
+        @keyframes pulse-green {
+            0% { color: var(--text-main); }
+            50% { color: var(--primary); }
+            100% { color: var(--text-main); }
+        }
+
+        /* BUTTONS */
+        .btn {
+            height: 46px;
+            padding: 0 18px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: -0.01em;
+        }
+        .btn-sm { height: 34px; padding: 0 12px; font-size: 12px; border-radius: 7px; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25); }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary { background: var(--bg-card-alt); color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--border-color); }
+        .btn-danger { background: var(--danger-soft); color: var(--danger); }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
+        .btn-success { background: var(--success); color: white; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25); }
+        .btn-success:hover { filter: brightness(1.08); }
+        .btn-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .btn-warning:hover { background: rgba(245, 158, 11, 0.25); }
+        .btn-block { width: 100%; }
+        .btn:disabled { opacity: 0.45; pointer-events: none; transform: none !important; box-shadow: none !important; }
+
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+        .mobile-card { background: var(--bg-card); border-radius: var(--radius); padding: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; transition: border-color var(--transition); }
+        .mobile-card:hover { border-color: var(--border-light); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .card-title { font-size: 14px; font-weight: 650; line-height: 1.3; }
+        .card-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+
+        .upload-zone { background: var(--bg-elevated); border: 1.5px dashed var(--border-color); border-radius: var(--radius); padding: 28px 16px; text-align: center; color: var(--text-muted); cursor: pointer; transition: all var(--transition); }
+        .upload-zone:hover { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+        .upload-zone i { font-size: 22px; margin-bottom: 8px; display: block; }
+        .upload-zone span { font-size: 13px; }
+
+        .total-bar { margin-top: 16px; background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 16px; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center; }
+        .total-bar span:first-child { font-weight: 600; font-size: 14px; }
+        .total-value { font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: -0.02em; }
+
+        .summary-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .summary-row span:first-child { color: var(--text-muted); }
+        .summary-row span:last-child { font-weight: 600; }
+        .summary-divider { height: 1px; background: var(--border-color); margin: 2px 0; }
+
+        .info-note { margin-top: 14px; font-size: 12px; color: var(--text-muted); display: flex; align-items: flex-start; gap: 8px; line-height: 1.45; }
+        .info-note i { margin-top: 2px; color: var(--info); }
+
+        .count-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--text-muted); }
+
+        .nav-buttons { display: flex; gap: 12px; margin-top: 28px; }
+        .nav-buttons .btn { flex: 1; }
+
+        .action-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .action-row .btn { flex: 1; min-width: 120px; }
+
+        .mt-2 { margin-top: 12px; }
+        .flex { display: flex; gap: 10px; }
+
+        /* LOGIN */
+        #loginView {
+            position: fixed; inset: 0; background: var(--bg-main);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 24px; z-index: 2000;
+        }
+        .login-box { width: 100%; max-width: 400px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 36px 28px 32px; box-shadow: var(--shadow-md); }
+        .logo-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
+        .logo-wrap img { width: 88px; height: 88px; object-fit: contain; border-radius: 18px; filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.25)); }
+        .login-box h2 { font-size: 22px; font-weight: 700; text-align: center; letter-spacing: -0.02em; }
+        .login-box .subtitle { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 6px; margin-bottom: 28px; }
+
+        .profile-header { text-align: center; margin-bottom: 28px; padding-top: 8px; }
+        .profile-avatar { width: 76px; height: 76px; border-radius: 50%; background: var(--primary-soft); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 30px; color: var(--primary); }
+        .profile-header h3 { font-size: 18px; font-weight: 700; }
+        .profile-header .role { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .profile-menu { display: flex; flex-direction: column; gap: 10px; }
+        .profile-item { background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 16px; border-radius: var(--radius); display: flex; align-items: center; justify-content: space-between; font-size: 14px; cursor: pointer; transition: all var(--transition); }
+        .profile-item:hover { border-color: var(--border-light); background: var(--bg-elevated); }
+        .profile-item .left { display: flex; align-items: center; gap: 12px; }
+        .badge-count { background: var(--primary); color: white; border-radius: 12px; padding: 2px 9px; font-size: 11px; font-weight: 600; }
+
+        .pwa-tab-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: calc(64px + var(--safe-area-bottom));
+            padding-bottom: var(--safe-area-bottom);
+            background: rgba(21, 31, 50, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-dim);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 33.33%;
+            padding: 8px 0;
+            transition: color var(--transition);
+            position: relative;
+        }
+        .tab-item i { font-size: 20px; transition: transform var(--transition); }
+        .tab-item.active { color: var(--primary); }
+        .tab-item.active i { transform: scale(1.08); }
+
+        .form-step { display: none; animation: fadeIn 0.25s ease; }
+        .form-step.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.error { border-color: var(--danger); }
+        .toast.success { border-color: var(--success); }
+        .toast.warning { border-color: var(--warning); }
+        .toast i { margin-right: 8px; }
+        .toast.error i { color: var(--danger); }
+        .toast.success i { color: var(--success); }
+        .toast.warning i { color: var(--warning); }
+
+        /* Section visibility based on compensation type */
+        .comp-type-dependent {
+            transition: opacity 0.3s ease, max-height 0.3s ease;
+        }
+        .comp-type-dependent.hidden-section {
+            opacity: 0.3;
+            pointer-events: none;
+            position: relative;
+        }
+        .comp-type-dependent.hidden-section::after {
+            content: '⚠️ Not applicable for this compensation type';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85);
+            color: var(--warning);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast"></div>
+
+    <!-- LOGIN VIEW -->
+    <div id="loginView">
+        <div class="login-box">
+            <div class="logo-wrap">
+                <img src="logo2.jpg" alt="Survey Field App Logo">
+            </div>
+            <h2>CompensatePro</h2>
+            <p class="subtitle">Field Survey & Assessment Portal</p>
+            <form onsubmit="handleLogin(event)" class="form-grid">
+                <div class="form-group">
+                    <label>Agent Email / Username</label>
+                    <input type="email" value="clement@agency.gov.ng" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" value="••••••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">
+                    <i class="fas fa-right-to-bracket"></i> Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN FORM VIEW -->
+    <div id="formView" class="app-view active">
+        <header class="pwa-header">
+            <div>
+                <h2>New Compensation Register</h2>
+                <span class="header-sub">Field Assessment Entry</span>
+            </div>
+            <div class="status-pill">
+                <i class="fas fa-wifi"></i> Online
+            </div>
+        </header>
+
+        <div class="stepper-wrapper">
+            <div class="form-stepper" id="formStepper">
+                <div class="step-indicator active" onclick="jumpToStep(0)">
+                    <span class="num">1</span><span class="label">Project Setup</span><span class="sep">›</span>
+                </div>
+                <div class="step-indicator" onclick="jumpToStep(1)">
+                    <span class="num">2</span><span class="label">Beneficiaries</span><span class="sep">›</span>
+                </div>
+                <div class="step-indicator" onclick="jumpToStep(2)">
+                    <span class="num">3</span><span class="label">Farm Info</span><span class="sep">›</span>
+                </div>
+                <div class="step-indicator" onclick="jumpToStep(3)">
+                    <span class="num">4</span><span class="label">Assets</span><span class="sep">›</span>
+                </div>
+                <div class="step-indicator" onclick="jumpToStep(4)">
+                    <span class="num">5</span><span class="label">Valuation</span><span class="sep">›</span>
+                </div>
+                <div class="step-indicator" onclick="jumpToStep(5)">
+                    <span class="num">6</span><span class="label">Summary</span>
+                </div>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <main class="content-container">
+            <form id="masterForm" onsubmit="event.preventDefault();">
+
+                <!-- STEP 1: PROJECT SETUP (Project with embedded Compensation Type) -->
+                <div class="form-step active" data-step="0">
+                    <div class="step-title">Project Setup</div>
+                    <div class="step-subtitle">Select a project – the compensation type is automatically determined.</div>
+
+                    <!-- PROJECT SELECTOR -->
+                    <div class="project-selector" id="projectSelector">
+                        <div class="project-label">
+                            <i class="fas fa-folder-open"></i> Active Project <span class="required">*</span>
+                            <span id="projectRequiredStar" style="color:var(--danger);font-size:16px;margin-left:4px;">⚠️</span>
+                        </div>
+                        <select id="projectSelect" onchange="onProjectChange()" style="margin-top: 2px;">
+                            <option value="">— Select a Project —</option>
+                            <!-- Projects with embedded compensation type: monetary or land -->
+                            <option value="Kano Housing" data-comp="monetary">Kano State Housing Extension Phase II</option>
+                            <option value="Kwali Highway" data-comp="land">Kwali Highway Right-of-Way</option>
+                            <option value="Lekki Gardens" data-comp="monetary">Lekki Gardens Phase 3</option>
+                            <option value="Abuja Rail" data-comp="land">Abuja Light Rail Corridor</option>
+                            <option value="Lagos-Ibadan" data-comp="monetary">Lagos-Ibadan Expressway Corridor</option>
+                            <option value="Port Harcourt" data-comp="land">Port Harcourt Refinery Expansion</option>
+                        </select>
+
+                        <div class="project-meta">
+                            <span><i class="fas fa-users"></i> Affected: <strong id="projectAffected">12</strong> farmers</span>
+                            <span><i class="fas fa-vector-square"></i> Area: <strong id="projectArea">2.40</strong> Ha</span>
+                            <span><i class="fas fa-file-alt"></i> Status: <strong id="projectStatus" style="color:var(--primary);">Active</strong></span>
+                            <span id="projectWarning" style="color:var(--warning);display:none;">
+                                <i class="fas fa-exclamation-triangle"></i> Please select a project
+                            </span>
+                        </div>
+
+                        <!-- COMPENSATION TYPE BADGE - READ ONLY, DERIVED FROM PROJECT -->
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
+                                <i class="fas fa-gavel"></i> Compensation Type (auto-detected)
+                            </span>
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px;">
+                                <span class="comp-type-badge monetary" id="compTypeBadge"><i class="fas fa-circle-check"></i> Monetary (Cash)</span>
+                                <span style="font-size: 11px; color: var(--text-dim);">
+                                    <i class="fas fa-info-circle"></i> Determined by the selected project
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-title" style="margin-top: 20px;">General Information</div>
+                    <div class="step-subtitle">Provide the basic details of this compensation case.</div>
+
+                    <div class="form-grid">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Location <span class="required">*</span></label>
+                                <input type="text" placeholder="e.g., GRA" value="GRA" />
+                            </div>
+                            <div class="form-group">
+                                <label>Purpose <span class="required">*</span></label>
+                                <select>
+                                    <option>Infrastructure Development</option>
+                                    <option selected>Housing</option>
+                                    <option>Commercial</option>
+                                    <option>Agricultural</option>
+                                    <option>Government Acquisition</option>
+                                    <option>Urban Renewal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Survey Officer <span class="required">*</span></label>
+                                <input type="text" value="Clement Joseph" />
+                            </div>
+                            <div class="form-group">
+                                <label>Date <span class="required">*</span></label>
+                                <input type="date" id="assessmentDate" />
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Area (Ha) <span class="required">*</span></label>
+                                <input type="number" step="0.01" placeholder="e.g., 2.40" value="2.40" id="areaHa" onchange="updateProjectSummary()" />
+                            </div>
+                            <div class="form-group">
+                                <label>Estimated Value (₦)</label>
+                                <input type="number" step="0.01" placeholder="e.g., 1500000" value="1500000" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea placeholder="Brief description of the case...">Compensation for 12 affected landowners along the Kano State housing corridor. The project spans 2.4 hectares of farmland with economic trees including palm oil, cocoa, and rubber.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: BENEFICIARIES -->
+                <div class="form-step" data-step="1">
+                    <div class="step-title">Beneficiaries</div>
+                    <div class="step-subtitle">Add farmers and landowners affected by this case.</div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="beneficiaryTable">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Phone</th>
+                                    <th>NIN</th>
+                                    <th>Status</th>
+                                    <th style="width:44px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" value="Chidi Okafor" /></td>
+                                    <td><input type="text" value="080-1234-5678" /></td>
+                                    <td><input type="text" value="12345678901" /></td>
+                                    <td>
+                                        <select>
+                                            <option selected>Verified</option>
+                                            <option>Pending</option>
+                                            <option>Review</option>
+                                        </select>
+                                    </td>
+                                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" value="Ngozi Adeyemi" /></td>
+                                    <td><input type="text" value="080-9876-5432" /></td>
+                                    <td><input type="text" value="98765432109" /></td>
+                                    <td>
+                                        <select>
+                                            <option>Verified</option>
+                                            <option selected>Pending</option>
+                                            <option>Review</option>
+                                        </select>
+                                    </td>
+                                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" value="Adebayo Ogunlesi" /></td>
+                                    <td><input type="text" value="070-5555-1212" /></td>
+                                    <td><input type="text" value="11223344556" /></td>
+                                    <td>
+                                        <select>
+                                            <option>Verified</option>
+                                            <option selected>Pending</option>
+                                            <option>Review</option>
+                                        </select>
+                                    </td>
+                                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addBeneficiaryRow()">
+                        <i class="fas fa-user-plus"></i> Add Farmer
+                    </button>
+                    <div class="count-badge">
+                        <i class="fas fa-users"></i> Total: <strong id="beneficiaryCount">3</strong>
+                    </div>
+                </div>
+
+                <!-- STEP 3: FARM INFO -->
+                <div class="form-step" data-step="2">
+                    <div class="step-title">Farm Information</div>
+                    <div class="step-subtitle">Enter the farm details and upload boundary data.</div>
+                    <div class="form-grid">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Area (Ha) <span class="required">*</span></label>
+                                <input type="number" step="0.01" value="2.40" id="farmArea" onchange="syncFarmArea()" />
+                            </div>
+                            <div class="form-group">
+                                <label>Coordinates <span class="required">*</span></label>
+                                <input type="text" value="9.0765° N, 7.3986° E" />
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>GPS Reading</label>
+                                <input type="text" value="N 09°04'35.4\", E 07°23'55.0\"" />
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Plots</label>
+                                <input type="number" value="10" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Farm Map</label>
+                            <div class="upload-zone" onclick="alert('Interactive map opened')">
+                                <i class="fas fa-draw-polygon"></i>
+                                <span>Click to draw polygon or view farm map</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Upload Boundary (Shapefile / KML / GeoJSON)</label>
+                            <div class="upload-zone" onclick="alert('File upload dialog')">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Drag & drop or click to upload</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: ASSETS (Economic Trees / Structures) - Dynamic based on comp type -->
+                <div class="form-step" data-step="3">
+                    <div class="step-title">
+                        <span id="assetStepTitle">Economic Trees</span>
+                        <span id="assetTypeBadge" style="font-size:12px;font-weight:400;color:var(--text-muted);margin-left:8px;">(Monetary Compensation)</span>
+                    </div>
+                    <div class="step-subtitle" id="assetStepSubtitle">List all economic trees on the affected land for valuation.</div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="treeTable">
+                            <thead>
+                                <tr>
+                                    <th>Asset Type</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price (₦)</th>
+                                    <th>Total (₦)</th>
+                                    <th style="width:44px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select>
+                                            <option selected>Palm Oil</option>
+                                            <option>Cocoa</option>
+                                            <option>Rubber</option>
+                                            <option>Mango</option>
+                                            <option>Cashew</option>
+                                            <option>Teak</option>
+                                            <option>Mahogany</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" value="45" class="tree-qty" oninput="calcTreeTotals()" /></td>
+                                    <td><input type="number" value="15000" class="tree-rate" oninput="calcTreeTotals()" /></td>
+                                    <td class="tree-row-total">₦675,000</td>
+                                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this);calcTreeTotals();"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <select>
+                                            <option>Cocoa</option>
+                                            <option selected>Palm Oil</option>
+                                            <option>Rubber</option>
+                                            <option>Mango</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" value="28" class="tree-qty" oninput="calcTreeTotals()" /></td>
+                                    <td><input type="number" value="22000" class="tree-rate" oninput="calcTreeTotals()" /></td>
+                                    <td class="tree-row-total">₦616,000</td>
+                                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this);calcTreeTotals();"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <select>
+                                            <option>Rubber</option>
+                                            <option>Cocoa</option>
+                                            <option selected>Palm Oil</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" value="12" class="tree-qty" oninput="calcTreeTotals()" /></td>
+                                    <td><input type="number" value="18500" class="tree-rate" oninput="calcTreeTotals()" /></td>
+                                    <td class="tree-row-total">₦222,000</td>
+                                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this);calcTreeTotals();"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addTreeRow()">
+                        <i class="fas fa-tree"></i> Add Asset
+                    </button>
+                    <div class="total-bar">
+                        <span>Total Assets Value</span>
+                        <span class="total-value" id="treeGrandTotal">₦1,513,000</span>
+                    </div>
+                </div>
+
+                <!-- STEP 5: VALUATION -->
+                <div class="form-step" data-step="4">
+                    <div class="step-title">Valuation Summary</div>
+                    <div class="step-subtitle">Review the valuation breakdown based on the compensation type.</div>
+
+                    <div class="summary-card">
+                        <div class="summary-row"><span>Compensation Type</span><span id="valuationCompType" style="color:var(--primary);">Monetary (Cash)</span></div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row"><span>Total Assets Value</span><span id="valuationAssetTotal" style="color:var(--primary);">₦1,513,000</span></div>
+                        <div class="summary-row"><span>Number of Beneficiaries</span><span id="valuationBenCount">3</span></div>
+                        <div class="summary-row"><span>Area (Ha)</span><span id="valuationArea">2.40</span></div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row" style="font-size:16px;padding-top:4px;">
+                            <span style="font-weight:700;">Total Compensation</span>
+                            <span style="font-size:20px;font-weight:800;color:var(--primary);" id="valuationGrandTotal">₦1,513,000</span>
+                        </div>
+                    </div>
+
+                    <!-- Land-for-Land specific section -->
+                    <div id="landForLandSection" style="display:none;" class="summary-card" style="border-color:var(--info);">
+                        <div class="summary-row"><span style="color:var(--info);"><i class="fas fa-map-marked-alt"></i> Land-for-Land Allocation</span></div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row"><span>Total Land Area</span><span id="landTotalArea">2.40 Ha</span></div>
+                        <div class="summary-row"><span>50% Allocation</span><span id="landFiftyPercent">1.20 Ha</span></div>
+                        <div class="summary-row"><span>Number of Plots</span><span id="landPlotCount">10</span></div>
+                        <div class="summary-row"><span>Plot Size</span><span id="landPlotSize">0.12 Ha</span></div>
+                    </div>
+                </div>
+
+                <!-- STEP 6: SUMMARY -->
+                <div class="form-step" data-step="5">
+                    <div class="step-title">Final Review & Submit</div>
+                    <div class="step-subtitle">Review all details before final submission.</div>
+
+                    <div class="summary-card">
+                        <div class="summary-row"><span>Project</span><span id="summaryProject">Kano State Housing Project</span></div>
+                        <div class="summary-row"><span>Location</span><span>GRA</span></div>
+                        <div class="summary-row"><span>Compensation Type</span><span style="color:var(--primary);" id="summaryCompType">Monetary (Cash)</span></div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row"><span>Total Assets Value</span><span id="summaryTreeTotal" style="color:var(--primary);">₦1,513,000</span></div>
+                        <div class="summary-row"><span>Beneficiaries</span><span id="summaryBeneficiaryCount">3</span></div>
+                        <div class="summary-row"><span>Area (Ha)</span><span id="summaryArea">2.40</span></div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row" style="font-size:16px;padding-top:4px;">
+                            <span style="font-weight:700;">Total Compensation</span>
+                            <span style="font-size:20px;font-weight:800;color:var(--primary);" id="summaryGrandTotal">₦1,513,000</span>
+                        </div>
+                        <div class="summary-row"><span>Status</span><span style="color:var(--warning);"><i class="fas fa-circle" style="font-size:8px;margin-right:4px;"></i> Ready for Submission</span></div>
+                    </div>
+
+                    <div class="action-row">
+                        <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                            <i class="fas fa-save"></i> Save Draft
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="previewCase()">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="submitAssessment()">
+                            <i class="fas fa-paper-plane"></i> Submit Case
+                        </button>
+                    </div>
+                    <div class="info-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Upon submission, the case will be routed through the OP Workflow for review and approval based on the selected compensation type.</span>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION -->
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-secondary" id="prevBtn" onclick="stepNav(-1)" disabled>Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="stepNav(1)">Next</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- CASES VIEW -->
+    <div id="casesView" class="app-view">
+        <header class="pwa-header">
+            <div>
+                <h2>Registered Cases</h2>
+                <span class="header-sub">Local & Synced Records</span>
+            </div>
+        </header>
+        <main class="content-container card-list">
+            <div class="mobile-card">
+                <div class="card-header">
+                    <span class="card-title">Kano State Housing Extension Phase II</span>
+                    <span style="color:var(--primary);font-size:12px;font-weight:600;"><i class="fas fa-circle-check"></i> Synced</span>
+                </div>
+                <div class="card-row"><span>Beneficiaries: 12</span><span>15 Aug 2026</span></div>
+                <div class="card-row"><span>Total: ₦8,450,000</span><span>Monetary</span></div>
+            </div>
+            <div class="mobile-card">
+                <div class="card-header">
+                    <span class="card-title">Kwali Highway Right-of-Way</span>
+                    <span style="color:var(--warning);font-size:12px;font-weight:600;"><i class="fas fa-clock"></i> Draft</span>
+                </div>
+                <div class="card-row"><span>Beneficiaries: 4</span><span>17 Aug 2026</span></div>
+                <div class="card-row"><span>Total: ₦2,100,000</span><span>Land-for-Land</span></div>
+            </div>
+            <div class="mobile-card">
+                <div class="card-header">
+                    <span class="card-title">Lekki Gardens Phase 3</span>
+                    <span style="color:var(--primary);font-size:12px;font-weight:600;"><i class="fas fa-circle-check"></i> Synced</span>
+                </div>
+                <div class="card-row"><span>Beneficiaries: 8</span><span>10 Aug 2026</span></div>
+                <div class="card-row"><span>Total: ₦5,220,000</span><span>Monetary</span></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div id="profileView" class="app-view">
+        <header class="pwa-header">
+            <div>
+                <h2>Field Officer Profile</h2>
+                <span class="header-sub">System & Account</span>
+            </div>
+        </header>
+        <main class="content-container">
+            <div class="profile-header">
+                <div class="profile-avatar"><i class="fas fa-user-gear"></i></div>
+                <h3>Clement Joseph</h3>
+                <div class="role">Lead Survey & Assessment Officer</div>
+            </div>
+            <div class="profile-menu">
+                <div class="profile-item">
+                    <div class="left"><i class="fas fa-cloud-arrow-up" style="color:var(--primary)"></i> Offline Sync Queue</div>
+                    <span class="badge-count">1 Pending</span>
+                </div>
+                <div class="profile-item">
+                    <div class="left"><i class="fas fa-database" style="color:var(--info)"></i> Local Cache</div>
+                    <span style="color:var(--text-muted);font-size:13px;">14.2 MB</span>
+                </div>
+                <div class="profile-item" onclick="logout()">
+                    <div class="left"><i class="fas fa-right-from-bracket" style="color:var(--danger)"></i> Sign Out</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- TAB BAR -->
+    <nav class="pwa-tab-bar">
+        <div class="tab-item active" onclick="switchTab('formView', this)">
+            <i class="fas fa-pen-to-square"></i><span>Register</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('casesView', this)">
+            <i class="fas fa-folder-open"></i><span>Cases</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('profileView', this)">
+            <i class="fas fa-circle-user"></i><span>Profile</span>
+        </div>
+    </nav>
+
+    <script>
+        let currentStep = 0;
+        const totalSteps = 6;
+        let currentCompType = 'monetary'; // derived from project
+
+        // ----- TOAST NOTIFICATION -----
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast ' + type;
+            toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i> ${message}`;
+            toast.classList.add('show');
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // ----- LOGIN / LOGOUT -----
+        function handleLogin(e) {
+            e.preventDefault();
+            document.getElementById('loginView').style.display = 'none';
+            showToast('Welcome back, Clement!', 'success');
+        }
+        function logout() {
+            document.getElementById('loginView').style.display = 'flex';
+            showToast('Signed out successfully', 'info');
+        }
+
+        // ----- TAB SWITCHING -----
+        function switchTab(viewId, tabElement) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            tabElement.classList.add('active');
+        }
+
+        // ----- PROJECT SELECTION (with embedded compensation type) -----
+        function onProjectChange() {
+            const sel = document.getElementById('projectSelect');
+            const selectedOption = sel.options[sel.selectedIndex];
+            const projectName = selectedOption?.text || 'None';
+            const compType = selectedOption?.getAttribute('data-comp') || 'monetary';
+
+            // Update compensation type
+            currentCompType = compType;
+            updateCompTypeUI(compType);
+
+            // Update project summary
+            const summaryProject = document.getElementById('summaryProject');
+            if (summaryProject) summaryProject.textContent = projectName;
+
+            const affected = document.getElementById('projectAffected');
+            const area = document.getElementById('projectArea');
+            const status = document.getElementById('projectStatus');
+            const warning = document.getElementById('projectWarning');
+            const selector = document.getElementById('projectSelector');
+
+            const projectData = {
+                'Kano Housing': { affected: 12, area: 2.40, status: 'Active' },
+                'Kwali Highway': { affected: 4, area: 1.80, status: 'Active' },
+                'Lekki Gardens': { affected: 8, area: 3.20, status: 'Active' },
+                'Abuja Rail': { affected: 15, area: 5.60, status: 'Active' },
+                'Lagos-Ibadan': { affected: 22, area: 8.40, status: 'Active' },
+                'Port Harcourt': { affected: 18, area: 6.20, status: 'Active' }
+            };
+
+            const data = projectData[sel.value] || { affected: 0, area: 0, status: '—' };
+
+            affected.textContent = data.affected;
+            area.textContent = data.area.toFixed(2);
+            status.textContent = data.status;
+            status.style.color = data.status === 'Active' ? 'var(--primary)' : 'var(--text-muted)';
+
+            if (!sel.value) {
+                selector.classList.add('warning');
+                warning.style.display = 'inline';
+                document.getElementById('projectRequiredStar').style.display = 'inline';
+            } else {
+                selector.classList.remove('warning');
+                warning.style.display = 'none';
+                document.getElementById('projectRequiredStar').style.display = 'none';
+            }
+
+            updateSummary();
+            updateValuation();
+        }
+
+        // ----- Update UI based on compensation type (derived from project) -----
+        function updateCompTypeUI(type) {
+            const badge = document.getElementById('compTypeBadge');
+            const summaryComp = document.getElementById('summaryCompType');
+            const valuationComp = document.getElementById('valuationCompType');
+            const assetTitle = document.getElementById('assetStepTitle');
+            const assetBadge = document.getElementById('assetTypeBadge');
+            const assetSubtitle = document.getElementById('assetStepSubtitle');
+            const landSection = document.getElementById('landForLandSection');
+
+            if (type === 'monetary') {
+                badge.className = 'comp-type-badge monetary';
+                badge.innerHTML = '<i class="fas fa-circle-check"></i> Monetary (Cash)';
+                summaryComp.textContent = 'Monetary (Cash)';
+                valuationComp.textContent = 'Monetary (Cash)';
+                assetTitle.textContent = 'Economic Trees';
+                assetBadge.textContent = '(Monetary Compensation)';
+                assetSubtitle.textContent = 'List all economic trees on the affected land for valuation.';
+                landSection.style.display = 'none';
+            } else { // land
+                badge.className = 'comp-type-badge land';
+                badge.innerHTML = '<i class="fas fa-circle-check"></i> Land-for-Land (50:50)';
+                summaryComp.textContent = 'Land-for-Land (50:50)';
+                valuationComp.textContent = 'Land-for-Land (50:50)';
+                assetTitle.textContent = 'Structures & Improvements';
+                assetBadge.textContent = '(Land-for-Land Compensation)';
+                assetSubtitle.textContent = 'List all structures and improvements on the land for valuation.';
+                landSection.style.display = 'block';
+            }
+
+            // Update tree table options to include both trees and structures
+            const treeSelects = document.querySelectorAll('#treeTable tbody select');
+            treeSelects.forEach(sel => {
+                const currentVal = sel.value;
+                if (type === 'monetary') {
+                    sel.innerHTML = `
+                        <option>Palm Oil</option><option>Cocoa</option><option>Rubber</option>
+                        <option>Mango</option><option>Cashew</option><option>Teak</option><option>Mahogany</option>
+                    `;
+                } else {
+                    sel.innerHTML = `
+                        <option>Building</option><option>Fence</option><option>Well</option>
+                        <option>Pavement</option><option>Gate</option><option>Other Structure</option>
+                    `;
+                }
+                sel.value = currentVal;
+            });
+        }
+
+        // ----- STEP NAVIGATION -----
+        function updateProgress() {
+            const pct = ((currentStep + 1) / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = pct + '%';
+        }
+
+        function stepNav(dir) { jumpToStep(currentStep + dir); }
+
+        function jumpToStep(targetStep) {
+            if (targetStep < 0 || targetStep >= totalSteps) return;
+            
+            // Validate before moving forward
+            if (targetStep > currentStep) {
+                if (currentStep === 0) {
+                    const projectSel = document.getElementById('projectSelect');
+                    if (!projectSel.value) {
+                        showToast('⚠️ Please select a project first.', 'error');
+                        document.getElementById('projectSelector').classList.add('warning');
+                        setTimeout(() => document.getElementById('projectSelector').classList.remove('warning'), 2000);
+                        return;
+                    }
+                }
+            }
+
+            currentStep = targetStep;
+
+            document.querySelectorAll('.step-indicator').forEach((ind, idx) => {
+                ind.classList.remove('active', 'completed');
+                if (idx === currentStep) ind.classList.add('active');
+                else if (idx < currentStep) ind.classList.add('completed');
+            });
+
+            document.querySelectorAll('.form-step').forEach((step, idx) => {
+                step.classList.toggle('active', idx === currentStep);
+            });
+
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Next';
+
+            updateProgress();
+            updateSummary();
+            updateValuation();
+
+            document.querySelector('.content-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ----- BENEFICIARY ROWS -----
+        function addBeneficiaryRow() {
+            const tbody = document.querySelector('#beneficiaryTable tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" placeholder="Full Name" /></td>
+                <td><input type="text" placeholder="Phone" /></td>
+                <td><input type="text" placeholder="NIN" /></td>
+                <td>
+                    <select><option>Pending</option><option>Verified</option><option>Review</option></select>
+                </td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+            updateSummary();
+            showToast('Beneficiary added successfully', 'success');
+        }
+
+        // ----- TREE ROWS -----
+        function addTreeRow() {
+            const tbody = document.querySelector('#treeTable tbody');
+            const tr = document.createElement('tr');
+            const options = currentCompType === 'monetary' 
+                ? `<option>Palm Oil</option><option>Cocoa</option><option>Rubber</option><option>Mango</option><option>Cashew</option><option>Teak</option><option>Mahogany</option>`
+                : `<option>Building</option><option>Fence</option><option>Well</option><option>Pavement</option><option>Gate</option><option>Other Structure</option>`;
+            tr.innerHTML = `
+                <td>
+                    <select>${options}</select>
+                </td>
+                <td><input type="number" value="1" class="tree-qty" oninput="calcTreeTotals()" /></td>
+                <td><input type="number" value="0" class="tree-rate" oninput="calcTreeTotals()" /></td>
+                <td class="tree-row-total">₦0</td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this);calcTreeTotals();"><i class="fas fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+            calcTreeTotals();
+            updateSummary();
+            showToast('Asset added successfully', 'success');
+        }
+
+        function removeRow(btn) {
+            const row = btn.closest('tr');
+            if (row.parentElement.children.length > 1) {
+                row.remove();
+                updateSummary();
+                if (row.closest('#treeTable')) calcTreeTotals();
+                showToast('Row removed', 'info');
+            } else {
+                showToast('At least one row is required.', 'error');
+            }
+        }
+
+        // ----- TREE CALCULATIONS (Real-time) -----
+        function calcTreeTotals() {
+            let grand = 0;
+            document.querySelectorAll('#treeTable tbody tr').forEach(row => {
+                const qty = parseFloat(row.querySelector('.tree-qty')?.value) || 0;
+                const rate = parseFloat(row.querySelector('.tree-rate')?.value) || 0;
+                const total = qty * rate;
+                const totalCell = row.querySelector('.tree-row-total');
+                if (totalCell) {
+                    totalCell.textContent = '₦' + total.toLocaleString();
+                    totalCell.classList.add('updated');
+                    setTimeout(() => totalCell.classList.remove('updated'), 300);
+                }
+                grand += total;
+            });
+            document.getElementById('treeGrandTotal').textContent = '₦' + grand.toLocaleString();
+            document.getElementById('summaryTreeTotal').textContent = '₦' + grand.toLocaleString();
+            document.getElementById('valuationAssetTotal').textContent = '₦' + grand.toLocaleString();
+            document.getElementById('valuationGrandTotal').textContent = '₦' + grand.toLocaleString();
+            document.getElementById('summaryGrandTotal').textContent = '₦' + grand.toLocaleString();
+        }
+
+        // ----- VALUATION UPDATE -----
+        function updateValuation() {
+            const benCount = document.querySelectorAll('#beneficiaryTable tbody tr').length;
+            document.getElementById('valuationBenCount').textContent = benCount;
+            
+            const areaVal = document.getElementById('areaHa')?.value || '0';
+            document.getElementById('valuationArea').textContent = areaVal;
+
+            // Land-for-Land specific calculations
+            const area = parseFloat(areaVal) || 0;
+            const plots = parseInt(document.querySelector('input[type="number"][value="10"]')?.value) || 10;
+            document.getElementById('landTotalArea').textContent = area.toFixed(2) + ' Ha';
+            document.getElementById('landFiftyPercent').textContent = (area * 0.5).toFixed(2) + ' Ha';
+            document.getElementById('landPlotCount').textContent = plots;
+            document.getElementById('landPlotSize').textContent = (area / (plots || 1)).toFixed(2) + ' Ha';
+
+            // Update total compensation based on comp type
+            const assetTotal = parseFloat(document.getElementById('treeGrandTotal').textContent.replace(/[₦,]/g, '')) || 0;
+            const totalComp = currentCompType === 'monetary' ? assetTotal : assetTotal * 2;
+            document.getElementById('valuationGrandTotal').textContent = '₦' + totalComp.toLocaleString();
+            document.getElementById('summaryGrandTotal').textContent = '₦' + totalComp.toLocaleString();
+        }
+
+        // ----- SYNC AREA FIELDS -----
+        function syncFarmArea() {
+            const farmArea = document.getElementById('farmArea');
+            const areaHa = document.getElementById('areaHa');
+            if (farmArea && areaHa) {
+                areaHa.value = farmArea.value;
+            }
+            updateSummary();
+            updateValuation();
+        }
+
+        function updateProjectSummary() {
+            const areaHa = document.getElementById('areaHa');
+            const summaryArea = document.getElementById('summaryArea');
+            if (areaHa && summaryArea) {
+                summaryArea.textContent = areaHa.value || '0';
+            }
+            updateValuation();
+        }
+
+        // ----- UPDATE SUMMARY -----
+        function updateSummary() {
+            const benCount = document.querySelectorAll('#beneficiaryTable tbody tr').length;
+            document.getElementById('beneficiaryCount').textContent = benCount;
+            document.getElementById('summaryBeneficiaryCount').textContent = benCount;
+
+            const areaHa = document.getElementById('areaHa');
+            const summaryArea = document.getElementById('summaryArea');
+            if (areaHa && summaryArea) {
+                summaryArea.textContent = areaHa.value || '0';
+            }
+
+            const sel = document.getElementById('projectSelect');
+            const summaryProject = document.getElementById('summaryProject');
+            if (sel && summaryProject) {
+                summaryProject.textContent = sel.options[sel.selectedIndex]?.text || '⚠️ No Project Selected';
+                if (!sel.value) {
+                    summaryProject.style.color = 'var(--danger)';
+                } else {
+                    summaryProject.style.color = 'var(--text-main)';
+                }
+            }
+
+            calcTreeTotals();
+            updateValuation();
+        }
+
+        // ----- DRAFT & PREVIEW -----
+        function saveDraft() {
+            const projectSelect = document.getElementById('projectSelect');
+            if (!projectSelect.value) {
+                showToast('⚠️ Please select a project first.', 'error');
+                jumpToStep(0);
+                return;
+            }
+            showToast('Draft saved successfully!', 'success');
+        }
+
+        function previewCase() {
+            const projectSelect = document.getElementById('projectSelect');
+            if (!projectSelect.value) {
+                showToast('⚠️ Please select a project first.', 'error');
+                jumpToStep(0);
+                return;
+            }
+            showToast('Opening preview...', 'info');
+        }
+
+        // ----- SUBMIT (With Full Validation) -----
+        function submitAssessment() {
+            const projectSelect = document.getElementById('projectSelect');
+            if (!projectSelect.value) {
+                showToast('⚠️ Please select a project before submitting.', 'error');
+                jumpToStep(0);
+                document.getElementById('projectSelector').classList.add('warning');
+                setTimeout(() => document.getElementById('projectSelector').classList.remove('warning'), 2000);
+                return;
+            }
+
+            const benCount = document.querySelectorAll('#beneficiaryTable tbody tr').length;
+            if (benCount === 0) {
+                showToast('⚠️ Please add at least one beneficiary.', 'error');
+                jumpToStep(1);
+                return;
+            }
+
+            let hasAssets = false;
+            document.querySelectorAll('#treeTable tbody tr').forEach(row => {
+                const qty = parseFloat(row.querySelector('.tree-qty')?.value) || 0;
+                if (qty > 0) hasAssets = true;
+            });
+            if (!hasAssets) {
+                showToast('⚠️ Please add at least one asset with quantity > 0.', 'error');
+                jumpToStep(3);
+                return;
+            }
+
+            const locationInput = document.querySelector('input[placeholder="e.g., GRA"]');
+            if (locationInput && !locationInput.value.trim()) {
+                showToast('⚠️ Please enter the location.', 'error');
+                jumpToStep(0);
+                return;
+            }
+
+            const areaInput = document.getElementById('areaHa');
+            if (areaInput && (!areaInput.value || parseFloat(areaInput.value) <= 0)) {
+                showToast('⚠️ Please enter a valid area in Hectares.', 'error');
+                jumpToStep(0);
+                return;
+            }
+
+            const compTypeLabel = currentCompType === 'monetary' ? 'Monetary' : 'Land-for-Land';
+            showToast(`✅ Compensation Record (${compTypeLabel}) saved successfully!`, 'success');
+
+            const casesTab = document.querySelectorAll('.tab-item')[1];
+            switchTab('casesView', casesTab);
+
+            const casesList = document.querySelector('.card-list');
+            const newCard = document.createElement('div');
+            newCard.className = 'mobile-card';
+            const totalComp = document.getElementById('summaryGrandTotal').textContent;
+            newCard.innerHTML = `
+                <div class="card-header">
+                    <span class="card-title">${projectSelect.options[projectSelect.selectedIndex]?.text || 'New Case'}</span>
+                    <span style="color:var(--success);font-size:12px;font-weight:600;"><i class="fas fa-circle-check"></i> Submitted</span>
+                </div>
+                <div class="card-row"><span>Beneficiaries: ${benCount}</span><span>${new Date().toLocaleDateString()}</span></div>
+                <div class="card-row"><span>Total: ${totalComp}</span><span>${compTypeLabel}</span></div>
+            `;
+            casesList.prepend(newCard);
+        }
+
+        // ----- INIT -----
+        window.onload = function() {
+            const dateInput = document.getElementById('assessmentDate');
+            if (dateInput) {
+                const today = new Date();
+                dateInput.value = today.toISOString().split('T')[0];
+            }
+
+            updateSummary();
+            updateProgress();
+            updateValuation();
+            onProjectChange();
+
+            setTimeout(() => {
+                showToast('Welcome to CompensatePro! Select a project to begin.', 'info');
+            }, 500);
+        };
+    </script>
+</body>
+</html>
