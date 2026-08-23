@@ -2627,6 +2627,13 @@
                 <i class="fas fa-chart-pie"></i> Dashboard
                 <span class="badge green">12</span>
             </a>
+            <a class="nav-item" data-page="projects" onclick="navigateTo('projects')">
+                <i class="fas fa-folder-open"></i> Project Management
+                <span class="badge blue">5</span>
+            </a>
+            <a class="nav-item sub-item" data-page="project-register" onclick="navigateTo('project-register')">
+                <i class="fas fa-plus-circle"></i> Create Project
+            </a>
             <a class="nav-item" data-page="compensation-cases" onclick="navigateTo('compensation-cases')">
                 <i class="fas fa-list"></i> Compensation Cases
             </a>
@@ -2991,7 +2998,7 @@
                                 <span style="font-weight:700;color:var(--primary);">1,876</span>
                             </div>
                             <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius-sm);">
-                                <span style="font-size:12px;color:var(--gray-500);">Schemes are exclusive — either cash or land, never mixed per case</span>
+                                <span style="font-size:12px;color:var(--gray-500);">Scheme type is set at Project level — cases inherit it (never mixed)</span>
                             </div>
                         </div>
                     </div>
@@ -3024,7 +3031,7 @@
                         </select>
                         <select style="padding:8px 14px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:#fff;">
                             <option>All Projects</option>
-                            <option>Abuja Housing</option>
+                            <option>Kano Housing</option>
                             <option>Lagos Rail Corridor</option>
                             <option>Kano Industrial Park</option>
                         </select>
@@ -3053,8 +3060,8 @@
                             <tbody>
                                 <tr>
                                     <td><strong>C-2024-045</strong></td>
-                                    <td>Abuja Housing</td>
-                                    <td>Maitama, FCT</td>
+                                    <td>Kano Housing</td>
+                                    <td>GRA</td>
                                     <td>2.4</td>
                                     <td>3</td>
                                     <td><span class="status-badge active"><span class="dot"></span>Active</span></td>
@@ -3149,8 +3156,157 @@
             </div>
 
             <!-- ============================================================
+            PAGE: PROJECT MANAGEMENT (List)
+            ============================================================ -->
+            <div class="page" id="page-projects">
+                <div class="page-header">
+                    <div>
+                        <h2>Project Management</h2>
+                        <p>Projects define the compensation scheme (Monetary or Land-for-Land 50:50). Cases inherit the scheme from the selected project.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="navigateTo('project-register')">
+                        <i class="fas fa-plus"></i> Create Project
+                    </button>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Projects</div>
+                        <div class="kpi-value" id="projKpiTotal">5</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Monetary Schemes</div>
+                        <div class="kpi-value" id="projKpiMonetary">3</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Land-for-Land Schemes</div>
+                        <div class="kpi-value" id="projKpiLand">2</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Active</div>
+                        <div class="kpi-value" id="projKpiActive">4</div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Project ID</th>
+                                    <th>Project Name</th>
+                                    <th>Location</th>
+                                    <th>Scheme Type</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                    <th>Cases</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <span id="projectsTableFooter">Showing projects</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            PAGE: Create Project
+            ============================================================ -->
+            <div class="page" id="page-project-register">
+                <div class="page-header">
+                    <div>
+                        <h2>Create Project</h2>
+                        <p>Create a new project and set its compensation scheme. This scheme will be locked for all cases registered under the project.</p>
+                    </div>
+                </div>
+                <div class="form-container">
+                    <div class="form-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Project Name <span class="required">*</span></label>
+                                <input type="text" id="newProjectName" placeholder="e.g., Kano Housing Corridor Phase 2" />
+                            </div>
+                            <div class="form-group">
+                                <label>Location <span class="required">*</span></label>
+                                <input type="text" id="newProjectLocation" placeholder="e.g., GRA" />
+                            </div>
+                            <div class="form-group">
+                                <label>Purpose <span class="required">*</span></label>
+                                <select id="newProjectPurpose">
+                                    <option value="">Select purpose...</option>
+                                    <option>Infrastructure Development</option>
+                                    <option>Housing</option>
+                                    <option>Commercial</option>
+                                    <option>Agricultural</option>
+                                    <option>Government Acquisition</option>
+                                    <option>Urban Renewal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Start Date</label>
+                                <input type="date" id="newProjectDate" value="2024-06-01" />
+                            </div>
+                            <div class="form-group full">
+                                <label>Description</label>
+                                <textarea id="newProjectDesc" placeholder="Brief project description..."></textarea>
+                            </div>
+                            <div class="form-group full">
+                                <label>Compensation Scheme Type <span class="required">*</span></label>
+                                <p class="helper-text" style="margin-bottom:10px;">This choice is permanent for the project. All cases under this project will use the selected scheme exclusively.</p>
+                                <div class="comp-type-grid">
+                                    <label class="comp-type-option selected" id="newTypeOptMonetary" onclick="selectNewProjectType('monetary')">
+                                        <input type="radio" name="newCompType" value="monetary" checked />
+                                        <div class="type-icon"><i class="fas fa-money-bill-wave"></i></div>
+                                        <div class="type-title">Monetary (Cash for Trees)</div>
+                                        <div class="type-desc">Payment for economic trees only. Tree Type × Quantity × Unit Price. No land allocation.</div>
+                                        <span class="type-badge">Cash for Trees</span>
+                                    </label>
+                                    <label class="comp-type-option" id="newTypeOptLand" onclick="selectNewProjectType('land')">
+                                        <input type="radio" name="newCompType" value="land" />
+                                        <div class="type-icon"><i class="fas fa-map-marked-alt"></i></div>
+                                        <div class="type-title">Land-for-Land (50:50)</div>
+                                        <div class="type-desc">Physical plot allocation. Total plots split 50:50 — half to farmers, half to government. No cash component.</div>
+                                        <span class="type-badge">Plots Only</span>
+                                    </label>
+                                </div>
+                                <div class="comp-type-note">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Critical:</strong> Once the project is created, the scheme type cannot be changed. Cases will inherit this type and the form lifecycle will adapt automatically.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <div class="left">
+                                <button class="btn btn-secondary" onclick="navigateTo('projects')">
+                                    <i class="fas fa-arrow-left"></i> Cancel
+                                </button>
+                            </div>
+                            <div class="right">
+                                <button class="btn btn-secondary" onclick="alert('Draft saved')">
+                                    <i class="fas fa-save"></i> Save Draft
+                                </button>
+                                <button class="btn btn-success" onclick="saveNewProject()">
+                                    <i class="fas fa-check"></i> Create Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
             PAGE: COMPENSATION REGISTER (Multi-Step Form)
             ============================================================ -->
+            <div class="page" id="page-compensation-register">
+                <div class="page-header">
+                    <div>
+                        <h2>Register Compensation Case</h2>
+                        <p>Select a Project first. The compensation scheme (Monetary or Land-for-Land) is inherited from the Project and drives the rest of the form.</p>
                     </div>
                 </div>
 
@@ -3194,23 +3350,43 @@
                         <!-- STEP 1: GENERAL INFORMATION -->
                         <div class="form-step active" data-step="0">
                             <div class="step-title">General Information</div>
-                            <div class="step-subtitle">Provide the basic details of the compensation case.</div>
+                            <div class="step-subtitle">Select a Project. Compensation scheme (Monetary or Land-for-Land 50:50) is defined at Project level and cannot be changed on the case.</div>
 
                             <div class="form-grid">
+                                <div class="form-group full">
+                                    <label>Select Project <span class="required">*</span></label>
+                                    <select id="projectSelect" onchange="onProjectSelect()">
+                                        <option value="">— Choose a registered project —</option>
+                                        <!-- Options populated by JS from projects array -->
+                                    </select>
+                                    <p class="helper-text">Only active projects appear here. Create new projects under <strong>Project Management</strong>.</p>
+                                </div>
+
+                                <!-- Scheme type inherited from Project (read-only) -->
+                                <div class="form-group full" id="schemeTypeDisplay" style="display:none;">
+                                    <label>Compensation Scheme (from Project)</label>
+                                    <div id="schemeTypeBadge" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
+                                        <!-- Filled by JS -->
+                                    </div>
+                                    <div class="comp-type-note" style="margin-top:10px;" id="schemeTypeNote">
+                                        <!-- Filled by JS -->
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
-                                    <label>Project Name <span class="required">*</span></label>
-                                    <input type="text" placeholder="e.g., Abuja Housing Project" id="projectName" value="Abuja Housing Project" />
+                                    <label>Project Name</label>
+                                    <input type="text" id="projectName" readonly style="background:var(--gray-100);color:var(--gray-700);" placeholder="Auto-filled from Project" />
                                 </div>
                                 <div class="form-group">
                                     <label>Location <span class="required">*</span></label>
-                                    <input type="text" placeholder="e.g., Maitama, FCT" id="location" value="Maitama, FCT" />
+                                    <input type="text" placeholder="e.g., GRA" id="location" />
                                 </div>
                                 <div class="form-group">
                                     <label>Purpose <span class="required">*</span></label>
                                     <select id="purpose">
                                         <option value="">Select purpose...</option>
                                         <option>Infrastructure Development</option>
-                                        <option selected>Housing</option>
+                                        <option>Housing</option>
                                         <option>Commercial</option>
                                         <option>Agricultural</option>
                                         <option>Government Acquisition</option>
@@ -3227,35 +3403,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Area (Ha) <span class="required">*</span></label>
-                                    <input type="number" step="0.01" placeholder="e.g., 2.40" id="area" value="2.40" />
+                                    <input type="number" step="0.01" placeholder="e.g., 2.40" id="area" />
                                 </div>
                                 <div class="form-group full">
                                     <label>Description</label>
-                                    <textarea placeholder="Brief description of the case..." id="description">Compensation for 12 affected landowners along the Abuja housing corridor. The project spans 2.4 hectares of farmland with economic trees including palm oil, cocoa, and rubber.</textarea>
-                                </div>
-                                <div class="form-group full">
-                                    <label>Compensation Type <span class="required">*</span></label>
-                                    <p class="helper-text" style="margin-bottom:10px;">Choose one scheme type only. A case cannot mix monetary (trees) and land-for-land compensation.</p>
-                                    <div class="comp-type-grid">
-                                        <label class="comp-type-option selected" id="typeOptMonetary" onclick="selectCompType('monetary')">
-                                            <input type="radio" name="compType" value="monetary" checked />
-                                            <div class="type-icon"><i class="fas fa-money-bill-wave"></i></div>
-                                            <div class="type-title">Monetary (Cash)</div>
-                                            <div class="type-desc">Payment for economic trees only. Tree Type × Quantity × Unit Price. Paid to the farmer/landowner for lost agricultural assets.</div>
-                                            <span class="type-badge">Cash for Trees</span>
-                                        </label>
-                                        <label class="comp-type-option" id="typeOptLand" onclick="selectCompType('land')">
-                                            <input type="radio" name="compType" value="land" />
-                                            <div class="type-icon"><i class="fas fa-map-marked-alt"></i></div>
-                                            <div class="type-title">Land-for-Land (50:50)</div>
-                                            <div class="type-desc">Physical plot allocation. Total plots split 50:50 — half to farmers, half to government for public allotment. No cash component.</div>
-                                            <span class="type-badge">Plots Only</span>
-                                        </label>
-                                    </div>
-                                    <div class="comp-type-note">
-                                        <i class="fas fa-info-circle"></i>
-                                        <strong>Either / or:</strong> Select Monetary if compensating for economic trees with cash. Select Land-for-Land if compensating for loss of land with replacement plots under the 50:50 formula. Do not combine both in one case.
-                                    </div>
+                                    <textarea placeholder="Brief description of the case..." id="description"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -3591,11 +3743,11 @@
                             <div class="preview-grid">
                                 <div class="preview-item">
                                     <span class="label">Project Name</span>
-                                    <span class="value" id="previewProject">Abuja Housing Project</span>
+                                    <span class="value" id="previewProject">Kano Housing Project</span>
                                 </div>
                                 <div class="preview-item">
                                     <span class="label">Location</span>
-                                    <span class="value" id="previewLocation">Maitama, FCT</span>
+                                    <span class="value" id="previewLocation">GRA</span>
                                 </div>
                                 <div class="preview-item">
                                     <span class="label">Purpose</span>
@@ -3615,14 +3767,14 @@
                                 </div>
                                 <div class="preview-item full">
                                     <span class="label">Description</span>
-                                    <span class="value" id="previewDescription">Compensation for 12 affected landowners along the Abuja housing corridor.</span>
+                                    <span class="value" id="previewDescription">Compensation for 12 affected landowners along the Kano housing corridor.</span>
                                 </div>
                                 <div class="preview-item">
                                     <span class="label">Beneficiaries</span>
                                     <span class="value" id="previewBeneficiaries">3 farmers</span>
                                 </div>
                                 <div class="preview-item">
-                                    <span class="label">Compensation Type</span>
+                                    <span class="label">Compensation Scheme (from Project)</span>
                                     <span class="value" id="previewCompType" style="color:var(--primary);font-weight:700;">Monetary (Cash for Trees)</span>
                                 </div>
                                 <div class="preview-item" id="previewTreesItem">
@@ -4188,7 +4340,7 @@
                                 <tr><th>GKN No.</th><th>Title / Description</th><th>Location</th><th>Area (Ha)</th><th>Land Use</th><th>Status</th><th>Actions</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td><strong>GKN-2024-089</strong></td><td>Maitama Extension Block A</td><td>Maitama, FCT</td><td>4.20</td><td>Residential</td>
+                                <tr><td><strong>GKN-2024-089</strong></td><td>Maitama Extension Block A</td><td>GRA</td><td>4.20</td><td>Residential</td>
                                     <td><span class="status-badge active"><span class="dot"></span>Active</span></td>
                                     <td class="action-icons"><button><i class="fas fa-eye"></i></button><button><i class="fas fa-edit"></i></button></td></tr>
                                 <tr><td><strong>GKN-2024-072</strong></td><td>Idu Industrial Corridor</td><td>Idu</td><td>12.50</td><td>Commercial</td>
@@ -4602,6 +4754,8 @@
         const pageTitles = {
             'dashboard': 'Dashboard',
             'compensation-dashboard': 'Compensation Dashboard',
+            'projects': 'Project Management',
+            'project-register': 'Create Project',
             'compensation-cases': 'Compensation Cases',
             'compensation-register': 'Register Case',
             'compensation-beneficiaries': 'Beneficiaries',
@@ -4694,20 +4848,275 @@
         const totalSteps = 6;
         let beneficiaryCount = 3;
         let treeTotal = 1513000;
-        let compensationType = 'monetary'; // 'monetary' | 'land' — exclusive, never mixed
+        let compensationType = 'monetary'; // inherited from selected Project — exclusive, never mixed
+        let selectedProjectId = null;
+
+        // ============================================================
+        // PROJECTS DATA (source of truth for Compensation Scheme Type)
+        // ============================================================
+        let projects = [
+            {
+                id: 'P-2024-001',
+                name: 'Kano Housing Project',
+                location: 'GRA',
+                purpose: 'Housing',
+                type: 'monetary',
+                status: 'Active',
+                cases: 12,
+                description: 'Compensation for affected landowners along the Kano housing corridor. Economic trees (palm oil, cocoa, rubber).',
+                date: '2024-03-01'
+            },
+            {
+                id: 'P-2024-002',
+                name: 'Ring Road Extension',
+                location: 'Gwagwalada, FCT',
+                purpose: 'Infrastructure Development',
+                type: 'land',
+                status: 'Active',
+                cases: 8,
+                description: 'Land-for-Land compensation for road expansion. 50:50 plot allocation.',
+                date: '2024-02-15'
+            },
+            {
+                id: 'P-2024-003',
+                name: 'Lagos Rail Corridor',
+                location: 'Ikeja, Lagos',
+                purpose: 'Infrastructure Development',
+                type: 'monetary',
+                status: 'Active',
+                cases: 23,
+                description: 'Cash compensation for economic trees along the rail right-of-way.',
+                date: '2024-01-20'
+            },
+            {
+                id: 'P-2024-004',
+                name: 'Industrial Park Phase 2',
+                location: 'Idu, FCT',
+                purpose: 'Commercial',
+                type: 'land',
+                status: 'Active',
+                cases: 5,
+                description: 'Land swap for industrial layout under 50:50 formula.',
+                date: '2024-04-10'
+            },
+            {
+                id: 'P-2024-005',
+                name: 'Kano Industrial Park',
+                location: 'Kano, Kano',
+                purpose: 'Commercial',
+                type: 'monetary',
+                status: 'Draft',
+                cases: 0,
+                description: 'Tree valuation for industrial acquisition.',
+                date: '2024-06-01'
+            }
+        ];
+
+        let newProjectType = 'monetary'; // for Create Project form
 
         // Farm table data
         let farmRows = [];
         let srCounter = 0;
 
+        // ============================================================
+        // PROJECT MANAGEMENT FUNCTIONS
+        // ============================================================
+        function selectNewProjectType(type) {
+            newProjectType = type === 'land' ? 'land' : 'monetary';
+            const monOpt = document.getElementById('newTypeOptMonetary');
+            const landOpt = document.getElementById('newTypeOptLand');
+            if (monOpt) monOpt.classList.toggle('selected', newProjectType === 'monetary');
+            if (landOpt) landOpt.classList.toggle('selected', newProjectType === 'land');
+            const radios = document.querySelectorAll('input[name="newCompType"]');
+            radios.forEach(r => { r.checked = r.value === newProjectType; });
+        }
+
+        function saveNewProject() {
+            const name = document.getElementById('newProjectName')?.value.trim();
+            const location = document.getElementById('newProjectLocation')?.value.trim();
+            const purpose = document.getElementById('newProjectPurpose')?.value;
+            const date = document.getElementById('newProjectDate')?.value || '';
+            const desc = document.getElementById('newProjectDesc')?.value.trim() || '';
+
+            if (!name || !location || !purpose) {
+                alert('⚠️ Please fill in Project Name, Location and Purpose.');
+                return;
+            }
+
+            const nextNum = projects.length + 1;
+            const id = 'P-2024-' + String(nextNum).padStart(3, '0');
+
+            const project = {
+                id: id,
+                name: name,
+                location: location,
+                purpose: purpose,
+                type: newProjectType,
+                status: 'Active',
+                cases: 0,
+                description: desc,
+                date: date
+            };
+            projects.push(project);
+
+            // Refresh UI
+            renderProjectsTable();
+            populateProjectSelect();
+            updateProjectKpis();
+
+            alert('✅ Project created successfully!\n\n' +
+                '📌 ID: ' + id + '\n' +
+                '📌 Name: ' + name + '\n' +
+                '📌 Scheme: ' + (newProjectType === 'monetary' ? 'Monetary (Cash for Trees)' : 'Land-for-Land (50:50)') + '\n\n' +
+                'This scheme is now locked. Cases registered under this project will inherit it.');
+
+            // Reset form
+            document.getElementById('newProjectName').value = '';
+            document.getElementById('newProjectLocation').value = '';
+            document.getElementById('newProjectPurpose').value = '';
+            document.getElementById('newProjectDesc').value = '';
+            selectNewProjectType('monetary');
+
+            navigateTo('projects');
+        }
+
+        function renderProjectsTable() {
+            const tbody = document.getElementById('projectsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            projects.forEach(p => {
+                const typeBadge = p.type === 'monetary'
+                    ? '<span class="status-badge active"><span class="dot"></span>Monetary</span>'
+                    : '<span class="status-badge completed"><span class="dot"></span>Land-for-Land</span>';
+                const statusBadge = p.status === 'Active'
+                    ? '<span class="status-badge active"><span class="dot"></span>Active</span>'
+                    : '<span class="status-badge pending"><span class="dot"></span>Draft</span>';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${p.id}</strong></td>
+                    <td>${p.name}</td>
+                    <td>${p.location}</td>
+                    <td>${typeBadge}</td>
+                    <td>${p.purpose}</td>
+                    <td>${statusBadge}</td>
+                    <td>${p.cases}</td>
+                    <td class="action-icons">
+                        <button title="Register Case under this project" onclick="startCaseForProject('${p.id}')"><i class="fas fa-plus-circle"></i></button>
+                        <button title="View" onclick="alert('Project: ${p.name}\\nScheme: ${p.type}')"><i class="fas fa-eye"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const footer = document.getElementById('projectsTableFooter');
+            if (footer) footer.textContent = `Showing ${projects.length} projects · Scheme type is set at project level`;
+        }
+
+        function updateProjectKpis() {
+            const total = projects.length;
+            const monetary = projects.filter(p => p.type === 'monetary').length;
+            const land = projects.filter(p => p.type === 'land').length;
+            const active = projects.filter(p => p.status === 'Active').length;
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            set('projKpiTotal', total);
+            set('projKpiMonetary', monetary);
+            set('projKpiLand', land);
+            set('projKpiActive', active);
+        }
+
+        function populateProjectSelect() {
+            const select = document.getElementById('projectSelect');
+            if (!select) return;
+            const current = select.value;
+            select.innerHTML = '<option value="">— Choose a registered project —</option>';
+            projects.filter(p => p.status === 'Active').forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.id} · ${p.name} (${p.type === 'monetary' ? 'Monetary' : 'Land-for-Land'})`;
+                select.appendChild(opt);
+            });
+            if (current && projects.some(p => p.id === current)) {
+                select.value = current;
+            }
+        }
+
+        function onProjectSelect() {
+            const select = document.getElementById('projectSelect');
+            const projectId = select ? select.value : '';
+            selectedProjectId = projectId || null;
+
+            const schemeDisplay = document.getElementById('schemeTypeDisplay');
+            const badgeEl = document.getElementById('schemeTypeBadge');
+            const noteEl = document.getElementById('schemeTypeNote');
+
+            if (!projectId) {
+                compensationType = 'monetary';
+                if (schemeDisplay) schemeDisplay.style.display = 'none';
+                document.getElementById('projectName').value = '';
+                document.getElementById('location').value = '';
+                document.getElementById('purpose').value = '';
+                document.getElementById('area').value = '';
+                document.getElementById('description').value = '';
+                applyCompTypeUI();
+                return;
+            }
+
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+
+            // Inherit scheme type from project
+            compensationType = project.type;
+            selectedProjectId = project.id;
+
+            // Fill fields
+            document.getElementById('projectName').value = project.name;
+            document.getElementById('location').value = project.location;
+            document.getElementById('purpose').value = project.purpose;
+            document.getElementById('description').value = project.description || '';
+            if (!document.getElementById('area').value) {
+                document.getElementById('area').value = project.type === 'land' ? '5.00' : '2.40';
+            }
+
+            // Show scheme badge
+            if (schemeDisplay) schemeDisplay.style.display = 'block';
+            if (badgeEl) {
+                if (project.type === 'monetary') {
+                    badgeEl.innerHTML = `
+                        <span class="status-badge active" style="font-size:14px;padding:6px 16px;"><span class="dot"></span> Monetary (Cash for Trees)</span>
+                        <span style="font-size:13px;color:var(--gray-600);">Inherited from project · cannot be changed on case</span>
+                    `;
+                } else {
+                    badgeEl.innerHTML = `
+                        <span class="status-badge completed" style="font-size:14px;padding:6px 16px;"><span class="dot"></span> Land-for-Land (50:50)</span>
+                        <span style="font-size:13px;color:var(--gray-600);">Inherited from project · cannot be changed on case</span>
+                    `;
+                }
+            }
+            if (noteEl) {
+                noteEl.innerHTML = project.type === 'monetary'
+                    ? '<i class="fas fa-info-circle"></i> <strong>Monetary scheme:</strong> You will record economic trees and calculate cash compensation. No plot allocation under this project.'
+                    : '<i class="fas fa-info-circle"></i> <strong>Land-for-Land scheme:</strong> You will allocate plots under the 50:50 formula (Farmer : Government). No cash for trees under this project.';
+            }
+
+            applyCompTypeUI();
+        }
+
+        function startCaseForProject(projectId) {
+            navigateTo('compensation-register');
+            setTimeout(() => {
+                const select = document.getElementById('projectSelect');
+                if (select) {
+                    select.value = projectId;
+                    onProjectSelect();
+                }
+            }, 100);
+        }
+
+        // Internal helper (kept for any residual calls; UI selection removed from case form)
         function selectCompType(type) {
             compensationType = type === 'land' ? 'land' : 'monetary';
-            const monOpt = document.getElementById('typeOptMonetary');
-            const landOpt = document.getElementById('typeOptLand');
-            if (monOpt) monOpt.classList.toggle('selected', compensationType === 'monetary');
-            if (landOpt) landOpt.classList.toggle('selected', compensationType === 'land');
-            const radios = document.querySelectorAll('input[name="compType"]');
-            radios.forEach(r => { r.checked = r.value === compensationType; });
             applyCompTypeUI();
         }
 
@@ -5127,6 +5536,11 @@
                 priceInput.addEventListener('input', calculateTreeTotal);
             }
 
+            // Project Management init
+            renderProjectsTable();
+            populateProjectSelect();
+            updateProjectKpis();
+
             initializeFarmData();
             applyCompTypeUI();
             updateFormStepper();
@@ -5222,8 +5636,8 @@
         // ============================================================
         function updatePreview() {
             applyCompTypeUI();
-            const project = document.getElementById('projectName').value || 'Abuja Housing Project';
-            const location = document.getElementById('location').value || 'Maitama, FCT';
+            const project = document.getElementById('projectName').value || 'Kano Housing Project';
+            const location = document.getElementById('location').value || 'GRA';
             const purpose = document.getElementById('purpose').value || 'Housing';
             const officer = document.getElementById('surveyOfficer').value || 'Clement Joseph';
             const date = document.getElementById('date').value || '2024-06-15';
@@ -5243,8 +5657,13 @@
             const typeEl = document.getElementById('previewCompType');
             if (typeEl) {
                 typeEl.textContent = isMonetary
-                    ? 'Monetary (Cash for Trees)'
-                    : 'Land-for-Land (50:50 Plots)';
+                    ? 'Monetary (Cash for Trees) — from Project'
+                    : 'Land-for-Land (50:50 Plots) — from Project';
+            }
+            // Also show project ID if available
+            const previewProjectEl = document.getElementById('previewProject');
+            if (previewProjectEl && selectedProjectId) {
+                previewProjectEl.textContent = project + ' (' + selectedProjectId + ')';
             }
 
             const treesItem = document.getElementById('previewTreesItem');
@@ -5284,12 +5703,14 @@
         // SUBMIT CASE
         // ============================================================
         function submitCase() {
+            const projectSelect = document.getElementById('projectSelect');
+            const projectId = projectSelect ? projectSelect.value : '';
             const project = document.getElementById('projectName').value.trim();
             const location = document.getElementById('location').value.trim();
             const isMonetary = compensationType === 'monetary';
 
-            if (!project || !location) {
-                alert('⚠️ Please ensure all required fields are filled in Step 1 (including Compensation Type).');
+            if (!projectId || !project || !location) {
+                alert('⚠️ Please select a Project in Step 1. The compensation scheme is inherited from the Project.');
                 currentStep = 0;
                 updateFormStepper();
                 return;
@@ -5340,7 +5761,7 @@
 
             const confirmSubmit = confirm(
                 '✅ Ready to submit!\n\n' +
-                '📋 Project: ' + project + '\n' +
+                '📋 Project: ' + project + ' (' + (selectedProjectId || projectId) + ')\n' +
                 '📍 Location: ' + location + '\n' +
                 '👤 Beneficiaries: ' + beneficiaryCount + '\n' +
                 schemeLine +
@@ -5348,9 +5769,16 @@
             );
 
             if (confirmSubmit) {
+                // Increment case count on project
+                const proj = projects.find(p => p.id === selectedProjectId);
+                if (proj) proj.cases = (proj.cases || 0) + 1;
+                renderProjectsTable();
+                updateProjectKpis();
+
                 alert('✅ Case submitted successfully!\n\n' +
                     '📌 Case Reference: C-2024-046\n' +
-                    '📌 Type: ' + (isMonetary ? 'Monetary (Cash)' : 'Land-for-Land (50:50)') + '\n' +
+                    '📌 Project: ' + project + '\n' +
+                    '📌 Scheme (from Project): ' + (isMonetary ? 'Monetary (Cash for Trees)' : 'Land-for-Land (50:50)') + '\n' +
                     '🔄 Status: Pending Review\n' +
                     '📋 OP Workflow initiated: Survey → GIS → Commissioner → Deeds → Land/OSS\n\n' +
                     'You will be notified when the case progresses.');
@@ -5402,9 +5830,10 @@
         }
 
         console.log('🏗️ KLAES Survey Department Module loaded successfully!');
-        console.log('📌 Multi-step form: General → Beneficiaries → Farm Info → Trees → Compensation → Preview');
-        console.log('💰 Compensation is exclusive: Monetary (cash for trees) OR Land-for-Land (50:50 plots) — never mixed per case.');
-        console.log('📊 All sidebar modules now have dedicated pages with tables and forms.');
+        console.log('📌 Project Management: Scheme type (Monetary | Land-for-Land) is set at Project level.');
+        console.log('📌 Cases inherit the scheme from the selected Project — form lifecycle adapts automatically.');
+        console.log('📌 Multi-step form: General (select Project) → Beneficiaries → Farm Info → Trees → Compensation → Preview');
+        console.log('💰 Compensation is exclusive per Project: Monetary (cash for trees) OR Land-for-Land (50:50 plots) — never mixed.');
     </script>
 
 </body>
