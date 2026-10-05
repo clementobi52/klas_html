@@ -1,0 +1,3197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KLAES - Cadastral Module</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0f3b5e;
+      --primary-light: #1a5276;
+      --primary-dark: #0a2a42;
+      --primary-50: #e8f0f8;
+      --primary-100: #d1e1f0;
+      --secondary: #2ecc71;
+      --secondary-dark: #27ae60;
+      --accent: #f39c12;
+      --danger: #e74c3c;
+      --info: #3498db;
+      --gray-50: #f8f9fa;
+      --gray-100: #f1f3f5;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-400: #ced4da;
+      --gray-500: #adb5bd;
+      --gray-600: #6c757d;
+      --gray-700: #495057;
+      --gray-800: #343a40;
+      --gray-900: #212529;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, .08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, .1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 4px;
+      --transition: .25s cubic-bezier(.4, 0, .2, 1);
+      --sidebar-width: 280px;
+      --header-height: 64px;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      font-size: 16px
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-50);
+      color: var(--gray-800);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gray-400);
+      border-radius: 10px
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--primary-dark);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      overflow-y: auto;
+      transition: transform var(--transition)
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, .08)
+    }
+
+    .sidebar-brand .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--secondary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-dark)
+    }
+
+    .sidebar-brand h1 {
+      font-size: 17px;
+      font-weight: 600
+    }
+
+    .sidebar-brand h1 small {
+      display: block;
+      font-weight: 400;
+      font-size: 11px;
+      opacity: .6
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 10px 24px
+    }
+
+    .nav-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: rgba(255, 255, 255, .3);
+      padding: 14px 12px 6px;
+      font-weight: 600
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      color: rgba(255, 255, 255, .65);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      position: relative;
+      margin-bottom: 1px;
+      transition: all var(--transition)
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, .08);
+      color: #fff
+    }
+
+    .nav-item.active {
+      background: rgba(46, 204, 113, .2);
+      color: #fff
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 22px;
+      background: var(--secondary);
+      border-radius: 0 4px 4px 0
+    }
+
+    .nav-item i {
+      width: 18px;
+      text-align: center;
+      font-size: 14px
+    }
+
+    .nav-item .badge {
+      margin-left: auto;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px
+    }
+
+    .nav-item .badge.yellow {
+      background: var(--accent)
+    }
+
+    .nav-item .badge.blue {
+      background: var(--info)
+    }
+
+    .nav-item .badge.green {
+      background: var(--secondary)
+    }
+
+    .nav-item.sub-item {
+      padding-left: 42px;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, .5)
+    }
+
+    .nav-item.sub-item.active {
+      color: #fff;
+      background: rgba(46, 204, 113, .15)
+    }
+
+    .nav-item.sub-item.active::before {
+      left: 18px
+    }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255, 255, 255, .08)
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--primary-dark)
+    }
+
+    .user-card .name {
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .user-card .role {
+      font-size: 11px;
+      opacity: .6
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column
+    }
+
+    .header {
+      height: var(--header-height);
+      background: rgba(255, 255, 255, .92);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px)
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--gray-700);
+      cursor: pointer
+    }
+
+    .page-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gray-900)
+    }
+
+    .page-title .sub {
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-left: 8px
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--gray-100);
+      border-radius: 24px;
+      padding: 6px 14px;
+      gap: 8px
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13px;
+      width: 180px;
+      font-family: var(--font)
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: var(--gray-100);
+      color: var(--gray-700);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative
+    }
+
+    .icon-btn .dot {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 7px;
+      height: 7px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid #fff
+    }
+
+    .page-content {
+      padding: 22px 28px 40px;
+      flex: 1
+    }
+
+    .page {
+      display: none;
+      animation: fadeUp .3s ease
+    }
+
+    .page.active {
+      display: block
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px
+    }
+
+    .page-header h2 {
+      font-size: 20px;
+      font-weight: 600
+    }
+
+    .page-header p {
+      color: var(--gray-500);
+      font-size: 13px;
+      margin-top: 2px
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px
+    }
+
+    .kpi-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      transition: all var(--transition)
+    }
+
+    .kpi-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px)
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: .4px
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-top: 4px
+    }
+
+    .kpi-meta {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-top: 4px
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px
+    }
+
+    @media(max-width:1024px) {
+      .dash-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .dash-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200)
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px
+    }
+
+    .card-header h3 {
+      font-size: 14px;
+      font-weight: 600
+    }
+
+    .card-header a {
+      font-size: 12px;
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 500
+    }
+
+    .table-wrapper {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .table-scroll {
+      overflow-x: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px
+    }
+
+    table thead {
+      background: var(--gray-50)
+    }
+
+    table thead th {
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      color: var(--gray-600);
+      border-bottom: 1px solid var(--gray-200);
+      white-space: nowrap
+    }
+
+    table tbody td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+      vertical-align: middle
+    }
+
+    table tbody tr:hover {
+      background: var(--gray-50)
+    }
+
+    table tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600
+    }
+
+    .status-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%
+    }
+
+    .status-badge.active {
+      background: #d5f5e3;
+      color: #1a7a3a
+    }
+
+    .status-badge.active .dot {
+      background: #1a7a3a
+    }
+
+    .status-badge.pending {
+      background: #fdebd0;
+      color: #b9770e
+    }
+
+    .status-badge.pending .dot {
+      background: #b9770e
+    }
+
+    .status-badge.completed {
+      background: #d6eaf8;
+      color: #1a5276
+    }
+
+    .status-badge.completed .dot {
+      background: #1a5276
+    }
+
+    .status-badge.rejected {
+      background: #fadbd8;
+      color: #922b21
+    }
+
+    .status-badge.rejected .dot {
+      background: #922b21
+    }
+
+    .status-badge.review {
+      background: #ebf5fb;
+      color: #2c7fb8
+    }
+
+    .status-badge.review .dot {
+      background: #2c7fb8
+    }
+
+    .action-icons {
+      display: flex;
+      gap: 4px
+    }
+
+    .action-icons button {
+      background: none;
+      border: none;
+      color: var(--gray-500);
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 13px
+    }
+
+    .action-icons button:hover {
+      background: var(--gray-100);
+      color: var(--primary)
+    }
+
+    .action-icons button.danger:hover {
+      color: var(--danger)
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-top: 1px solid var(--gray-200);
+      font-size: 13px;
+      color: var(--gray-500)
+    }
+
+    .table-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px
+    }
+
+    .table-toolbar .left {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .table-toolbar input,
+    .table-toolbar select {
+      padding: 7px 12px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: var(--font);
+      background: #fff
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition)
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light)
+    }
+
+    .btn-secondary {
+      background: var(--gray-200);
+      color: var(--gray-700)
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-300)
+    }
+
+    .btn-success {
+      background: var(--secondary);
+      color: #fff
+    }
+
+    .btn-success:hover {
+      background: var(--secondary-dark)
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--gray-300);
+      color: var(--gray-700)
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-50)
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 12px
+    }
+
+    .btn-xs {
+      padding: 3px 9px;
+      font-size: 11px
+    }
+
+    .form-container {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden
+    }
+
+    .form-body {
+      padding: 24px
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 24px
+    }
+
+    .form-grid .full {
+      grid-column: 1/-1
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-700)
+    }
+
+    .form-group label .required {
+      color: var(--danger)
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 9px 12px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: var(--font);
+      background: #fff;
+      color: var(--gray-800);
+      width: 100%
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-100)
+    }
+
+    .form-group input[readonly],
+    .form-group select[disabled] {
+      background: var(--gray-100)
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 72px
+    }
+
+    .form-group .helper {
+      font-size: 11px;
+      color: var(--gray-500)
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--gray-200);
+      margin-top: 20px;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .form-actions .right {
+      display: flex;
+      gap: 8px
+    }
+
+    .wf-chain {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      padding-left: 36px
+    }
+
+    .wf-chain::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 16px;
+      bottom: 16px;
+      width: 2px;
+      background: var(--gray-300)
+    }
+
+    .wf-node {
+      position: relative;
+      padding: 12px 16px 12px 24px;
+      background: #fff;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-200);
+      margin-bottom: 10px;
+      transition: all var(--transition)
+    }
+
+    .wf-node::before {
+      content: '';
+      position: absolute;
+      left: -30px;
+      top: 18px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--gray-300);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px var(--gray-300)
+    }
+
+    .wf-node.done::before {
+      background: var(--secondary);
+      box-shadow: 0 0 0 2px var(--secondary)
+    }
+
+    .wf-node.active::before {
+      background: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent)
+    }
+
+    .wf-title {
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .wf-meta {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-top: 4px
+    }
+
+    .wf-actions {
+      margin-top: 8px
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      margin-top: 12px
+    }
+
+    .calc-card {
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      border: 1px solid var(--gray-200);
+      text-align: center
+    }
+
+    .calc-card .label {
+      font-size: 11px;
+      color: var(--gray-500);
+      font-weight: 500
+    }
+
+    .calc-card .amount {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 6px 0
+    }
+
+    .calc-card .detail {
+      font-size: 12px;
+      color: var(--gray-600)
+    }
+
+    .comp-total {
+      background: var(--primary-50);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      border-left: 4px solid var(--primary);
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .comp-total .total-amount {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary)
+    }
+
+    .map-placeholder {
+      background: var(--gray-100);
+      border-radius: var(--radius-sm);
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-500);
+      border: 1px solid var(--gray-300);
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .map-placeholder i {
+      font-size: 40px;
+      opacity: .35
+    }
+
+    .note-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #fef9e7;
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius-xs);
+      font-size: 12px;
+      color: var(--gray-700)
+    }
+
+    .info-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: var(--primary-50);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius-xs);
+      font-size: 12px;
+      color: var(--gray-700)
+    }
+
+    .activity-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--gray-100)
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0
+    }
+
+    .activity-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary-50);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px
+    }
+
+    .activity-content .text {
+      font-size: 13px;
+      color: var(--gray-700)
+    }
+
+    .activity-content .time {
+      font-size: 11px;
+      color: var(--gray-500)
+    }
+
+    .section-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px
+    }
+
+    .section-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all var(--transition)
+    }
+
+    .section-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px)
+    }
+
+    .section-card .section-icon {
+      font-size: 26px;
+      color: var(--primary);
+      opacity: .7
+    }
+
+    .section-card h4 {
+      margin: 8px 0 4px;
+      font-size: 14px
+    }
+
+    .section-card p {
+      font-size: 12px;
+      color: var(--gray-500)
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px
+    }
+
+    .modal-overlay.open {
+      display: flex
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-md)
+    }
+
+    .modal.wide {
+      max-width: 720px
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200)
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 600
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--gray-500);
+      cursor: pointer;
+      line-height: 1
+    }
+
+    .modal-body {
+      padding: 20px
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px
+    }
+
+    /* Toast */
+    .toast-wrap {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .toast {
+      background: #fff;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      box-shadow: var(--shadow-md);
+      border-left: 4px solid var(--secondary);
+      font-size: 13px;
+      min-width: 260px;
+      animation: slideIn .3s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px
+    }
+
+    .toast.error {
+      border-left-color: var(--danger)
+    }
+
+    .toast.warn {
+      border-left-color: var(--accent)
+    }
+
+    .toast.info {
+      border-left-color: var(--info)
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      z-index: 999
+    }
+
+    .sidebar-overlay.active {
+      display: block
+    }
+
+    @media(max-width:768px) {
+      .sidebar {
+        transform: translateX(-100%)
+      }
+
+      .sidebar.open {
+        transform: translateX(0)
+      }
+
+      .main-content {
+        margin-left: 0
+      }
+
+      .menu-toggle {
+        display: block
+      }
+
+      .header {
+        padding: 0 14px
+      }
+
+      .page-content {
+        padding: 14px
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr
+      }
+
+      .search-box input {
+        width: 100px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">C</div>
+      <h1>KLAES <small>Cadastral Module</small></h1>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')"><i class="fas fa-th-large"></i>
+        Dashboard</a>
+      <div class="nav-label">Registry</div>
+      <a class="nav-item" data-page="intake" onclick="navigateTo('intake')"><i class="fas fa-inbox"></i> Intake Queue
+        <span class="badge yellow" id="badgeIntake">0</span></a>
+      <a class="nav-item" data-page="correspondence" onclick="navigateTo('correspondence')"><i class="fas fa-copy"></i>
+        Correspondence Files</a>
+      <div class="nav-label">Reports</div>
+      <a class="nav-item" data-page="reports-all" onclick="navigateTo('reports-all')"><i class="fas fa-list-alt"></i>
+        All Reports <span class="badge" id="badgeReports">0</span></a>
+      <a class="nav-item" data-page="verification" onclick="navigateTo('verification')"><i
+          class="fas fa-check-double"></i> Verification</a>
+      <a class="nav-item sub-item" data-page="customary" onclick="navigateTo('customary')"><i
+          class="fas fa-landmark"></i> Customary</a>
+      <a class="nav-item sub-item" data-page="statutory" onclick="navigateTo('statutory')"><i
+          class="fas fa-balance-scale"></i> Statutory</a>
+      <div class="nav-label">Information</div>
+      <a class="nav-item" data-page="index-cards" onclick="navigateTo('index-cards')"><i class="fas fa-id-card"></i>
+        Index Cards</a>
+      <a class="nav-item" data-page="charting" onclick="navigateTo('charting')"><i class="fas fa-draw-polygon"></i>
+        Charting</a>
+      <a class="nav-item" data-page="survey-jobs" onclick="navigateTo('survey-jobs')"><i class="fas fa-hard-hat"></i>
+        Survey Jobs (I to S) <span class="badge blue" id="badgeJobs">0</span></a>
+      <a class="nav-item" data-page="file-status" onclick="navigateTo('file-status')"><i class="fas fa-toggle-on"></i>
+        File Status</a>
+      <div class="nav-label">Plan &amp; Description</div>
+      <a class="nav-item" data-page="area-pillars" onclick="navigateTo('area-pillars')"><i
+          class="fas fa-ruler-combined"></i> Area &amp; Pillars</a>
+      <a class="nav-item" data-page="descriptions" onclick="navigateTo('descriptions')"><i
+          class="fas fa-align-left"></i> Descriptions</a>
+      <a class="nav-item" data-page="fee-calculator" onclick="navigateTo('fee-calculator')"><i
+          class="fas fa-calculator"></i> Fee Calculator</a>
+      <div class="nav-label">Analytics</div>
+      <a class="nav-item" data-page="analytics" onclick="navigateTo('analytics')"><i class="fas fa-chart-bar"></i>
+        Reports / Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar">CJ</div>
+        <div>
+          <div class="name">Clement Joseph</div>
+          <div class="role">AD / Cad. Info</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-left">
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <span class="page-title" id="pageTitle">Dashboard <span class="sub">/ Overview</span></span>
+      </div>
+      <div class="header-right">
+        <div class="search-box"><i class="fas fa-search" style="color:var(--gray-500);font-size:13px"></i>
+          <input type="text" id="globalSearch" placeholder="Search FileNo, owner..." oninput="globalSearchHandler()" />
+        </div>
+        <button class="icon-btn" title="Notifications" onclick="showToast('No new notifications','info')"><i
+            class="fas fa-bell"></i><span class="dot"></span></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <h2>Cadastral Dashboard</h2>
+            <p>Registry · Reports · Information · Plan &amp; Description</p>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Intake Queue</div>
+            <div class="kpi-value" id="kpiIntake">0</div>
+            <div class="kpi-meta">Awaiting correspondence</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Open Reports</div>
+            <div class="kpi-value" id="kpiReports">0</div>
+            <div class="kpi-meta">All streams</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Survey Jobs</div>
+            <div class="kpi-value" id="kpiJobs">0</div>
+            <div class="kpi-meta">Active I to S</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Index Cards</div>
+            <div class="kpi-value" id="kpiCards">0</div>
+            <div class="kpi-meta">Commissioned</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Fees YTD</div>
+            <div class="kpi-value" id="kpiFees">₦0</div>
+            <div class="kpi-meta">Area + pillars</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Duplicates</div>
+            <div class="kpi-value" id="kpiDup">0</div>
+            <div class="kpi-meta">Require review</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="card-header">
+              <h3><i class="fas fa-project-diagram" style="color:var(--primary);margin-right:6px"></i>Latest open report
+              </h3><a onclick="navigateTo('reports-all')">View all →</a>
+            </div>
+            <div id="dashWorkflow"></div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header">
+              <h3><i class="fas fa-bolt" style="color:var(--accent);margin-right:6px"></i>Recent Activity</h3>
+            </div>
+            <div class="activity-feed" id="activityFeed"></div>
+          </div>
+        </div>
+        <div class="section-cards">
+          <div class="section-card" onclick="navigateTo('intake')">
+            <div class="section-icon"><i class="fas fa-inbox"></i></div>
+            <h4>Registry</h4>
+            <p>Intake &amp; correspondence</p>
+          </div>
+          <div class="section-card" onclick="navigateTo('verification')">
+            <div class="section-icon"><i class="fas fa-check-double"></i></div>
+            <h4>Verification</h4>
+            <p>Customary &amp; Statutory nested</p>
+          </div>
+          <div class="section-card" onclick="navigateTo('index-cards')">
+            <div class="section-icon"><i class="fas fa-id-card"></i></div>
+            <h4>Index Cards</h4>
+            <p>Commission &amp; track</p>
+          </div>
+          <div class="section-card" onclick="navigateTo('fee-calculator')">
+            <div class="section-icon"><i class="fas fa-calculator"></i></div>
+            <h4>Fee Calculator</h4>
+            <p>Area + pillars @ ₦4,000</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTAKE -->
+      <div class="page" id="page-intake">
+        <div class="page-header">
+          <div>
+            <h2>Intake Queue</h2>
+            <p>Files received only from Allocation sources: Land · SLTR · ST</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openLogIntakeModal()"><i class="fas fa-plus"></i> Log
+            Incoming</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left">
+            <input type="text" id="intakeSearch" placeholder="Search FileNo / owner..." oninput="renderIntake()"
+              style="width:200px" />
+            <select id="intakeSource" onchange="renderIntake()">
+              <option value="">All Sources</option>
+              <option>Land</option>
+              <option>SLTR</option>
+              <option>ST</option>
+            </select>
+            <select id="intakeType" onchange="renderIntake()">
+              <option value="">All Types</option>
+              <option>Direct RES</option>
+              <option>Direct COM</option>
+              <option>Direct IND</option>
+              <option>Conversion</option>
+              <option>SLTR</option>
+              <option>Sectional Title</option>
+            </select>
+            <select id="intakeStatus" onchange="renderIntake()">
+              <option value="">All Status</option>
+              <option>Queued</option>
+              <option>In progress</option>
+              <option>Correspondence done</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>FileNo</th>
+                  <th>Source</th>
+                  <th>Type</th>
+                  <th>Owner</th>
+                  <th>Location</th>
+                  <th>Received</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="intakeBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="intakeFooter"></div>
+        </div>
+        <div class="info-box"><i class="fas fa-info-circle"></i> Conversion files skip charting and go to Index Cards
+          after correspondence.</div>
+      </div>
+
+      <!-- CORRESPONDENCE -->
+      <div class="page" id="page-correspondence">
+        <div class="page-header">
+          <div>
+            <h2>Correspondence Files</h2>
+            <p>Cadastral copies · synchronized FileNo · duplicate detection</p>
+          </div>
+        </div>
+        <div class="table-toolbar">
+          <div class="left">
+            <input type="text" id="corrSearch" placeholder="Search..." oninput="renderCorrespondence()"
+              style="width:200px" />
+            <select id="corrDup" onchange="renderCorrespondence()">
+              <option value="">All</option>
+              <option value="Clear">Clear</option>
+              <option value="Duplicate">Duplicate</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Corr. FileNo</th>
+                  <th>Source FileNo</th>
+                  <th>Owner</th>
+                  <th>Created</th>
+                  <th>Duplicate</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="corrBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="corrFooter"></div>
+        </div>
+      </div>
+
+      <!-- ALL REPORTS -->
+      <div class="page" id="page-reports-all">
+        <div class="page-header">
+          <div>
+            <h2>All Reports</h2>
+            <p>Verification · Customary · Statutory</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewReportModal()"><i class="fas fa-plus"></i> New
+            Report</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left">
+            <select id="repTypeFilter" onchange="renderAllReports()">
+              <option value="">All Types</option>
+              <option>Verification</option>
+              <option>Customary</option>
+              <option>Statutory</option>
+            </select>
+            <select id="repStageFilter" onchange="renderAllReports()">
+              <option value="">All Stages</option>
+              <option>Registration</option>
+              <option>Field Inspection</option>
+              <option>Chart Upload</option>
+              <option>Digital Chart</option>
+              <option>Report Generation</option>
+              <option>Checking</option>
+              <option>Approval</option>
+              <option>Dispatch</option>
+              <option>Dispatched</option>
+            </select>
+            <input type="text" id="repSearch" placeholder="Search FileNo / ID..." oninput="renderAllReports()"
+              style="width:180px" />
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Report ID</th>
+                  <th>FileNo</th>
+                  <th>Type</th>
+                  <th>Stage</th>
+                  <th>Assignee</th>
+                  <th>Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="allReportsBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="allReportsFooter"></div>
+        </div>
+      </div>
+
+      <!-- VERIFICATION -->
+      <div class="page" id="page-verification">
+        <div class="page-header">
+          <div>
+            <h2>Verification Report</h2>
+            <p>8-step workflow · Field inspection included</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewReportModal('Verification')"><i
+              class="fas fa-plus"></i> Start Verification</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left"><select id="verSelect" onchange="loadReportDetail('Verification')"></select></div>
+          <div><button class="btn btn-success btn-sm" id="verAdvanceBtn" onclick="advanceReportStage('Verification')"><i
+                class="fas fa-forward"></i> Advance Stage</button>
+            <button class="btn btn-outline btn-sm" onclick="rejectReportStage('Verification')"><i
+                class="fas fa-undo"></i> Return</button>
+          </div>
+        </div>
+        <div class="form-container" style="margin-bottom:16px">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>Report ID</label><input id="verId" readonly /></div>
+              <div class="form-group"><label>FileNo</label><input id="verFileNo" readonly /></div>
+              <div class="form-group"><label>Owner</label><input id="verOwner" readonly /></div>
+              <div class="form-group"><label>Location</label><input id="verLoc" readonly /></div>
+              <div class="form-group"><label>Assignee</label><input id="verAssignee" /></div>
+              <div class="form-group"><label>Notes</label><input id="verNotes" placeholder="Stage notes..." /></div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-header">
+            <h3>Workflow (8 steps)</h3>
+          </div>
+          <div class="wf-chain" id="verWf"></div>
+        </div>
+      </div>
+
+      <!-- CUSTOMARY -->
+      <div class="page" id="page-customary">
+        <div class="page-header">
+          <div>
+            <h2>Customary Report</h2>
+            <p>Under Verification · 7 steps</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewReportModal('Customary')"><i class="fas fa-plus"></i>
+            Start Customary</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left"><select id="cusSelect" onchange="loadReportDetail('Customary')"></select></div>
+          <div><button class="btn btn-success btn-sm" onclick="advanceReportStage('Customary')"><i
+                class="fas fa-forward"></i> Advance Stage</button>
+            <button class="btn btn-outline btn-sm" onclick="rejectReportStage('Customary')"><i class="fas fa-undo"></i>
+              Return</button>
+          </div>
+        </div>
+        <div class="form-container" style="margin-bottom:16px">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>Report ID</label><input id="cusId" readonly /></div>
+              <div class="form-group"><label>FileNo</label><input id="cusFileNo" readonly /></div>
+              <div class="form-group"><label>Owner</label><input id="cusOwner" readonly /></div>
+              <div class="form-group"><label>Location</label><input id="cusLoc" readonly /></div>
+              <div class="form-group"><label>Assignee</label><input id="cusAssignee" /></div>
+              <div class="form-group"><label>Notes</label><input id="cusNotes" placeholder="Stage notes..." /></div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-header">
+            <h3>Workflow (7 steps)</h3>
+          </div>
+          <div class="wf-chain" id="cusWf"></div>
+        </div>
+      </div>
+
+      <!-- STATUTORY -->
+      <div class="page" id="page-statutory">
+        <div class="page-header">
+          <div>
+            <h2>Statutory Report</h2>
+            <p>Under Verification · 7 steps</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewReportModal('Statutory')"><i class="fas fa-plus"></i>
+            Start Statutory</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left"><select id="staSelect" onchange="loadReportDetail('Statutory')"></select></div>
+          <div><button class="btn btn-success btn-sm" onclick="advanceReportStage('Statutory')"><i
+                class="fas fa-forward"></i> Advance Stage</button>
+            <button class="btn btn-outline btn-sm" onclick="rejectReportStage('Statutory')"><i class="fas fa-undo"></i>
+              Return</button>
+          </div>
+        </div>
+        <div class="form-container" style="margin-bottom:16px">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>Report ID</label><input id="staId" readonly /></div>
+              <div class="form-group"><label>FileNo</label><input id="staFileNo" readonly /></div>
+              <div class="form-group"><label>Owner</label><input id="staOwner" readonly /></div>
+              <div class="form-group"><label>Location</label><input id="staLoc" readonly /></div>
+              <div class="form-group"><label>Assignee</label><input id="staAssignee" /></div>
+              <div class="form-group"><label>Notes</label><input id="staNotes" placeholder="Stage notes..." /></div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-header">
+            <h3>Workflow (7 steps)</h3>
+          </div>
+          <div class="wf-chain" id="staWf"></div>
+        </div>
+      </div>
+
+      <!-- INDEX CARDS -->
+      <div class="page" id="page-index-cards">
+        <div class="page-header">
+          <div>
+            <h2>Index Cards</h2>
+            <p>Commission · movement · survey job link · print</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalIndexCard')"><i class="fas fa-plus"></i>
+            Commission Card</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left">
+            <input type="text" id="icSearch" placeholder="Search FileNo / name..." oninput="renderIndexCards()"
+              style="width:220px" />
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Card ID</th>
+                  <th>FileNo</th>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Survey Job</th>
+                  <th>Last Movement</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="indexCardsBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="indexCardsFooter"></div>
+        </div>
+      </div>
+
+      <!-- CHARTING -->
+      <div class="page" id="page-charting">
+        <div class="page-header">
+          <div>
+            <h2>Charting</h2>
+            <p>Direct files on Geo-DB · Conversion = no chart</p>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="card-header">
+              <h3>Map canvas</h3>
+            </div>
+            <div class="map-placeholder" id="mapCanvas">
+              <i class="fas fa-map"></i>
+              <div id="mapStatus">Select a file and save chart</div>
+              <div style="font-size:12px">Digital red FileNo overlay · boundary validation</div>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header">
+              <h3>Chart session</h3>
+            </div>
+            <div class="form-grid" style="grid-template-columns:1fr">
+              <div class="form-group"><label>Select correspondence / FileNo</label>
+                <select id="chartFileSelect" onchange="onChartFileSelect()"></select>
+              </div>
+              <div class="form-group"><label>File class</label><input id="chartClass" readonly /></div>
+              <div class="form-group"><label>Chart status</label>
+                <select id="chartStatus">
+                  <option>In progress</option>
+                  <option>Completed</option>
+                  <option>Conflict</option>
+                  <option>Skipped (Conversion)</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Notes</label><textarea id="chartNotes" rows="2"></textarea></div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="saveChart()"><i class="fas fa-save"></i> Save
+                Chart</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Zoom simulated','info')">Zoom +</button>
+              <button class="btn btn-secondary btn-sm"
+                onclick="showToast('Layers: Cadastre, Imagery','info')">Layers</button>
+            </div>
+            <div class="info-box" style="margin-top:14px"><i class="fas fa-info-circle"></i> Conversion files are
+              auto-flagged no-chart and routed to Index Cards.</div>
+          </div>
+        </div>
+        <div class="table-wrapper" style="margin-top:20px">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>FileNo</th>
+                  <th>Class</th>
+                  <th>Status</th>
+                  <th>Updated</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="chartsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SURVEY JOBS -->
+      <div class="page" id="page-survey-jobs">
+        <div class="page-header">
+          <div>
+            <h2>Survey Jobs (I to S)</h2>
+            <p>SURCON job numbers · Instruction to Surveyor</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalITOS')"><i class="fas fa-plus"></i> Issue I to
+            S</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="left">
+            <input type="text" id="sjSearch" placeholder="Search job / FileNo..." oninput="renderSurveyJobs()"
+              style="width:200px" />
+            <select id="sjStatusFilter" onchange="renderSurveyJobs()">
+              <option value="">All Status</option>
+              <option>Issued</option>
+              <option>Field</option>
+              <option>Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job No</th>
+                  <th>FileNo</th>
+                  <th>Surveyor</th>
+                  <th>Firm</th>
+                  <th>Issued</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="surveyJobsBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="surveyJobsFooter"></div>
+        </div>
+      </div>
+
+      <!-- FILE STATUS -->
+      <div class="page" id="page-file-status">
+        <div class="page-header">
+          <div>
+            <h2>File Status</h2>
+            <p>Revoke · Reinstate · Withdraw · Change of Purpose · Open / Close</p>
+          </div>
+        </div>
+        <div class="form-container" style="margin-bottom:20px">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>FileNo <span class="required">*</span></label>
+                <select id="fsFileNo">
+                  <option value="">— Select FileNo —</option>
+                </select>
+                <span class="helper">Dropdown only · no manual entry</span>
+              </div>
+              <div class="form-group"><label>Action <span class="required">*</span></label>
+                <select id="fsAction">
+                  <option value="">Select...</option>
+                  <option>Revoke</option>
+                  <option>Reinstate</option>
+                  <option>Withdraw</option>
+                  <option>Change of Purpose</option>
+                  <option>Open</option>
+                  <option>Close</option>
+                </select>
+              </div>
+              <div class="form-group full"><label>Reason / Notes <span class="required">*</span></label><textarea
+                  id="fsNotes" placeholder="Mandatory for revoke / withdraw / COP..."></textarea></div>
+              <div class="form-group" id="fsCopWrap" style="display:none"><label>New purpose (COP)</label>
+                <select id="fsNewPurpose">
+                  <option>RES</option>
+                  <option>COM</option>
+                  <option>IND</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="left"></div>
+              <div class="right"><button class="btn btn-primary" onclick="applyFileStatus()"><i
+                    class="fas fa-check"></i> Apply Status</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>FileNo</th>
+                  <th>Action</th>
+                  <th>By</th>
+                  <th>Date</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="fileStatusBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer"><span>Status changes notify Land / Deeds</span></div>
+        </div>
+      </div>
+
+      <!-- AREA & PILLARS -->
+      <div class="page" id="page-area-pillars">
+        <div class="page-header">
+          <div>
+            <h2>Area &amp; Pillars</h2>
+            <p>Area from GIS or entry · Pillars @ ₦4,000 (Govt &amp; Private)</p>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="saveAreaPillars()"><i class="fas fa-save"></i> Save
+            Record</button>
+        </div>
+        <div class="form-container">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>FileNo <span class="required">*</span></label>
+                <select id="apFileNo" onchange="calcAreaPillars()">
+                  <option value="">— Select FileNo —</option>
+                </select>
+                <span class="helper">Dropdown only · no manual entry</span>
+              </div>
+              <div class="form-group"><label>Land use</label><select id="apLandUse" onchange="calcAreaPillars()">
+                  <option>Residential</option>
+                  <option>Commercial</option>
+                  <option>Industrial</option>
+                </select></div>
+              <div class="form-group"><label>Area (Ha)</label><input type="number" step="0.0001" id="apAreaHa"
+                  value="0.45" oninput="calcAreaPillars()" /></div>
+              <div class="form-group"><label>Area (m²)</label><input type="number" id="apAreaM2" readonly /></div>
+              <div class="form-group"><label>Government Pillars</label><input type="number" min="0" id="apPillarGovt"
+                  value="4" oninput="calcAreaPillars()" /></div>
+              <div class="form-group"><label>Private Pillars</label><input type="number" min="0" id="apPillarPrivate"
+                  value="2" oninput="calcAreaPillars()" /></div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-card">
+                <div class="label">Area (m²)</div>
+                <div class="amount" id="apDispM2">0</div>
+                <div class="detail">Ha × 10,000</div>
+              </div>
+              <div class="calc-card">
+                <div class="label">Govt Pillars</div>
+                <div class="amount" id="apDispGovt">₦0</div>
+                <div class="detail">× ₦4,000</div>
+              </div>
+              <div class="calc-card">
+                <div class="label">Private Pillars</div>
+                <div class="amount" id="apDispPrivate">₦0</div>
+                <div class="detail">× ₦4,000</div>
+              </div>
+              <div class="calc-card">
+                <div class="label">Pillar Subtotal</div>
+                <div class="amount" id="apDispPillarTotal">₦0</div>
+                <div class="detail">Govt + Private</div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="left"><button class="btn btn-outline btn-sm" onclick="navigateTo('descriptions')">Next:
+                  Descriptions →</button></div>
+              <div class="right"><button class="btn btn-success btn-sm" onclick="saveAreaPillars()"><i
+                    class="fas fa-save"></i> Save</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper" style="margin-top:20px">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>FileNo</th>
+                  <th>Ha</th>
+                  <th>m²</th>
+                  <th>Govt</th>
+                  <th>Private</th>
+                  <th>Pillar ₦</th>
+                  <th>Land use</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="areaPillarsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTIONS -->
+      <div class="page" id="page-descriptions">
+        <div class="page-header">
+          <div>
+            <h2>Land Descriptions</h2>
+            <p>Templates · auto-populate FileNo, area, boundaries, pillars</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="generateDescription()"><i class="fas fa-magic"></i> Generate
+            from Template</button>
+        </div>
+        <div class="form-container">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>FileNo</label>
+                <select id="descFileNo" onchange="onDescFileNoChange()">
+                  <option value="">— Select FileNo —</option>
+                </select>
+                <span class="helper">Dropdown only · no manual entry</span>
+              </div>
+              <div class="form-group"><label>Template</label>
+                <select id="descTemplate">
+                  <option>Residential plot</option>
+                  <option>Commercial plot</option>
+                  <option>Industrial plot</option>
+                  <option>Customary holding</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Location text</label><input type="text" id="descLocation"
+                  placeholder="e.g. Hotoro GRA, Kano Municipal" /></div>
+              <div class="form-group"><label>Boundary notes</label><input type="text" id="descBounds"
+                  placeholder="Optional boundary wording" /></div>
+              <div class="form-group full"><label>Description text</label><textarea id="descText" rows="10"></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="left"><button class="btn btn-outline btn-sm" onclick="navigateTo('fee-calculator')">Next: Fee
+                  Calculator →</button></div>
+              <div class="right">
+                <button class="btn btn-secondary btn-sm" onclick="generateDescription()"><i class="fas fa-magic"></i>
+                  Regenerate</button>
+                <button class="btn btn-success btn-sm" onclick="saveDescription()"><i class="fas fa-save"></i> Save
+                  Description</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper" style="margin-top:20px">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>FileNo</th>
+                  <th>Template</th>
+                  <th>Preview</th>
+                  <th>Saved</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="descBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEE CALCULATOR -->
+      <div class="page" id="page-fee-calculator">
+        <div class="page-header">
+          <div>
+            <h2>Fee Calculator</h2>
+            <p>Area + pillars (₦4,000) + service + description → grand total</p>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="saveFeeBill()"><i class="fas fa-save"></i> Save Bill</button>
+        </div>
+        <div class="form-container">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group"><label>FileNo</label>
+                <select id="feeFileNo" onchange="loadFeeFromArea()">
+                  <option value="">— Select FileNo —</option>
+                </select>
+                <span class="helper">Dropdown only · no manual entry</span>
+              </div>
+              <div class="form-group"><label>Zone</label><select id="feeZone" onchange="calcFees()">
+                  <option value="urban">Urban</option>
+                  <option value="semi">Semi-urban</option>
+                  <option value="rural">Rural</option>
+                </select></div>
+              <div class="form-group"><label>Area (Ha)</label><input type="number" step="0.0001" id="feeArea"
+                  value="0.45" oninput="calcFees()" /></div>
+              <div class="form-group"><label>Area rate (₦/Ha)</label><input type="number" id="feeAreaRate" value="50000"
+                  oninput="calcFees()" /></div>
+              <div class="form-group"><label>Govt Pillars</label><input type="number" id="feePillarG" value="4"
+                  oninput="calcFees()" /></div>
+              <div class="form-group"><label>Private Pillars</label><input type="number" id="feePillarP" value="2"
+                  oninput="calcFees()" /></div>
+              <div class="form-group"><label>Service charge %</label><input type="number" id="feeServicePct" value="5"
+                  oninput="calcFees()" /></div>
+              <div class="form-group"><label>Description complexity (₦)</label><input type="number" id="feeDesc"
+                  value="2500" oninput="calcFees()" /></div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-card">
+                <div class="label">Area Fee</div>
+                <div class="amount" id="feeAreaAmt">₦0</div>
+                <div class="detail">Ha × rate × zone</div>
+              </div>
+              <div class="calc-card">
+                <div class="label">Pillar Fees</div>
+                <div class="amount" id="feePillarAmt">₦0</div>
+                <div class="detail">@ ₦4,000 each</div>
+              </div>
+              <div class="calc-card">
+                <div class="label">Service</div>
+                <div class="amount" id="feeServiceAmt">₦0</div>
+                <div class="detail">% of subtotal</div>
+              </div>
+              <div class="calc-card">
+                <div class="label">Description</div>
+                <div class="amount" id="feeDescAmt">₦0</div>
+                <div class="detail">Complexity</div>
+              </div>
+            </div>
+            <div class="comp-total"><span><i class="fas fa-receipt"></i> Grand Total</span><span class="total-amount"
+                id="feeGrand">₦0</span></div>
+            <div class="form-actions">
+              <div class="left"><button class="btn btn-outline btn-sm" onclick="pushToRevenue()"><i
+                    class="fas fa-share"></i> Push to Revenue</button></div>
+              <div class="right"><button class="btn btn-success btn-sm" onclick="saveFeeBill()"><i
+                    class="fas fa-save"></i> Save Bill</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper" style="margin-top:20px">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bill ID</th>
+                  <th>FileNo</th>
+                  <th>Area ₦</th>
+                  <th>Pillars ₦</th>
+                  <th>Service</th>
+                  <th>Desc</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="feeBillsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="page" id="page-analytics">
+        <div class="page-header">
+          <div>
+            <h2>Reports / Analytics</h2>
+            <p>Cadastral metrics · PHS feed</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="refreshAnalytics()"><i class="fas fa-sync"></i>
+            Refresh</button>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Reports total</div>
+            <div class="kpi-value" id="anReports">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Dispatched</div>
+            <div class="kpi-value" id="anDispatched">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Duplicates blocked</div>
+            <div class="kpi-value" id="anDup">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">IGR (saved bills)</div>
+            <div class="kpi-value" id="anIgr">₦0</div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Report</th>
+                  <th>Metric</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- page-content -->
+  </main>
+
+  <!-- ========== MODALS ========== -->
+  <div class="modal-overlay" id="modalLogIntake">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Log Incoming File</h3><button class="modal-close" onclick="closeModal('modalLogIntake')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-box" style="margin-top:0;margin-bottom:14px"><i class="fas fa-info-circle"></i> Cadastral
+          receives files <strong>only</strong> from Allocation sources: <strong>Land</strong>, <strong>SLTR</strong>,
+          <strong>ST</strong>. Select source, then FileNo — location and owner backfill automatically. FileNo is never
+          typed.</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Source Department <span class="required">*</span></label>
+            <select id="liSource" onchange="onIntakeSourceChange()">
+              <option value="">— Select source —</option>
+              <option value="Land">Land</option>
+              <option value="SLTR">SLTR</option>
+              <option value="ST">ST</option>
+            </select>
+          </div>
+          <div class="form-group"><label>FileNo <span class="required">*</span></label>
+            <select id="liFileNo" onchange="onIntakeFileNoChange()" disabled>
+              <option value="">— Select source first —</option>
+            </select>
+            <span class="helper">Dropdown only · no manual entry</span>
+          </div>
+          <div class="form-group"><label>Type</label>
+            <input id="liType" readonly />
+          </div>
+          <div class="form-group"><label>Owner / Title</label>
+            <input id="liOwner" readonly />
+          </div>
+          <div class="form-group full"><label>Location</label>
+            <input id="liLocation" readonly />
+            <span class="helper">Backfilled from selected FileNo</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalLogIntake')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="submitLogIntake()">Log File</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalView">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 id="modalViewTitle">Details</h3><button class="modal-close"
+          onclick="closeModal('modalView')">&times;</button>
+      </div>
+      <div class="modal-body" id="modalViewBody"></div>
+      <div class="modal-footer"><button class="btn btn-secondary btn-sm"
+          onclick="closeModal('modalView')">Close</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalNewReport">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalNewReportTitle">New Report</h3><button class="modal-close"
+          onclick="closeModal('modalNewReport')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label>Type</label><select id="nrType">
+              <option>Verification</option>
+              <option>Customary</option>
+              <option>Statutory</option>
+            </select></div>
+          <div class="form-group"><label>FileNo <span class="required">*</span></label>
+            <select id="nrFileNo" onchange="onNrFileNoChange()">
+              <option value="">— Select FileNo —</option>
+            </select>
+            <span class="helper">Dropdown only · no manual entry</span>
+          </div>
+          <div class="form-group"><label>Owner</label><input id="nrOwner" readonly /></div>
+          <div class="form-group"><label>Location</label><input id="nrLoc" readonly /></div>
+          <div class="form-group"><label>OIC / Assignee</label><input id="nrAssignee" value="OIC Verification" /></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalNewReport')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="submitNewReport()">Create Report</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalIndexCard">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Commission Index Card</h3><button class="modal-close"
+          onclick="closeModal('modalIndexCard')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label>FileNo <span class="required">*</span></label>
+            <select id="icFileNo" onchange="onIcFileNoChange()">
+              <option value="">— Select FileNo —</option>
+            </select>
+            <span class="helper">Dropdown only · no manual entry</span>
+          </div>
+          <div class="form-group"><label>Name / Owner <span class="required">*</span></label><input id="icName"
+              readonly /></div>
+          <div class="form-group"><label>Location</label><input id="icLocation" readonly /></div>
+          <div class="form-group"><label>Survey Job No</label><input id="icJobNo" placeholder="SJ-2026-xxx" /></div>
+          <div class="form-group full"><label>Initial movement note</label><input id="icMovement"
+              value="Commissioned" /></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalIndexCard')">Cancel</button>
+        <button class="btn btn-success btn-sm" onclick="submitIndexCard()">Commission</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalITOS">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Issue Instruction to Surveyor (I to S)</h3><button class="modal-close"
+          onclick="closeModal('modalITOS')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label>Job Number</label><input id="sjNo" readonly /></div>
+          <div class="form-group"><label>Linked FileNo <span class="required">*</span></label>
+            <select id="sjFileNo">
+              <option value="">— Select FileNo —</option>
+            </select>
+            <span class="helper">Dropdown only · no manual entry</span>
+          </div>
+          <div class="form-group"><label>Surveyor Name <span class="required">*</span></label><input id="sjSurveyor" />
+            <div class="form-group"><label>Survey Firm</label><input id="sjFirm" /></div>
+            <div class="form-group full"><label>Job Scope &amp; Location <span
+                  class="required">*</span></label><textarea id="sjScope" rows="3"></textarea></div>
+            <div class="form-group full"><label>OIC Signature</label><input value="Clement Joseph — AD/Cad. Info"
+                readonly /></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('modalITOS')">Cancel</button>
+          <button class="btn btn-success btn-sm" onclick="submitITOS()"><i class="fas fa-file-signature"></i> Issue I to
+            S</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ===================== DATA ===================== */
+      const PILLAR_RATE = 4000;
+      const ZONE_FACTOR = { urban: 1, semi: 0.85, rural: 0.7 };
+      const VER_STEPS = ['Registration', 'Field Inspection', 'Chart Upload', 'Digital Chart', 'Report Generation', 'Checking', 'Approval', 'Dispatch'];
+      const CUS_STEPS = ['Registration', 'Chart Upload', 'Digital Chart', 'Report Generation', 'Checking', 'Approval', 'Dispatch'];
+      const STA_STEPS = ['Registration', 'Chart Upload', 'Digital Chart', 'Report Generation', 'Checking', 'Approval', 'Dispatch'];
+
+      let activityLog = [];
+      /* Files available from Allocation source departments (Land, SLTR, ST only). Not yet in Cadastral intake. */
+      let sourceFiles = [
+        { fileNo: 'RES/24/1201', source: 'Land', type: 'Direct RES', owner: 'Hassan Abdullahi', location: 'Nassarawa GRA' },
+        { fileNo: 'RES/24/1202', source: 'Land', type: 'Direct RES', owner: 'Fatima Yusuf', location: 'Hotoro GRA' },
+        { fileNo: 'COM/24/060', source: 'Land', type: 'Direct COM', owner: 'Kano Traders Ltd', location: 'Bompai' },
+        { fileNo: 'IND/24/015', source: 'Land', type: 'Direct IND', owner: 'Challawa Industries', location: 'Challawa' },
+        { fileNo: 'CON/RES/24/018', source: 'Land', type: 'Conversion', owner: 'Ibrahim Sule', location: 'Fagge' },
+        { fileNo: 'CON/COM/24/007', source: 'Land', type: 'Conversion', owner: 'Sabon Gari Ventures', location: 'Sabon Gari' },
+        { fileNo: 'SLTR/24/095', source: 'SLTR', type: 'SLTR', owner: 'Ungogo Community', location: 'Ungogo' },
+        { fileNo: 'SLTR/24/096', source: 'SLTR', type: 'SLTR', owner: 'Kumbotso Farmers Assoc.', location: 'Kumbotso' },
+        { fileNo: 'SLTR/24/097', source: 'SLTR', type: 'SLTR', owner: 'Gezawa Landholders', location: 'Gezawa' },
+        { fileNo: 'ST/24/022', source: 'ST', type: 'Sectional Title', owner: 'Horizon Residences', location: 'Gyadi-Gyadi' },
+        { fileNo: 'ST/24/023', source: 'ST', type: 'Sectional Title', owner: 'Emirate Towers', location: 'Nassarawa' },
+        { fileNo: 'ST/24/024', source: 'ST', type: 'Sectional Title', owner: 'Parkview Estate', location: 'Tarauni' }
+      ];
+      let intake = [
+        { id: 1, fileNo: 'RES/24/1190', source: 'Land', type: 'Direct RES', owner: 'Musa Ibrahim', location: 'Hotoro GRA', received: '2026-08-27', status: 'Queued' },
+        { id: 2, fileNo: 'COM/24/051', source: 'Land', type: 'Direct COM', owner: 'Amina Trading Co.', location: 'Bompai', received: '2026-08-27', status: 'Queued' },
+        { id: 3, fileNo: 'SLTR/24/088', source: 'SLTR', type: 'SLTR', owner: 'Community Trust', location: 'Kumbotso', received: '2026-08-26', status: 'In progress' },
+        { id: 4, fileNo: 'CON/RES/24/012', source: 'Land', type: 'Conversion', owner: 'Yusuf Garba', location: 'Nassarawa', received: '2026-08-26', status: 'Queued' },
+        { id: 5, fileNo: 'ST/24/019', source: 'ST', type: 'Sectional Title', owner: 'Green Valley Est.', location: 'Gyadi-Gyadi', received: '2026-08-25', status: 'Correspondence done' }
+      ];
+      let correspondence = [
+        { id: 1, corrNo: 'CAD/RES/24/1182', sourceNo: 'RES/24/1182', owner: 'Musa Ibrahim', created: '2026-08-20', dup: 'Clear', status: 'Active' },
+        { id: 2, corrNo: 'CAD/COM/24/044', sourceNo: 'COM/24/044', owner: 'Amina Trading Co.', created: '2026-08-20', dup: 'Clear', status: 'Charted' },
+        { id: 3, corrNo: 'CAD/RES/24/1101', sourceNo: 'RES/24/1101', owner: 'Conflict Case', created: '2026-08-18', dup: 'Duplicate', status: 'On hold' }
+      ];
+      let reports = [
+        { id: 'RPT-089', fileNo: 'RES/24/1182', type: 'Verification', stageIdx: 5, assignee: 'AD / Cad. Report', owner: 'Musa Ibrahim', location: 'Hotoro GRA', updated: '2026-08-27', notes: '' },
+        { id: 'RPT-087', fileNo: 'RES/24/1105', type: 'Customary', stageIdx: 2, assignee: 'Chart Officer II', owner: 'Sani Bello', location: 'Fagge', updated: '2026-08-26', notes: '' },
+        { id: 'RPT-085', fileNo: 'COM/24/040', type: 'Statutory', stageIdx: 5, assignee: 'D / Cad.', owner: 'Kano Plastics', location: 'Sharada', updated: '2026-08-25', notes: '' },
+        { id: 'RPT-082', fileNo: 'IND/24/008', type: 'Verification', stageIdx: 7, assignee: 'Desk', owner: 'Industrial Ltd', location: 'Challawa', updated: '2026-08-22', notes: '' }
+      ];
+      let indexCards = [
+        { id: 'IC-1842', fileNo: 'COM/24/044', name: 'Amina Trading Co.', location: 'Bompai', jobNo: 'SJ-2026-071', movement: 'Charting → Report' },
+        { id: 'IC-1841', fileNo: 'RES/24/1182', name: 'Musa Ibrahim', location: 'Hotoro GRA', jobNo: '', movement: 'Registry → Info' },
+        { id: 'IC-1838', fileNo: 'CON/RES/24/012', name: 'Yusuf Garba', location: 'Nassarawa', jobNo: '', movement: 'Conversion · no chart' }
+      ];
+      let surveyJobs = [
+        { id: 'SJ-2026-089', fileNo: 'COM/24/044', surveyor: 'Engr. Bello A.', firm: 'Bello & Partners', issued: '2026-08-26', status: 'Field', scope: 'Boundary survey Bompai' },
+        { id: 'SJ-2026-071', fileNo: 'RES/24/1090', surveyor: 'Surv. Aisha M.', firm: 'Kano Survey Ltd', issued: '2026-08-10', status: 'Completed', scope: 'Residential plot' }
+      ];
+      let fileStatusLog = [
+        { fileNo: 'RES/24/1001', action: 'Revoke', by: 'D / Cad.', date: '2026-08-15', notes: 'Court order' },
+        { fileNo: 'COM/24/030', action: 'Reinstate', by: 'DD / Cad.', date: '2026-08-12', notes: 'Appeal upheld' },
+        { fileNo: 'RES/24/0955', action: 'Change of Purpose', by: 'AD / Cad. Info', date: '2026-08-08', notes: 'RES → COM' }
+      ];
+      let charts = [
+        { fileNo: 'COM/24/044', cls: 'Direct COM', status: 'Completed', updated: '2026-08-21', notes: 'Overlay saved' },
+        { fileNo: 'RES/24/1182', cls: 'Direct RES', status: 'In progress', updated: '2026-08-27', notes: '' }
+      ];
+      let areaPillars = [
+        { fileNo: 'RES/24/1182', ha: 0.45, m2: 4500, govt: 4, priv: 2, pillarFee: 24000, landUse: 'Residential' }
+      ];
+      let descriptions = [];
+      let feeBills = [];
+      let nextIds = { intake: 6, corr: 4, rpt: 90, ic: 1843, sj: 90, bill: 1 };
+      let activities = [
+        { icon: 'fa-inbox', text: '<strong>RES/24/1190</strong> received from Land (Direct)', time: '12 min ago' },
+        { icon: 'fa-id-card', text: 'Index card commissioned for <strong>COM/24/044</strong>', time: '1 hour ago' },
+        { icon: 'fa-hard-hat', text: 'I to S issued · Job <strong>SJ-2026-089</strong>', time: '3 hours ago' },
+        { icon: 'fa-exclamation-triangle', text: 'Duplicate FileNo flag · <strong>RES/24/1101</strong>', time: '5 hours ago' }
+      ];
+
+      /* ===================== UTILS ===================== */
+      function today() { return new Date().toISOString().slice(0, 10) }
+      function money(n) { return '₦' + Math.round(n).toLocaleString() }
+      function showToast(msg, type = 'success') {
+        const w = document.getElementById('toastWrap');
+        const t = document.createElement('div');
+        t.className = 'toast ' + (type === 'error' ? 'error' : type === 'warn' ? 'warn' : type === 'info' ? 'info' : '');
+        t.innerHTML = '<i class="fas fa-' + (type === 'error' ? 'times-circle' : type === 'warn' ? 'exclamation-triangle' : type === 'info' ? 'info-circle' : 'check-circle') + '"></i><span>' + msg + '</span>';
+        w.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+      }
+      function openModal(id) { document.getElementById(id).classList.add('open') }
+      function closeModal(id) { document.getElementById(id).classList.remove('open') }
+      function addActivity(icon, text) {
+        activities.unshift({ icon, text, time: 'Just now' });
+        if (activities.length > 12) activities.pop();
+        renderActivity();
+      }
+      function badgeClass(status) {
+        const s = (status || '').toLowerCase();
+        if (/done|active|clear|completed|dispatched|approved|reinstated|open/.test(s)) return 'active';
+        if (/queue|pending|field|issued|in progress|checking|charting/.test(s)) return 'pending';
+        if (/hold|duplicate|revoke|withdraw|reject|conflict/.test(s)) return 'rejected';
+        if (/review|approval|waiting|change/.test(s)) return 'review';
+        return 'completed';
+      }
+      function stepsFor(type) { return type === 'Verification' ? VER_STEPS : type === 'Customary' ? CUS_STEPS : STA_STEPS }
+      function stageName(r) { const s = stepsFor(r.type); return r.stageIdx >= s.length ? 'Dispatched' : s[r.stageIdx] }
+
+      /* ===================== NAV ===================== */
+      const pageTitles = { dashboard: 'Dashboard', intake: 'Intake Queue', correspondence: 'Correspondence Files', 'reports-all': 'All Reports', verification: 'Verification', customary: 'Customary', statutory: 'Statutory', 'index-cards': 'Index Cards', charting: 'Charting', 'survey-jobs': 'Survey Jobs (I to S)', 'file-status': 'File Status', 'area-pillars': 'Area & Pillars', descriptions: 'Descriptions', 'fee-calculator': 'Fee Calculator', analytics: 'Reports / Analytics' };
+      function navigateTo(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const el = document.getElementById('page-' + page); if (el) el.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const nav = document.querySelector('.nav-item[data-page="' + page + '"]');
+        if (nav) nav.classList.add('active');
+        if (page === 'customary' || page === 'statutory') {
+          const v = document.querySelector('.nav-item[data-page="verification"]'); if (v) v.classList.add('active');
+        }
+        document.getElementById('pageTitle').innerHTML = (pageTitles[page] || page) + ' <span class="sub">/ Cadastral</span>';
+        closeSidebar();
+        if (page === 'dashboard') refreshDashboard();
+        if (page === 'intake') renderIntake();
+        if (page === 'correspondence') renderCorrespondence();
+        if (page === 'reports-all') renderAllReports();
+        if (page === 'verification') { fillReportSelect('Verification'); loadReportDetail('Verification') }
+        if (page === 'customary') { fillReportSelect('Customary'); loadReportDetail('Customary') }
+        if (page === 'statutory') { fillReportSelect('Statutory'); loadReportDetail('Statutory') }
+        if (page === 'index-cards') renderIndexCards();
+        if (page === 'charting') { fillChartSelect(); renderCharts() }
+        if (page === 'survey-jobs') renderSurveyJobs();
+        if (page === 'file-status') { populateFileNoSelect('fsFileNo'); renderFileStatus() }
+        if (page === 'area-pillars') { populateFileNoSelect('apFileNo'); calcAreaPillars(); renderAreaPillars() }
+        if (page === 'descriptions') { populateFileNoSelect('descFileNo'); renderDescriptions() }
+        if (page === 'fee-calculator') { populateFileNoSelect('feeFileNo'); calcFees(); renderFeeBills() }
+        if (page === 'analytics') refreshAnalytics();
+        window.scrollTo(0, 0);
+      }
+      function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active') }
+      function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active') }
+
+      /** Registry of all FileNos known in Cadastral (intake + correspondence + cards + area + reports). */
+      function getCadastralFileRegistry() {
+        const map = new Map();
+        function add(fileNo, owner, location, type, source) {
+          if (!fileNo) return;
+          if (!map.has(fileNo)) map.set(fileNo, { fileNo, owner: owner || '—', location: location || '—', type: type || '', source: source || '' });
+          else {
+            const cur = map.get(fileNo);
+            if (owner && owner !== '—') cur.owner = owner;
+            if (location && location !== '—') cur.location = location;
+            if (type) cur.type = type;
+            if (source) cur.source = source;
+          }
+        }
+        intake.forEach(i => add(i.fileNo, i.owner, i.location, i.type, i.source));
+        correspondence.forEach(c => add(c.sourceNo, c.owner, '', '', ''));
+        indexCards.forEach(c => add(c.fileNo, c.name, c.location, '', ''));
+        areaPillars.forEach(a => add(a.fileNo, '', '', '', ''));
+        reports.forEach(r => add(r.fileNo, r.owner, r.location, '', ''));
+        charts.forEach(c => add(c.fileNo, '', '', '', ''));
+        return [...map.values()].sort((a, b) => a.fileNo.localeCompare(b.fileNo));
+      }
+      function lookupFile(fileNo) {
+        return getCadastralFileRegistry().find(f => f.fileNo === fileNo) || null;
+      }
+      /** Populate a <select> with FileNos. selectedValue keeps current choice if still valid. */
+      function populateFileNoSelect(selectId, selectedValue) {
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        const reg = getCadastralFileRegistry();
+        const prev = selectedValue !== undefined ? selectedValue : sel.value;
+        sel.innerHTML = '<option value="">— Select FileNo —</option>' + reg.map(f =>
+          '<option value="' + f.fileNo + '">' + f.fileNo + (f.owner && f.owner !== '—' ? ' · ' + f.owner : '') + '</option>'
+        ).join('');
+        if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+      }
+      function populateAllFileNoSelects() {
+        ['fsFileNo', 'apFileNo', 'descFileNo', 'feeFileNo', 'nrFileNo', 'icFileNo', 'sjFileNo', 'chartFileSelect'].forEach(id => populateFileNoSelect(id));
+      }
+      function fillFileLists() { populateAllFileNoSelects() }
+      function onNrFileNoChange() {
+        const f = lookupFile(document.getElementById('nrFileNo').value);
+        document.getElementById('nrOwner').value = f ? f.owner : '';
+        document.getElementById('nrLoc').value = f ? f.location : '';
+      }
+      function onIcFileNoChange() {
+        const f = lookupFile(document.getElementById('icFileNo').value);
+        document.getElementById('icName').value = f ? f.owner : '';
+        document.getElementById('icLocation').value = f ? f.location : '';
+      }
+      function onDescFileNoChange() {
+        const fn = document.getElementById('descFileNo').value;
+        const f = lookupFile(fn);
+        if (f && f.location && f.location !== '—') document.getElementById('descLocation').value = f.location;
+        const ap = areaPillars.find(a => a.fileNo === fn);
+        if (ap) {/* area used in generateDescription */ }
+      }
+      function openIndexCardForFile(fileNo, owner) {
+        navigateTo('index-cards');
+        setTimeout(() => {
+          openModal('modalIndexCard');
+          populateFileNoSelect('icFileNo', fileNo);
+          document.getElementById('icFileNo').value = fileNo;
+          onIcFileNoChange();
+          if (owner) document.getElementById('icName').value = owner;
+        }, 80);
+      }
+
+      /* ===================== DASHBOARD ===================== */
+      function refreshDashboard() {
+        const queued = intake.filter(i => i.status === 'Queued').length;
+        document.getElementById('kpiIntake').textContent = queued;
+        document.getElementById('badgeIntake').textContent = queued;
+        const openR = reports.filter(r => stageName(r) !== 'Dispatched').length;
+        document.getElementById('kpiReports').textContent = openR;
+        document.getElementById('badgeReports').textContent = reports.length;
+        const activeJ = surveyJobs.filter(j => j.status !== 'Completed').length;
+        document.getElementById('kpiJobs').textContent = activeJ;
+        document.getElementById('badgeJobs').textContent = activeJ;
+        document.getElementById('kpiCards').textContent = indexCards.length;
+        const feeSum = feeBills.reduce((s, b) => s + b.total, 0);
+        document.getElementById('kpiFees').textContent = money(feeSum || 4200000);
+        document.getElementById('kpiDup').textContent = correspondence.filter(c => c.dup === 'Duplicate').length;
+        renderActivity();
+        const open = reports.find(r => stageName(r) !== 'Dispatched');
+        const box = document.getElementById('dashWorkflow');
+        if (!open) { box.innerHTML = '<p style="font-size:13px;color:var(--gray-500)">No open reports</p>'; return }
+        const steps = stepsFor(open.type);
+        box.innerHTML = '<div class="wf-chain">' + steps.map((s, i) => {
+          let cls = i < open.stageIdx ? 'done' : i === open.stageIdx ? 'active' : '';
+          let badge = i < open.stageIdx ? 'active' : 'pending';
+          let label = i < open.stageIdx ? 'Done' : i === open.stageIdx ? 'In progress' : 'Waiting';
+          return '<div class="wf-node ' + cls + '"><div class="wf-title">' + s + ' <span class="status-badge ' + badge + '"><span class="dot"></span>' + label + '</span></div><div class="wf-meta">' + open.id + ' · ' + open.type + ' · ' + open.fileNo + '</div></div>';
+        }).join('') + '</div>';
+      }
+      function renderActivity() {
+        document.getElementById('activityFeed').innerHTML = activities.slice(0, 6).map(a =>
+          '<div class="activity-item"><div class="activity-icon"><i class="fas ' + a.icon + '"></i></div><div class="activity-content"><div class="text">' + a.text + '</div><div class="time">' + a.time + '</div></div></div>'
+        ).join('');
+      }
+
+      /* ===================== INTAKE ===================== */
+      function renderIntake() {
+        const q = (document.getElementById('intakeSearch').value || '').toLowerCase();
+        const src = document.getElementById('intakeSource').value;
+        const typ = document.getElementById('intakeType').value;
+        const st = document.getElementById('intakeStatus').value;
+        let rows = intake.filter(i => {
+          if (src && i.source !== src) return false;
+          if (typ && i.type !== typ) return false;
+          if (st && i.status !== st) return false;
+          if (q && !(i.fileNo + ' ' + i.owner + ' ' + i.location).toLowerCase().includes(q)) return false;
+          return true;
+        });
+        document.getElementById('intakeBody').innerHTML = rows.map(i => `<tr>
+    <td><strong>${i.fileNo}</strong></td><td>${i.source}</td><td>${i.type}</td><td>${i.owner}</td><td>${i.location}</td><td>${i.received}</td>
+    <td><span class="status-badge ${badgeClass(i.status)}"><span class="dot"></span>${i.status}</span></td>
+    <td class="action-icons">
+      ${i.status !== 'Correspondence done' ? `<button title="Create Correspondence" onclick="createCorrespondence(${i.id})"><i class="fas fa-copy"></i></button>` : ''}
+      <button title="View" onclick="viewIntake(${i.id})"><i class="fas fa-eye"></i></button>
+    </td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--gray-500)">No items</td></tr>';
+        document.getElementById('intakeFooter').textContent = 'Showing ' + rows.length + ' of ' + intake.length;
+        document.getElementById('badgeIntake').textContent = intake.filter(x => x.status === 'Queued').length;
+      }
+      function openLogIntakeModal() {
+        document.getElementById('liSource').value = '';
+        const fnSel = document.getElementById('liFileNo');
+        fnSel.innerHTML = '<option value="">— Select source first —</option>';
+        fnSel.disabled = true;
+        document.getElementById('liType').value = '';
+        document.getElementById('liOwner').value = '';
+        document.getElementById('liLocation').value = '';
+        openModal('modalLogIntake');
+      }
+      function onIntakeSourceChange() {
+        const source = document.getElementById('liSource').value;
+        const fnSel = document.getElementById('liFileNo');
+        document.getElementById('liType').value = '';
+        document.getElementById('liOwner').value = '';
+        document.getElementById('liLocation').value = '';
+        if (!source) {
+          fnSel.innerHTML = '<option value="">— Select source first —</option>';
+          fnSel.disabled = true;
+          return;
+        }
+        const already = new Set(intake.map(i => i.fileNo));
+        const available = sourceFiles.filter(f => f.source === source && !already.has(f.fileNo));
+        if (!available.length) {
+          fnSel.innerHTML = '<option value="">No pending files from ' + source + '</option>';
+          fnSel.disabled = true;
+          return;
+        }
+        fnSel.innerHTML = '<option value="">— Select FileNo —</option>' + available.map(f => '<option value="' + f.fileNo + '">' + f.fileNo + ' · ' + f.owner + '</option>').join('');
+        fnSel.disabled = false;
+      }
+      function onIntakeFileNoChange() {
+        const fileNo = document.getElementById('liFileNo').value;
+        const source = document.getElementById('liSource').value;
+        if (!fileNo) {
+          document.getElementById('liType').value = '';
+          document.getElementById('liOwner').value = '';
+          document.getElementById('liLocation').value = '';
+          return;
+        }
+        const f = sourceFiles.find(x => x.fileNo === fileNo && x.source === source);
+        if (!f) return;
+        document.getElementById('liType').value = f.type;
+        document.getElementById('liOwner').value = f.owner;
+        document.getElementById('liLocation').value = f.location;
+      }
+      function submitLogIntake() {
+        const source = document.getElementById('liSource').value;
+        const fileNo = document.getElementById('liFileNo').value;
+        const owner = document.getElementById('liOwner').value.trim();
+        const type = document.getElementById('liType').value;
+        const location = document.getElementById('liLocation').value || '—';
+        if (!source || !['Land', 'SLTR', 'ST'].includes(source)) { showToast('Select source: Land, SLTR or ST only', 'error'); return }
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        if (!owner) { showToast('Owner missing — select a valid FileNo', 'error'); return }
+        if (intake.some(i => i.fileNo === fileNo)) { showToast('FileNo already in intake', 'error'); return }
+        intake.unshift({ id: nextIds.intake++, fileNo, source, type, owner, location, received: today(), status: 'Queued' });
+        // Remove from available source pool so it cannot be selected again
+        sourceFiles = sourceFiles.filter(f => !(f.fileNo === fileNo && f.source === source));
+        closeModal('modalLogIntake');
+        addActivity('fa-inbox', '<strong>' + fileNo + '</strong> received from ' + source);
+        showToast('File logged from ' + source + ': ' + fileNo);
+        populateAllFileNoSelects();
+        renderIntake(); refreshDashboard();
+      }
+      function createCorrespondence(id) {
+        const item = intake.find(i => i.id === id); if (!item) return;
+        const isDup = correspondence.some(c => c.sourceNo === item.fileNo) || item.fileNo.includes('1101');
+        const corrNo = 'CAD/' + item.fileNo;
+        correspondence.unshift({ id: nextIds.corr++, corrNo, sourceNo: item.fileNo, owner: item.owner, created: today(), dup: isDup ? 'Duplicate' : 'Clear', status: isDup ? 'On hold' : 'Active' });
+        item.status = 'Correspondence done';
+        addActivity('fa-copy', 'Correspondence <strong>' + corrNo + '</strong> created' + (isDup ? ' · DUPLICATE FLAG' : ''));
+        if (isDup) showToast('Correspondence created but DUPLICATE detected — on hold', 'warn');
+        else showToast('Correspondence created: ' + corrNo);
+        renderIntake();
+        if (item.type === 'Conversion' && !isDup) {
+          showToast('Conversion file — proceed to Index Cards (no charting)', 'info');
+        }
+      }
+      function viewIntake(id) {
+        const i = intake.find(x => x.id === id); if (!i) return;
+        document.getElementById('modalViewTitle').textContent = 'Intake · ' + i.fileNo;
+        document.getElementById('modalViewBody').innerHTML = `<div class="form-grid">
+    <div class="form-group"><label>FileNo</label><input readonly value="${i.fileNo}"/></div>
+    <div class="form-group"><label>Source</label><input readonly value="${i.source}"/></div>
+    <div class="form-group"><label>Type</label><input readonly value="${i.type}"/></div>
+    <div class="form-group"><label>Status</label><input readonly value="${i.status}"/></div>
+    <div class="form-group full"><label>Owner</label><input readonly value="${i.owner}"/></div>
+    <div class="form-group full"><label>Location</label><input readonly value="${i.location}"/></div>
+    <div class="form-group"><label>Received</label><input readonly value="${i.received}"/></div>
+  </div>`;
+        openModal('modalView');
+      }
+
+      /* ===================== CORRESPONDENCE ===================== */
+      function renderCorrespondence() {
+        const q = (document.getElementById('corrSearch').value || '').toLowerCase();
+        const d = document.getElementById('corrDup').value;
+        let rows = correspondence.filter(c => {
+          if (d && c.dup !== d) return false;
+          if (q && !(c.corrNo + ' ' + c.sourceNo + ' ' + c.owner).toLowerCase().includes(q)) return false;
+          return true;
+        });
+        document.getElementById('corrBody').innerHTML = rows.map(c => `<tr>
+    <td><strong>${c.corrNo}</strong></td><td>${c.sourceNo}</td><td>${c.owner}</td><td>${c.created}</td>
+    <td><span class="status-badge ${badgeClass(c.dup)}"><span class="dot"></span>${c.dup}</span></td>
+    <td><span class="status-badge ${badgeClass(c.status)}"><span class="dot"></span>${c.status}</span></td>
+    <td class="action-icons">
+      <button title="View" onclick="viewCorr(${c.id})"><i class="fas fa-eye"></i></button>
+      ${c.dup === 'Duplicate' ? `<button title="Resolve duplicate" onclick="resolveDup(${c.id})"><i class="fas fa-check"></i></button>` : ''}
+      ${c.dup === 'Clear' ? `<button title="Index Card" onclick="openIndexCardForFile('${c.sourceNo}','${c.owner.replace(/'/g, "\\'")}')"><i class="fas fa-id-card"></i></button>
+      <button title="Charting" onclick="navigateTo('charting')"><i class="fas fa-draw-polygon"></i></button>`: ''}
+    </td></tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--gray-500)">No files</td></tr>';
+        document.getElementById('corrFooter').textContent = rows.length + ' correspondence file(s)';
+      }
+      function viewCorr(id) {
+        const c = correspondence.find(x => x.id === id); if (!c) return;
+        document.getElementById('modalViewTitle').textContent = c.corrNo;
+        document.getElementById('modalViewBody').innerHTML = `<div class="form-grid">
+    <div class="form-group"><label>Corr. FileNo</label><input readonly value="${c.corrNo}"/></div>
+    <div class="form-group"><label>Source</label><input readonly value="${c.sourceNo}"/></div>
+    <div class="form-group"><label>Owner</label><input readonly value="${c.owner}"/></div>
+    <div class="form-group"><label>Created</label><input readonly value="${c.created}"/></div>
+    <div class="form-group"><label>Duplicate check</label><input readonly value="${c.dup}"/></div>
+    <div class="form-group"><label>Status</label><input readonly value="${c.status}"/></div>
+  </div>`;
+        openModal('modalView');
+      }
+      function resolveDup(id) {
+        const c = correspondence.find(x => x.id === id); if (!c) return;
+        if (!confirm('Mark duplicate as resolved (Clear) for ' + c.corrNo + '?')) return;
+        c.dup = 'Clear'; c.status = 'Active';
+        showToast('Duplicate resolved: ' + c.corrNo);
+        renderCorrespondence(); refreshDashboard();
+      }
+
+      /* ===================== REPORTS ===================== */
+      function openNewReportModal(pre) {
+        if (pre) document.getElementById('nrType').value = pre;
+        document.getElementById('modalNewReportTitle').textContent = 'New ' + (pre || 'Report');
+        document.getElementById('nrOwner').value = '';
+        document.getElementById('nrLoc').value = '';
+        populateFileNoSelect('nrFileNo', '');
+        openModal('modalNewReport');
+      }
+      function submitNewReport() {
+        const type = document.getElementById('nrType').value;
+        const fileNo = document.getElementById('nrFileNo').value;
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        const id = 'RPT-' + (nextIds.rpt++);
+        reports.unshift({ id, fileNo, type, stageIdx: 0, assignee: document.getElementById('nrAssignee').value || ('OIC ' + type), owner: document.getElementById('nrOwner').value || '—', location: document.getElementById('nrLoc').value || '—', updated: today(), notes: '' });
+        closeModal('modalNewReport');
+        addActivity('fa-file-alt', 'Report <strong>' + id + '</strong> (' + type + ') registered');
+        showToast('Report created: ' + id);
+        if (type === 'Verification') navigateTo('verification');
+        else if (type === 'Customary') navigateTo('customary');
+        else navigateTo('statutory');
+      }
+      function renderAllReports() {
+        const t = document.getElementById('repTypeFilter').value;
+        const st = document.getElementById('repStageFilter').value;
+        const q = (document.getElementById('repSearch').value || '').toLowerCase();
+        let rows = reports.filter(r => {
+          if (t && r.type !== t) return false;
+          const sn = stageName(r);
+          if (st && sn !== st && !(st === 'Dispatched' && sn === 'Dispatched')) return false;
+          if (q && !(r.id + ' ' + r.fileNo).toLowerCase().includes(q)) return false;
+          return true;
+        });
+        document.getElementById('allReportsBody').innerHTML = rows.map(r => {
+          const sn = stageName(r);
+          return `<tr><td><strong>${r.id}</strong></td><td>${r.fileNo}</td><td>${r.type}</td>
+    <td><span class="status-badge ${badgeClass(sn)}"><span class="dot"></span>${sn}</span></td>
+    <td>${r.assignee}</td><td>${r.updated}</td>
+    <td class="action-icons"><button onclick="goReport(${JSON.stringify(r.type)},'${r.id}')"><i class="fas fa-eye"></i></button></td></tr>`;
+        }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--gray-500)">No reports</td></tr>';
+        document.getElementById('allReportsFooter').textContent = rows.length + ' of ' + reports.length;
+        document.getElementById('badgeReports').textContent = reports.length;
+      }
+      function goReport(type, id) {
+        const map = { Verification: 'verification', Customary: 'customary', Statutory: 'statutory' };
+        navigateTo(map[type]);
+        setTimeout(() => {
+          const sel = document.getElementById(type === 'Verification' ? 'verSelect' : type === 'Customary' ? 'cusSelect' : 'staSelect');
+          if (sel) { sel.value = id; loadReportDetail(type) }
+        }, 50);
+      }
+      function fillReportSelect(type) {
+        const sel = document.getElementById(type === 'Verification' ? 'verSelect' : type === 'Customary' ? 'cusSelect' : 'staSelect');
+        const list = reports.filter(r => r.type === type);
+        sel.innerHTML = list.length ? list.map(r => `<option value="${r.id}">${r.id} · ${r.fileNo} · ${stageName(r)}</option>`).join('') : '<option value="">No reports</option>';
+      }
+      function loadReportDetail(type) {
+        const prefix = type === 'Verification' ? 'ver' : type === 'Customary' ? 'cus' : 'sta';
+        const sel = document.getElementById(prefix + 'Select');
+        const r = reports.find(x => x.id === sel.value);
+        const steps = stepsFor(type);
+        if (!r) {
+          document.getElementById(prefix + 'Id').value = '';
+          document.getElementById(prefix + 'Wf').innerHTML = '<p style="font-size:13px;color:var(--gray-500)">Select or create a report</p>';
+          return;
+        }
+        document.getElementById(prefix + 'Id').value = r.id;
+        document.getElementById(prefix + 'FileNo').value = r.fileNo;
+        document.getElementById(prefix + 'Owner').value = r.owner;
+        document.getElementById(prefix + 'Loc').value = r.location;
+        document.getElementById(prefix + 'Assignee').value = r.assignee;
+        document.getElementById(prefix + 'Notes').value = r.notes || '';
+        document.getElementById(prefix + 'Wf').innerHTML = steps.map((s, i) => {
+          const cls = i < r.stageIdx ? 'done' : i === r.stageIdx ? 'active' : '';
+          const badge = i < r.stageIdx ? 'active' : i === r.stageIdx ? 'pending' : 'review';
+          const label = i < r.stageIdx ? 'Done' : i === r.stageIdx ? 'Active' : 'Waiting';
+          return `<div class="wf-node ${cls}"><div class="wf-title">${i + 1}. ${s} <span class="status-badge ${badge}"><span class="dot"></span>${label}</span></div></div>`;
+        }).join('');
+      }
+      function advanceReportStage(type) {
+        const prefix = type === 'Verification' ? 'ver' : type === 'Customary' ? 'cus' : 'sta';
+        const id = document.getElementById(prefix + 'Id').value;
+        const r = reports.find(x => x.id === id); if (!r) { showToast('Select a report first', 'error'); return }
+        const steps = stepsFor(type);
+        if (r.stageIdx >= steps.length) { showToast('Already dispatched', 'info'); return }
+        r.notes = document.getElementById(prefix + 'Notes').value;
+        r.assignee = document.getElementById(prefix + 'Assignee').value || r.assignee;
+        r.stageIdx++;
+        r.updated = today();
+        if (r.stageIdx >= steps.length) {
+          showToast(r.id + ' dispatched');
+          addActivity('fa-paper-plane', 'Report <strong>' + r.id + '</strong> dispatched');
+        } else {
+          showToast(r.id + ' → ' + steps[r.stageIdx]);
+          addActivity('fa-forward', '<strong>' + r.id + '</strong> advanced to ' + steps[r.stageIdx]);
+        }
+        fillReportSelect(type);
+        document.getElementById(prefix + 'Select').value = r.id;
+        loadReportDetail(type);
+        refreshDashboard();
+      }
+      function rejectReportStage(type) {
+        const prefix = type === 'Verification' ? 'ver' : type === 'Customary' ? 'cus' : 'sta';
+        const id = document.getElementById(prefix + 'Id').value;
+        const r = reports.find(x => x.id === id); if (!r) { showToast('Select a report first', 'error'); return }
+        if (r.stageIdx <= 0) { showToast('Already at first stage', 'info'); return }
+        r.stageIdx--;
+        r.notes = document.getElementById(prefix + 'Notes').value || 'Returned';
+        r.updated = today();
+        showToast(r.id + ' returned to ' + stepsFor(type)[r.stageIdx], 'warn');
+        fillReportSelect(type);
+        document.getElementById(prefix + 'Select').value = r.id;
+        loadReportDetail(type);
+      }
+
+      /* ===================== INDEX CARDS ===================== */
+      function renderIndexCards() {
+        const q = (document.getElementById('icSearch').value || '').toLowerCase();
+        let rows = indexCards.filter(c => !q || (c.fileNo + ' ' + c.name + ' ' + c.location).toLowerCase().includes(q));
+        document.getElementById('indexCardsBody').innerHTML = rows.map((c, idx) => `<tr>
+    <td><strong>${c.id}</strong></td><td>${c.fileNo}</td><td>${c.name}</td><td>${c.location || '—'}</td>
+    <td>${c.jobNo || '—'}</td><td>${c.movement}</td>
+    <td class="action-icons">
+      <button title="Print" onclick="printCard('${c.id}')"><i class="fas fa-print"></i></button>
+      <button title="View" onclick="viewCard('${c.id}')"><i class="fas fa-eye"></i></button>
+      <button title="Update movement" onclick="updateCardMovement('${c.id}')"><i class="fas fa-exchange-alt"></i></button>
+    </td></tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--gray-500)">No cards</td></tr>';
+        document.getElementById('indexCardsFooter').textContent = rows.length + ' card(s)';
+      }
+      function submitIndexCard() {
+        const fileNo = document.getElementById('icFileNo').value;
+        const name = document.getElementById('icName').value.trim();
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        if (!name) { showToast('Name/Owner missing — select a valid FileNo', 'error'); return }
+        const id = 'IC-' + (nextIds.ic++);
+        indexCards.unshift({ id, fileNo, name, location: document.getElementById('icLocation').value || '—', jobNo: document.getElementById('icJobNo').value || '', movement: document.getElementById('icMovement').value || 'Commissioned' });
+        closeModal('modalIndexCard');
+        addActivity('fa-id-card', 'Index card <strong>' + id + '</strong> commissioned for ' + fileNo);
+        showToast('Index card commissioned: ' + id);
+        renderIndexCards(); refreshDashboard();
+      }
+      function viewCard(id) {
+        const c = indexCards.find(x => x.id === id); if (!c) return;
+        document.getElementById('modalViewTitle').textContent = 'Index Card ' + c.id;
+        document.getElementById('modalViewBody').innerHTML = `<div class="form-grid">
+    <div class="form-group"><label>Card ID</label><input readonly value="${c.id}"/></div>
+    <div class="form-group"><label>FileNo</label><input readonly value="${c.fileNo}"/></div>
+    <div class="form-group full"><label>Name</label><input readonly value="${c.name}"/></div>
+    <div class="form-group"><label>Location</label><input readonly value="${c.location}"/></div>
+    <div class="form-group"><label>Survey Job</label><input readonly value="${c.jobNo || '—'}"/></div>
+    <div class="form-group full"><label>Movement</label><input readonly value="${c.movement}"/></div>
+  </div><div class="note-box">Official seal print-on-demand available.</div>`;
+        openModal('modalView');
+      }
+      function printCard(id) { showToast('Sending ' + id + ' to print queue (official seal)', 'info') }
+      function updateCardMovement(id) {
+        const m = prompt('New movement note:', 'Info → Report');
+        if (m === null) return;
+        const c = indexCards.find(x => x.id === id); if (!c) return;
+        c.movement = m || c.movement;
+        showToast('Movement updated');
+        renderIndexCards();
+      }
+
+      /* ===================== CHARTING ===================== */
+      function fillChartSelect() {
+        populateFileNoSelect('chartFileSelect');
+      }
+      function onChartFileSelect() {
+        const fn = document.getElementById('chartFileSelect').value;
+        const item = intake.find(i => i.fileNo === fn);
+        const isConv = fn.startsWith('CON/') || (item && item.type === 'Conversion');
+        document.getElementById('chartClass').value = isConv ? 'Conversion (no chart)' : (item ? item.type : 'Direct');
+        if (isConv) {
+          document.getElementById('chartStatus').value = 'Skipped (Conversion)';
+          document.getElementById('mapStatus').textContent = 'Conversion — charting not required';
+        } else {
+          document.getElementById('chartStatus').value = 'In progress';
+          document.getElementById('mapStatus').textContent = 'Ready to chart ' + fn;
+        }
+      }
+      function saveChart() {
+        const fn = document.getElementById('chartFileSelect').value;
+        if (!fn) { showToast('Select a FileNo', 'error'); return }
+        const cls = document.getElementById('chartClass').value;
+        const st = document.getElementById('chartStatus').value;
+        const notes = document.getElementById('chartNotes').value;
+        if (cls.includes('Conversion') && st !== 'Skipped (Conversion)') {
+          showToast('Conversion files must remain Skipped (no chart)', 'warn');
+          document.getElementById('chartStatus').value = 'Skipped (Conversion)';
+        }
+        const existing = charts.find(c => c.fileNo === fn);
+        if (existing) { existing.status = document.getElementById('chartStatus').value; existing.notes = notes; existing.updated = today() }
+        else charts.unshift({ fileNo: fn, cls, status: document.getElementById('chartStatus').value, updated: today(), notes });
+        const corr = correspondence.find(c => c.sourceNo === fn);
+        if (corr && document.getElementById('chartStatus').value === 'Completed') corr.status = 'Charted';
+        document.getElementById('mapStatus').textContent = 'Chart saved for ' + fn + ' · ' + document.getElementById('chartStatus').value;
+        addActivity('fa-draw-polygon', 'Chart updated for <strong>' + fn + '</strong>');
+        showToast('Chart saved: ' + fn);
+        renderCharts();
+      }
+      function renderCharts() {
+        document.getElementById('chartsBody').innerHTML = charts.map(c => `<tr>
+    <td><strong>${c.fileNo}</strong></td><td>${c.cls}</td>
+    <td><span class="status-badge ${badgeClass(c.status)}"><span class="dot"></span>${c.status}</span></td>
+    <td>${c.updated}</td><td>${c.notes || '—'}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500)">No charts yet</td></tr>';
+      }
+
+      /* ===================== SURVEY JOBS ===================== */
+      function renderSurveyJobs() {
+        const q = (document.getElementById('sjSearch').value || '').toLowerCase();
+        const st = document.getElementById('sjStatusFilter').value;
+        let rows = surveyJobs.filter(j => {
+          if (st && j.status !== st) return false;
+          if (q && !(j.id + ' ' + j.fileNo + ' ' + j.surveyor).toLowerCase().includes(q)) return false;
+          return true;
+        });
+        document.getElementById('surveyJobsBody').innerHTML = rows.map(j => `<tr>
+    <td><strong>${j.id}</strong></td><td>${j.fileNo}</td><td>${j.surveyor}</td><td>${j.firm || '—'}</td><td>${j.issued}</td>
+    <td><span class="status-badge ${badgeClass(j.status)}"><span class="dot"></span>${j.status}</span></td>
+    <td class="action-icons">
+      <button title="Print I to S" onclick="printITOS('${j.id}')"><i class="fas fa-print"></i></button>
+      <button title="View" onclick="viewJob('${j.id}')"><i class="fas fa-eye"></i></button>
+      ${j.status !== 'Completed' ? `<button title="Mark Field" onclick="setJobStatus('${j.id}','Field')"><i class="fas fa-map-marker-alt"></i></button>
+      <button title="Complete" onclick="setJobStatus('${j.id}','Completed')"><i class="fas fa-check"></i></button>` : ''}
+    </td></tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--gray-500)">No jobs</td></tr>';
+        document.getElementById('surveyJobsFooter').textContent = rows.length + ' job(s)';
+        document.getElementById('badgeJobs').textContent = surveyJobs.filter(j => j.status !== 'Completed').length;
+      }
+      function openModalITOSPrep() {
+        document.getElementById('sjNo').value = 'SJ-2026-' + (nextIds.sj);
+        openModal('modalITOS');
+      }
+      // Prepare FileNo dropdowns when opening modals
+      const _openModal = openModal;
+      openModal = function (id) {
+        if (id === 'modalITOS') {
+          document.getElementById('sjNo').value = 'SJ-2026-' + (nextIds.sj);
+          populateFileNoSelect('sjFileNo', '');
+        }
+        if (id === 'modalIndexCard') {
+          populateFileNoSelect('icFileNo', '');
+          document.getElementById('icName').value = '';
+          document.getElementById('icLocation').value = '';
+        }
+        if (id === 'modalNewReport') {
+          populateFileNoSelect('nrFileNo', '');
+        }
+        _openModal(id);
+      };
+      function submitITOS() {
+        const fileNo = document.getElementById('sjFileNo').value;
+        const surveyor = document.getElementById('sjSurveyor').value.trim();
+        const scope = document.getElementById('sjScope').value.trim();
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        if (!surveyor || !scope) { showToast('Surveyor and Scope required', 'error'); return }
+        const id = 'SJ-2026-' + (nextIds.sj++);
+        surveyJobs.unshift({ id, fileNo, surveyor, firm: document.getElementById('sjFirm').value || '—', issued: today(), status: 'Issued', scope });
+        const card = indexCards.find(c => c.fileNo === fileNo);
+        if (card) { card.jobNo = id; card.movement = 'Job ' + id + ' linked' }
+        closeModal('modalITOS');
+        document.getElementById('sjFileNo').value = '';
+        document.getElementById('sjSurveyor').value = '';
+        document.getElementById('sjFirm').value = '';
+        document.getElementById('sjScope').value = '';
+        addActivity('fa-hard-hat', 'I to S issued · <strong>' + id + '</strong>');
+        showToast('I to S issued: ' + id + ' (linked to index card if present)');
+        renderSurveyJobs(); refreshDashboard();
+      }
+      function viewJob(id) {
+        const j = surveyJobs.find(x => x.id === id); if (!j) return;
+        document.getElementById('modalViewTitle').textContent = 'I to S · ' + j.id;
+        document.getElementById('modalViewBody').innerHTML = `<div class="form-grid">
+    <div class="form-group"><label>Job No</label><input readonly value="${j.id}"/></div>
+    <div class="form-group"><label>FileNo</label><input readonly value="${j.fileNo}"/></div>
+    <div class="form-group"><label>Surveyor</label><input readonly value="${j.surveyor}"/></div>
+    <div class="form-group"><label>Firm</label><input readonly value="${j.firm}"/></div>
+    <div class="form-group"><label>Issued</label><input readonly value="${j.issued}"/></div>
+    <div class="form-group"><label>Status</label><input readonly value="${j.status}"/></div>
+    <div class="form-group full"><label>Scope</label><textarea readonly rows="3">${j.scope}</textarea></div>
+    <div class="form-group full"><label>OIC</label><input readonly value="Clement Joseph — AD/Cad. Info"/></div>
+  </div>`;
+        openModal('modalView');
+      }
+      function printITOS(id) { showToast('Printing I to S ' + id, 'info') }
+      function setJobStatus(id, st) {
+        const j = surveyJobs.find(x => x.id === id); if (!j) return;
+        j.status = st;
+        showToast(id + ' → ' + st);
+        renderSurveyJobs(); refreshDashboard();
+      }
+
+      /* ===================== FILE STATUS ===================== */
+      document.getElementById('fsAction').addEventListener('change', function () {
+        document.getElementById('fsCopWrap').style.display = this.value === 'Change of Purpose' ? 'block' : 'none';
+      });
+      function applyFileStatus() {
+        const fn = document.getElementById('fsFileNo').value;
+        const action = document.getElementById('fsAction').value;
+        const notes = document.getElementById('fsNotes').value.trim();
+        if (!fn) { showToast('Select FileNo from the dropdown', 'error'); return }
+        if (!action) { showToast('Action required', 'error'); return }
+        if ((action === 'Revoke' || action === 'Withdraw' || action === 'Change of Purpose') && !notes) {
+          showToast('Reason is mandatory for ' + action, 'error'); return;
+        }
+        let finalNotes = notes;
+        if (action === 'Change of Purpose') finalNotes = (notes ? notes + ' · ' : '') + '→ ' + document.getElementById('fsNewPurpose').value;
+        fileStatusLog.unshift({ fileNo: fn, action, by: 'C. Joseph', date: today(), notes: finalNotes || '—' });
+        addActivity('fa-toggle-on', 'Status <strong>' + action + '</strong> on ' + fn);
+        showToast(action + ' applied to ' + fn + ' · Land/Deeds notified');
+        document.getElementById('fsFileNo').value = '';
+        document.getElementById('fsAction').value = '';
+        document.getElementById('fsNotes').value = '';
+        document.getElementById('fsCopWrap').style.display = 'none';
+        renderFileStatus();
+      }
+      function renderFileStatus() {
+        document.getElementById('fileStatusBody').innerHTML = fileStatusLog.map(f => `<tr>
+    <td>${f.fileNo}</td>
+    <td><span class="status-badge ${badgeClass(f.action)}"><span class="dot"></span>${f.action}</span></td>
+    <td>${f.by}</td><td>${f.date}</td><td>${f.notes}</td></tr>`).join('');
+      }
+
+      /* ===================== AREA & PILLARS ===================== */
+      function calcAreaPillars() {
+        const ha = parseFloat(document.getElementById('apAreaHa').value) || 0;
+        const m2 = Math.round(ha * 10000);
+        document.getElementById('apAreaM2').value = m2;
+        document.getElementById('apDispM2').textContent = m2.toLocaleString();
+        const g = parseInt(document.getElementById('apPillarGovt').value, 10) || 0;
+        const p = parseInt(document.getElementById('apPillarPrivate').value, 10) || 0;
+        document.getElementById('apDispGovt').textContent = money(g * PILLAR_RATE);
+        document.getElementById('apDispPrivate').textContent = money(p * PILLAR_RATE);
+        document.getElementById('apDispPillarTotal').textContent = money((g + p) * PILLAR_RATE);
+      }
+      function saveAreaPillars() {
+        const fileNo = document.getElementById('apFileNo').value;
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        const ha = parseFloat(document.getElementById('apAreaHa').value) || 0;
+        const g = parseInt(document.getElementById('apPillarGovt').value, 10) || 0;
+        const p = parseInt(document.getElementById('apPillarPrivate').value, 10) || 0;
+        const rec = { fileNo, ha, m2: Math.round(ha * 10000), govt: g, priv: p, pillarFee: (g + p) * PILLAR_RATE, landUse: document.getElementById('apLandUse').value };
+        const idx = areaPillars.findIndex(a => a.fileNo === fileNo);
+        if (idx >= 0) areaPillars[idx] = rec; else areaPillars.unshift(rec);
+        populateFileNoSelect('feeFileNo', fileNo);
+        document.getElementById('feeArea').value = ha;
+        document.getElementById('feePillarG').value = g;
+        document.getElementById('feePillarP').value = p;
+        showToast('Area & pillars saved for ' + fileNo);
+        renderAreaPillars();
+      }
+      function renderAreaPillars() {
+        document.getElementById('areaPillarsBody').innerHTML = areaPillars.map(a => `<tr>
+    <td><strong>${a.fileNo}</strong></td><td>${a.ha}</td><td>${a.m2.toLocaleString()}</td>
+    <td>${a.govt}</td><td>${a.priv}</td><td>${money(a.pillarFee)}</td><td>${a.landUse}</td>
+    <td class="action-icons"><button onclick="loadAreaToForm('${a.fileNo}')"><i class="fas fa-edit"></i></button></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--gray-500)">No records</td></tr>';
+      }
+      function loadAreaToForm(fn) {
+        const a = areaPillars.find(x => x.fileNo === fn); if (!a) return;
+        populateFileNoSelect('apFileNo', fn);
+        document.getElementById('apFileNo').value = a.fileNo;
+        document.getElementById('apAreaHa').value = a.ha;
+        document.getElementById('apPillarGovt').value = a.govt;
+        document.getElementById('apPillarPrivate').value = a.priv;
+        document.getElementById('apLandUse').value = a.landUse;
+        calcAreaPillars();
+      }
+
+      /* ===================== DESCRIPTIONS ===================== */
+      function generateDescription() {
+        const fn = document.getElementById('descFileNo').value;
+        if (!fn) { showToast('Select FileNo from the dropdown', 'error'); return }
+        const tpl = document.getElementById('descTemplate').value;
+        const loc = document.getElementById('descLocation').value || 'Hotoro GRA, Kano Municipal Local Government Area, Kano State';
+        const bounds = document.getElementById('descBounds').value;
+        const ap = areaPillars.find(a => a.fileNo === fn);
+        const ha = ap ? ap.ha : 0.45;
+        const m2 = ap ? ap.m2 : 4500;
+        const g = ap ? ap.govt : 4, p = ap ? ap.priv : 2;
+        const text = `LAND DESCRIPTION — ${tpl}
+
+File Number: ${fn}
+The parcel of land situate at ${loc}, measuring approximately ${ha} hectares (${m2.toLocaleString()} square metres), bounded as follows:
+
+North: ${bounds || 'by adjoining plot / public road'}
+South: ${bounds || 'by adjoining plot / public road'}
+East: ${bounds || 'by adjoining plot / public road'}
+West: ${bounds || 'by adjoining plot / public road'}
+
+Pillars: ${g} Government and ${p} Private beacons as marked on the survey plan / cadastral chart.
+This description is generated for cadastral purposes under KLAES Cadastral Module.`;
+        document.getElementById('descText').value = text;
+        showToast('Description generated');
+      }
+      function saveDescription() {
+        const fileNo = document.getElementById('descFileNo').value;
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        const text = document.getElementById('descText').value.trim();
+        if (!text) { showToast('Generate or enter description first', 'error'); return }
+        const tpl = document.getElementById('descTemplate').value;
+        const idx = descriptions.findIndex(d => d.fileNo === fileNo);
+        const rec = { fileNo, template: tpl, text, saved: today() };
+        if (idx >= 0) descriptions[idx] = rec; else descriptions.unshift(rec);
+        showToast('Description saved for ' + fileNo);
+        renderDescriptions();
+      }
+      function renderDescriptions() {
+        document.getElementById('descBody').innerHTML = descriptions.map(d => `<tr>
+    <td><strong>${d.fileNo}</strong></td><td>${d.template}</td>
+    <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.text.slice(0, 80)}…</td>
+    <td>${d.saved}</td>
+    <td class="action-icons">
+      <button onclick="loadDesc('${d.fileNo}')"><i class="fas fa-edit"></i></button>
+      <button onclick="viewDesc('${d.fileNo}')"><i class="fas fa-eye"></i></button>
+    </td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500)">No descriptions saved</td></tr>';
+      }
+      function loadDesc(fn) {
+        const d = descriptions.find(x => x.fileNo === fn); if (!d) return;
+        populateFileNoSelect('descFileNo', fn);
+        document.getElementById('descFileNo').value = d.fileNo;
+        document.getElementById('descTemplate').value = d.template;
+        document.getElementById('descText').value = d.text;
+      }
+      function viewDesc(fn) {
+        const d = descriptions.find(x => x.fileNo === fn); if (!d) return;
+        document.getElementById('modalViewTitle').textContent = 'Description · ' + fn;
+        document.getElementById('modalViewBody').innerHTML = '<pre style="white-space:pre-wrap;font-family:var(--font);font-size:13px">' + d.text + '</pre>';
+        openModal('modalView');
+      }
+
+      /* ===================== FEES ===================== */
+      function calcFees() {
+        const ha = parseFloat(document.getElementById('feeArea').value) || 0;
+        const rate = parseFloat(document.getElementById('feeAreaRate').value) || 0;
+        const zone = document.getElementById('feeZone').value;
+        const zf = ZONE_FACTOR[zone] || 1;
+        const areaFee = Math.round(ha * rate * zf);
+        const g = parseInt(document.getElementById('feePillarG').value, 10) || 0;
+        const p = parseInt(document.getElementById('feePillarP').value, 10) || 0;
+        const pillarFee = (g + p) * PILLAR_RATE;
+        const sub = areaFee + pillarFee;
+        const pct = parseFloat(document.getElementById('feeServicePct').value) || 0;
+        const service = Math.round(sub * pct / 100);
+        const desc = parseFloat(document.getElementById('feeDesc').value) || 0;
+        const grand = sub + service + desc;
+        document.getElementById('feeAreaAmt').textContent = money(areaFee);
+        document.getElementById('feePillarAmt').textContent = money(pillarFee);
+        document.getElementById('feeServiceAmt').textContent = money(service);
+        document.getElementById('feeDescAmt').textContent = money(desc);
+        document.getElementById('feeGrand').textContent = money(grand);
+        return { areaFee, pillarFee, service, desc, grand };
+      }
+      function loadFeeFromArea() {
+        const fn = document.getElementById('feeFileNo').value;
+        const a = areaPillars.find(x => x.fileNo === fn);
+        if (a) {
+          document.getElementById('feeArea').value = a.ha;
+          document.getElementById('feePillarG').value = a.govt;
+          document.getElementById('feePillarP').value = a.priv;
+          calcFees();
+        }
+      }
+      function saveFeeBill() {
+        const fileNo = document.getElementById('feeFileNo').value;
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        const f = calcFees();
+        const id = 'BILL-' + (nextIds.bill++);
+        feeBills.unshift({ id, fileNo, ...f, status: 'Saved', date: today() });
+        showToast('Fee bill saved: ' + id + ' · ' + money(f.grand));
+        renderFeeBills(); refreshDashboard();
+      }
+      function pushToRevenue() {
+        const fileNo = document.getElementById('feeFileNo').value;
+        if (!fileNo) { showToast('Select FileNo from the dropdown', 'error'); return }
+        const f = calcFees();
+        const id = 'BILL-' + (nextIds.bill++);
+        feeBills.unshift({ id, fileNo, ...f, status: 'Sent to Revenue', date: today() });
+        addActivity('fa-coins', 'Fee bill <strong>' + id + '</strong> pushed to Revenue · ' + money(f.grand));
+        showToast('Pushed to Revenue Management: ' + money(f.grand));
+        renderFeeBills(); refreshDashboard();
+      }
+      function renderFeeBills() {
+        document.getElementById('feeBillsBody').innerHTML = feeBills.map(b => `<tr>
+    <td><strong>${b.id}</strong></td><td>${b.fileNo}</td><td>${money(b.areaFee)}</td><td>${money(b.pillarFee)}</td>
+    <td>${money(b.service)}</td><td>${money(b.desc)}</td><td><strong>${money(b.total || b.grand)}</strong></td>
+    <td><span class="status-badge ${badgeClass(b.status)}"><span class="dot"></span>${b.status}</span></td>
+    <td class="action-icons"><button onclick="showToast('Bill ${b.id} · ${money(b.grand)}','info')"><i class="fas fa-eye"></i></button></td>
+  </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--gray-500)">No bills yet</td></tr>';
+      }
+
+      /* ===================== ANALYTICS ===================== */
+      function refreshAnalytics() {
+        document.getElementById('anReports').textContent = reports.length;
+        document.getElementById('anDispatched').textContent = reports.filter(r => stageName(r) === 'Dispatched').length;
+        document.getElementById('anDup').textContent = correspondence.filter(c => c.dup === 'Duplicate').length;
+        const igr = feeBills.reduce((s, b) => s + (b.grand || 0), 0);
+        document.getElementById('anIgr').textContent = money(igr);
+        document.getElementById('analyticsBody').innerHTML = `
+    <tr><td>Intake queued</td><td>Awaiting correspondence</td><td>${intake.filter(i => i.status === 'Queued').length}</td></tr>
+    <tr><td>Correspondence</td><td>Active + Charted</td><td>${correspondence.length}</td></tr>
+    <tr><td>Verification open</td><td>Not dispatched</td><td>${reports.filter(r => r.type === 'Verification' && stageName(r) !== 'Dispatched').length}</td></tr>
+    <tr><td>Customary open</td><td>Not dispatched</td><td>${reports.filter(r => r.type === 'Customary' && stageName(r) !== 'Dispatched').length}</td></tr>
+    <tr><td>Statutory open</td><td>Not dispatched</td><td>${reports.filter(r => r.type === 'Statutory' && stageName(r) !== 'Dispatched').length}</td></tr>
+    <tr><td>Index cards</td><td>Commissioned</td><td>${indexCards.length}</td></tr>
+    <tr><td>Survey jobs active</td><td>Issued / Field</td><td>${surveyJobs.filter(j => j.status !== 'Completed').length}</td></tr>
+    <tr><td>Charts completed</td><td>Direct files</td><td>${charts.filter(c => c.status === 'Completed').length}</td></tr>
+    <tr><td>Fee bills</td><td>Saved / Revenue</td><td>${feeBills.length}</td></tr>
+  `;
+      }
+
+      function globalSearchHandler() {
+        const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+        if (q.length < 2) return;
+        // simple hint via toast when user stops — skip for performance
+      }
+
+      /* ===================== INIT ===================== */
+      document.addEventListener('DOMContentLoaded', () => {
+        fillFileLists();
+        calcAreaPillars();
+        calcFees();
+        refreshDashboard();
+        navigateTo('dashboard');
+      });
+    </script>
+</body>
+
+</html>
